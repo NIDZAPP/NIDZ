@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -11,8 +12,19 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    mode === 'development' &&
-    componentTagger(),
+    mode === 'development' && componentTagger(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      manifest: {
+        name: 'PetLink DZ',
+        short_name: 'PetLink DZ',
+        description: 'Algeria pet care marketplace',
+        theme_color: '#4f46e5',
+        icons: [
+          { src: '/favicon.ico', sizes: '64x64 32x32 16x16', type: 'image/x-icon' }
+        ]
+      }
+    }),
   ].filter(Boolean),
   resolve: {
     alias: {

@@ -1,0 +1,35 @@
+{
+  "common": {
+    "appName": "PetLink DZ",
+    "language": "Language",
+    "english": "English",
+    "french": "French",
+    "arabic": "Arabic",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "nav": {
+    "home": "Home",
+    "search": "Search",
+    "pets": "My Pets",
+    "dashboard": "Sitter Dashboard",
+    "admin": "Admin",
+    "help": "Help",
+    "policies": "Policies"
+  },
+  "home": {
+    "title": "Care you can trust",
+    "subtitle": "Find trusted sitters and walkers near you in Algeria.",
+    "searchCta": "Find a sitter"
+  },
+  "listing": {
+    "services": "Services",
+    "instantBook": "Instant Book"
+  },
+  "booking": {
+    "request": "Send request",
+    "payProof": "Upload payment proof",
+    "startWalk": "Start Walk",
+    "endWalk": "End Walk"
+  }
+}

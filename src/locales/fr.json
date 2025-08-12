@@ -1,0 +1,35 @@
+{
+  "common": {
+    "appName": "PetLink DZ",
+    "language": "Langue",
+    "english": "Anglais",
+    "french": "Français",
+    "arabic": "Arabe",
+    "save": "Enregistrer",
+    "cancel": "Annuler"
+  },
+  "nav": {
+    "home": "Accueil",
+    "search": "Recherche",
+    "pets": "Mes animaux",
+    "dashboard": "Tableau pet-sitter",
+    "admin": "Admin",
+    "help": "Aide",
+    "policies": "Politiques"
+  },
+  "home": {
+    "title": "Un soin de confiance",
+    "subtitle": "Trouvez des pet-sitters et promeneurs de confiance en Algérie.",
+    "searchCta": "Trouver un pet-sitter"
+  },
+  "listing": {
+    "services": "Services",
+    "instantBook": "Réservation instantanée"
+  },
+  "booking": {
+    "request": "Envoyer la demande",
+    "payProof": "Téléverser la preuve de paiement",
+    "startWalk": "Démarrer la promenade",
+    "endWalk": "Terminer la promenade"
+  }
+}
