@@ -9,6 +9,7 @@ import Layout from "@/components/layout/Layout";
 import Auth from "@/pages/Auth";
 import Pets from "@/pages/Pets";
 import Search from "@/pages/Search";
+import SitterRegister from "@/pages/SitterRegister";
 import SitterProfile from "@/pages/SitterProfile";
 import Book from "@/pages/Book";
 import Chat from "@/pages/Chat";
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/pets" element={<Pets />} />
             <Route path="/search" element={<Search />} />
+            <Route path="/sitter/register" element={<SitterRegister />} />
             <Route path="/sitter/:id" element={<SitterProfile />} />
             <Route path="/book/:listingId" element={<Book />} />
             <Route path="/chat/:bookingId" element={<Chat />} />

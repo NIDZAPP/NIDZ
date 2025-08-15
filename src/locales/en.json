@@ -17,10 +17,37 @@
     "help": "Help",
     "policies": "Policies"
   },
+  "roles": {
+    "sitter": "Pet Sitter",
+    "owner": "Pet Owner",
+    "sitterDescription": "Join our community of trusted pet sitters and earn money caring for pets",
+    "ownerDescription": "Find trusted pet sitters near you for walks, daycare, and boarding",
+    "becomeSitter": "Become a Sitter",
+    "findSitter": "Find a Sitter"
+  },
   "home": {
     "title": "Care you can trust",
-    "subtitle": "Find trusted sitters and walkers near you in Algeria.",
-    "searchCta": "Find a sitter"
+    "subtitle": "Connect with trusted pet sitters and walkers in Algeria"
+  },
+  "sitter": {
+    "registration": "Sitter Registration",
+    "registrationSubtitle": "Join our community of trusted pet sitters",
+    "profileInfo": "Profile Information",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "firstNamePlaceholder": "Enter your first name",
+    "lastNamePlaceholder": "Enter your last name",
+    "bio": "Bio",
+    "bioPlaceholder": "Tell pet owners about yourself, your experience with pets...",
+    "dailyPrice": "Daily Rate (DZD)",
+    "priceRange": "Typical range: 500-2000 DZD per day",
+    "verification": "Identity Verification",
+    "verificationDescription": "Upload your ID and take a selfie to get verified and build trust with pet owners",
+    "idCard": "ID Card",
+    "uploadId": "Upload your ID card (front and back)",
+    "selfie": "Selfie",
+    "takeSelfie": "Take a selfie for verification",
+    "submit": "Submit Registration"
   },
   "listing": {
     "services": "Services",

@@ -11,16 +11,43 @@
   "nav": {
     "home": "Accueil",
     "search": "Recherche",
-    "pets": "Mes animaux",
-    "dashboard": "Tableau pet-sitter",
+    "pets": "Mes Animaux",
+    "dashboard": "Tableau de Bord",
     "admin": "Admin",
     "help": "Aide",
     "policies": "Politiques"
   },
+  "roles": {
+    "sitter": "Pet-Sitter",
+    "owner": "Propriétaire",
+    "sitterDescription": "Rejoignez notre communauté de pet-sitters de confiance et gagnez de l'argent",
+    "ownerDescription": "Trouvez des pet-sitters de confiance près de chez vous pour promenades et garde",
+    "becomeSitter": "Devenir Pet-Sitter",
+    "findSitter": "Trouver un Pet-Sitter"
+  },
   "home": {
     "title": "Un soin de confiance",
-    "subtitle": "Trouvez des pet-sitters et promeneurs de confiance en Algérie.",
-    "searchCta": "Trouver un pet-sitter"
+    "subtitle": "Connectez-vous avec des pet-sitters et promeneurs de confiance en Algérie"
+  },
+  "sitter": {
+    "registration": "Inscription Pet-Sitter",
+    "registrationSubtitle": "Rejoignez notre communauté de pet-sitters de confiance",
+    "profileInfo": "Informations du Profil",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "firstNamePlaceholder": "Entrez votre prénom",
+    "lastNamePlaceholder": "Entrez votre nom",
+    "bio": "Bio",
+    "bioPlaceholder": "Parlez de vous aux propriétaires, votre expérience avec les animaux...",
+    "dailyPrice": "Tarif Journalier (DZD)",
+    "priceRange": "Fourchette typique : 500-2000 DZD par jour",
+    "verification": "Vérification d'Identité",
+    "verificationDescription": "Téléversez votre pièce d'identité et prenez un selfie pour être vérifié",
+    "idCard": "Pièce d'Identité",
+    "uploadId": "Téléversez votre pièce d'identité (recto et verso)",
+    "selfie": "Selfie",
+    "takeSelfie": "Prenez un selfie pour la vérification",
+    "submit": "Soumettre l'Inscription"
   },
   "listing": {
     "services": "Services",
