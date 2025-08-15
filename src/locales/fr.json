@@ -49,6 +49,20 @@
     "takeSelfie": "Prenez un selfie pour la vérification",
     "submit": "Soumettre l'Inscription"
   },
+  "search": {
+    "title": "Trouvez Votre Pet-Sitter Idéal",
+    "subtitle": "Découvrez des pet-sitters de confiance près de chez vous avec des profils vérifiés",
+    "locationPlaceholder": "Entrez votre localisation (ex: Hydra, Alger)",
+    "searchButton": "Rechercher",
+    "filters": "Filtres",
+    "distance": "Distance",
+    "price": "Prix",
+    "topRated": "Pet-Sitters Les Mieux Notés",
+    "sittersFound": "pet-sitters trouvés",
+    "responds": "Répond en",
+    "contact": "Contacter",
+    "loadMore": "Voir Plus"
+  },
   "listing": {
     "services": "Services",
     "instantBook": "Réservation instantanée"

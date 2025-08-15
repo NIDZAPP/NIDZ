@@ -49,6 +49,20 @@
     "takeSelfie": "Take a selfie for verification",
     "submit": "Submit Registration"
   },
+  "search": {
+    "title": "Find Your Perfect Pet Sitter",
+    "subtitle": "Discover trusted pet sitters near you with verified profiles and great reviews",
+    "locationPlaceholder": "Enter your location (e.g., Hydra, Algiers)",
+    "searchButton": "Search",
+    "filters": "Filters",
+    "distance": "Distance",
+    "price": "Price",
+    "topRated": "Top Rated Pet Sitters",
+    "sittersFound": "sitters found",
+    "responds": "Responds in",
+    "contact": "Contact",
+    "loadMore": "Load More"
+  },
   "listing": {
     "services": "Services",
     "instantBook": "Instant Book"
