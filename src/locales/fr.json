@@ -27,7 +27,8 @@
   },
   "home": {
     "title": "Un soin de confiance",
-    "subtitle": "Connectez-vous avec des pet-sitters et promeneurs de confiance en Algérie"
+    "subtitle": "Connectez-vous avec des pet-sitters et promeneurs de confiance en Algérie",
+    "searchCta": "Trouver un pet-sitter"
   },
   "sitter": {
     "registration": "Inscription Pet-Sitter",

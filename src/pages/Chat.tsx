@@ -6,7 +6,7 @@ export default function Chat() {
   return (
     <div className="container py-10">
       <Helmet>
-        <title>PetLink DZ — Chat</title>
+        <title>Nidz — Chat</title>
         <meta name="description" content="Chat with your sitter" />
       </Helmet>
       <h1 className="text-3xl font-semibold mb-2">Chat · Booking #{bookingId}</h1>

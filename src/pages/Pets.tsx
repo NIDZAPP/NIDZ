@@ -4,7 +4,7 @@ export default function Pets() {
   return (
     <div className="container py-10">
       <Helmet>
-        <title>PetLink DZ — Pets</title>
+        <title>Nidz — Pets</title>
         <meta name="description" content="Manage your pets" />
         <link rel="canonical" href="/pets" />
       </Helmet>

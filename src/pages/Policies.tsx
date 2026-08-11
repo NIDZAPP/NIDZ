@@ -4,7 +4,7 @@ export default function Policies() {
   return (
     <div className="container py-10">
       <Helmet>
-        <title>PetLink DZ — Policies</title>
+        <title>Nidz — Policies</title>
         <meta name="description" content="Terms, privacy and safety policies" />
       </Helmet>
       <h1 className="text-3xl font-semibold mb-2">Policies</h1>

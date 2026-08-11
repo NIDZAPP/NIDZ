@@ -16,8 +16,8 @@ export default defineConfig(({ mode }) => ({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'PetLink DZ',
-        short_name: 'PetLink DZ',
+        name: 'Nidz',
+        short_name: 'Nidz',
         description: 'Algeria pet care marketplace',
         theme_color: '#4f46e5',
         icons: [

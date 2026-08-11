@@ -6,8 +6,8 @@ export default function Auth() {
   return (
     <div className="container py-10">
       <Helmet>
-        <title>PetLink DZ — Auth</title>
-        <meta name="description" content="Sign in or sign up to PetLink DZ" />
+        <title>Nidz — Auth</title>
+        <meta name="description" content="Sign in or sign up to Nidz" />
         <link rel="canonical" href="/auth" />
       </Helmet>
       <h1 className="text-3xl font-semibold mb-2">Sign in / Sign up</h1>

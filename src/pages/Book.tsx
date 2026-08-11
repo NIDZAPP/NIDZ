@@ -6,7 +6,7 @@ export default function Book() {
   return (
     <div className="container py-10">
       <Helmet>
-        <title>PetLink DZ — Booking</title>
+        <title>Nidz — Booking</title>
         <meta name="description" content="Create a booking request" />
       </Helmet>
       <h1 className="text-3xl font-semibold mb-2">Book listing #{listingId}</h1>

@@ -28,9 +28,7 @@ export default function Header() {
             <NavLink to="/sitter/dashboard" className={navLinkCls} end>
               {t("nav.dashboard")}
             </NavLink>
-            <NavLink to="/admin" className={navLinkCls} end>
-              {t("nav.admin")}
-            </NavLink>
+            {/* Admin is intentionally not exposed in public navigation. The /admin route remains reachable directly. */}
             <NavLink to="/help" className={navLinkCls} end>
               {t("nav.help")}
             </NavLink>

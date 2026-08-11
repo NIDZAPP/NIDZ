@@ -27,7 +27,8 @@
   },
   "home": {
     "title": "Care you can trust",
-    "subtitle": "Connect with trusted pet sitters and walkers in Algeria"
+    "subtitle": "Connect with trusted pet sitters and walkers in Algeria",
+    "searchCta": "Find a sitter"
   },
   "sitter": {
     "registration": "Sitter Registration",

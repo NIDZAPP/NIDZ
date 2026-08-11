@@ -15,7 +15,7 @@ const NotFound = () => {
   return (
     <div className="min-h-[60vh] flex items-center justify-center">
       <Helmet>
-        <title>PetLink DZ — 404</title>
+        <title>Nidz — 404</title>
         <meta name="description" content="Page not found" />
       </Helmet>
       <div className="text-center">

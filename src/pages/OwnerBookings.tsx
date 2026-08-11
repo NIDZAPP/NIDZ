@@ -4,7 +4,7 @@ export default function OwnerBookings() {
   return (
     <div className="container py-10">
       <Helmet>
-        <title>PetLink DZ — My bookings</title>
+        <title>Nidz — My bookings</title>
         <meta name="description" content="Owner bookings" />
       </Helmet>
       <h1 className="text-3xl font-semibold mb-2">My bookings</h1>

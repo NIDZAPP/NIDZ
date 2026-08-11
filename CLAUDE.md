@@ -33,7 +33,7 @@ The app is a **UI prototype with no backend integration**. This is important con
 - Most routed pages are `coming soon` stubs (~14 lines each). Only `Index`, `Search`, `SitterRegister`, and `NotFound` have real content.
 - `localStorage` is used only for the i18n language cache and the Mapbox token placeholder (`src/components/map/MapPreview.tsx`); Mapbox is installed but not yet wired to a real map.
 
-Note a **naming inconsistency**: the codebase, PWA manifest (`vite.config.ts`), and page `<Helmet>` titles say **"PetLink DZ"**, while the product/design system is named **Nidz**. Preserve whatever a given file already uses unless asked to rebrand.
+**Product name**: the app is named **Nidz** throughout. The legacy name "PetLink DZ" was removed from the codebase, the PWA manifest (`vite.config.ts`), and all page `<Helmet>` titles in the Audit 1.1 rebrand; do not reintroduce it. The canonical string is the `common.appName` i18n key (`Nidz` in en/fr, `نيدز` in ar) — prefer `t("common.appName")` over a hardcoded literal in user-facing copy. Note the design system document styles the name as **NIDZ** in headings; the code uses **Nidz**.
 
 ## Architecture
 

@@ -6,7 +6,7 @@ export default function SitterProfile() {
   return (
     <div className="container py-10">
       <Helmet>
-        <title>PetLink DZ — Sitter Profile</title>
+        <title>Nidz — Sitter Profile</title>
         <meta name="description" content="Sitter profile page" />
       </Helmet>
       <h1 className="text-3xl font-semibold mb-2">Sitter #{id}</h1>
