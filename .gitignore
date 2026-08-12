@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local AI / browser tooling
+.claude/settings.local.json
+.claude/skills/impeccable/
+.claude/skills/playwright-cli/
+.playwright/
+.playwright-cli/
+*.auth-state.json
