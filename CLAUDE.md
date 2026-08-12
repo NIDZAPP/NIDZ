@@ -44,7 +44,13 @@ Stack: **Vite 5 + React 18 + TypeScript** (SWC), **shadcn/ui** (Radix) component
 - **Path alias**: `@/` → `src/` (configured in both `vite.config.ts` and `tsconfig`). shadcn aliases live in `components.json`.
 
 ### Design tokens
-All colors, gradients, and shadows are **HSL CSS variables** defined in `src/index.css` (`:root` + `.dark`), and mapped to Tailwind semantic classes in `tailwind.config.ts`. Brand palette is **mint-green primary** + **soft-orange secondary**. Use the semantic tokens (`bg-primary`, `text-muted-foreground`, `shadow-elegant`, `bg-gradient-primary`, etc.) — do not hard-code hex/HSL values in components. Fonts: `Inter` (sans/default), `Playfair Display` (`font-display`). Icons: **lucide-react**.
+All colors are **HSL CSS variables** defined in `src/index.css` (`:root`), mapped to Tailwind semantic classes in `tailwind.config.ts`. Brand palette is **deep-teal primary** (`#0F766E`) on a **warm off-white** background (`#FBFAF7`). Use the semantic tokens (`bg-primary`, `text-muted-foreground`, `border-input`, …) — never hard-code hex/HSL in components.
+
+**Two different things are called "accent" — read the comment block at the top of `src/index.css` before touching colors.** CSS `--accent` is shadcn's *hover / keyboard-highlight / selection surface* (44 usages across 13 primitives); it is a neutral UI role. The design system's warm terracotta accent (`#A84F32`) lives on a separate `--brand` token and is reserved for **non-interactive** brand surfaces — never a button, link, hover, or selected state. `--secondary` is likewise a neutral surface (it backs the Slider and Progress tracks), not a brand color.
+
+Radius scale is sm 8 / md 12 / lg 16 / xl 24; `rounded-2xl` and `rounded-3xl` are not part of it. Motion durations follow design system §24 and `prefers-reduced-motion` is honored globally. Dark mode is **not** part of V1: the `.dark` block in `index.css` is legacy, never applied, and still holds the old mint theme.
+
+Fonts: `Inter` (sans/default) carries the interface; `Playfair Display` (`font-display`) is brand expression only — the header wordmark and a single marketing display title. Never in forms, buttons, tables, or admin. Icons: **lucide-react** only, never emoji.
 
 ### Internationalization + RTL (critical for every UI change)
 `src/i18n.ts` configures i18next for three locales — **`en`, `fr`, `ar`** (strings in `src/locales/*.json`), default `en`, detected from localStorage → querystring → navigator.

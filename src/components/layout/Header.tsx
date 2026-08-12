@@ -5,14 +5,16 @@ import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 
 const navLinkCls = ({ isActive }: { isActive: boolean }) =>
   `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-    isActive ? "bg-accent text-accent-foreground" : "hover:bg-muted/60"
+    isActive
+      ? "bg-accent text-accent-foreground font-semibold"
+      : "hover:bg-secondary"
   }`;
 
 export default function Header() {
   const { t } = useTranslation();
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-40 w-full border-b bg-background">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-4">
           <Link to="/" className="font-display text-xl tracking-tight">
@@ -34,9 +36,9 @@ export default function Header() {
             </NavLink>
           </nav>
         </div>
-        <div className="flex items-center gap-3 rtl:space-x-reverse">
+        <div className="flex items-center gap-3">
           <LanguageSwitcher />
-          <Button asChild variant="hero" className="hidden md:inline-flex">
+          <Button asChild className="hidden md:inline-flex">
             <Link to="/search">{t("home.searchCta")}</Link>
           </Button>
         </div>

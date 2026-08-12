@@ -2,61 +2,130 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* ============================================================================
+   NIDZ DESIGN TOKENS
+   Source of truth: .claude/skills/nidz-design/NIDZ_DESIGN_SYSTEM.md (§12, §16)
+   All colors MUST be HSL triplets (Tailwind wraps them as hsl(var(--token))).
+
+   IMPORTANT — two different things are called "accent":
+     - CSS `--accent`  = shadcn's HOVER / HIGHLIGHT / SELECTION surface. It backs
+       ghost+outline button hover, Radix `data-[highlighted]` (keyboard
+       navigation) in select/dropdown/command/context-menu/menubar, the calendar
+       selected day, toggle, sidebar and the active header nav link.
+       It is a NEUTRAL UI role, not a brand color. Do NOT put terracotta here.
+     - Design-system `accent` (Warm Terracotta #A84F32) lives on `--brand`.
+       It is reserved for NON-INTERACTIVE brand / editorial surfaces only.
+       Terracotta and primary have almost identical luminance (both ~5.5:1 on
+       white), so terracotta on a control reads as important as the primary CTA.
+       Never use `bg-brand` for a button, link, hover or selected state.
+
+   Radius scale (§16): sm 8 · md 12 · lg 16 · xl 24. Tailwind's `rounded-2xl`
+   and `rounded-3xl` are NOT part of the Nidz scale — do not use them.
+
+   TRUST PROVENANCE (§6). Every claim shown about a sitter belongs to exactly
+   one of four categories, and each has a fixed treatment. All four are a
+   14px Lucide icon + 12px label — a byline, never a trophy badge (§7 forbids
+   cascading decorative badges). Only the first one has a real mechanism
+   behind it today, so only the first one has a call site:
+
+     A. Declared by the sitter  `User`          text-muted-foreground   IN USE
+     B. Verified by Nidz        `BadgeCheck`    text-primary /
+                                                bg-primary-soft         RESERVED
+     C. From the community      `MessageSquare` text-muted-foreground   RESERVED
+     D. Measured by Nidz        `Activity`      text-muted-foreground   RESERVED
+
+   B, C and D must stay unused until a real, traceable process exists (§6.1).
+   Do not add a fifth category, and do not promote A to B because a profile
+   is complete — profil complet != profil vérifié.
+   ========================================================================= */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Surfaces */
+    --background: 45 33% 98%;           /* #FBFAF7 warm off-white */
+    --foreground: 167 16% 11%;          /* #18211F dark green slate */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;                  /* #FFFFFF */
+    --card-foreground: 167 16% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 167 16% 11%;
 
-    /* Brand colors - Nidz mint green & soft orange theme */
-    --primary: 165 65% 55%;              /* mint green/turquoise */
+    /* Brand primary — identity + principal action */
+    --primary: 175 77% 26%;             /* #0F766E deep teal */
     --primary-foreground: 0 0% 100%;
+    --primary-hover: 176 69% 22%;       /* #115E59 hover / pressed */
+    --primary-soft: 170 33% 93%;        /* #E7F3F1 soft primary background */
 
-    --secondary: 20 85% 75%;             /* soft orange/salmon */
-    --secondary-foreground: 20 50% 15%;
+    /* Neutral surfaces — warm ramp, kept deliberately NON-brand so that
+       secondary actions stay visually secondary to the primary CTA (§17). */
+    --secondary: 43 18% 92%;            /* #EFEDE8 */
+    --secondary-foreground: 167 16% 11%;
+    --secondary-hover: 43 16% 87%;      /* neutrals are too light for /80 opacity
+                                           hover to be perceptible — use a real step */
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 40 23% 95%;                /* #F5F3EF */
+    --muted-foreground: 162 7% 38%;     /* #5B6864 muted slate */
 
-    --accent: 165 45% 85%;               /* light mint accent */
-    --accent-foreground: 165 65% 25%;
+    /* Filled-control track (slider, progress, switch-off). Needs to be visible
+       against the surface AND clearly distinct from the primary fill:
+       1.8:1 on --card, 3.0:1 against --primary. A light neutral fails the
+       second test, which is why this is not --secondary or --border. */
+    --track: 160 9% 74%;                /* #B6C2BE */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Hover / highlight / selection surface (see note above) */
+    --accent: var(--primary-soft);
+    --accent-foreground: 175 77% 26%;   /* teal text: 4.8:1 on the soft surface */
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 165 65% 55%;
+    /* Nidz warm brand accent — NON-INTERACTIVE USE ONLY (see note above).
+       Consumers: the /search need panel + results context bar surface
+       (`bg-brand-soft`), the demo monogram avatars, and the PawPrint mark.
+       Never a button, link, hover or selected state. */
+    --brand: 15 54% 43%;                /* #A84F32 warm terracotta */
+    --brand-foreground: 0 0% 100%;
+    --brand-soft: 19 54% 93%;           /* #F7EAE4 */
 
-    --radius: 0.75rem;
+    /* Status — each pairs with white text at >= 5.6:1 */
+    --success: 143 64% 24%;             /* #166534 */
+    --success-foreground: 0 0% 100%;
+    --warning: 34 100% 30%;             /* #9A5700 */
+    --warning-foreground: 0 0% 100%;
+    --destructive: 0 74% 42%;           /* #B91C1C — danger/destruction only */
+    --destructive-foreground: 0 0% 100%;
+    --info: 224 76% 48%;                /* #1D4ED8 */
+    --info-foreground: 0 0% 100%;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 165 65% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 165 45% 95%;
-    --sidebar-accent-foreground: 165 65% 25%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 165 65% 55%;
+    /* Lines.
+       --border is decorative separation (1.25:1) and must NEVER be the sole
+       indicator of an interactive control.
+       --input is the functional control boundary: 3.41:1 on --background and
+       3.56:1 on --card, so it satisfies WCAG 1.4.11 non-text contrast. */
+    --border: 154 11% 88%;              /* #DCE3E0 */
+    --input: 160 6% 52%;                /* #7C8B86 */
+    --ring: 175 77% 26%;
 
-    /* Extras */
-    --primary-glow: 165 70% 65%;
-    --secondary-glow: 20 90% 80%;
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
-    --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--secondary-glow)));
-    --shadow-elegant: 0 12px 30px -12px hsl(var(--primary) / 0.35);
-    --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --radius: 0.75rem;                  /* 12px — see radius scale note above */
+
+    /* Sidebar primitive (currently unused) — aliased to the main palette so it
+       cannot drift back to the legacy mint theme. */
+    --sidebar-background: var(--background);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--primary-foreground);
+    --sidebar-accent: var(--accent);
+    --sidebar-accent-foreground: var(--accent-foreground);
+    --sidebar-border: var(--border);
+    --sidebar-ring: var(--ring);
   }
 
+  /* LEGACY / UNMAINTAINED — dark mode is NOT part of Nidz V1 (design system
+     §38) and this block is never applied: nothing in the app ever adds the
+     `dark` class. These values are stale Lovable-era colours that do NOT match
+     the Nidz palette, and the block does not define the tokens added above
+     (--primary-hover, --primary-soft, --brand*, --track, status colours), so a
+     dark theme would silently inherit light values for them.
+     Deliberately not expanded. Delete it or author a real dark palette before
+     any dark-mode toggle ships. */
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -70,8 +139,8 @@ All colors MUST be HSL.
     --primary: 165 70% 65%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
-    --secondary: 20 80% 70%;
-    --secondary-foreground: 20 50% 15%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
@@ -85,21 +154,6 @@ All colors MUST be HSL.
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 165 70% 65%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 165 70% 65%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 165 25% 20%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 165 70% 65%;
-
-    --primary-glow: 165 75% 72%;
-    --secondary-glow: 20 85% 75%;
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
-    --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--secondary-glow)));
-    --shadow-elegant: 0 12px 30px -12px hsl(var(--primary) / 0.45);
-    --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
@@ -108,15 +162,27 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    /* The header is sticky; keep focused targets from landing underneath it
+       (WCAG 2.2 AA — 2.4.11 Focus Not Obscured). */
+    scroll-padding-top: calc(4rem + 1px); /* header h-16 + its bottom border */
+  }
+
   body {
     @apply bg-background text-foreground font-sans;
   }
 }
 
-@layer utilities {
-  .bg-gradient-primary { background-image: var(--gradient-primary); }
-  .bg-gradient-secondary { background-image: var(--gradient-secondary); }
-  .shadow-elegant { box-shadow: var(--shadow-elegant); }
-  .hover-scale { transition: var(--transition-smooth); transform: translateZ(0); }
-  .hover-scale:hover { transform: scale(1.03); }
+/* Motion must never block an action (§24). Use `animation-duration: 0.01ms`
+   rather than `animation: none` so Radix still receives `animationend` and
+   exit transitions do not strand elements in the DOM. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

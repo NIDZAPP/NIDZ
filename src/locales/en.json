@@ -51,27 +51,115 @@
     "submit": "Submit Registration"
   },
   "search": {
-    "title": "Find Your Perfect Pet Sitter",
-    "subtitle": "Discover trusted pet sitters near you with verified profiles and great reviews",
-    "locationPlaceholder": "Enter your location (e.g., Hydra, Algiers)",
-    "searchButton": "Search",
-    "filters": "Filters",
-    "distance": "Distance",
-    "price": "Price",
-    "topRated": "Top Rated Pet Sitters",
-    "sittersFound": "sitters found",
-    "responds": "Responds in",
-    "contact": "Contact",
-    "loadMore": "Load More"
+    "need": {
+      "title": "Which animal are you looking for care for?",
+      "intro": "Nidz starts with the sitters that match your animal, your area and the kind of care you need.",
+      "speciesLabel": "Your animal",
+      "communeLabel": "Where are you looking?",
+      "communeAny": "All areas",
+      "communeHelp": "This demo covers a few areas of Algiers.",
+      "careLabel": "What kind of care do you need?",
+      "submit": "See the sitters",
+      "skip": "Browse the examples without criteria"
+    },
+    "species": {
+      "dog": "Dog",
+      "cat": "Cat"
+    },
+    "accepts": {
+      "dog": "Accepts dogs",
+      "cat": "Accepts cats"
+    },
+    "care": {
+      "boarding": "Boarding at the sitter's home",
+      "atOwner": "Care at my home",
+      "walk": "Walking"
+    },
+    "context": {
+      "noCriteria": "All the examples",
+      "edit": "Edit",
+      "editLabel": "Edit my search",
+      "editLabelCount": "Edit my search · {{count}} active criteria"
+    },
+    "filters": {
+      "title": "Filter",
+      "maxPrice": "Maximum price",
+      "anyPrice": "Any price",
+      "upTo": "{{price}} or less",
+      "apply": "See the results",
+      "clear": "Clear all criteria",
+      "close": "Close",
+      "description": "Choose the animal, the kind of care, the area and the maximum price."
+    },
+    "results": {
+      "title": "Sitters that match your search",
+      "countLabel": "Results: {{count}}",
+      "sortedByPrice": "Sorted by lowest price",
+      "emptyTitle": "No sitter matches these criteria",
+      "emptyBody": "Try another kind of care, another area, or raise the maximum price.",
+      "titleAll": "Example sitters"
+    },
+    "card": {
+      "matchLabel": "Matches your search",
+      "perNight": "per night",
+      "viewProfile": "View profile",
+      "viewProfileOf": "View {{name}}'s profile",
+      "demoTag": "Example",
+      "from": "from",
+      "unit": {
+        "night": "per night",
+        "visit": "per visit",
+        "walk": "per walk"
+      }
+    },
+    "demo": {
+      "title": "Demonstration examples",
+      "body": "These sitters are fictional and Nidz does not verify any profile yet. Nothing is saved, no request can be sent, and the profiles open onto an incomplete demonstration page."
+    },
+    "speciesPlural": {
+      "dog": "Dogs",
+      "cat": "Cats"
+    },
+    "brief": {
+      "title": "Your search",
+      "species": "Animal",
+      "care": "Kind of care",
+      "zone": "Area",
+      "budget": "Budget",
+      "anySpecies": "Dog or cat",
+      "anyCare": "Any kind of care"
+    }
+  },
+  "trust": {
+    "declared": "Stated by the sitter"
+  },
+  "sitters": {
+    "s1": {
+      "bio": "I look after dogs at my place, in a house with a fenced yard."
+    },
+    "s2": {
+      "bio": "Daily walks and short stays. I grew up with dogs."
+    },
+    "s3": {
+      "bio": "I mostly care for cats, at their owners' homes, morning and evening."
+    },
+    "s4": {
+      "bio": "Quiet flat, no other animals. I can host one cat or a small dog."
+    }
   },
   "listing": {
-    "services": "Services",
-    "instantBook": "Instant Book"
+    "services": "Services"
   },
   "booking": {
     "request": "Send request",
     "payProof": "Upload payment proof",
     "startWalk": "Start Walk",
     "endWalk": "End Walk"
+  },
+  "communes": {
+    "hydra": "Hydra",
+    "elBiar": "El Biar",
+    "kouba": "Kouba",
+    "babEzzouar": "Bab Ezzouar"
   }
 }

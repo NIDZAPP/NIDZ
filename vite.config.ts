@@ -19,7 +19,8 @@ export default defineConfig(({ mode }) => ({
         name: 'Nidz',
         short_name: 'Nidz',
         description: 'Algeria pet care marketplace',
-        theme_color: '#4f46e5',
+        theme_color: '#FBFAF7',
+        background_color: '#FBFAF7',
         icons: [
           { src: '/favicon.ico', sizes: '64x64 32x32 16x16', type: 'image/x-icon' }
         ]

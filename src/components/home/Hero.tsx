@@ -40,7 +40,7 @@ export default function Hero() {
             </SelectContent>
           </Select>
           <Input placeholder="Hydra, Algiers" />
-          <Button type="submit" variant="hero" className="w-full">
+          <Button type="submit" className="w-full">
             {t("home.searchCta")}
           </Button>
         </form>

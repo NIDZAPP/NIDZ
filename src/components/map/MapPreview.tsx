@@ -18,7 +18,7 @@ export default function MapPreview() {
   return (
     <div className="w-full">
       {token ? (
-        <div className="h-72 rounded-lg bg-gradient-primary shadow-elegant grid place-items-center text-primary-foreground">
+        <div className="h-72 rounded-lg bg-primary grid place-items-center text-primary-foreground">
           <p>Map enabled soon — using your Mapbox token.</p>
         </div>
       ) : (
