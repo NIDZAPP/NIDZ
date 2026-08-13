@@ -8,7 +8,7 @@ web
 
 ## Users
 
-**Pet owners** — people in Algeria who own dogs or cats and need someone to care for their animal while they are away or unavailable. Their situation is one of uncertainty rather than scarcity: the hard question is not "where do I find someone?" but **"is this the right person for my animal, and do I have enough information to trust them?"** They arrive anxious about handing over a family member to a stranger.
+**Pet owners** — people in Algeria who own dogs, cats or birds and need someone to care for their animal while they are away or unavailable. An owner may have several animals, and they will not all have the same needs. Their situation is one of uncertainty rather than scarcity: the hard question is not "where do I find someone?" but **"is this the right person for my animal, and do I have enough information to trust them?"** They arrive anxious about handing over a family member to a stranger.
 
 **Pet-sitters** — individuals offering pet-care services in their own home or at the owner's. Their job is to present how they actually care for animals, receive requests that genuinely fit their limits and environment, build a reputation, and win further opportunities.
 
@@ -16,7 +16,7 @@ Both sides are Algerian, mobile-first, and read **French, Arabic, or English** (
 
 ## Product Purpose
 
-Nidz is an **Algerian pet-sitting marketplace** connecting dog and cat owners with trusted pet-sitters nearby. It must not behave as a plain classifieds catalogue.
+Nidz is an **Algerian pet-sitting marketplace** connecting dog, cat and bird owners with pet-sitters nearby. It must not behave as a plain classifieds catalogue. "Nearby" is a matching input, not a claim of national coverage: administrative geography data covering the whole country never licenses a promise of supply everywhere.
 
 Owner-side value chain: **find → understand → trust → hand over the animal with peace of mind.**
 
@@ -37,7 +37,7 @@ Success is a hand-over the owner felt calm and informed about, and a sitter who 
 
 **Stage: pre-launch startup.** Intended to become a real marketplace with real Algerian sitters and owners; design and code should be judged against production readiness and trust that survives real users — not against demo polish.
 
-**Currently a front-end prototype with no backend.** No `fetch`/REST/Supabase/Firebase client exists in `src/`. `QueryClientProvider` is mounted but no query or mutation is ever called. Displayed data is hard-coded mock arrays. Most routed pages are stubs; only `Index`, `Search`, `SitterRegister`, and `NotFound` have real content. `localStorage` holds only the i18n language cache and a Mapbox token placeholder; Mapbox is installed but not wired to a real map.
+**Currently a front-end prototype with no backend.** No `fetch`/REST/Supabase/Firebase client exists in `src/`. `QueryClientProvider` is mounted but no query or mutation is ever called. Displayed data comes from centralised fixtures in `src/data/` and from browser-local reducer state in `src/state/demo/`, mirrored into `localStorage` alongside the i18n language cache. Audit 1.1 removed the unused Mapbox dependency and its token placeholder, and replaced the earlier stub pages: both marketplace journeys now run end to end in the browser, and routes that are genuinely not implemented serve one honest `NotAvailable` screen rather than a "coming soon" promise.
 
 **Stack (existing):** Vite 5 + React 18 + TypeScript (SWC), shadcn/ui on Radix, Tailwind CSS 3, react-router-dom 6, lucide-react. Scaffolded via Lovable. No test framework is configured.
 
@@ -51,7 +51,7 @@ Success is a hand-over the owner felt calm and informed about, and a sitter who 
 - **A real logo / brand asset set exists or is being produced** and future work should use it rather than inventing a mark.
 - **Brand feel (confirmed in the design system):** calm, human, reliable, warm, clean, contemporary, accessible.
 - **The current visual system is a baseline, not a ceiling.** The user explicitly authorized substantially redesigning the visual system, layouts, components, typography, color usage, navigation, spacing, and overall art direction where a stronger result is achievable. No visual decision is to be preserved merely because it already exists. This license covers appearance only — product truth, trust and safety rules, privacy, accessibility, core marketplace logic, and honest representation of functionality are preserved regardless.
-- `.claude/skills/nidz-design/NIDZ_DESIGN_SYSTEM.md` remains authoritative for **product, UX and trust rules**; its visual layer is open to replacement per the license above.
+- `.claude/skills/nidz-design/NIDZ_DESIGN_SYSTEM.md` remains authoritative for **product, UX and trust rules**; its visual layer is open to replacement per the license above. Audit 1.2 exercised that licence twice, and recorded both changes in the amendment block at the top of that document: the application canvas is now **white** (`#FFFFFF`), and **Inter is the only typeface** — Playfair Display is withdrawn, partly because it has no Arabic face and so could never carry copy in all three product languages.
 
 ## Evidence on Hand
 

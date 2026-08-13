@@ -23,6 +23,18 @@ This is the **Nidz** product (a pet-care marketplace for Algeria). Before creati
 
 It is the authoritative spec for UX, UI, colors, typography, spacing, trust signals, and product behavior. When it conflicts with generic design advice, shadcn/Tailwind examples, or existing legacy UI, **the Nidz design system wins**. The `/nidz-design` skill (`.claude/skills/nidz-design/SKILL.md`) enforces this. Key product rule: **never make a simulated/demo feature look genuinely functional**, and never invent verification, reviews, availability, payment protection, booking confirmation, insurance, or trust metrics that don't exist.
 
+**Read the `## 0.0 Amendements actifs` block at the top of that document first.** Audit 1.2 deliberately superseded two of its Level-2 visual decisions (§42 ranks its own decisions; Level 2 is "may evolve consciously"). Where the body of the document still contradicts that block, the block wins. No Level-1 principle — product truth, trust provenance, accessibility, privacy — was touched.
+
+## Audit 1.2 (branch `nidz-1.2`)
+
+Work in progress on `nidz-1.2`, branched from `nidz-1.1` @ `5fefa94`. `main` and `nidz-1.1` are read-only for its duration, along with the existing safety stash.
+
+- `docs/Audit 1.2.md` — the binding requirements, section-numbered against the brief.
+- `docs/NIDZ-1.2-IMPLEMENTATION-PLAN.md` — verified git baseline, quality-gate and bundle numbers to regress against, repository/agent/skill inventory, the design decisions taken, and the group-by-group outcome table.
+- `docs/NIDZ-1.2-REGRESSION-CHECKLIST.md` — every deception Audit 1.1 removed, with the mechanism that keeps it removed. Audit 1.2 may replace any 1.1 implementation; it may not reintroduce anything on that list.
+
+Direction: one account with **owner and sitter workspaces** (capabilities plus an `activeWorkspace`, never a mutually exclusive `role`), multi-pet ownership across dog/cat/bird, verified Algerian geography, an explainable deterministic ranking, and a trust-provenance model (`declared` / `verified` / `community` / `platform`) carried in the data rather than only in labels.
+
 ## Current state: complete demo front-end, no backend
 
 Both marketplace journeys are implemented end to end, entirely in the browser. There is still **no backend**, and that is load-bearing context for every change:

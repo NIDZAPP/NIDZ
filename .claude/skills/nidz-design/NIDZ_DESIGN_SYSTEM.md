@@ -4,6 +4,47 @@
 
 ---
 
+## 0.0 Amendements actifs — Audit 1.2 (13 août 2026)
+
+> **À lire avant les §12 et §13.** Deux décisions de **niveau 2** (§42 —
+> « système actif, peut évoluer consciemment ») ont été modifiées
+> délibérément par l'Audit 1.2. Là où le corps du document ci-dessous les
+> contredit encore, **cet encadré fait foi**. Aucun principe de niveau 1
+> n'est touché : la vérité produit, la provenance des signaux de confiance,
+> l'accessibilité, la protection des données sensibles et l'absence de
+> promesse fictive restent inchangées.
+
+**A. Le fond global de l'application devient `#FFFFFF`** — remplace le blanc
+cassé chaud `#FBFAF7` du §12.1 comme canevas de l'application.
+
+Conséquence à ne pas manquer : sur fond crème, `surface` `#FFFFFF` servait
+elle-même d'indice d'élévation. Sur fond blanc, cet indice disparaît. La
+structure doit donc venir de la **hiérarchie, de l'espacement, de la
+typographie, du regroupement, de bordures discrètes et de surfaces douces
+sémantiques ponctuelles**. L'ombre est réservée à une élévation réelle.
+Fond blanc ne veut **pas** dire cartes blanches sur fond blanc.
+
+Le reste de l'identité est inchangé : `primary` `#0F766E`, hover `#115E59`,
+`primary-soft` `#E7F3F1`, accent terracotta `#A84F32`, `accent-soft`
+`#F7EAE4`, `foreground` `#18211F`, `muted-foreground` `#5B6864`, `border`
+`#DCE3E0`, `control-border` `#7C8B86`. Les couleurs sémantiques
+succès / avertissement / destructif / info restent en place, sauf correction
+de contraste **mesurée** sur le nouveau fond.
+
+**B. Inter uniquement ; Playfair Display est retirée** — remplace le §13.2.
+
+La hiérarchie vient de la taille, de la graisse, de l'espacement, du contenu
+et de la mise en page, jamais du mélange de familles. Ce retrait corrige
+aussi un défaut réel et pas seulement une préférence : Playfair n'a pas de
+face arabe, donc tout rôle qu'elle portait était monolingue par construction
+dans un produit trilingue. Aucune police d'affichage de remplacement n'est
+introduite — en adopter une serait une décision de marque multilingue
+délibérée, pas l'effet secondaire d'un audit UI.
+
+Détail et justification : `docs/NIDZ-1.2-IMPLEMENTATION-PLAN.md` §4.
+
+---
+
 ## 0. Rôle de ce document
 
 Ce document est la **source de vérité UX/UI de Nidz**.
