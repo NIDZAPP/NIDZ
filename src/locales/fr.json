@@ -74,6 +74,48 @@
       "firstRequired": "Indiquez votre prénom.",
       "lastRequired": "Indiquez votre nom.",
       "storageNote": "Cette démonstration n'a pas de serveur : votre nom reste dans ce navigateur et n'est envoyé nulle part."
+    },
+    "phone": {
+      "title": "Votre numéro de téléphone",
+      "intro": "C'est par téléphone que le pet-sitter pourra vous joindre s'il accepte votre demande.",
+      "label": "Numéro",
+      "help": "9 chiffres après +213. Cette démonstration ne couvre que les numéros algériens.",
+      "invalid": "Saisissez un numéro à 9 chiffres, par exemple 555 12 34 56.",
+      "demoNote": "Aucun SMS ne sera envoyé : votre numéro reste dans ce navigateur."
+    },
+    "verify": {
+      "title": "Vérification du numéro",
+      "intro": "Numéro indiqué : {{phone}}",
+      "demoTitle": "Étape simulée",
+      "demoBody": "Nidz n'envoie aucun SMS et ne vérifie aucun numéro : il n'y a ni serveur ni opérateur derrière cette démonstration. Saisissez n'importe quel code à 6 chiffres pour continuer. Passer cette étape ne signifie pas que votre numéro a été vérifié.",
+      "codeLabel": "Code à 6 chiffres",
+      "invalid": "Saisissez 6 chiffres.",
+      "resend": "Renvoyer le code",
+      "resentNote": "Rien n'a été renvoyé : aucun code n'est généré dans cette démonstration.",
+      "changeNumber": "Modifier le numéro"
+    },
+    "review": {
+      "title": "Votre demande",
+      "send": "Envoyer ma demande",
+      "missing": "Il manque le type de garde ou les dates. Reprenez votre recherche pour les indiquer.",
+      "demoNote": "Envoyer n'effectue aucune réservation et aucun paiement. Rien ne quitte ce navigateur."
+    },
+    "sent": {
+      "title": "Demande de démonstration envoyée",
+      "intro": "Dans un vrai Nidz, {{sitter}} pourrait maintenant consulter votre demande pour {{pet}}.",
+      "demoTitle": "Rien n'a été envoyé",
+      "demoBody": "Cette demande existe uniquement dans ce navigateur. Aucun pet-sitter n'a été prévenu, aucune réservation n'a été créée et aucun paiement n'a eu lieu. Vous pouvez la retrouver dans « Mes demandes ».",
+      "viewRequest": "Voir ma demande",
+      "home": "Retour à l'accueil"
+    },
+    "summary": {
+      "sitter": "Pet-sitter",
+      "pet": "Animal",
+      "care": "Type de garde",
+      "dates": "Dates",
+      "rate": "Tarif affiché",
+      "needs": "Besoins importants",
+      "ownerZone": "Zone du propriétaire"
     }
   },
   "sitterFlow": {
@@ -287,5 +329,24 @@
     "experienceLine_other": "{{count}} ans d'expérience déclarée, surtout avec : {{species}}.",
     "experienceYears_one": "{{count}} an d'expérience déclarée.",
     "experienceYears_other": "{{count}} ans d'expérience déclarée."
+  },
+  "ownerRequests": {
+    "title": "Mes demandes",
+    "emptyTitle": "Aucune demande pour le moment",
+    "emptyBody": "Lorsque vous enverrez une demande à un pet-sitter, elle apparaîtra ici avec son statut.",
+    "notFoundTitle": "Cette demande n'existe pas",
+    "notFoundBody": "Elle a peut-être été créée dans un autre navigateur : cette démonstration ne conserve rien ailleurs que sur cet appareil.",
+    "sentOn": "Envoyée le {{date}}",
+    "viewSitter": "Voir le profil du pet-sitter",
+    "explain": {
+      "pending": "Aucun pet-sitter n'a été prévenu : cette demande n'a été envoyée nulle part. Dans un vrai Nidz, elle attendrait ici une réponse du pet-sitter, et rien ne serait convenu tant qu'il n'aurait pas accepté.",
+      "accepted": "Dans cette démonstration, l'acceptation vient de vous, depuis le côté pet-sitter. Même dans un vrai Nidz, ce ne serait pas une réservation : Nidz ne gère ni réservation, ni paiement, ni assurance. Les détails de la garde restent à convenir directement entre les deux personnes.",
+      "declined": "Dans cette démonstration, le refus vient de vous, depuis le côté pet-sitter. Un refus est une réponse normale : les limites de chaque pet-sitter sont indiquées sur son profil."
+    },
+    "count_one": "{{count}} demande",
+    "count_other": "{{count}} demandes",
+    "demoNote": "Ces demandes existent uniquement dans ce navigateur. Aucun pet-sitter n'a été prévenu.",
+    "demoBody": "Cette demande existe uniquement dans ce navigateur. Aucun pet-sitter n'a été prévenu, aucune réservation n'a été créée et aucun paiement n'a eu lieu.",
+    "alreadySent": "Vous aviez déjà envoyé cette demande. La voici."
   }
 }

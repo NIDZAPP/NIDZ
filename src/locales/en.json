@@ -74,6 +74,48 @@
       "firstRequired": "Enter your first name.",
       "lastRequired": "Enter your last name.",
       "storageNote": "This demonstration has no server: your name stays in this browser and is sent nowhere."
+    },
+    "phone": {
+      "title": "Your phone number",
+      "intro": "The phone is how the sitter can reach you if they accept your request.",
+      "label": "Number",
+      "help": "9 digits after +213. This demonstration covers Algerian numbers only.",
+      "invalid": "Enter a 9-digit number, for example 555 12 34 56.",
+      "demoNote": "No SMS will be sent: your number stays in this browser."
+    },
+    "verify": {
+      "title": "Number check",
+      "intro": "Number given: {{phone}}",
+      "demoTitle": "Simulated step",
+      "demoBody": "Nidz sends no SMS and verifies no number: there is neither a server nor an operator behind this demonstration. Enter any 6-digit code to continue. Completing this step does not mean your number has been verified.",
+      "codeLabel": "6-digit code",
+      "invalid": "Enter 6 digits.",
+      "resend": "Send the code again",
+      "resentNote": "Nothing was sent: no code is generated in this demonstration.",
+      "changeNumber": "Change the number"
+    },
+    "review": {
+      "title": "Your request",
+      "send": "Send my request",
+      "missing": "The kind of care or the dates are missing. Go back to your search to set them.",
+      "demoNote": "Sending books nothing and pays nothing. Nothing leaves this browser."
+    },
+    "sent": {
+      "title": "Demonstration request sent",
+      "intro": "In a real Nidz, {{sitter}} could now read your request for {{pet}}.",
+      "demoTitle": "Nothing was sent",
+      "demoBody": "This request exists only in this browser. No sitter was notified, no booking was created and no payment took place. You can find it again under “My requests”.",
+      "viewRequest": "View my request",
+      "home": "Back to home"
+    },
+    "summary": {
+      "sitter": "Sitter",
+      "pet": "Animal",
+      "care": "Kind of care",
+      "dates": "Dates",
+      "rate": "Displayed rate",
+      "needs": "Important needs",
+      "ownerZone": "Owner's area"
     }
   },
   "sitterFlow": {
@@ -287,5 +329,24 @@
     "experienceLine_other": "{{count}} years of stated experience, mostly with: {{species}}.",
     "experienceYears_one": "{{count}} year of stated experience.",
     "experienceYears_other": "{{count}} years of stated experience."
+  },
+  "ownerRequests": {
+    "title": "My requests",
+    "emptyTitle": "No requests yet",
+    "emptyBody": "When you send a request to a sitter, it will appear here with its status.",
+    "notFoundTitle": "This request does not exist",
+    "notFoundBody": "It may have been created in another browser: this demonstration keeps nothing anywhere but on this device.",
+    "sentOn": "Sent on {{date}}",
+    "viewSitter": "View the sitter's profile",
+    "explain": {
+      "pending": "No sitter was notified: this request was not sent anywhere. In a real Nidz it would be waiting here for the sitter's answer, and nothing would be agreed until they accepted.",
+      "accepted": "In this demonstration the acceptance came from you, on the sitter side. Even in a real Nidz it would not be a booking: Nidz handles no reservation, no payment and no insurance. The details of the stay remain to be agreed directly between the two people.",
+      "declined": "In this demonstration the refusal came from you, on the sitter side. Declining is a normal answer: every sitter's limits are stated on their profile."
+    },
+    "count_one": "{{count}} request",
+    "count_other": "{{count}} requests",
+    "demoNote": "These requests exist only in this browser. No sitter was notified.",
+    "demoBody": "This request exists only in this browser. No sitter was notified, no booking was created and no payment took place.",
+    "alreadySent": "You had already sent this request. Here it is."
   }
 }

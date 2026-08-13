@@ -16,7 +16,6 @@ import SitterRegister from "@/pages/SitterRegister";
 import SitterProfile from "@/pages/SitterProfile";
 import Book from "@/pages/Book";
 import Chat from "@/pages/Chat";
-import OwnerBookings from "@/pages/OwnerBookings";
 import SitterDashboard from "@/pages/SitterDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
 import Policies from "@/pages/Policies";
@@ -27,6 +26,12 @@ import NeedPet from "@/pages/owner/need/NeedPet";
 import NeedLocation from "@/pages/owner/need/NeedLocation";
 import NeedCare from "@/pages/owner/need/NeedCare";
 import RequestName from "@/pages/owner/request/RequestName";
+import RequestPhone from "@/pages/owner/request/RequestPhone";
+import RequestVerify from "@/pages/owner/request/RequestVerify";
+import RequestReview from "@/pages/owner/request/RequestReview";
+import RequestSent from "@/pages/owner/request/RequestSent";
+import OwnerRequests from "@/pages/owner/OwnerRequests";
+import OwnerRequestDetail from "@/pages/owner/OwnerRequestDetail";
 
 const queryClient = new QueryClient();
 
@@ -68,6 +73,10 @@ const App = () => (
             <Route path="/owner/need/location" element={<NeedLocation />} />
             <Route path="/owner/need/care" element={<NeedCare />} />
             <Route path="/owner/request/:sitterId" element={<RequestName />} />
+            <Route path="/owner/request/:sitterId/phone" element={<RequestPhone />} />
+            <Route path="/owner/request/:sitterId/verify" element={<RequestVerify />} />
+            <Route path="/owner/request/:sitterId/review" element={<RequestReview />} />
+            <Route path="/owner/request/:sitterId/sent" element={<RequestSent />} />
 
             <Route element={<Layout />}>
               <Route path="/" element={<Index />} />
@@ -78,9 +87,8 @@ const App = () => (
               <Route path="/sitter/register" element={<SitterRegister />} />
               <Route path="/book/:listingId" element={<Book />} />
               <Route path="/chat/:bookingId" element={<Chat />} />
-              {/* "Mes demandes". The screen itself lands with the request
-                  flow; the route exists now so nothing links into a 404. */}
-              <Route path="/owner/requests" element={<OwnerBookings />} />
+              <Route path="/owner/requests" element={<OwnerRequests />} />
+              <Route path="/owner/requests/:id" element={<OwnerRequestDetail />} />
               <Route path="/owner/bookings" element={<Navigate to="/owner/requests" replace />} />
               <Route path="/sitter/dashboard" element={<SitterDashboard />} />
               <Route path="/admin" element={<AdminDashboard />} />

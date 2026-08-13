@@ -187,7 +187,10 @@ export type CareRequest = {
   pet: Pet;
   careType: CareType;
   dates: DateRange;
-  communeCode: string;
+  /** The OWNER's area — what a sitter needs in order to answer a home visit or
+      a walk. Null when the search was wilaya-wide and no commune was given:
+      absent is honest, the sitter's own commune in this slot would not be. */
+  communeCode: string | null;
   /** Owner's public identity on the request, same convention as the sitter. */
   ownerName: string;
   /** The rate displayed to the owner when they sent the request, so the
@@ -196,3 +199,8 @@ export type CareRequest = {
   status: RequestStatus;
   respondedAt: string | null;
 };
+
+/** The one country code this demonstration handles. Not a selector: nothing
+    here does anything with a phone number, so a control that changes nothing
+    would be worse than an honest constant. */
+export const PHONE_PREFIX = "+213";

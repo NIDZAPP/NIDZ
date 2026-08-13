@@ -57,7 +57,6 @@ export default function RequestName() {
       account: {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
-        phoneCountry: state.account?.phoneCountry ?? "+213",
         phoneNumber: state.account?.phoneNumber ?? "",
         /* Preserved: a confirmation belongs to the phone NUMBER, which is
            unchanged here. Resetting it would push someone fixing a typo in

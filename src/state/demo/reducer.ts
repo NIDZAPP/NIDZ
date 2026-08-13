@@ -39,7 +39,6 @@ export type DemoRole = "owner" | "sitter";
 export type DemoAccount = {
   firstName: string;
   lastName: string;
-  phoneCountry: string;
   phoneNumber: string;
   phoneConfirmed: boolean;
   createdAt: string;
