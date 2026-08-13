@@ -18,16 +18,16 @@
   "nav": {
     "home": "Accueil",
     "search": "Recherche",
-    "pets": "Mes Animaux",
-    "dashboard": "Tableau de Bord",
-    "admin": "Admin",
     "help": "Aide",
-    "policies": "Politiques"
+    "policies": "Politiques",
+    "myRequests": "Demandes",
+    "received": "Reçues",
+    "siteLabel": "Navigation du site",
+    "footerLabel": "Liens de bas de page"
   },
   "home": {
     "title": "Un soin de confiance",
-    "subtitle": "Connectez-vous avec des pet-sitters et promeneurs de confiance en Algérie",
-    "searchCta": "Trouver un pet-sitter"
+    "subtitle": "Connectez-vous avec des pet-sitters et promeneurs de confiance en Algérie"
   },
   "species": {
     "dog": "Chien",
@@ -417,7 +417,10 @@
     "experienceLine_one": "{{count}} an d'expérience déclarée, surtout avec : {{species}}.",
     "experienceLine_other": "{{count}} ans d'expérience déclarée, surtout avec : {{species}}.",
     "experienceYears_one": "{{count}} an d'expérience déclarée.",
-    "experienceYears_other": "{{count}} ans d'expérience déclarée."
+    "experienceYears_other": "{{count}} ans d'expérience déclarée.",
+    "selfTestTitle": "Tester le côté pet-sitter",
+    "selfTestBody": "Cette démonstration n'a pas d'autres utilisateurs. Envoyez-vous une demande à vous-même pour voir ce qu'un pet-sitter reçoit, et pouvoir y répondre.",
+    "selfTestCta": "M'envoyer une demande de test"
   },
   "ownerRequests": {
     "title": "Mes demandes",

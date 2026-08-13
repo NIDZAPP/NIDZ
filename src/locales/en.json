@@ -18,16 +18,16 @@
   "nav": {
     "home": "Home",
     "search": "Search",
-    "pets": "My Pets",
-    "dashboard": "Sitter Dashboard",
-    "admin": "Admin",
     "help": "Help",
-    "policies": "Policies"
+    "policies": "Policies",
+    "myRequests": "Requests",
+    "received": "Received",
+    "siteLabel": "Site navigation",
+    "footerLabel": "Footer links"
   },
   "home": {
     "title": "Care you can trust",
-    "subtitle": "Connect with trusted pet sitters and walkers in Algeria",
-    "searchCta": "Find a sitter"
+    "subtitle": "Connect with trusted pet sitters and walkers in Algeria"
   },
   "species": {
     "dog": "Dog",
@@ -417,7 +417,10 @@
     "experienceLine_one": "{{count}} year of stated experience, mostly with: {{species}}.",
     "experienceLine_other": "{{count}} years of stated experience, mostly with: {{species}}.",
     "experienceYears_one": "{{count}} year of stated experience.",
-    "experienceYears_other": "{{count}} years of stated experience."
+    "experienceYears_other": "{{count}} years of stated experience.",
+    "selfTestTitle": "Try the sitter side",
+    "selfTestBody": "This demonstration has no other users. Send yourself a request to see what a sitter receives, and answer it.",
+    "selfTestCta": "Send myself a test request"
   },
   "ownerRequests": {
     "title": "My requests",

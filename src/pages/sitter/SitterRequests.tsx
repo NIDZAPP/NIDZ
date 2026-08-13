@@ -49,6 +49,21 @@ export default function SitterRequests() {
       <div className="mx-auto max-w-[720px]">
         <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">{t("sitterRequests.title")}</h1>
 
+        {/* §22 lists "mon profil de garde" as a real sitter destination, and
+            unlike Messages or Disponibilités that screen exists. Without this
+            a published sitter can only reach it by finding themselves in the
+            search results. */}
+        {state.sitter?.published && (
+          <p className="mt-3 text-sm">
+            <Link
+              to={`/sitters/${state.sitter.profile.id}`}
+              className="font-medium text-primary underline-offset-4 hover:underline"
+            >
+              {t("sitterFlow.published.viewProfile")}
+            </Link>
+          </p>
+        )}
+
         {/* Above the branch: the first thing a new sitter reads must not be an
             unqualified promise that owners will write to them. */}
         <DemoNotice

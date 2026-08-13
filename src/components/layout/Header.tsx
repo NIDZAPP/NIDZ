@@ -1,53 +1,66 @@
 import { Link, NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
+
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
+import { cn } from "@/lib/utils";
 import { useDemo } from "@/state/demo/context";
 
 const navLinkCls = ({ isActive }: { isActive: boolean }) =>
-  `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-    isActive
-      ? "bg-accent text-accent-foreground font-semibold"
-      : "hover:bg-secondary"
-  }`;
+  cn(
+    /* h-11 keeps the nav links on the Nidz touch floor even on a tablet. */
+    "inline-flex h-11 items-center rounded-md px-3 text-sm font-medium transition-colors",
+    isActive ? "bg-accent font-semibold text-accent-foreground" : "hover:bg-secondary",
+  );
 
+/**
+ * Desktop chrome.
+ *
+ * Carries the same destinations as the mobile bottom bar, and only
+ * destinations that exist: "Mes animaux" and "Tableau de bord" pointed at
+ * stubs and are gone. Admin stays out of public navigation.
+ *
+ * The header CTA was a second, competing "find a sitter" beside a nav link to
+ * the same place; the nav link is enough (§4.2).
+ */
 export default function Header() {
   const { t } = useTranslation();
   const { state } = useDemo();
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background">
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link to="/" className="font-display text-xl tracking-tight">
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-background">
+      <div className="container flex h-16 items-center justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-4">
+          {/* The one Playfair role in the application: the wordmark. */}
+          <Link
+            to="/"
+            aria-label={`${t("common.appName")} — ${t("nav.home")}`}
+            className="shrink-0 rounded-md font-display text-xl tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
             {t("common.appName")}
           </Link>
-          <nav className="hidden md:flex items-center gap-1">
+          <nav aria-label={t("nav.siteLabel")} className="hidden items-center gap-1 md:flex">
             <NavLink to="/search" className={navLinkCls} end>
               {t("nav.search")}
             </NavLink>
-            <NavLink to="/owner/requests" className={navLinkCls} end>
-              {t("ownerRequests.title")}
+            {/* Same keys as the bottom bar: crossing 768px must not rename a
+                destination, and page-title keys are not nav labels. No `end`,
+                so the link stays current on the request detail page. */}
+            <NavLink to="/owner/requests" className={navLinkCls}>
+              {t("nav.myRequests")}
             </NavLink>
-            {/* Only once a sitter profile exists — a destination that would be
+            {/* Only once a profile is published — a destination that would be
                 empty for everyone else is not navigation. */}
-            {state.sitter && (
-              <NavLink to="/sitter/requests" className={navLinkCls} end>
-                {t("sitterRequests.title")}
+            {state.sitter?.published && (
+              <NavLink to="/sitter/requests" className={navLinkCls}>
+                {t("nav.received")}
               </NavLink>
             )}
-            {/* Admin is intentionally not exposed in public navigation. The /admin route remains reachable directly. */}
             <NavLink to="/help" className={navLinkCls} end>
               {t("nav.help")}
             </NavLink>
           </nav>
         </div>
-        <div className="flex items-center gap-3">
-          <LanguageSwitcher />
-          <Button asChild className="hidden md:inline-flex">
-            <Link to="/search">{t("home.searchCta")}</Link>
-          </Button>
-        </div>
+        <LanguageSwitcher />
       </div>
     </header>
   );

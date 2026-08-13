@@ -120,7 +120,9 @@ export default function SitterProfile() {
   const petName = pet && state.need.species === criteria.species ? pet.name : null;
 
   /* Your own profile does not invite you to request care from yourself; it
-     offers the thing you would actually want from this page. */
+     offers the thing you would actually want from this page. The demo action
+     below it is what makes the sitter side reachable at all — see the notice
+     rendered with it. */
   const cta = isOwnProfile ? (
     <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
       <Link to="/sitter/profile/about">{t("sitterFlow.preview.edit")}</Link>
@@ -163,6 +165,24 @@ export default function SitterProfile() {
               {sitter.isDemoFixture && (
                 <DemoNotice className="mb-8" title={t("search.demo.title")} body={t("search.demo.body")} />
               )}
+              {/* Without this, nothing in the interface can address a request to
+                  your own profile, so "Demandes reçues" is a tab that can never
+                  hold anything. Labelled as the demonstration control it is,
+                  not dressed up as an owner action. */}
+              {isOwnProfile && state.sitter?.published && (
+                <div className="mb-8 border-y border-border py-4">
+                  <p className="text-sm font-medium text-foreground">{t("profile.selfTestTitle")}</p>
+                  <p className="mt-1 max-w-[64ch] text-sm text-muted-foreground">
+                    {t("profile.selfTestBody")}
+                  </p>
+                  <Button asChild variant="outline" className="mt-4">
+                    <Link to={{ pathname: `/owner/request/${sitter.id}`, search: paramKey }}>
+                      {t("profile.selfTestCta")}
+                    </Link>
+                  </Button>
+                </div>
+              )}
+
               <SitterProfileView
                 sitter={sitter}
                 hasCriteria={hasCriteria}
@@ -193,7 +213,11 @@ export default function SitterProfile() {
            matches the document tree, so `xl:hidden` would not stop the rule
            applying at desktop widths where the rail, not this bar, carries the
            action — reinstating the dead gap the scoping exists to avoid. */
-        className="has-pinned-action-sm sticky bottom-0 z-30 border-t border-border bg-background xl:hidden"
+        /* Offset above the bottom navigation below md: both pin to
+           bottom:0 in the root stacking context, so without this the nav
+           sat over the one conversion action in the product and swallowed
+           the tap. Above md the nav is gone and this returns to the edge. */
+        className="has-pinned-action-sm sticky bottom-14 z-30 border-t border-border bg-background md:bottom-0 xl:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <div className="container flex items-center gap-4 py-3">

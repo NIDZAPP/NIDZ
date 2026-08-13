@@ -15,9 +15,9 @@ This plan consolidates the original 22-batch sequencing into 9 implementation gr
 - [x] Group 3 — Demo foundations: honesty primitives, fixtures, state store, and routing shell
 - [x] Group 4 — Entry flow and owner need-definition flow
 - [x] Group 5 — Search results and sitter profile
-- [ ] Group 6 — Owner account, simulated OTP, request flow, and My Requests
-- [ ] Group 7 — Sitter onboarding, profile builder, trust step, preview, and publish
-- [ ] Group 8 — Sitter requests and role-specific navigation
+- [x] Group 6 — Owner account, simulated OTP, request flow, and My Requests
+- [x] Group 7 — Sitter onboarding, profile builder, trust step, preview, and publish
+- [x] Group 8 — Sitter requests and role-specific navigation
 - [ ] Group 9 — Final demo-path cleanup, required states, i18n, RTL, accessibility, lint and build verification
 
 ---
@@ -219,6 +219,14 @@ Also fixed: the mismatch list covers location and budget, not just species/care/
 
 **Risk:** Medium. Highest honesty risk: the OTP demo notice must be persistent and visible, not a footnote. "Grande animation de validation" reads as 200–300ms honoring `prefers-reduced-motion`.
 
+### Status: COMPLETE — committed **040068a**
+
+The code step is simulated and says so in a full-weight `DemoNotice` above the field: no SMS, no provider, any six digits, and completing it does not mean the number was verified. `phoneConfirmed` records only that the step was taken.
+
+**Deviation:** `+213` is a fixed prefix, not the country selector the audit asks for. Nothing in this demonstration does anything with a phone number, and a selector that changes nothing is worse than an honest constant.
+
+The record is built once and the summary renders that object — building it twice let a service the sitter did not offer show no price on the summary and then acquire one, for a different service, on the screen after it. Missing care type or dates redirects to the step that collects them rather than substituting a default. `Mes demandes` and the request detail carry the demo marker, because they are the screens an owner returns to and they are deep-linkable.
+
 ---
 
 ## Group 7 — Sitter onboarding, profile builder, trust step, preview, and publish
@@ -232,6 +240,18 @@ Also fixed: the mismatch list covers location and budget, not just species/care/
 **Dependencies:** Groups 5, 6.
 
 **Risk:** High. By far the largest surface in the audit — recommend 2–3 sub-batches. Also the most important honesty boundary.
+
+### Status: COMPLETE — committed **98fbbf7**
+
+Six builder steps rather than the audit's nine sections: photo and experience are one question about the person, services and prices depend on each other, housing and care method describe one environment. §4.5 warns against ten artificial screens, and an exhausting builder is the most reliable way to lose a sitter halfway through.
+
+**The trust boundary holds.** Adding a document produces no verified state — there is no `verified` field in the model to set — and the screen states that a document does not make an identity verified, because Nidz has no verification process. The status line says "document ajouté, aucune vérification n'a lieu" rather than "vérification en attente": nothing is waiting.
+
+**One implementation, twice.** The three identity screens moved into `components/account/AccountSteps.tsx` and both sides render them. The preview renders the same `SitterProfileView` the owner's `/sitters/:id` renders, at `headingLevel="h2"`.
+
+**Found by browser testing:** the published screen claimed the profile now appears in search results, and it did not — `/search` only ever read the fixtures. Publishing now adds the profile to the pool, and the `/search` demo notice is scoped to fixtures so a real published profile is not called fictional.
+
+Housing type and outdoor space start unanswered and are required: a default pressed through would have been published as a declaration nobody made, under a line reading "informations fournies par le pet-sitter". The legacy `SitterRegister` page, which promised verification, was deleted.
 
 ---
 
@@ -250,6 +270,26 @@ Also fixed: the mismatch list covers location and budget, not just species/care/
 **Constraints identified during review:**
 - **Two fully separate bottom navs contradict design system §22** and the audit's own "ce choix ne crée pas deux comptes différents". Prefer one nav with a visible context switch.
 - **"Refuser" is a normal outcome, not destructive** — do not colour it red.
+
+### Status: COMPLETE
+
+One bottom bar below `md`, not two. §22 is explicit that one person may progressively have both uses and that Nidz must not become two applications, so the sitter's inbox is an additional destination on the same bar rather than a separate bar behind a mode switch. It appears only once a sitter profile exists.
+
+**Every destination is a screen that exists.** The audit's lists mention Messages, Mes animaux, Disponibilités and Compte; none of those exist as real screens, so none appear. The header lost "Mes animaux" and "Tableau de bord" (both stubs) and its duplicate "Trouver un pet-sitter" CTA, which competed with the nav link beside it.
+
+"Refuser" is a secondary outline button, not red. Accepting states plainly that it is not a booking and that Nidz handles no reservation, payment or insurance.
+
+**Two Criticals found by review, both fixed:**
+
+1. **The bottom bar covered the sitter profile's primary action.** Both bars pinned to `bottom: 0` in the root stacking context, so the nav (z-40) sat over the CTA (z-30) and a tap at the centre of "Demander une garde" navigated to `/owner/requests` instead. Measured: CTA 584–632, nav 601–659. The profile bar now offsets above the nav below `md`. Re-measured after the fix: CTA 529–577, nav 602–659, centre tap hits the button.
+
+2. **"Demandes reçues" was structurally unreachable.** Group 7's fix for "your own profile should not invite you to request care from yourself" removed the only interface path that could address a request to your own profile — so the tab could never hold anything, while its own copy described content it could not have. The profile now carries an explicitly-labelled demonstration control ("Tester le côté pet-sitter — cette démonstration n'a pas d'autres utilisateurs"), which is honest about what it is and makes the loop reachable.
+
+**Correction to an earlier claim in this document:** the Group 7 entry said the loop was browser-verified. It was — but the request was created by navigating directly to `/owner/request/my-profile`, not through the interface, which is exactly why the unreachability above went unnoticed. The loop has since been walked end to end using only on-screen controls: profile → "M'envoyer une demande de test" → name → phone → simulated code → summary → send → Demandes reçues → Accepter → the owner's row reads *Acceptée*.
+
+Also fixed from the review: the fourth tab now keys on `published` rather than on the sitter flow having been opened once; header and bar use the same labels for the same destinations (crossing 768px renamed every tab); the active tab carries a top rule and a heavier label, not colour alone; each pinned layer has its own scroll-padding hook at the breakpoint it exists at (one class carrying two breakpoint meanings had reserved 96px of dead gap on every screen that pinned nothing); a published sitter has a route back to their own profile.
+
+**Browser-verified:** Arabic RTL at 390×844 and 320×640 with no horizontal overflow; 0 console errors.
 
 ---
 

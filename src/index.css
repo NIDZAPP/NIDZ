@@ -205,9 +205,27 @@
   /* Same rule for a bar that is pinned only below the xl breakpoint. `:has()`
      matches the document tree rather than the render tree, so a hidden bar
      would otherwise keep reserving room it no longer occupies. */
+  /* The browsable shell's bottom navigation, which exists only below md. */
+  @media (max-width: 767.98px) {
+    html:has(.has-bottom-nav) {
+      scroll-padding-bottom: 5rem;
+    }
+  }
+
+  /* The sitter profile's pinned price-and-action bar, which exists below xl. */
   @media (max-width: 1279.98px) {
     html:has(.has-pinned-action-sm) {
-      scroll-padding-bottom: 6rem;
+      scroll-padding-bottom: 7rem;
+    }
+  }
+
+  /* Below md both are present and stacked, so the room they need is the sum.
+     Each hook is keyed to the breakpoint its layer actually exists at — one
+     class carrying two different breakpoint meanings is what reserved 96px of
+     dead gap on every screen that pinned nothing. */
+  @media (max-width: 767.98px) {
+    html:has(.has-bottom-nav):has(.has-pinned-action-sm) {
+      scroll-padding-bottom: 11rem;
     }
   }
 }

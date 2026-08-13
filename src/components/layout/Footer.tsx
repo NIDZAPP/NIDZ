@@ -5,10 +5,10 @@ export default function Footer() {
   const { t } = useTranslation();
 
   return (
-    <footer className="border-t mt-12">
+    <footer className="mt-12 border-t border-border">
       <div className="container py-8 text-sm text-muted-foreground flex flex-col md:flex-row items-center justify-between gap-4">
         <p>© {new Date().getFullYear()} {t("common.appName")}</p>
-        <nav className="flex gap-4">
+        <nav aria-label={t("nav.footerLabel")} className="flex gap-4">
           <Link className="hover:underline" to="/policies">
             {t("nav.policies")}
           </Link>

@@ -18,16 +18,16 @@
   "nav": {
     "home": "الرئيسية",
     "search": "البحث",
-    "pets": "حيواناتي",
-    "dashboard": "لوحة الحاضن",
-    "admin": "الإدارة",
     "help": "مساعدة",
-    "policies": "السياسات"
+    "policies": "السياسات",
+    "myRequests": "الطلبات",
+    "received": "الواردة",
+    "siteLabel": "تنقّل الموقع",
+    "footerLabel": "روابط التذييل"
   },
   "home": {
     "title": "رعاية موثوقة",
-    "subtitle": "تواصل مع حاضني ومتنزهي الحيوانات الموثوقين في الجزائر",
-    "searchCta": "ابحث عن حاضن"
+    "subtitle": "تواصل مع حاضني ومتنزهي الحيوانات الموثوقين في الجزائر"
   },
   "species": {
     "dog": "كلب",
@@ -445,7 +445,10 @@
     "experienceYears_two": "سنتان من الخبرة المصرّح بها.",
     "experienceYears_few": "{{count}} سنوات من الخبرة المصرّح بها.",
     "experienceYears_many": "{{count}} سنة من الخبرة المصرّح بها.",
-    "experienceYears_other": "{{count}} سنة من الخبرة المصرّح بها."
+    "experienceYears_other": "{{count}} سنة من الخبرة المصرّح بها.",
+    "selfTestTitle": "جرّب جانب الحاضن",
+    "selfTestBody": "لا يوجد مستخدمون آخرون في هذه النسخة التوضيحية. أرسل طلباً إلى نفسك لترى ما يستقبله الحاضن ولتتمكن من الرد عليه.",
+    "selfTestCta": "إرسال طلب تجريبي لنفسي"
   },
   "ownerRequests": {
     "title": "طلباتي",
