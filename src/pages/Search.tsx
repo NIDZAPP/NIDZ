@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
-import { Cat, Check, Dog, MapPin, SlidersHorizontal } from "lucide-react";
+import { Cat, Dog, SlidersHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,9 +13,11 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { ChipGroup } from "@/components/shared/Chip";
+import SitterCard from "@/components/sitter/SitterCard";
+import { useReasonLabel } from "@/components/sitter/use-reason-label";
 import EmptyState from "@/components/shared/EmptyState";
 import { DateRangeField, LocationFields, SelectField } from "@/components/shared/fields";
-import { DemoNotice, ProvenanceLabel } from "@/components/shared/trust";
+import { DemoNotice } from "@/components/shared/trust";
 import {
   EMPTY_CRITERIA,
   PRICE_STEPS,
@@ -25,12 +27,12 @@ import {
   needPatchFromCriteria,
   normalizeCriteria,
   parseCriteria,
-  type MatchReason,
+  partitionReasons,
   type SearchCriteria,
 } from "@/data/criteria";
-import { DEMO_SITTERS, offeredServices } from "@/data/demo-sitters";
+import { DEMO_SITTERS } from "@/data/demo-sitters";
 import { communeName, getWilaya } from "@/data/locations";
-import { CARE_UNIT_KEY, localized, type CareType, type Species } from "@/data/types";
+import { localized, type CareType, type Species } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
 import { cn } from "@/lib/utils";
 import { useDemo } from "@/state/demo/context";
@@ -91,6 +93,11 @@ export default function Search() {
   };
 
   const results = useMemo(() => matchSitters(DEMO_SITTERS, criteria), [criteria]);
+  /* Every criteria-derived reason is true of every survivor by construction,
+     so repeating it on each row is three lines of noise per entry that
+     discriminates nothing. Shared reasons are stated once, above. */
+  const { universal, perResult } = useMemo(() => partitionReasons(results), [results]);
+  const reasonLabel = useReasonLabel();
   const activeFilters = activeCriteriaCount(criteria);
   const hasCriteria = activeFilters > 0;
 
@@ -165,25 +172,6 @@ export default function Search() {
     </Button>
   );
 
-  /** Concrete compatibility, never a score (§8.2, §8.3). Each reason names a
-      hard constraint that was actually checked against the sitter's own data.
-      Exhaustive by construction: adding a `MatchReason` kind without a label
-      is a type error rather than a silent empty token. */
-  const reasonLabel = (reason: MatchReason): string => {
-    switch (reason.kind) {
-      case "species":
-        return t(`accepts.${reason.species}`);
-      case "care":
-        return careLabel(reason.care);
-      case "zone":
-        return zoneLabel(reason.zone);
-      case "dates":
-        return t("search.reason.dates");
-      case "noCat":
-        return t("search.reason.noCat");
-    }
-  };
-
   return (
     <div>
       <Helmet>
@@ -228,25 +216,7 @@ export default function Search() {
             off one leading axis. Symmetric margins on a 1440 canvas are what
             made the previous grid read as unfinished. */}
         <div className="mx-auto max-w-[1120px] xl:grid xl:grid-cols-[264px_minmax(0,1fr)] xl:items-start">
-          {/* The rule lives on the register's leading edge, not the rail's
-              trailing edge: the rail is sticky and short, so a rule on it would
-              stop a third of the way down the page. */}
-          <aside className="hidden xl:sticky xl:top-24 xl:block xl:pe-12">
-            <h2 className="eyebrow mb-4">{t("search.brief.title")}</h2>
-            <dl className="space-y-4">
-              {brief.map((row) => (
-                <div key={row.key}>
-                  <dt className="text-sm text-muted-foreground">{row.label}</dt>
-                  <dd className={cn("mt-0.5 text-base", row.brand ? "font-medium text-brand" : "text-foreground")}>
-                    <bdi>{row.value}</bdi>
-                  </dd>
-                </div>
-              ))}
-            </dl>
-            <div className="mt-6">{editButton}</div>
-          </aside>
-
-          <div className="min-w-0 xl:border-s xl:border-border xl:ps-12">
+          <div className="min-w-0 xl:col-start-2 xl:row-start-1 xl:border-s xl:border-border xl:ps-12">
             {/* The count below carries aria-live, so a criteria change is
                 announced without moving focus — moving it would drag a
                 keyboard user out of the sheet they just applied. */}
@@ -258,6 +228,27 @@ export default function Search() {
               {/* No ordering claim when there is nothing to order. */}
               {results.length > 0 && ` · ${t("search.results.sortedByPrice")}`}
             </p>
+
+            {/* What every result has in common, said once. Repeating it as
+                tokens on each row would be four identical chips per entry that
+                discriminate nothing (§5.2) and wrap to three lines at 390px —
+                the badge mosaic §19 forbids by name. */}
+            {universal.length > 0 && (
+              <p className="mt-3 max-w-[70ch] text-sm text-foreground">
+                {/* Labels are used verbatim: lowercasing them would damage
+                    proper nouns, and a commune name is one of the things this
+                    sentence can contain. */}
+                {t("search.results.allOfThem")}{" "}
+                {universal.map((reason, i) => (
+                  <span key={i}>
+                    {i > 0 && <span aria-hidden="true"> · </span>}
+                    {/* Each fact is isolated: a commune name is Latin text
+                        inside an Arabic sentence. */}
+                    <bdi>{reasonLabel(reason)}</bdi>
+                  </span>
+                ))}
+              </p>
+            )}
 
             <DemoNotice className="my-6 md:my-8" title={t("search.demo.title")} body={t("search.demo.body")} />
 
@@ -279,134 +270,42 @@ export default function Search() {
                  and a bordered elevated card used all four at once for a
                  low-importance element. */
               <ul role="list">
-                {results.map(({ sitter: s, rate, reasons }) => {
-                  const rest = [
-                    ...s.acceptedSpecies
-                      .filter((sp) => sp !== criteria.species)
-                      .map((sp) => t(`accepts.${sp}`)),
-                    ...offeredServices(s)
-                      .filter((c) => c !== criteria.care)
-                      .map(careLabel),
-                  ];
-
-                  return (
-                    <li key={s.id} className="border-b border-border">
-                      <article
-                        className={cn(
-                          "relative grid rounded-md px-3 py-6 transition-colors md:py-8",
-                          "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
-                          /* Gated so the wash does not stick after a tap. */
-                          "[@media(hover:hover)]:hover:bg-muted",
-                          /* Mobile: identity beside the entry, price on a
-                             second row. Desktop: adds the price axis as a
-                             third column. */
-                          "grid-cols-[40px_minmax(0,1fr)] gap-x-3",
-                          "md:grid-cols-[48px_minmax(0,1fr)_190px] md:gap-x-6",
-                        )}
-                      >
-                        {/* A monogram, not a stock portrait: §21 and §40 both
-                            forbid presenting stock photography as a real
-                            person's profile. */}
-                        <span
-                          aria-hidden="true"
-                          className="flex size-10 items-center justify-center rounded-sm bg-secondary text-base font-semibold text-foreground md:size-12 md:text-name"
-                        >
-                          {s.publicName.charAt(0)}
-                        </span>
-
-                        <div className="min-w-0">
-                          {/* Species as a filing system: scanning the column
-                              shows the page is organised around animals before
-                              it is organised around people. */}
-                          <p className="eyebrow">
-                            {s.acceptedSpecies.map((sp) => t(`speciesPlural.${sp}`)).join(" · ")}
-                          </p>
-                          {/* <bdi> isolates these Latin strings: without it
-                              "Youcef H." renders as ".Youcef H" in Arabic, the
-                              trailing period being a neutral character. */}
-                          <h2 className="mt-1.5 text-name font-semibold text-foreground">
-                            <bdi>{s.publicName}</bdi>
-                          </h2>
-                          <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
-                            <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
-                            <bdi className="truncate">{zoneLabel(s.communeCode)}</bdi>
-                          </p>
-
-                          <p className="mt-3 max-w-[56ch] text-base leading-relaxed text-foreground">
-                            {localized(s.headline, lng)}
-                          </p>
-
-                          {/* Why this one fits: the hard constraints that were
-                              actually checked, in the words of the thing
-                              checked. Containment is the match signal — an
-                              answer to something the owner asked is held in a
-                              token, everything else is plain text, and the mark
-                              is never the only way to read the fact. */}
-                          <ul role="list" className="mt-4 flex flex-wrap items-center gap-2 text-sm">
-                            {reasons
-                              /* An absence is not a confirmation: "has not
-                                 declared these dates unavailable" gets plain
-                                 text, so it cannot be read as a fourth tick
-                                 alongside three facts the sitter did declare. */
-                              .filter((reason) => reason.kind !== "dates")
-                              .map((reason) => (
-                                <li
-                                  key={reason.kind + ("species" in reason ? reason.species : "")}
-                                  className="inline-flex items-center gap-1 rounded-sm bg-accent px-2 py-0.5 font-medium text-accent-foreground"
-                                >
-                                  <Check className="size-3 shrink-0" aria-hidden="true" />
-                                  <span className="sr-only">{t("search.card.matchLabel")} : </span>
-                                  {reasonLabel(reason)}
-                                </li>
-                              ))}
-                            {rest.length > 0 && <li className="text-muted-foreground">{rest.join(" · ")}</li>}
-                            {reasons.some((r) => r.kind === "dates") && (
-                              <li className="text-muted-foreground">{t("search.reason.dates")}</li>
-                            )}
-                          </ul>
-
-                          {/* Provenance byline, merged with the demo marker so
-                              the entry carries one honesty line rather than
-                              two. */}
-                          <ProvenanceLabel className="mt-3">
-                            {s.isDemoFixture ? ` · ${t("search.card.demoTag")}` : null}
-                          </ProvenanceLabel>
-                        </div>
-
-                        {/* Price on its own axis: at md+ the amounts line up in
-                            one column, so "classés par prix" is visible rather
-                            than asserted — and the entry stops reading as a
-                            pricing card. */}
-                        <div className="col-span-2 mt-4 flex items-end justify-between gap-4 md:col-span-1 md:mt-0 md:block md:text-end">
-                          <div>
-                            {rate.isFrom && <p className="text-sm text-muted-foreground">{t("search.card.from")}</p>}
-                            <p className="text-price font-semibold tabular-nums text-foreground">
-                              {formatDZD(rate.amount, lng)}
-                            </p>
-                            <p className="text-sm text-muted-foreground">{t(CARE_UNIT_KEY[rate.careType])}</p>
-                          </div>
-                          {/* The entry's only action. The stretched pseudo
-                              element makes the whole row clickable while
-                              keeping exactly one tab stop. The name is in the
-                              accessible name via sr-only, so the visible label
-                              stays a prefix of it (WCAG 2.5.3). */}
-                          <Button asChild className="md:mt-4">
-                            <Link
-                              to={{ pathname: `/sitters/${s.id}`, search: paramKey }}
-                              className="after:absolute after:inset-0"
-                            >
-                              {t("search.card.viewProfile")}
-                              <span className="sr-only"> — {s.publicName}</span>
-                            </Link>
-                          </Button>
-                        </div>
-                      </article>
-                    </li>
-                  );
-                })}
+                {results.map(({ sitter, rate }) => (
+                  <SitterCard
+                    key={sitter.id}
+                    sitter={sitter}
+                    rate={rate}
+                    reasons={perResult.get(sitter.id) ?? []}
+                    askedSpecies={criteria.species}
+                    askedCare={criteria.care}
+                    search={paramKey}
+                    /* Redundant once the species is a criterion: it is then
+                       true of every row and the line above has said so. */
+                    showSpeciesEyebrow={criteria.species === null}
+                  />
+                ))}
               </ul>
             )}
           </div>
+          {/* Rendered AFTER the register in the DOM and pulled back into the
+              first grid column, so the page's <h1> precedes the rail's <h2>
+              (§25 — logical DOM order). The rule lives on the register's
+              leading edge, not the rail's trailing edge: the rail is sticky
+              and short, so a rule on it would stop a third of the way down. */}
+          <aside className="hidden xl:col-start-1 xl:row-start-1 xl:sticky xl:top-24 xl:block xl:pe-12">
+            <h2 className="eyebrow mb-4">{t("search.brief.title")}</h2>
+            <dl className="space-y-4">
+              {brief.map((row) => (
+                <div key={row.key}>
+                  <dt className="text-sm text-muted-foreground">{row.label}</dt>
+                  <dd className={cn("mt-0.5 text-base", row.brand ? "font-medium text-brand" : "text-foreground")}>
+                    <bdi>{row.value}</bdi>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <div className="mt-6">{editButton}</div>
+          </aside>
         </div>
       </section>
 

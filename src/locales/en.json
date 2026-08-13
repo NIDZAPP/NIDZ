@@ -57,13 +57,23 @@
     }
   },
   "trust": {
-    "declared": "Stated by the sitter"
+    "declared": "Information provided by the sitter"
   },
   "request": {
     "status": {
       "pending": "Awaiting a reply",
       "accepted": "Accepted",
       "declined": "Declined"
+    },
+    "name": {
+      "title": "What is your name?",
+      "intro": "{{name}} will see your name on your request.",
+      "firstLabel": "First name",
+      "lastLabel": "Last name",
+      "lastHelp": "Only your first name and the initial of your last name are shown publicly.",
+      "firstRequired": "Enter your first name.",
+      "lastRequired": "Enter your last name.",
+      "storageNote": "This demonstration has no server: your name stays in this browser and is sent nowhere."
     }
   },
   "sitterFlow": {
@@ -116,17 +126,18 @@
       "sortedByPrice": "Sorted by lowest price",
       "emptyTitle": "No sitter matches these criteria",
       "emptyBody": "Try another kind of care, another area, or raise the maximum price.",
-      "titleAll": "Example sitters"
+      "titleAll": "Example sitters",
+      "allOfThem": "Every result below:"
     },
     "card": {
-      "matchLabel": "Matches your search",
+      "matchLabel": "Matches your search: ",
       "viewProfile": "View profile",
       "demoTag": "Example",
       "from": "from"
     },
     "demo": {
       "title": "Demonstration examples",
-      "body": "These sitters are fictional and Nidz does not verify any profile yet. Nothing is saved, no request can be sent, and the profiles open onto an incomplete demonstration page."
+      "body": "These sitters are examples: the profiles are fictional, and Nidz does not verify any profile yet. Nothing is booked and no payment exists."
     },
     "brief": {
       "title": "Your search",
@@ -205,5 +216,76 @@
       "availabilityNote": "Nidz books nothing. Sitters state for themselves the periods when they are not available.",
       "datesPast": "Choose a date in the future."
     }
+  },
+  "dogSize": {
+    "small": "Small dogs",
+    "medium": "Medium dogs",
+    "large": "Large dogs"
+  },
+  "housing": {
+    "type": {
+      "apartment": "Flat",
+      "house": "House"
+    },
+    "outdoor": {
+      "none": "No outdoor space",
+      "balcony": "Balcony",
+      "yard": "Yard",
+      "garden": "Garden"
+    }
+  },
+  "careMethod": {
+    "freeInHome": "Animals live freely in the home.",
+    "separatedZones": "I can separate the spaces when an animal needs quiet.",
+    "outdoorAccess": "Animals get outdoor access several times a day.",
+    "ownerRoutine": "I keep to the animal's own routine at home, without moving it."
+  },
+  "profile": {
+    "section": {
+      "fit": "Why this sitter fits",
+      "fitNamed": "A good fit for {{name}}",
+      "about": "About",
+      "care": "How I look after animals",
+      "practical": "In practice",
+      "limits": "What I cannot accept",
+      "unavailable": "Periods stated as unavailable"
+    },
+    "mismatchTitle": "Does not match what you are looking for",
+    "mismatch": {
+      "species": "This sitter does not take this species: {{species}}.",
+      "care": "This sitter does not offer: {{care}}.",
+      "dates": "This sitter stated they are unavailable over the requested period.",
+      "zone": "This sitter is not in the area you asked for: {{zone}}.",
+      "price": "This sitter's rates are above {{price}}."
+    },
+    "limitsIntro": "The sitter states these limits so that a stay that would not suit your animal does not happen.",
+    "unavailableNone": "This sitter has not stated any unavailable period.",
+    "noPayment": "Nidz handles no payment.",
+    "facts": {
+      "species": "Animals accepted",
+      "sizes": "Sizes accepted",
+      "max": "Maximum number",
+      "housing": "Home",
+      "outdoor": "Outdoor space",
+      "residentPets": "Animals at home",
+      "maxValue_one": "{{count}} animal at a time",
+      "maxValue_other": "{{count}} animals at a time"
+    },
+    "residentPets": {
+      "none": "No animals stated",
+      "dog_one": "{{count}} dog",
+      "dog_other": "{{count}} dogs",
+      "cat_one": "{{count}} cat",
+      "cat_other": "{{count}} cats"
+    },
+    "cta": "Request care",
+    "backToResults": "Back to the results",
+    "backToSearch": "See the sitters",
+    "notFoundTitle": "This profile does not exist",
+    "notFoundBody": "The link may be old, or the profile is no longer published. You can start again from the available sitters.",
+    "experienceLine_one": "{{count}} year of stated experience, mostly with: {{species}}.",
+    "experienceLine_other": "{{count}} years of stated experience, mostly with: {{species}}.",
+    "experienceYears_one": "{{count}} year of stated experience.",
+    "experienceYears_other": "{{count}} years of stated experience."
   }
 }

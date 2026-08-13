@@ -81,10 +81,10 @@ export default function FlowScreen({
   const hasTopBar = Boolean(onBack || progress || showLanguageSwitcher);
 
   return (
-    /* `flow-shell` is what src/index.css keys the bottom scroll padding on —
-       the document is the scroll container, but only a mounted flow needs the
-       room under its pinned action bar. */
-    <div className="flow-shell flex min-h-dvh flex-col bg-background">
+    /* `has-pinned-action` is what src/index.css keys the bottom scroll padding
+       on — the document is the scroll container, but only a screen with a
+       pinned action bar needs the room under it. */
+    <div className="has-pinned-action flex min-h-dvh flex-col bg-background">
       {hasTopBar && (
         <div className="sticky top-0 z-30 border-b border-border bg-background">
           <div className="container flex h-14 items-center gap-4">

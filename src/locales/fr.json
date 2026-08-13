@@ -57,13 +57,23 @@
     }
   },
   "trust": {
-    "declared": "Déclaré par le pet-sitter"
+    "declared": "Informations fournies par le pet-sitter"
   },
   "request": {
     "status": {
       "pending": "En attente",
       "accepted": "Acceptée",
       "declined": "Refusée"
+    },
+    "name": {
+      "title": "Comment vous appelez-vous ?",
+      "intro": "{{name}} verra votre nom sur votre demande.",
+      "firstLabel": "Prénom",
+      "lastLabel": "Nom",
+      "lastHelp": "Seuls votre prénom et l'initiale de votre nom seront visibles publiquement.",
+      "firstRequired": "Indiquez votre prénom.",
+      "lastRequired": "Indiquez votre nom.",
+      "storageNote": "Cette démonstration n'a pas de serveur : votre nom reste dans ce navigateur et n'est envoyé nulle part."
     }
   },
   "sitterFlow": {
@@ -116,17 +126,18 @@
       "sortedByPrice": "Classés par prix croissant",
       "emptyTitle": "Aucun pet-sitter ne correspond à ces critères",
       "emptyBody": "Essayez un autre type de garde, une autre commune, ou augmentez le prix maximum.",
-      "titleAll": "Exemples de pet-sitters"
+      "titleAll": "Exemples de pet-sitters",
+      "allOfThem": "Tous les résultats ci-dessous :"
     },
     "card": {
-      "matchLabel": "Correspond à votre recherche",
+      "matchLabel": "Correspond à votre recherche : ",
       "viewProfile": "Voir le profil",
       "demoTag": "Exemple",
       "from": "à partir de"
     },
     "demo": {
       "title": "Exemples de démonstration",
-      "body": "Ces pet-sitters sont fictifs et Nidz ne vérifie encore aucun profil. Aucune donnée n'est enregistrée, aucune demande ne peut être envoyée, et les profils s'ouvrent sur une page de démonstration incomplète."
+      "body": "Ces pet-sitters sont des exemples : les profils sont fictifs, et Nidz ne vérifie encore aucun profil. Rien n'est réservé et aucun paiement n'existe."
     },
     "brief": {
       "title": "Votre recherche",
@@ -205,5 +216,76 @@
       "availabilityNote": "Nidz ne réserve rien. Les pet-sitters indiquent eux-mêmes les périodes où ils ne sont pas disponibles.",
       "datesPast": "Choisissez une date à venir."
     }
+  },
+  "dogSize": {
+    "small": "Petits chiens",
+    "medium": "Chiens moyens",
+    "large": "Grands chiens"
+  },
+  "housing": {
+    "type": {
+      "apartment": "Appartement",
+      "house": "Maison"
+    },
+    "outdoor": {
+      "none": "Pas d'espace extérieur",
+      "balcony": "Balcon",
+      "yard": "Cour",
+      "garden": "Jardin"
+    }
+  },
+  "careMethod": {
+    "freeInHome": "Les animaux vivent librement dans le logement.",
+    "separatedZones": "Je peux séparer les espaces lorsqu'un animal a besoin de calme.",
+    "outdoorAccess": "Les animaux ont accès à l'extérieur plusieurs fois par jour.",
+    "ownerRoutine": "Je respecte les habitudes de l'animal chez lui, sans le déplacer."
+  },
+  "profile": {
+    "section": {
+      "fit": "Pourquoi ce pet-sitter correspond",
+      "fitNamed": "Bien adapté à {{name}}",
+      "about": "À propos",
+      "care": "Comment j'accueille les animaux",
+      "practical": "En pratique",
+      "limits": "Ce que je ne peux pas accepter",
+      "unavailable": "Périodes indiquées comme indisponibles"
+    },
+    "mismatchTitle": "Ne correspond pas à ce que vous cherchez",
+    "mismatch": {
+      "species": "Ce pet-sitter n'accueille pas cette espèce : {{species}}.",
+      "care": "Ce pet-sitter ne propose pas : {{care}}.",
+      "dates": "Ce pet-sitter s'est déclaré indisponible sur la période demandée.",
+      "zone": "Ce pet-sitter n'est pas dans la zone demandée : {{zone}}.",
+      "price": "Les tarifs de ce pet-sitter dépassent {{price}}."
+    },
+    "limitsIntro": "Ces limites sont indiquées par le pet-sitter pour éviter une garde qui ne conviendrait pas à votre animal.",
+    "unavailableNone": "Ce pet-sitter n'a indiqué aucune période d'indisponibilité.",
+    "noPayment": "Nidz ne gère aucun paiement.",
+    "facts": {
+      "species": "Animaux acceptés",
+      "sizes": "Tailles acceptées",
+      "max": "Nombre maximum",
+      "housing": "Logement",
+      "outdoor": "Espace extérieur",
+      "residentPets": "Animaux au domicile",
+      "maxValue_one": "{{count}} animal à la fois",
+      "maxValue_other": "{{count}} animaux à la fois"
+    },
+    "residentPets": {
+      "none": "Aucun animal déclaré",
+      "dog_one": "{{count}} chien",
+      "dog_other": "{{count}} chiens",
+      "cat_one": "{{count}} chat",
+      "cat_other": "{{count}} chats"
+    },
+    "cta": "Demander une garde",
+    "backToResults": "Retour aux résultats",
+    "backToSearch": "Voir les pet-sitters",
+    "notFoundTitle": "Ce profil n'existe pas",
+    "notFoundBody": "Le lien est peut-être ancien, ou le profil n'est plus publié. Vous pouvez repartir des pet-sitters disponibles.",
+    "experienceLine_one": "{{count}} an d'expérience déclarée, surtout avec : {{species}}.",
+    "experienceLine_other": "{{count}} ans d'expérience déclarée, surtout avec : {{species}}.",
+    "experienceYears_one": "{{count}} an d'expérience déclarée.",
+    "experienceYears_other": "{{count}} ans d'expérience déclarée."
   }
 }

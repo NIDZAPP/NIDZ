@@ -1,0 +1,138 @@
+import { MapPin } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
+
+import { MatchReasonList } from "@/components/sitter/match";
+import { ProvenanceLabel } from "@/components/shared/trust";
+import { Button } from "@/components/ui/button";
+import type { MatchReason } from "@/data/criteria";
+import { offeredServices, type rateFor } from "@/data/demo-sitters";
+import { communeName } from "@/data/locations";
+import { CARE_UNIT_KEY, localized, type CareType, type Species, type SitterProfile } from "@/data/types";
+import { useAppLocale } from "@/hooks/use-locale";
+import { cn } from "@/lib/utils";
+import { formatDZD } from "@/utils/format";
+
+/**
+ * One entry in the results register.
+ *
+ * A register, not a grid of tiles: entries separated by hairlines on the page
+ * ground. §16 ranks space > surface > border > shadow, and a bordered elevated
+ * card spends all four at once on a low-importance element.
+ *
+ * A result card is not a mini profile (§19) — it carries only what decides
+ * whether the profile is worth opening.
+ */
+export default function SitterCard({
+  sitter,
+  rate,
+  reasons,
+  askedSpecies,
+  askedCare,
+  /** Carried onto the profile link so the profile can explain the same match
+      and offer a real "back to results" link. */
+  search,
+  showSpeciesEyebrow = true,
+}: {
+  sitter: SitterProfile;
+  rate: NonNullable<ReturnType<typeof rateFor>>;
+  reasons: MatchReason[];
+  askedSpecies: Species | null;
+  askedCare: CareType | null;
+  search: string;
+  showSpeciesEyebrow?: boolean;
+}) {
+  const { t } = useTranslation();
+  const lng = useAppLocale();
+
+  /* Facts the owner did not ask about, as plain text. Anything they did ask
+     about is already a reason token or was hoisted into the preamble. */
+  const rest = [
+    ...sitter.acceptedSpecies.filter((sp) => sp !== askedSpecies).map((sp) => t(`accepts.${sp}`)),
+    ...offeredServices(sitter)
+      .filter((c) => c !== askedCare)
+      .map((c) => t(`care.${c}`)),
+  ];
+
+  return (
+    <li className="border-b border-border">
+      <article
+        className={cn(
+          "relative grid rounded-md px-3 py-6 transition-colors md:py-8",
+          "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+          /* Gated so the wash does not stick after a tap. */
+          "[@media(hover:hover)]:hover:bg-muted",
+          /* Mobile: identity beside the entry, price on a second row.
+             Desktop: adds the price axis as a third column. */
+          "grid-cols-[40px_minmax(0,1fr)] gap-x-3",
+          "md:grid-cols-[48px_minmax(0,1fr)_190px] md:gap-x-6",
+        )}
+      >
+        {/* A monogram, not a stock portrait: §21 and §40 both forbid presenting
+            stock photography as a real person's profile. Kept at this size on
+            the profile too, where it reads as a recognition mark carried over
+            from this row rather than as a substitute for a face. */}
+        <span
+          aria-hidden="true"
+          className="flex size-10 items-center justify-center rounded-sm bg-secondary text-base font-semibold text-foreground md:size-12 md:text-name"
+        >
+          {sitter.publicName.charAt(0)}
+        </span>
+
+        <div className="min-w-0">
+          {/* Species as a filing system: scanning the column shows the page is
+              organised around animals before it is organised around people.
+              Dropped when species is a criterion, because then it is true of
+              every row and the preamble has already said so. */}
+          {showSpeciesEyebrow && (
+            <p className="eyebrow">
+              {sitter.acceptedSpecies.map((sp) => t(`speciesPlural.${sp}`)).join(" · ")}
+            </p>
+          )}
+          {/* <bdi> isolates these Latin strings: without it "Youcef H." renders
+              as ".Youcef H" in Arabic, the trailing period being neutral. */}
+          <h2 className={cn("text-name font-semibold text-foreground", showSpeciesEyebrow && "mt-1.5")}>
+            <bdi>{sitter.publicName}</bdi>
+          </h2>
+          <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+            <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
+            <bdi className="truncate">{communeName(sitter.communeCode, lng) ?? sitter.communeCode}</bdi>
+          </p>
+
+          <p className="mt-3 max-w-[56ch] text-base leading-relaxed text-foreground">
+            {localized(sitter.headline, lng)}
+          </p>
+
+          <MatchReasonList className="mt-4" reasons={reasons} trailing={rest} />
+
+          {/* One honesty line per entry: where the information came from, and
+              whether the person is an example. */}
+          <ProvenanceLabel className="mt-3">
+            {sitter.isDemoFixture ? ` · ${t("search.card.demoTag")}` : null}
+          </ProvenanceLabel>
+        </div>
+
+        {/* Price on its own axis: at md+ the amounts line up in one column, so
+            "classés par prix" is visible rather than asserted — and the entry
+            stops reading as a pricing card. */}
+        <div className="col-span-2 mt-4 flex items-end justify-between gap-4 md:col-span-1 md:mt-0 md:block md:text-end">
+          <div>
+            {rate.isFrom && <p className="text-sm text-muted-foreground">{t("search.card.from")}</p>}
+            <p className="text-price font-semibold tabular-nums text-foreground">{formatDZD(rate.amount, lng)}</p>
+            <p className="text-sm text-muted-foreground">{t(CARE_UNIT_KEY[rate.careType])}</p>
+          </div>
+          {/* The entry's only action. The stretched pseudo element makes the
+              whole row clickable while keeping exactly one tab stop. The name
+              is in the accessible name via sr-only, so the visible label stays
+              a prefix of it (WCAG 2.5.3). */}
+          <Button asChild className="md:mt-4">
+            <Link to={{ pathname: `/sitters/${sitter.id}`, search }} className="after:absolute after:inset-0">
+              {t("search.card.viewProfile")}
+              <span className="sr-only"> — {sitter.publicName}</span>
+            </Link>
+          </Button>
+        </div>
+      </article>
+    </li>
+  );
+}

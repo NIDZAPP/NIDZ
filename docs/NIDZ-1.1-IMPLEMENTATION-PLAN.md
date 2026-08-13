@@ -14,7 +14,7 @@ This plan consolidates the original 22-batch sequencing into 9 implementation gr
 - [x] Group 2 — Global design system and interaction primitives
 - [x] Group 3 — Demo foundations: honesty primitives, fixtures, state store, and routing shell
 - [x] Group 4 — Entry flow and owner need-definition flow
-- [ ] Group 5 — Search results and sitter profile
+- [x] Group 5 — Search results and sitter profile
 - [ ] Group 6 — Owner account, simulated OTP, request flow, and My Requests
 - [ ] Group 7 — Sitter onboarding, profile builder, trust step, preview, and publish
 - [ ] Group 8 — Sitter requests and role-specific navigation
@@ -177,6 +177,33 @@ Also from the review: `loadState` validates each slice instead of asserting `as 
 **Risk:** Medium–High. `Search.tsx` is the only substantial working screen; do not rewrite it wholesale.
 
 **Honesty constraints:** drop `4,9 · 18 avis`, `Disponible du 12 au 16 août`, `1,2 km`, `Identité vérifiée`, and the availability filter — all invented data with no source. Use commune/zone instead of distance, and §7 cold-start signals instead of ratings.
+
+### Status: COMPLETE
+
+**One profile component.** `components/sitter/SitterProfileView.tsx` owns no layout chrome — no container, no measure, no sticky bar, no `<Helmet>` — because the audit requires the sitter's own preview to be "exactement le même profil" and the preview will embed it inside `FlowScreen`, which supplies its own. `headingLevel` exists for the same reason.
+
+**Six sections, not ten.** The audit's list is a content inventory; as headings it would have been the grey stack §20 and §40 warn against. Collapsed into three registers: a lede (identity, why this fits), narrative (about with experience folded in, how the animals are kept), and facts (in practice, what I cannot accept, declared unavailability). Care methods are first-person sentences rather than four chips — §20's question is whether an owner can picture the stay concretely, and tokens cannot answer it.
+
+**What the profile refuses to do.** No photograph (a stock portrait presented as a sitter is §21/§40's named anti-pattern; the monogram stays at card scale, and the name carries the identity). No red on "ce que je ne peux pas accepter" — a sitter declining an animal their home does not suit is the matching working, not a danger. Prices are a menu at body scale, not a pricing grid, and carry "Nidz ne gère aucun paiement" because §28 says the payment model is unvalidated. Declared unavailability is labelled with the same sentence the need flow uses: not-declared-busy is not a reservation.
+
+**Mismatches are volunteered.** When the visitor's criteria are not all satisfied, the profile says so — muted, with a minus, never red. A marketplace that tells an owner "this sitter takes only dogs" has been useful.
+
+**`reasonsFor` verifies, it does not echo.** `matchSitters` can get away with echoing criteria back because it filters first; a profile cannot — `/sitters/karim-b?species=cat` is a URL anyone can type. Every reason is checked against the sitter's own data before it is emitted.
+
+**Reason density.** `partitionReasons` hoists the reasons true of every result into one line above the register, leaving only what actually distinguishes one sitter from another on the row. Two bugs were found doing this and fixed: all `zone` reasons collapsed to a single key, so a wilaya-wide search asserted one sitter's commune was true of all of them; and a wilaya match reported the sitter's commune rather than the wilaya, duplicating the location already printed under the name.
+
+**Code review** — three Critical, all product-truth, all fixed:
+1. **The profile never marked a fictional sitter as an example.** `isDemoFixture` was read on exactly one surface (the result card), while the profile was explicitly designed as shareable — so a visitor opening a shared `/sitters/amina-b` saw a complete, plausible profile of a person who does not exist, under a line reading "Informations fournies par le pet-sitter". The demo notice now renders on the profile too.
+2. **"Pourquoi ce pet-sitter correspond" was printed over content that was nothing but a mismatch** — and with a pet in state, "Bien adapté à Mimi" directly above the reason it is not. The heading now names what is actually underneath it.
+3. **The pet's name was asserted against criteria that may describe another animal.** It is now used only when the criteria still describe that pet's species.
+
+Also fixed: the mismatch list covers location and budget, not just species/care/dates; the quoted rate is suppressed rather than silently switched to another service; `hasCriteria` is computed once and passed down (a wilaya-only search had been losing its only explanation); `reasonKey` is exhaustive so the next value-carrying reason cannot re-create the universal-zone bug; single-result sets keep their reasons on the row; `noCat` joins `dates` in the absence register, because both are equally true of a sitter who never answered; the profile survives an empty profile (Group 7 embeds it); `housing.conditions` is no longer dropped when no care method is selected; unpublished drafts 404 on the public route; `has-pinned-action` is media-scoped, since `:has()` matches the document tree and `xl:hidden` does not stop it.
+
+- [x] Build passed; lint unchanged at baseline; `tsc --noEmit` clean; 202 base keys × 3 locales in sync, with real Arabic plural categories.
+- [x] Browser-verified: profile at 1440×900 and 390×844, Arabic RTL with no horizontal overflow, unknown-id not-found state, empty results, the legacy `/sitter/:id` redirect preserving its query string, 0 console errors.
+- [x] Committed and pushed to `origin/nidz-1.1`.
+
+**Carried into Group 6:** the profile CTA leads to `/owner/request/:sitterId` (name), whose "Continuer" targets the phone step that Group 6 adds.
 
 ---
 

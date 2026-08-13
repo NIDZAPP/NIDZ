@@ -26,6 +26,7 @@ import Intent from "@/pages/onboarding/Intent";
 import NeedPet from "@/pages/owner/need/NeedPet";
 import NeedLocation from "@/pages/owner/need/NeedLocation";
 import NeedCare from "@/pages/owner/need/NeedCare";
+import RequestName from "@/pages/owner/request/RequestName";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +67,7 @@ const App = () => (
             <Route path="/owner/need/pet" element={<NeedPet />} />
             <Route path="/owner/need/location" element={<NeedLocation />} />
             <Route path="/owner/need/care" element={<NeedCare />} />
+            <Route path="/owner/request/:sitterId" element={<RequestName />} />
 
             <Route element={<Layout />}>
               <Route path="/" element={<Index />} />

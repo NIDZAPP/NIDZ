@@ -147,7 +147,11 @@ export function activeCriteriaCount(c: SearchCriteria): number {
 export type MatchReason =
   | { kind: "species"; species: Species }
   | { kind: "care"; care: CareType }
-  | { kind: "zone"; zone: string }
+  /** `level` records WHAT was matched. A wilaya-wide search matched the
+      wilaya, not the commune — naming the commune there would both repeat the
+      location already printed under the sitter's name and imply the owner
+      asked for that commune. */
+  | { kind: "zone"; zone: string; level: "commune" | "wilaya" }
   /** An ABSENCE, not a confirmation: the sitter has not declared this period
       unavailable. Nidz holds no reservations. Every surface that renders this
       must keep it in a lower visual register than the facts a sitter actively
@@ -178,9 +182,9 @@ export function reasonsFor(sitter: SitterProfile, c: SearchCriteria): MatchReaso
      wilaya-only search — otherwise the thing that shortened the list is the
      one thing never explained. */
   if (c.commune && sitter.communeCode === c.commune) {
-    reasons.push({ kind: "zone", zone: sitter.communeCode });
+    reasons.push({ kind: "zone", zone: sitter.communeCode, level: "commune" });
   } else if (!c.commune && c.wilaya && getWilayaOfCommune(sitter.communeCode)?.code === c.wilaya) {
-    reasons.push({ kind: "zone", zone: sitter.communeCode });
+    reasons.push({ kind: "zone", zone: c.wilaya, level: "wilaya" });
   }
   if (c.dates && !overlapsDeclaredUnavailable(sitter, c.dates)) {
     reasons.push({ kind: "dates" });
@@ -205,6 +209,98 @@ export type SearchResult = {
  * responsiveness, because Nidz measures none of those — the order is the price
  * actually displayed, and the results screen says so.
  */
+/**
+ * Identity of a reason, for deduplication.
+ *
+ * The VALUE has to be part of the key, not just the kind. Keying `zone` on the
+ * kind alone made every sitter's commune look like the same reason, so a
+ * wilaya-wide search decided the zone was universal and stated one sitter's
+ * commune as true of all of them.
+ */
+export function reasonKey(reason: MatchReason): string {
+  switch (reason.kind) {
+    case "species":
+      return `species:${reason.species}`;
+    case "care":
+      return `care:${reason.care}`;
+    case "zone":
+      return `zone:${reason.level}:${reason.zone}`;
+    /* Listed explicitly rather than caught by `default`, so the next reason
+       kind that carries a value cannot silently key on its kind alone and
+       re-create the bug this docblock describes. */
+    case "dates":
+    case "noCat":
+      return reason.kind;
+  }
+}
+
+/**
+ * Reasons derived from an ABSENCE rather than from something the sitter said.
+ *
+ * "Has not declared these dates unavailable" and "no cat declared at home" are
+ * both true of a sitter who simply never answered the question. Presenting
+ * them with the same tick and tint as facts a sitter actively declared would
+ * turn silence into confirmation, so every surface renders them one register
+ * down (§6.1).
+ */
+export function isAbsenceReason(reason: MatchReason): boolean {
+  return reason.kind === "dates" || reason.kind === "noCat";
+}
+
+/**
+ * Split the reasons into the ones true of every result and the ones that vary.
+ *
+ * With hard-constraint-only matching, every criteria-derived reason is true of
+ * every survivor by construction. A fact identical on all rows carries no
+ * discriminating signal (§5.2) and costs three lines of tokens per row on a
+ * 390px screen — the "mosaïque de badges" §19 forbids by name. So the shared
+ * ones are stated once above the register, and only what actually distinguishes
+ * one sitter from another stays on the row.
+ */
+export function partitionReasons(results: SearchResult[]): {
+  universal: MatchReason[];
+  perResult: Map<string, MatchReason[]>;
+} {
+  const perResult = new Map<string, MatchReason[]>();
+  if (results.length === 0) return { universal: [], perResult };
+
+  const counts = new Map<string, { reason: MatchReason; n: number }>();
+  for (const { reasons } of results) {
+    for (const reason of reasons) {
+      const key = reasonKey(reason);
+      const entry = counts.get(key);
+      if (entry) entry.n += 1;
+      else counts.set(key, { reason, n: 1 });
+    }
+  }
+
+  /* A fact shared by one row is not shared — it is that row's. Hoisting it
+     would leave the only entry on the page with no explanation at all, two
+     blocks below the sentence that explains it. */
+  if (results.length < 2) {
+    for (const { sitter, reasons } of results) perResult.set(sitter.id, reasons);
+    return { universal: [], perResult };
+  }
+
+  const universalKeys = new Set<string>();
+  const universal: MatchReason[] = [];
+  for (const [key, v] of counts) {
+    if (v.n === results.length) {
+      universalKeys.add(key);
+      universal.push(v.reason);
+    }
+  }
+
+  for (const { sitter, reasons } of results) {
+    perResult.set(
+      sitter.id,
+      reasons.filter((r) => !universalKeys.has(reasonKey(r))),
+    );
+  }
+
+  return { universal, perResult };
+}
+
 export function matchSitters(sitters: SitterProfile[], c: SearchCriteria): SearchResult[] {
   return sitters
     .flatMap<SearchResult>((sitter) => {

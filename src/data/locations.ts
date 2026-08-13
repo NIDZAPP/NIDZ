@@ -100,11 +100,12 @@ export function communeName(code: string | null | undefined, locale: AppLocale):
   return commune ? commune.name[locale] ?? commune.name.en : null;
 }
 
-/** "Hydra, Alger" — for a profile header, where the wilaya adds orientation. */
+/** "Hydra, Alger" — for a profile header, where the wilaya adds orientation.
+    Arabic uses its own comma; the Latin one reads as a foreign glyph. */
 export function communeWithWilaya(code: string | null | undefined, locale: AppLocale): string | null {
   const entry = code ? COMMUNE_INDEX.get(code) : undefined;
   if (!entry) return null;
   const commune = entry.commune.name[locale] ?? entry.commune.name.en;
   const wilaya = entry.wilaya.name[locale] ?? entry.wilaya.name.en;
-  return `${commune}, ${wilaya}`;
+  return `${commune}${locale === "ar" ? "، " : ", "}${wilaya}`;
 }

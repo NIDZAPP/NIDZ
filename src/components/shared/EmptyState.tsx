@@ -15,15 +15,20 @@ export default function EmptyState({
   body,
   action,
   className,
+  /** `h1` when this state IS the page — otherwise the page has no first-level
+      heading at all and its outline starts at level 2. */
+  headingLevel = "h2",
 }: {
   title: string;
   body: string;
   action?: ReactNode;
   className?: string;
+  headingLevel?: "h1" | "h2";
 }) {
+  const Heading = headingLevel;
   return (
     <div className={cn("border-b border-border py-10", className)}>
-      <h2 className="text-name font-semibold text-foreground">{title}</h2>
+      <Heading className="text-name font-semibold text-foreground">{title}</Heading>
       <p className="mt-2 max-w-[60ch] text-base leading-relaxed text-muted-foreground">{body}</p>
       {action && <div className="mt-6">{action}</div>}
     </div>

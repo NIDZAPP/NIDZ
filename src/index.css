@@ -190,16 +190,25 @@
     @apply normal-case tracking-normal;
   }
 
-  /* The flow shell pins its action bar to the bottom edge. Without this, a
-     field focused near the end of a long step is scrolled underneath it
-     (WCAG 2.2 AA — 2.4.11).
+  /* Screens that pin an action bar to the bottom edge mark themselves with
+     `has-pinned-action`. Without the padding, a control focused near the end
+     of the page is scrolled underneath that bar (WCAG 2.2 AA — 2.4.11).
 
      The scroll container is the document, so the padding has to go on <html>
-     — but only while a flow is mounted. Applied globally it would leave a
-     96px dead gap under focus scrolling on /search and every other screen,
-     none of which pin anything to the bottom. */
-  html:has(.flow-shell) {
+     — but only while such a screen is mounted. Applied globally it would leave
+     a 96px dead gap under focus scrolling on every screen that pins nothing.
+     Both the flow shell and the sitter profile use this hook. */
+  html:has(.has-pinned-action) {
     scroll-padding-bottom: 6rem;
+  }
+
+  /* Same rule for a bar that is pinned only below the xl breakpoint. `:has()`
+     matches the document tree rather than the render tree, so a hidden bar
+     would otherwise keep reserving room it no longer occupies. */
+  @media (max-width: 1279.98px) {
+    html:has(.has-pinned-action-sm) {
+      scroll-padding-bottom: 6rem;
+    }
   }
 }
 
