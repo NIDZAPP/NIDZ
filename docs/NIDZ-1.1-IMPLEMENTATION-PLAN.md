@@ -13,7 +13,7 @@ This plan consolidates the original 22-batch sequencing into 9 implementation gr
 - [x] Group 1 — Nidz rebrand and public navigation cleanup
 - [x] Group 2 — Global design system and interaction primitives
 - [x] Group 3 — Demo foundations: honesty primitives, fixtures, state store, and routing shell
-- [ ] Group 4 — Entry flow and owner need-definition flow
+- [x] Group 4 — Entry flow and owner need-definition flow
 - [ ] Group 5 — Search results and sitter profile
 - [ ] Group 6 — Owner account, simulated OTP, request flow, and My Requests
 - [ ] Group 7 — Sitter onboarding, profile builder, trust step, preview, and publish
@@ -140,6 +140,27 @@ Also from the review: `loadState` validates each slice instead of asserting `as 
 **Dependencies:** Group 3.
 
 **Risk:** Medium. Largest new surface so far — split per step if it grows.
+
+### Status: COMPLETE
+
+**Routes** (all chrome-free, outside the layout route): `/welcome` → `/start` → `/owner/need/pet` → `/owner/need/location` → `/owner/need/care` → `/search?…`. `/` is now the returning-visitor home and redirects to `/welcome` until the introduction has been seen.
+
+**The contract** — `src/data/criteria.ts`. The pre-implementation design review found the plan's worst structural flaw: the dates step asked a question `/search` could not answer, and `OwnerNeed` was single-valued while the search criteria were arrays, so the two could not round-trip. Both are now one single-valued model. The URL stays canonical for results (linkable, Back works); the demo state carries the animal, which is not a shareable query. `matchSitters()` holds the hard-constraint filter and returns concrete compatibility reasons — never a score (§8.2, §8.3).
+
+**Three steps, not four** — the animal, the place, then care-and-dates together. Care type and dates depend on each other: a walk is one day, boarding is a run of nights, home care is a period of visits. Splitting them would mean going back a step to change the answer, and asking for a range before knowing the service asks a question the product cannot use.
+
+**Deliberate deviations from the audit, all for honesty:**
+- **"J'ai déjà un compte" is not shipped.** There is no sign-in, no session and no server. An authentication affordance on the first screen anyone sees would promise something Nidz cannot do, and a disabled one advertises the capability *and* blocks it. The slot goes to "Voir les pet-sitters", which exists.
+- **No "utiliser ma position".** Geolocation returns coordinates and nothing here can turn coordinates into a commune, so the control could only pretend to work.
+- **The `/search` need panel was deleted.** Defining a need is the flow; `/search` is results plus the edit sheet. Two differently-shaped forms for one job could disagree with each other (§5.2).
+- **Availability is stated as declared, never as confirmed.** A sitter who has not declared a period busy is not "disponible", and both the care step and the results say so.
+
+**Deleted:** `RoleSelection.tsx` (two equal-weight CTAs, the competing-primaries pattern §4.2 forbids, superseded by the intent screen) and the orphaned `Hero.tsx`.
+
+**Browser-verified in Chromium:** the whole journey from a cleared browser through to results at 390×844; Arabic RTL at 320×640 with no horizontal overflow and state preserved; desktop 1440×900. 0 console errors. Two defects were found this way and fixed — the animal-name field had lost its accessible name to an overridden `id`, and the visually-hidden file inputs were phantom tab stops.
+
+- [x] Build passed; lint unchanged at baseline; `tsc --noEmit` clean; 145 keys × 3 locales in sync.
+- [x] Committed and pushed to `origin/nidz-1.1`.
 
 ---
 

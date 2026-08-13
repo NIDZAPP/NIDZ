@@ -24,14 +24,6 @@
     "help": "Aide",
     "policies": "Politiques"
   },
-  "roles": {
-    "sitter": "Pet-Sitter",
-    "owner": "Propriétaire",
-    "sitterDescription": "Rejoignez notre communauté de pet-sitters de confiance et gagnez de l'argent",
-    "ownerDescription": "Trouvez des pet-sitters de confiance près de chez vous pour promenades et garde",
-    "becomeSitter": "Devenir Pet-Sitter",
-    "findSitter": "Trouver un Pet-Sitter"
-  },
   "home": {
     "title": "Un soin de confiance",
     "subtitle": "Connectez-vous avec des pet-sitters et promeneurs de confiance en Algérie",
@@ -57,6 +49,11 @@
       "night": "par nuit",
       "visit": "par visite",
       "walk": "par promenade"
+    },
+    "description": {
+      "boarding": "Votre animal séjourne chez le pet-sitter.",
+      "atOwner": "Le pet-sitter passe chez vous s'occuper de votre animal.",
+      "walk": "Une sortie, sans garde à domicile."
     }
   },
   "trust": {
@@ -95,17 +92,6 @@
     "submit": "Soumettre l'Inscription"
   },
   "search": {
-    "need": {
-      "title": "Pour quel animal cherchez-vous une garde ?",
-      "intro": "Nidz affiche d'abord les pet-sitters qui correspondent à votre animal, à votre quartier et au type de garde dont vous avez besoin.",
-      "speciesLabel": "Votre animal",
-      "communeLabel": "Où cherchez-vous ?",
-      "communeAny": "Toutes les communes",
-      "communeHelp": "Cette démonstration couvre quelques communes d'Alger et d'Oran.",
-      "careLabel": "Quel type de garde recherchez-vous ?",
-      "submit": "Voir les pet-sitters",
-      "skip": "Voir les exemples sans critères"
-    },
     "context": {
       "noCriteria": "Tous les exemples",
       "edit": "Modifier",
@@ -120,7 +106,9 @@
       "apply": "Voir les résultats",
       "clear": "Effacer tous les critères",
       "close": "Fermer",
-      "description": "Choisissez l'animal, le type de garde, la commune et le prix maximum."
+      "description": "Choisissez l'animal, le type de garde, la commune et le prix maximum.",
+      "datesHelp": "Les pet-sitters qui se sont déclarés indisponibles sur cette période sont retirés des résultats.",
+      "clearDates": "Retirer les dates"
     },
     "results": {
       "title": "Pet-sitters adaptés à votre recherche",
@@ -147,7 +135,75 @@
       "zone": "Zone",
       "budget": "Budget",
       "anySpecies": "Chien ou chat",
-      "anyCare": "Tous types de garde"
+      "anyCare": "Tous types de garde",
+      "dates": "Dates",
+      "anyDates": "Toutes les dates",
+      "anyZone": "Toutes les zones"
+    },
+    "reason": {
+      "dates": "Ne s'est pas déclaré indisponible sur cette période",
+      "noCat": "Aucun chat déclaré au domicile"
+    }
+  },
+  "entry": {
+    "title": "Trouvez une personne de confiance pour prendre soin de votre animal.",
+    "intro": "Nidz met en relation les propriétaires de chiens et de chats avec des pet-sitters près de chez eux, en expliquant clairement ce que chaque personne propose et ce qu'elle ne peut pas accepter.",
+    "start": "Commencer",
+    "browse": "Voir les pet-sitters",
+    "resume": "Reprendre ma recherche",
+    "findSitter": "Trouver un pet-sitter",
+    "myRequests": "Mes demandes",
+    "switchToOwner": "Chercher une garde pour mon animal",
+    "switchToSitter": "Devenir pet-sitter sur Nidz",
+    "requestsCount_one": "{{count}} demande",
+    "requestsCount_other": "{{count}} demandes",
+    "requestsPending_one": "{{count}} en attente de réponse",
+    "requestsPending_other": "{{count}} en attente de réponse"
+  },
+  "intent": {
+    "title": "Que souhaitez-vous faire aujourd'hui ?",
+    "owner": "Trouver quelqu'un pour mon animal",
+    "ownerDescription": "Décrivez votre animal et vos dates, puis voyez qui peut s'en occuper.",
+    "sitter": "Garder des animaux",
+    "sitterDescription": "Expliquez comment vous gardez les animaux et recevez des demandes adaptées.",
+    "bothSides": "Ce choix ne crée pas deux comptes différents : vous pourrez utiliser les deux côtés de Nidz."
+  },
+  "need": {
+    "pet": {
+      "title": "Votre animal",
+      "intro": "Ces informations aident un pet-sitter à savoir s'il peut réellement accueillir votre animal.",
+      "speciesLabel": "Pour quel animal cherchez-vous une garde ?",
+      "speciesRequired": "Indiquez s'il s'agit d'un chien ou d'un chat.",
+      "nameLabel": "Son nom",
+      "nameRequired": "Indiquez le nom de votre animal.",
+      "ageLabel": "Son âge",
+      "ageHelp": "Par exemple : 8 mois, 3 ans.",
+      "notesLabel": "Besoins ou contraintes importantes",
+      "notesHelp": "Traitement en cours, peur des autres chiens, ne peut pas rester seul longtemps…",
+      "photoLabel": "Une photo (facultatif)"
+    },
+    "location": {
+      "title": "Où cherchez-vous ?",
+      "intro": "Nidz affiche d'abord les pet-sitters de votre zone.",
+      "wilayaLabel": "Wilaya",
+      "wilayaRequired": "Choisissez une wilaya.",
+      "communeLabel": "Commune",
+      "anyCommune": "Toutes les communes",
+      "privacy": "Votre adresse exacte ne sera pas affichée publiquement.",
+      "coverage": "Cette démonstration ne couvre que quelques communes d'Alger et d'Oran.",
+      "wilayaPlaceholder": "Choisissez une wilaya"
+    },
+    "care": {
+      "title": "Quelle garde, et quand ?",
+      "careLabel": "Type de garde",
+      "careRequired": "Choisissez un type de garde.",
+      "dateLabel": "Date de la promenade",
+      "startLabel": "Date de début",
+      "endLabel": "Date de fin",
+      "datesRequired": "Indiquez la période qui vous intéresse.",
+      "submit": "Voir les pet-sitters",
+      "availabilityNote": "Nidz ne réserve rien. Les pet-sitters indiquent eux-mêmes les périodes où ils ne sont pas disponibles.",
+      "datesPast": "Choisissez une date à venir."
     }
   }
 }

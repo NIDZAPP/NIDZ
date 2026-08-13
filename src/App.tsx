@@ -21,6 +21,11 @@ import SitterDashboard from "@/pages/SitterDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
 import Policies from "@/pages/Policies";
 import Help from "@/pages/Help";
+import Welcome from "@/pages/onboarding/Welcome";
+import Intent from "@/pages/onboarding/Intent";
+import NeedPet from "@/pages/owner/need/NeedPet";
+import NeedLocation from "@/pages/owner/need/NeedLocation";
+import NeedCare from "@/pages/owner/need/NeedCare";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +59,14 @@ const App = () => (
       <BrowserRouter>
         <DemoProvider>
           <Routes>
+            {/* Flow screens: full viewport, own back control, own action bar,
+                no site chrome. */}
+            <Route path="/welcome" element={<Welcome />} />
+            <Route path="/start" element={<Intent />} />
+            <Route path="/owner/need/pet" element={<NeedPet />} />
+            <Route path="/owner/need/location" element={<NeedLocation />} />
+            <Route path="/owner/need/care" element={<NeedCare />} />
+
             <Route element={<Layout />}>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
@@ -63,7 +76,10 @@ const App = () => (
               <Route path="/sitter/register" element={<SitterRegister />} />
               <Route path="/book/:listingId" element={<Book />} />
               <Route path="/chat/:bookingId" element={<Chat />} />
-              <Route path="/owner/bookings" element={<OwnerBookings />} />
+              {/* "Mes demandes". The screen itself lands with the request
+                  flow; the route exists now so nothing links into a 404. */}
+              <Route path="/owner/requests" element={<OwnerBookings />} />
+              <Route path="/owner/bookings" element={<Navigate to="/owner/requests" replace />} />
               <Route path="/sitter/dashboard" element={<SitterDashboard />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/policies" element={<Policies />} />

@@ -24,14 +24,6 @@
     "help": "Help",
     "policies": "Policies"
   },
-  "roles": {
-    "sitter": "Pet Sitter",
-    "owner": "Pet Owner",
-    "sitterDescription": "Join our community of trusted pet sitters and earn money caring for pets",
-    "ownerDescription": "Find trusted pet sitters near you for walks, daycare, and boarding",
-    "becomeSitter": "Become a Sitter",
-    "findSitter": "Find a Sitter"
-  },
   "home": {
     "title": "Care you can trust",
     "subtitle": "Connect with trusted pet sitters and walkers in Algeria",
@@ -57,6 +49,11 @@
       "night": "per night",
       "visit": "per visit",
       "walk": "per walk"
+    },
+    "description": {
+      "boarding": "Your animal stays at the sitter's home.",
+      "atOwner": "The sitter comes to your home to look after your animal.",
+      "walk": "An outing, with no stay involved."
     }
   },
   "trust": {
@@ -95,17 +92,6 @@
     "submit": "Submit Registration"
   },
   "search": {
-    "need": {
-      "title": "Which animal are you looking for care for?",
-      "intro": "Nidz starts with the sitters that match your animal, your area and the kind of care you need.",
-      "speciesLabel": "Your animal",
-      "communeLabel": "Where are you looking?",
-      "communeAny": "All areas",
-      "communeHelp": "This demonstration covers a few areas of Algiers and Oran.",
-      "careLabel": "What kind of care do you need?",
-      "submit": "See the sitters",
-      "skip": "Browse the examples without criteria"
-    },
     "context": {
       "noCriteria": "All the examples",
       "edit": "Edit",
@@ -120,7 +106,9 @@
       "apply": "See the results",
       "clear": "Clear all criteria",
       "close": "Close",
-      "description": "Choose the animal, the kind of care, the area and the maximum price."
+      "description": "Choose the animal, the kind of care, the area and the maximum price.",
+      "datesHelp": "Sitters who declared themselves unavailable over this period are removed from the results.",
+      "clearDates": "Clear the dates"
     },
     "results": {
       "title": "Sitters that match your search",
@@ -147,7 +135,75 @@
       "zone": "Area",
       "budget": "Budget",
       "anySpecies": "Dog or cat",
-      "anyCare": "Any kind of care"
+      "anyCare": "Any kind of care",
+      "dates": "Dates",
+      "anyDates": "Any dates",
+      "anyZone": "Anywhere"
+    },
+    "reason": {
+      "dates": "Has not declared these dates unavailable",
+      "noCat": "No cat declared at home"
+    }
+  },
+  "entry": {
+    "title": "Find someone you can trust to look after your animal.",
+    "intro": "Nidz connects dog and cat owners with sitters nearby, and spells out what each person offers and what they cannot take on.",
+    "start": "Get started",
+    "browse": "See the sitters",
+    "resume": "Resume my search",
+    "findSitter": "Find a sitter",
+    "myRequests": "My requests",
+    "switchToOwner": "Look for care for my animal",
+    "switchToSitter": "Become a sitter on Nidz",
+    "requestsCount_one": "{{count}} request",
+    "requestsCount_other": "{{count}} requests",
+    "requestsPending_one": "{{count}} awaiting a reply",
+    "requestsPending_other": "{{count}} awaiting a reply"
+  },
+  "intent": {
+    "title": "What would you like to do today?",
+    "owner": "Find someone for my animal",
+    "ownerDescription": "Describe your animal and your dates, then see who can look after it.",
+    "sitter": "Look after animals",
+    "sitterDescription": "Explain how you care for animals and receive requests that fit.",
+    "bothSides": "This choice does not create two separate accounts — you can use both sides of Nidz."
+  },
+  "need": {
+    "pet": {
+      "title": "Your animal",
+      "intro": "This is what a sitter needs in order to know whether they can genuinely take your animal.",
+      "speciesLabel": "Which animal are you looking for care for?",
+      "speciesRequired": "Tell us whether it is a dog or a cat.",
+      "nameLabel": "Its name",
+      "nameRequired": "Enter your animal's name.",
+      "ageLabel": "Its age",
+      "ageHelp": "For example: 8 months, 3 years.",
+      "notesLabel": "Important needs or constraints",
+      "notesHelp": "Ongoing medication, afraid of other dogs, cannot be left alone for long…",
+      "photoLabel": "A photo (optional)"
+    },
+    "location": {
+      "title": "Where are you looking?",
+      "intro": "Nidz starts with the sitters in your area.",
+      "wilayaLabel": "Wilaya",
+      "wilayaRequired": "Choose a wilaya.",
+      "communeLabel": "Commune",
+      "anyCommune": "All communes",
+      "privacy": "Your exact address is never shown publicly.",
+      "coverage": "This demonstration covers only a few communes in Algiers and Oran.",
+      "wilayaPlaceholder": "Choose a wilaya"
+    },
+    "care": {
+      "title": "What kind of care, and when?",
+      "careLabel": "Kind of care",
+      "careRequired": "Choose a kind of care.",
+      "dateLabel": "Date of the walk",
+      "startLabel": "Start date",
+      "endLabel": "End date",
+      "datesRequired": "Tell us the period you need.",
+      "submit": "See the sitters",
+      "availabilityNote": "Nidz books nothing. Sitters state for themselves the periods when they are not available.",
+      "datesPast": "Choose a date in the future."
     }
   }
 }

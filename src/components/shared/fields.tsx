@@ -1,22 +1,22 @@
-import { useEffect, useId, useRef } from "react";
+import { useId, useRef } from "react";
 import { ImagePlus, Paperclip, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { WILAYAS } from "@/data/locations";
-import { localized } from "@/data/types";
+import { localized, type DateRange } from "@/data/types";
 import type { AppLocale } from "@/i18n";
 import { cn } from "@/lib/utils";
+import { toISODate, today } from "@/utils/dates";
 
 /* ---------------------------------------------------------------------------
    Form field wrappers.
@@ -76,7 +76,9 @@ export function FieldShell({
       )}
       {/* The error carries text, not just a colour (§25). */}
       {errorId && (
-        <p id={errorId} className="mt-2 text-sm font-medium text-destructive">
+        /* Announced as it appears: a validation message the user only finds by
+           reading the screen is not an accessible error (§25). */
+        <p id={errorId} role="alert" className="mt-2 text-sm font-medium text-destructive">
           {error}
         </p>
       )}
@@ -140,67 +142,202 @@ export function SelectField<T extends string>({
 }
 
 /**
- * The commune picker, grouped by wilaya.
+ * Wilaya, then commune.
  *
- * One control rather than two chained selects: the model stores a commune
- * code, and the demo covers two wilayas, so a wilaya select would be a step
- * that narrows a nine-item list. `anyLabel` keeps the field from becoming a
- * wall for someone outside the covered areas.
+ * Two chained selects rather than one long list, because that is the shape an
+ * authoritative Algerian dataset has: hundreds of communes under dozens of
+ * wilayas. `src/data/locations.ts` currently holds a small launch subset, and
+ * this control has to keep working when that file is replaced without being
+ * rewritten.
+ *
+ * The commune is optional — "toutes les communes" searches the whole wilaya —
+ * so someone who does not know the commune name is never stuck.
+ *
+ * Used by both the need flow and the `/search` filter sheet, so the location a
+ * person defines and the location they adjust are the same control.
  */
-export function CommuneField({
-  label,
-  value,
+export function LocationFields({
+  wilayaCode,
+  communeCode,
   onChange,
   locale,
-  anyLabel,
+  anyWilayaLabel,
+  anyCommuneLabel,
+  wilayaLabel,
+  wilayaPlaceholder,
+  communeLabel,
+  communePlaceholder,
+  wilayaRef,
   help,
   error,
   className,
 }: {
-  label: string;
-  /** `null` means "anywhere". */
-  value: string | null;
-  onChange: (code: string | null) => void;
+  wilayaCode: string | null;
+  communeCode: string | null;
+  onChange: (next: { wilayaCode: string | null; communeCode: string | null }) => void;
   locale: AppLocale;
-  anyLabel?: string;
+  /** Offer "anywhere" on the wilaya field. Omit in the need flow, where the
+      question is where the owner actually is. */
+  anyWilayaLabel?: string;
+  anyCommuneLabel: string;
+  wilayaLabel: string;
+  /** Shown when nothing is chosen yet, so the trigger is never an empty box. */
+  wilayaPlaceholder?: string;
+  communeLabel: string;
+  communePlaceholder?: string;
+  wilayaRef?: React.Ref<HTMLButtonElement>;
   help?: string;
   error?: string;
   className?: string;
 }) {
   const ANY = "__any__";
+  const wilaya = WILAYAS.find((w) => w.code === wilayaCode) ?? null;
 
   return (
-    <FieldShell label={label} help={help} error={error} className={className}>
-      {({ id, describedBy, labelId, invalid }) => (
-        <Select
-          value={value ?? (anyLabel ? ANY : "")}
-          onValueChange={(v) => onChange(v === ANY ? null : v)}
-        >
-          <SelectTrigger
+    <div className={cn("space-y-5", className)}>
+      <FieldShell label={wilayaLabel} error={error}>
+        {({ id, describedBy, labelId, invalid }) => (
+          <Select
+            value={wilayaCode ?? (anyWilayaLabel ? ANY : "")}
+            onValueChange={(v) =>
+              /* Changing wilaya always clears the commune: keeping it would
+                 leave a commune that belongs to a different wilaya. */
+              onChange({ wilayaCode: v === ANY ? null : v, communeCode: null })
+            }
+          >
+            <SelectTrigger
+              id={id}
+              ref={wilayaRef}
+              aria-labelledby={`${labelId} ${id}`}
+              aria-describedby={describedBy}
+              aria-invalid={invalid || undefined}
+              className="w-full"
+            >
+              <SelectValue placeholder={wilayaPlaceholder} />
+            </SelectTrigger>
+            <SelectContent>
+              {anyWilayaLabel && <SelectItem value={ANY}>{anyWilayaLabel}</SelectItem>}
+              {WILAYAS.map((w) => (
+                <SelectItem key={w.code} value={w.code}>
+                  {localized(w.name, locale)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      </FieldShell>
+
+      <FieldShell label={communeLabel} help={help}>
+        {({ id, describedBy, labelId }) => (
+          <Select
+            /* Empty while no wilaya is chosen, so the disabled trigger shows
+               the reason rather than asserting "all communes" — a scope that is
+               not in effect. */
+            value={wilaya ? (communeCode ?? ANY) : ""}
+            onValueChange={(v) => onChange({ wilayaCode, communeCode: v === ANY ? null : v })}
+            disabled={!wilaya}
+          >
+            <SelectTrigger
+              id={id}
+              aria-labelledby={`${labelId} ${id}`}
+              aria-describedby={describedBy}
+              className="w-full"
+            >
+              <SelectValue placeholder={communePlaceholder} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ANY}>{anyCommuneLabel}</SelectItem>
+              {(wilaya?.communes ?? []).map((commune) => (
+                <SelectItem key={commune.code} value={commune.code}>
+                  {localized(commune.name, locale)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      </FieldShell>
+    </div>
+  );
+}
+
+/**
+ * When the care is needed.
+ *
+ * Native `<input type="date">`: the picker, the ISO value, the keyboard
+ * support and the Arabic/French localisation all come from the platform, and
+ * `min` prevents a past date instead of flagging it red afterwards (§18 —
+ * prevention over error). A walk is a single day, so it renders one field and
+ * stores `start === end`, keeping one shape in the model.
+ */
+export function DateRangeField({
+  singleDay,
+  value,
+  onChange,
+  startLabel,
+  endLabel,
+  singleLabel,
+  help,
+  error,
+  startRef,
+}: {
+  startRef?: React.Ref<HTMLInputElement>;
+  singleDay: boolean;
+  value: DateRange | null;
+  onChange: (next: DateRange | null) => void;
+  startLabel: string;
+  endLabel: string;
+  singleLabel: string;
+  help?: string;
+  error?: string;
+}) {
+  const min = toISODate(today());
+
+  const setStart = (start: string) => {
+    if (!start) return onChange(null);
+    if (singleDay) return onChange({ start, end: start });
+    /* An end before the new start is not an error to report, it is a value to
+       correct: pull it along rather than making the owner fix it. */
+    const end = value && value.end >= start ? value.end : start;
+    onChange({ start, end });
+  };
+
+  return (
+    <div className="space-y-5">
+      <FieldShell label={singleDay ? singleLabel : startLabel} help={singleDay ? help : undefined} error={error}>
+        {({ id, describedBy, invalid }) => (
+          <Input
             id={id}
-            aria-labelledby={`${labelId} ${id}`}
+            ref={startRef}
+            type="date"
+            min={min}
+            value={value?.start ?? ""}
             aria-describedby={describedBy}
             aria-invalid={invalid || undefined}
-            className="w-full"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {anyLabel && <SelectItem value={ANY}>{anyLabel}</SelectItem>}
-            {WILAYAS.map((wilaya) => (
-              <SelectGroup key={wilaya.code}>
-                <SelectLabel>{localized(wilaya.name, locale)}</SelectLabel>
-                {wilaya.communes.map((commune) => (
-                  <SelectItem key={commune.code} value={commune.code}>
-                    {localized(commune.name, locale)}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            ))}
-          </SelectContent>
-        </Select>
+            onChange={(e) => setStart(e.target.value)}
+          />
+        )}
+      </FieldShell>
+
+      {!singleDay && (
+        <FieldShell label={endLabel} help={help}>
+          {({ id, describedBy }) => (
+            <Input
+              id={id}
+              type="date"
+              /* Never earlier than the start, so an impossible range cannot be
+                 entered in the first place. */
+              min={value?.start || min}
+              value={value?.end ?? ""}
+              disabled={!value?.start}
+              aria-describedby={describedBy}
+              onChange={(e) =>
+                value?.start && onChange({ start: value.start, end: e.target.value || value.start })
+              }
+            />
+          )}
+        </FieldShell>
       )}
-    </FieldShell>
+    </div>
   );
 }
 
@@ -227,16 +364,13 @@ export function PhotoField({
 }) {
   const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
-  /* Held in a ref so the unmount cleanup sees the last URL without making the
-     effect re-run — and revoke — on every change. */
-  const latest = useRef(value);
-  latest.current = value;
 
-  useEffect(() => {
-    return () => {
-      if (latest.current) URL.revokeObjectURL(latest.current);
-    };
-  }, []);
+  /* Deliberately NO revoke on unmount. The URL outlives this field: it is
+     handed to the caller, stored on the pet, and read again when the owner
+     comes back to the step or reaches the request summary. Revoking on unmount
+     killed the image the moment the step was left, so Back rendered a broken
+     frame over a button reading "Changer la photo". The field revokes only the
+     URLs it actually replaces or removes, below. */
 
   return (
     <div className={className}>
@@ -278,6 +412,10 @@ export function PhotoField({
         accept="image/*"
         className="sr-only"
         aria-label={label}
+        /* Out of the tab order: the visible button is the control, and a
+           second, invisible stop for the same action is a trap for keyboard
+           users. */
+        tabIndex={-1}
         onChange={(e) => {
           const file = e.target.files?.[0];
           /* Cleared unconditionally: without it, picking the same file twice
@@ -346,6 +484,7 @@ export function DocumentField({
         accept="image/*,application/pdf"
         className="sr-only"
         aria-label={label}
+        tabIndex={-1}
         onChange={(e) => {
           const file = e.target.files?.[0];
           e.target.value = "";

@@ -132,6 +132,42 @@ export type SitterProfile = {
   isDemoFixture: boolean;
 };
 
+/* -------------------------------------------------------------------- need */
+
+/**
+ * What the owner is looking for.
+ *
+ * Built up across the need flow and mirrored into the `/search` URL, which
+ * stays canonical for results so they remain linkable and Back keeps working.
+ * Every field is single-valued and optional — the same shape `/search` parses,
+ * so the brief the owner defined and the filters they adjust against the
+ * results cannot disagree.
+ *
+ * `petId` is the part that is NOT in the URL: an animal's name and needs are
+ * the owner's, not a shareable query.
+ */
+export type OwnerNeed = {
+  species: Species | null;
+  petId: string | null;
+  wilayaCode: string | null;
+  communeCode: string | null;
+  dates: DateRange | null;
+  careType: CareType | null;
+  /** Not asked for in the flow — it is a filter, added from the results. Kept
+      here so the brief and the URL round-trip without losing it. */
+  maxPrice: number | null;
+};
+
+export const EMPTY_NEED: OwnerNeed = {
+  species: null,
+  petId: null,
+  wilayaCode: null,
+  communeCode: null,
+  dates: null,
+  careType: null,
+  maxPrice: null,
+};
+
 /* ----------------------------------------------------------------- request */
 
 /**

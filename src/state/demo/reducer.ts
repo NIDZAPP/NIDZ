@@ -15,14 +15,13 @@
    an effect the platform already provides (design system §33.12).
    ------------------------------------------------------------------------ */
 
-import type {
-  CareRequest,
-  CareType,
-  DateRange,
-  Pet,
-  RequestStatus,
-  SitterProfile,
-  Species,
+import {
+  EMPTY_NEED,
+  type CareRequest,
+  type OwnerNeed,
+  type Pet,
+  type RequestStatus,
+  type SitterProfile,
 } from "@/data/types";
 
 /** Bumping this discards incompatible state saved by an older build rather
@@ -44,25 +43,6 @@ export type DemoAccount = {
   phoneNumber: string;
   phoneConfirmed: boolean;
   createdAt: string;
-};
-
-/** What the owner is looking for. Built up across the need flow; the
-    filterable part is mirrored into the /search URL so results stay
-    linkable and Back keeps working. */
-export type OwnerNeed = {
-  species: Species | null;
-  petId: string | null;
-  communeCode: string | null;
-  dates: DateRange | null;
-  careType: CareType | null;
-};
-
-export const EMPTY_NEED: OwnerNeed = {
-  species: null,
-  petId: null,
-  communeCode: null,
-  dates: null,
-  careType: null,
 };
 
 /** The sitter's own profile-in-progress. `idDocument` records only that a

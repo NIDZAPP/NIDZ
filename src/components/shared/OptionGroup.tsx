@@ -26,13 +26,24 @@ export type Option<T extends string> = {
  */
 export default function OptionGroup<T extends string>({
   label,
+  labelledBy,
+  describedBy,
+  invalid,
+  groupRef,
   value,
   onChange,
   options,
   className,
 }: {
-  /** Accessible name for the group. Pass the question itself. */
-  label: string;
+  /** Accessible name for the group. Prefer `labelledBy` when the question is
+      already on screen — naming the group twice announces it twice. */
+  label?: string;
+  labelledBy?: string;
+  describedBy?: string;
+  invalid?: boolean;
+  /** A plain ref prop rather than `forwardRef`, which cannot carry a generic
+      parameter without erasing `T` at every call site. */
+  groupRef?: React.Ref<HTMLDivElement>;
   value: T | null;
   onChange: (value: T) => void;
   options: Option<T>[];
@@ -40,7 +51,13 @@ export default function OptionGroup<T extends string>({
 }) {
   return (
     <RadioGroupPrimitive.Root
-      aria-label={label}
+      ref={groupRef}
+      aria-label={labelledBy ? undefined : label}
+      aria-labelledby={labelledBy}
+      /* Focus lands here on a failed submit, so the group has to carry the
+         error itself: an unnamed wrapper div announces nothing. */
+      aria-describedby={describedBy}
+      aria-invalid={invalid || undefined}
       value={value ?? ""}
       onValueChange={(v) => onChange(v as T)}
       className={cn("grid gap-3", className)}
