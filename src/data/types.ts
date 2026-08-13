@@ -85,8 +85,13 @@ export type Pet = {
 /* ------------------------------------------------------------------ sitter */
 
 export type SitterHousing = {
-  type: HousingType;
-  outdoor: OutdoorSpace;
+  /** Null until the sitter answers. A non-null seed is indistinguishable from
+      a choice, and every surface renders this under "informations fournies par
+      le pet-sitter" — so a default pressed through would be published as a
+      declaration nobody made. The type carries the distinction so the compiler
+      does, too. */
+  type: HousingType | null;
+  outdoor: OutdoorSpace | null;
   /** Animals already living at the sitter's home — a hard constraint for many
       owners, and the reason "aucun chat déclaré" is a useful compatibility
       fact rather than a badge. */

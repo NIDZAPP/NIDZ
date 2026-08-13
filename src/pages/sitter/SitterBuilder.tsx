@@ -54,7 +54,9 @@ import { formatDZD } from "@/utils/format";
    step pretends otherwise.
    ------------------------------------------------------------------------ */
 
-const TOTAL = 6;
+/* Eight, counting the identity document and the preview — the denominator
+   must not change between two consecutive screens. */
+const TOTAL = 8;
 
 function toggle<T>(list: T[], value: T): T[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
@@ -281,6 +283,7 @@ export function StepServices() {
   );
   const [error, setError] = useState<string>();
   const servicesRef = useRef<HTMLFieldSetElement>(null);
+  const rateRefs = useRef<Partial<Record<CareType, HTMLInputElement | null>>>({});
 
   return (
     <BuilderStep
@@ -305,7 +308,7 @@ export function StepServices() {
         });
         if (invalid) {
           setError(t("sitterFlow.services.priceRequired", { service: t(`care.${invalid}`) }));
-          document.getElementById(`rate-${invalid}`)?.focus();
+          rateRefs.current[invalid]?.focus();
           return false;
         }
         patch({
@@ -341,10 +344,13 @@ export function StepServices() {
         <div className="space-y-5">
           {CARE_TYPES.filter((c) => services.includes(c)).map((service) => (
             <FieldShell key={service} label={t(`care.${service}`)} help={t(CARE_UNIT_KEY[service])}>
-              {({ describedBy }) => (
+              {({ id, describedBy }) => (
                 <div className="flex items-center gap-2">
                   <Input
-                    id={`rate-${service}`}
+                    id={id}
+                    ref={(node) => {
+                      rateRefs.current[service] = node;
+                    }}
                     type="number"
                     min={1}
                     max={100000}

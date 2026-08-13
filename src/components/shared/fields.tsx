@@ -458,7 +458,7 @@ export function DocumentField({
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className={cn("rounded-md border border-border p-4", className)}>
+    <div className={className}>
       <p className="text-sm font-medium text-foreground">{label}</p>
       {help && <p className="mt-1 text-sm text-muted-foreground">{help}</p>}
 

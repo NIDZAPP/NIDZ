@@ -39,7 +39,13 @@ export function MatchReasonList({
       {tokens.map((reason) => (
         <li
           key={reasonKey(reason)}
-          className="inline-flex items-center gap-1 rounded-sm bg-accent px-2 py-0.5 font-medium text-accent-foreground"
+          /* Neutral, not teal: a selected filter chip is teal-on-soft-teal
+             with a check, and a match token sat one radius away from it with
+             the same colour and the same glyph. They co-occur — the filter
+             sheet opens over the register — and one is an interactive
+             selection while the other is a read-only fact (§5.2). Containment
+             and the check still carry the meaning. */
+          className="inline-flex items-center gap-1 rounded-sm bg-secondary px-2 py-0.5 font-medium text-foreground"
         >
           <Check className="size-3 shrink-0" aria-hidden="true" />
           {/* The separator lives in the translated string: French puts a space

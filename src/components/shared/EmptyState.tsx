@@ -27,7 +27,9 @@ export default function EmptyState({
 }) {
   const Heading = headingLevel;
   return (
-    <div className={cn("border-b border-border py-10", className)}>
+    /* No rule: in every call site this is the last thing on the page, so a
+       bottom border read as a stray underline beneath a lone button. */
+    <div className={cn("py-10", className)}>
       <Heading className="text-name font-semibold text-foreground">{title}</Heading>
       <p className="mt-2 max-w-[60ch] text-base leading-relaxed text-muted-foreground">{body}</p>
       {action && <div className="mt-6">{action}</div>}

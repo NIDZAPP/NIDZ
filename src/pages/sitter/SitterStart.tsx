@@ -25,7 +25,7 @@ export default function SitterStart() {
   const { state, dispatch } = useDemo();
 
   const start = () => {
-    dispatch({ type: "setRole", role: "sitter" });
+    dispatch({ type: "enter" });
     /* Idempotent in the reducer — re-entering must not wipe a profile that is
        already in progress. */
     dispatch({ type: "startSitterProfile", id: state.sitter?.profile.id ?? "my-profile" });

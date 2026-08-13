@@ -196,10 +196,10 @@ export default function Search() {
       <div className="sticky top-16 z-30 border-b border-border bg-background xl:hidden">
         <div className="container flex h-14 items-center gap-3">
           <p className="flex min-w-0 flex-1 items-baseline gap-1.5 text-sm">
-            {/* Terracotta names the animal, and nothing else on this page. The
-                species is never carried by colour alone — it is the first value
-                in the line and is labelled in the rail. */}
-            {speciesText && <bdi className="font-medium text-brand">{speciesText}</bdi>}
+            {/* The species leads the line because it is the first thing every
+                row answers to. It was terracotta here and plain everywhere else
+                the same fact appears — a private convention for one screen. */}
+            {speciesText && <bdi className="font-medium text-foreground">{speciesText}</bdi>}
             {/* Each part is isolated: a commune name may be Latin text inside
                 an Arabic sentence, and the separators are neutral. */}
             <span className="truncate text-muted-foreground">
@@ -219,7 +219,7 @@ export default function Search() {
 
       {/* Reserve both sticky layers, so a keyboard-focused card is never
           scrolled underneath them (WCAG 2.2 AA — 2.4.11). */}
-      <section className="container scroll-pt-[7.5rem] py-8 md:py-12">
+      <section className="container scroll-pt-[7.5rem] py-10 md:py-14">
         {/* Asymmetric at xl: a brief rail against a register column, both hung
             off one leading axis. Symmetric margins on a 1440 canvas are what
             made the previous grid read as unfinished. */}
@@ -313,7 +313,7 @@ export default function Search() {
               {brief.map((row) => (
                 <div key={row.key}>
                   <dt className="text-sm text-muted-foreground">{row.label}</dt>
-                  <dd className={cn("mt-0.5 text-base", row.brand ? "font-medium text-brand" : "text-foreground")}>
+                  <dd className={cn("mt-0.5 text-base text-foreground", row.brand && "font-medium")}>
                     <bdi>{row.value}</bdi>
                   </dd>
                 </div>

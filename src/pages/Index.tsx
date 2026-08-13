@@ -19,6 +19,12 @@ import { useDemo } from "@/state/demo/context";
  * The role fork is not repeated: it was asked once, and §22 says to ask it
  * only when the choice is necessary.
  */
+/* A hairline register, like every other list of navigable things in the app.
+   Bordered boxes read as controls — that is `OptionGroup`'s silhouette — and
+   made the emptiest screen in the product look like a dashboard stub. */
+const ROW =
+  "flex items-center justify-between gap-4 border-b border-border py-4 transition-colors first:border-t hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
+
 export default function Index() {
   const { t } = useTranslation();
   const { state } = useDemo();
@@ -35,7 +41,7 @@ export default function Index() {
   const resume = new URLSearchParams(criteriaToParams(criteria)).toString();
 
   return (
-    <div className="container py-12 md:py-20">
+    <div className="container py-10 md:py-14">
       <Helmet>
         <title>
           {t("common.appName")} — {t("home.title")}
@@ -43,7 +49,7 @@ export default function Index() {
         <meta name="description" content={t("home.subtitle")} />
       </Helmet>
 
-      <div className="mx-auto max-w-[640px]">
+      <div className="mx-auto max-w-[720px]">
         <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">{t("home.title")}</h1>
         <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{t("home.subtitle")}</p>
 
@@ -60,10 +66,11 @@ export default function Index() {
         {/* The one thing here that resembles a dashboard — and it is the
             person's own data, so it is the one thing that can be counted.
             Absent entirely when there is nothing to count. */}
+        <div className="mt-10">
         {state.requests.length > 0 && (
           <Link
             to="/owner/requests"
-            className="mt-10 flex items-center justify-between gap-4 rounded-md border border-border p-4 transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className={ROW}
           >
             <span>
               <span className="block font-medium text-foreground">{t("entry.myRequests")}</span>
@@ -83,7 +90,7 @@ export default function Index() {
         {state.sitter && (
           <Link
             to="/sitter/requests"
-            className="mt-4 flex items-center justify-between gap-4 rounded-md border border-border p-4 transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className={ROW}
           >
             <span>
               <span className="block font-medium text-foreground">{t("sitterRequests.title")}</span>
@@ -94,6 +101,8 @@ export default function Index() {
             <ArrowRight className="size-5 shrink-0 text-muted-foreground rtl:-scale-x-100" aria-hidden="true" />
           </Link>
         )}
+
+        </div>
 
         {/* One quiet pointer at the other side of the marketplace. Not a
             second pair of equal-weight cards. */}

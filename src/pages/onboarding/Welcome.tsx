@@ -13,7 +13,7 @@ import { useDemo } from "@/state/demo/context";
    empty page. `sessionStorage` rather than the demo store, because "has seen
    the wordmark" is a per-tab question — `entered` means "has been through the
    introduction", which outlives the tab. */
-const SPLASH_KEY = "nidz.splash.seen";
+export const SPLASH_KEY = "nidz.splash.seen";
 
 function shouldSplash(): boolean {
   if (typeof window === "undefined") return false;

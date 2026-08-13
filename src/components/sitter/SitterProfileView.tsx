@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 import { MatchReasonList, MismatchList } from "@/components/sitter/match";
 import { ProvenanceLabel } from "@/components/shared/trust";
-import type { MatchReason } from "@/data/criteria";
+import { isAbsenceReason, type MatchReason } from "@/data/criteria";
 import { offeredServices } from "@/data/demo-sitters";
 import { communeWithWilaya } from "@/data/locations";
 import { CARE_UNIT_KEY, localized, type SitterProfile } from "@/data/types";
@@ -101,8 +101,14 @@ export default function SitterProfileView({
         ]
       : []),
     { key: "max", label: t("profile.facts.max"), value: t("profile.facts.maxValue", { count: sitter.maxAnimals }) },
-    { key: "housing", label: t("profile.facts.housing"), value: t(`housing.type.${sitter.housing.type}`) },
-    { key: "outdoor", label: t("profile.facts.outdoor"), value: t(`housing.outdoor.${sitter.housing.outdoor}`) },
+    /* Only when answered: an unanswered housing question must not appear as a
+       declaration under "informations fournies par le pet-sitter". */
+    ...(sitter.housing.type
+      ? [{ key: "housing", label: t("profile.facts.housing"), value: t(`housing.type.${sitter.housing.type}`) }]
+      : []),
+    ...(sitter.housing.outdoor
+      ? [{ key: "outdoor", label: t("profile.facts.outdoor"), value: t(`housing.outdoor.${sitter.housing.outdoor}`) }]
+      : []),
     { key: "pets", label: t("profile.facts.residentPets"), value: residentPets },
   ];
 
@@ -166,11 +172,15 @@ export default function SitterProfileView({
           most animals" would be a manufactured claim. */}
       {hasCriteria && (reasons.length > 0 || mismatches.length > 0) && (
         <section>
-          {/* The heading names what is actually underneath it. A section that
-              contains nothing but a mismatch must not be titled "why this
-              sitter fits", still less "a good fit for Mimi". */}
+          {/* The heading names what is actually underneath it. A section
+              containing only a mismatch must not be titled "why this sitter
+              fits" — and neither must one containing only ABSENCES. "Has not
+              declared these dates unavailable" is equally true of a sitter who
+              never answered; heading it "Bien adapté à Milo" is exactly the
+              silence-into-confirmation move `isAbsenceReason` exists to
+              prevent. */}
           <Section className="text-name font-semibold text-foreground">
-            {reasons.length === 0
+            {!reasons.some((r) => !isAbsenceReason(r))
               ? t("profile.mismatchTitle")
               : petName
                 ? t("profile.section.fitNamed", { name: petName })
@@ -181,10 +191,13 @@ export default function SitterProfileView({
             <div className="mt-4">
               {/* The sub-label only earns its place when there is a matched
                   list above it to distinguish this from. */}
-              {reasons.length > 0 && (
+              {reasons.some((r) => !isAbsenceReason(r)) && (
                 <p className="text-sm font-medium text-foreground">{t("profile.mismatchTitle")}</p>
               )}
-              <MismatchList className={reasons.length > 0 ? "mt-2" : ""} items={mismatches} />
+              <MismatchList
+                className={reasons.some((r) => !isAbsenceReason(r)) ? "mt-2" : ""}
+                items={mismatches}
+              />
             </div>
           )}
         </section>
@@ -267,7 +280,7 @@ export default function SitterProfileView({
         <dl className="mt-8 grid gap-x-8 gap-y-5 sm:grid-cols-2">
           {facts.map((fact) => (
             <div key={fact.key}>
-              <dt className="eyebrow">{fact.label}</dt>
+              <dt className="text-sm text-muted-foreground">{fact.label}</dt>
               <dd className="mt-1 text-base text-foreground">{fact.value}</dd>
             </div>
           ))}

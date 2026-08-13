@@ -7,7 +7,6 @@ import type { LucideIcon } from "lucide-react";
 import FlowScreen from "@/components/shared/FlowScreen";
 import { useFlowBack } from "@/hooks/use-flow-back";
 import { useDemo } from "@/state/demo/context";
-import type { DemoRole } from "@/state/demo/reducer";
 
 /**
  * "Que souhaitez-vous faire aujourd'hui ?"
@@ -27,8 +26,11 @@ export default function Intent() {
   const navigate = useNavigate();
   const goBack = useFlowBack("/welcome");
 
-  const choose = (role: DemoRole, to: string) => {
-    dispatch({ type: "setRole", role });
+  /* Choosing does not create a role: the same account has both uses, and
+     every role-dependent decision in the app derives from whether a sitter
+     profile exists. All this records is that the introduction is done. */
+  const choose = (to: string) => {
+    dispatch({ type: "enter" });
     navigate(to);
   };
 
@@ -49,13 +51,13 @@ export default function Intent() {
             icon={Search}
             label={t("intent.owner")}
             description={t("intent.ownerDescription")}
-            onClick={() => choose("owner", "/owner/need/pet")}
+            onClick={() => choose("/owner/need/pet")}
           />
           <IntentRow
             icon={Heart}
             label={t("intent.sitter")}
             description={t("intent.sitterDescription")}
-            onClick={() => choose("sitter", "/sitter/start")}
+            onClick={() => choose("/sitter/start")}
           />
         </div>
 

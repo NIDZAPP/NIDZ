@@ -34,11 +34,6 @@ export function isISODate(value: unknown): value is string {
   return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
 }
 
-/** Nights between two dates. A one-day range is one night of boarding. */
-export function nightsBetween(range: DateRange): number {
-  const ms = fromISODate(range.end).getTime() - fromISODate(range.start).getTime();
-  return Math.max(0, Math.round(ms / 86_400_000));
-}
 
 const DATE_FORMATS: Record<AppLocale, Intl.DateTimeFormat> = {
   en: new Intl.DateTimeFormat("en-DZ", { day: "numeric", month: "long" }),

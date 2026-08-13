@@ -29,10 +29,6 @@ import {
 const STORAGE_VERSION = 1;
 const STORAGE_KEY = "nidz.demo.v1";
 
-/** Which side of the marketplace the person is currently using. One person,
-    two activities — never two accounts (Audit p.84, design system §22). */
-export type DemoRole = "owner" | "sitter";
-
 /** A local, unverified identity. `phoneConfirmed` records that the person
     completed the SIMULATED code step — it is not phone verification, and no
     surface may present it as one. */
@@ -58,7 +54,6 @@ export type DemoState = {
   version: number;
   /** The intro has been seen — a returning visitor is not shown it again. */
   entered: boolean;
-  role: DemoRole | null;
   account: DemoAccount | null;
   need: OwnerNeed;
   pets: Pet[];
@@ -69,7 +64,6 @@ export type DemoState = {
 export const INITIAL_STATE: DemoState = {
   version: STORAGE_VERSION,
   entered: false,
-  role: null,
   account: null,
   need: EMPTY_NEED,
   pets: [],
@@ -90,10 +84,11 @@ export function emptySitterProfile(id: string): SitterProfile {
     acceptedSpecies: [],
     acceptedDogSizes: [],
     maxAnimals: 1,
-    /* Placeholders only until the housing step is answered — nothing reads
-       them before then, and the step refuses to continue without a real
-       choice, so no default is ever laundered into a declaration. */
-    housing: { type: "apartment", outdoor: "none", residentPets: [], conditions: null },
+    /* Unanswered, not "apartment with no outdoor space". Seeding a value here
+       pre-selected it in the builder — teal border and check glyph, this
+       system's own signal for "you chose this" — and published it as a
+       declaration on the profile. */
+    housing: { type: null, outdoor: null, residentPets: [], conditions: null },
     careMethods: [],
     limits: [],
     declaredUnavailable: [],
@@ -105,9 +100,7 @@ export function emptySitterProfile(id: string): SitterProfile {
 
 export type DemoAction =
   | { type: "enter" }
-  | { type: "setRole"; role: DemoRole }
   | { type: "setNeed"; patch: Partial<OwnerNeed> }
-  | { type: "resetNeed" }
   | { type: "savePet"; pet: Pet }
   | { type: "setAccount"; account: DemoAccount }
   | { type: "confirmPhone" }
@@ -125,14 +118,8 @@ export function reducer(state: DemoState, action: DemoAction): DemoState {
     case "enter":
       return { ...state, entered: true };
 
-    case "setRole":
-      return { ...state, entered: true, role: action.role };
-
     case "setNeed":
       return { ...state, need: { ...state.need, ...action.patch } };
-
-    case "resetNeed":
-      return { ...state, need: EMPTY_NEED };
 
     case "savePet": {
       const exists = state.pets.some((p) => p.id === action.pet.id);
@@ -224,6 +211,32 @@ function stripTransientFields(state: DemoState): DemoState {
  * never be able to take the app down. Each slice is validated independently so
  * one bad field costs only that field.
  */
+/** The sitter workspace is the one slice whose shape reaches an unguarded
+    `.filter`/`.some` — `/search` puts a published profile straight into the
+    match pool — so a container check is not enough. Anything missing a
+    required array or string is discarded rather than crashing the results. */
+function restoreSitter(value: unknown): SitterWorkspace | null {
+  if (typeof value !== "object" || value === null) return null;
+  const workspace = value as Record<string, unknown>;
+  const profile = workspace.profile as Partial<SitterProfile> | undefined;
+  if (!profile || typeof profile !== "object") return null;
+
+  const arrays = [profile.services, profile.acceptedSpecies, profile.acceptedDogSizes, profile.careMethods, profile.limits, profile.declaredUnavailable];
+  if (arrays.some((a) => !Array.isArray(a))) return null;
+  if (typeof profile.id !== "string" || typeof profile.publicName !== "string") return null;
+  if (typeof profile.rates !== "object" || profile.rates === null) return null;
+  if (typeof profile.housing !== "object" || profile.housing === null) return null;
+
+  return {
+    profile: profile as SitterProfile,
+    published: workspace.published === true,
+    idDocument:
+      typeof workspace.idDocument === "object" && workspace.idDocument !== null
+        ? (workspace.idDocument as SitterWorkspace["idDocument"])
+        : null,
+  };
+}
+
 function restore(parsed: Record<string, unknown>): DemoState {
   const isObject = (v: unknown): v is Record<string, unknown> =>
     typeof v === "object" && v !== null && !Array.isArray(v);
@@ -232,15 +245,11 @@ function restore(parsed: Record<string, unknown>): DemoState {
   return {
     version: STORAGE_VERSION,
     entered: parsed.entered === true,
-    role: parsed.role === "owner" || parsed.role === "sitter" ? parsed.role : null,
     account: isObject(parsed.account) ? (parsed.account as unknown as DemoAccount) : null,
     need: isObject(parsed.need) ? { ...EMPTY_NEED, ...(parsed.need as Partial<OwnerNeed>) } : EMPTY_NEED,
     pets: (arrayOfObjects(parsed.pets) as Pet[] | null) ?? [],
     requests: (arrayOfObjects(parsed.requests) as CareRequest[] | null) ?? [],
-    sitter:
-      isObject(parsed.sitter) && isObject(parsed.sitter.profile)
-        ? (parsed.sitter as unknown as SitterWorkspace)
-        : null,
+    sitter: restoreSitter(parsed.sitter),
   };
 }
 

@@ -179,9 +179,7 @@
      role keeps its size and weight instead.
 
      Keyed on `[dir="rtl"]`, which is what Tailwind's `rtl:` variant compiles
-     to, so the whole codebase has ONE right-to-left mechanism. (`src/i18n.ts`
-     sets both the attribute and a legacy `.rtl` class; only the attribute is
-     depended on.) */
+     to, so the whole codebase has ONE right-to-left mechanism. */
   .eyebrow {
     @apply text-eyebrow font-semibold uppercase text-muted-foreground;
   }

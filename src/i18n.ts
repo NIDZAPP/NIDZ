@@ -11,12 +11,15 @@ const resources = { en: { translation: en }, fr: { translation: fr }, ar: { tran
 export const SUPPORTED_LOCALES = ["en", "fr", "ar"] as const;
 export type AppLocale = typeof SUPPORTED_LOCALES[number];
 
+/** `dir` and `lang` on <html>. The direction attribute is the ONE mechanism the
+    styles key on — Tailwind's `rtl:` variant compiles to `[dir="rtl"]`, and
+    `src/index.css` uses the same selector — so there is no companion class to
+    keep in step. */
 function updateDir(lng: string) {
   const isRTL = lng === "ar";
   const html = document.documentElement;
   html.setAttribute("lang", lng);
   html.setAttribute("dir", isRTL ? "rtl" : "ltr");
-  html.classList.toggle("rtl", isRTL);
 }
 
 i18n

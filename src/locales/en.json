@@ -5,8 +5,6 @@
     "english": "English",
     "french": "French",
     "arabic": "Arabic",
-    "save": "Save",
-    "cancel": "Cancel",
     "back": "Back",
     "continue": "Continue",
     "remove": "Remove",
@@ -26,8 +24,8 @@
     "footerLabel": "Footer links"
   },
   "home": {
-    "title": "Care you can trust",
-    "subtitle": "Connect with trusted pet sitters and walkers in Algeria"
+    "title": "Find care for your animal",
+    "subtitle": "Describe your animal and your dates, then see who can look after it — what each person offers, and what they cannot accept."
   },
   "species": {
     "dog": "Dog",
@@ -97,7 +95,6 @@
     "review": {
       "title": "Your request",
       "send": "Send my request",
-      "missing": "The kind of care or the dates are missing. Go back to your search to set them.",
       "demoNote": "Sending books nothing and pays nothing. Nothing leaves this browser."
     },
     "sent": {
@@ -122,7 +119,7 @@
     "trust": {
       "add": "Add my ID document",
       "title": "Identity document",
-      "intro": "Nidz asks for an identity document so that, later, it can check that the people hosting animals are who they say they are.",
+      "intro": "If Nidz ever puts identity checks in place, this document is what would confirm that the people hosting animals are who they say they are. That process does not exist today.",
       "docLabel": "Your identity document",
       "docHelp": "Optional in this demonstration.",
       "pending": "Document added — no verification takes place in this demonstration",
@@ -235,10 +232,10 @@
       "noCriteria": "All the examples",
       "edit": "Edit",
       "editLabel": "Edit my search",
-      "editLabelCount": "Edit my search · {{count}} active criteria"
+      "editLabelCount_one": "Edit my search · {{count}} active criterion",
+      "editLabelCount_other": "Edit my search · {{count}} active criteria"
     },
     "filters": {
-      "title": "Filter",
       "maxPrice": "Maximum price",
       "anyPrice": "Any price",
       "upTo": "{{price}} or less",
@@ -453,6 +450,66 @@
     "answered": {
       "accepted": "You accepted this request. The owner sees this status on their side. The details remain to be agreed directly between you.",
       "declined": "You declined this request. The owner sees this status on their side."
+    }
+  },
+  "notAvailable": {
+    "title": "This screen is not part of the demonstration",
+    "body": "The address exists, but the screen has not been built. This demonstration contains only the journeys that genuinely work: finding a sitter, sending a request, creating a sitter profile, and answering requests.",
+    "home": "Back to home"
+  },
+  "notFound": {
+    "title": "This page does not exist",
+    "body": "The address does not match any Nidz screen."
+  },
+  "help": {
+    "title": "About this demonstration",
+    "intro": "Nidz is a prototype. Here is precisely what works, what is simulated, and what does not exist yet.",
+    "q": {
+      "what": {
+        "q": "What can I do here?",
+        "a": "Describe your animal and your dates, browse sitters, open a profile, send a request, create your own sitter profile and answer requests. All of that genuinely works — but only inside this browser."
+      },
+      "data": {
+        "q": "Where does my information go?",
+        "a": "Nowhere. Nidz has no server: everything you type stays in this browser's local storage, and nothing is sent. No SMS is sent, no file is uploaded, no account is created anywhere else."
+      },
+      "verification": {
+        "q": "Are the sitters verified?",
+        "a": "No, and no profile shows “verified identity”. Nidz has no verification process today. Everything on a profile is presented as stated by that person. There are no reviews, ratings or statistics either: nothing produces them."
+      },
+      "booking": {
+        "q": "Is an accepted request a booking?",
+        "a": "No. Nidz handles no reservation, no payment and no insurance, and has not decided how it will. Accepting a request means a person agreed — everything else is arranged directly between the two people."
+      },
+      "sitters": {
+        "q": "Are the sitters shown real?",
+        "a": "No. They are examples written for the demonstration, marked as such in the results and on their profiles. There are no photographs of real people and no real accounts. The only non-fictional profile possible is the one you build yourself."
+      },
+      "coverage": {
+        "q": "Which areas are covered?",
+        "a": "A few communes in Algiers and Oran only, chosen for the demonstration. This is not national coverage, and Algeria's territorial divisions change: the list of wilayas and communes is data to be kept up to date, not a constant."
+      }
+    },
+    "reset": {
+      "title": "Start over",
+      "body": "Erases everything this demonstration kept in this browser: your name, your animal, your requests and your sitter profile. You will return to the introduction screen.",
+      "cta": "Reset the demonstration",
+      "confirmTitle": "Erase all your data?",
+      "confirmBody": "Your name, your number, your animal, your requests and your sitter profile will be deleted from this browser. This cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Erase everything"
+    }
+  },
+  "policies": {
+    "title": "Data and privacy",
+    "intro": "This page describes what the prototype actually does with what you type. It is not a privacy policy: there is no service behind it to have one.",
+    "points": {
+      "storage": "Everything you type is kept in this browser's local storage, under a single key. Nothing is kept anywhere else.",
+      "transmit": "No data is transmitted: Nidz has no server, no database and no third-party service in this prototype.",
+      "location": "The location asked for is a commune, never an address. Nidz collects no exact address and does not use your device's geolocation.",
+      "documents": "An identity document is never uploaded: only the file name is kept, locally, and it produces no verification.",
+      "photos": "Photos you add stay on your device and disappear when the page is reloaded.",
+      "remove": "You can erase everything at any time from the “About this demonstration” page."
     }
   }
 }

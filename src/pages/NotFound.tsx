@@ -1,32 +1,47 @@
-import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
+import { useTranslation } from "react-i18next";
+import { Link, useLocation } from "react-router-dom";
 
-const NotFound = () => {
+import EmptyState from "@/components/shared/EmptyState";
+import { Button } from "@/components/ui/button";
+
+/**
+ * An address that resolves to nothing.
+ *
+ * Distinct from `NotAvailable`, which is for routes that exist but are not
+ * part of this demonstration. Keeping the two apart means neither has to lie
+ * about the other.
+ */
+export default function NotFound() {
+  const { t } = useTranslation();
   const location = useLocation();
 
   useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname
-    );
+    /* Kept from the original: useful when someone reports a broken link. */
+    console.warn("404:", location.pathname);
   }, [location.pathname]);
 
   return (
-    <div className="min-h-[60vh] flex items-center justify-center">
+    <div className="container py-10 md:py-14">
       <Helmet>
-        <title>Nidz — 404</title>
-        <meta name="description" content="Page not found" />
+        <title>
+          {t("common.appName")} — {t("notFound.title")}
+        </title>
+        <meta name="robots" content="noindex" />
       </Helmet>
-      <div className="text-center">
-        <h1 className="text-5xl font-bold mb-4">404</h1>
-        <p className="text-lg text-muted-foreground mb-4">Oops! Page not found</p>
-        <a href="/" className="underline hover:opacity-90">
-          Return to Home
-        </a>
+      <div className="mx-auto max-w-[720px]">
+        <EmptyState
+          headingLevel="h1"
+          title={t("notFound.title")}
+          body={t("notFound.body")}
+          action={
+            <Button asChild variant="outline">
+              <Link to="/">{t("notAvailable.home")}</Link>
+            </Button>
+          }
+        />
       </div>
     </div>
   );
-};
-
-export default NotFound;
+}

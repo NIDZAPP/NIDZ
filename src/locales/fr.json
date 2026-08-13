@@ -5,8 +5,6 @@
     "english": "Anglais",
     "french": "Français",
     "arabic": "Arabe",
-    "save": "Enregistrer",
-    "cancel": "Annuler",
     "back": "Retour",
     "continue": "Continuer",
     "remove": "Retirer",
@@ -26,8 +24,8 @@
     "footerLabel": "Liens de bas de page"
   },
   "home": {
-    "title": "Un soin de confiance",
-    "subtitle": "Connectez-vous avec des pet-sitters et promeneurs de confiance en Algérie"
+    "title": "Trouver une garde pour votre animal",
+    "subtitle": "Décrivez votre animal et vos dates, puis regardez qui peut s'en occuper — ce que chaque personne propose, et ce qu'elle ne peut pas accepter."
   },
   "species": {
     "dog": "Chien",
@@ -97,7 +95,6 @@
     "review": {
       "title": "Votre demande",
       "send": "Envoyer ma demande",
-      "missing": "Il manque le type de garde ou les dates. Reprenez votre recherche pour les indiquer.",
       "demoNote": "Envoyer n'effectue aucune réservation et aucun paiement. Rien ne quitte ce navigateur."
     },
     "sent": {
@@ -122,7 +119,7 @@
     "trust": {
       "add": "Ajouter ma pièce d'identité",
       "title": "Pièce d'identité",
-      "intro": "Nidz demande une pièce d'identité pour pouvoir, plus tard, vérifier que les personnes qui accueillent des animaux sont bien celles qu'elles disent être.",
+      "intro": "Si Nidz met un jour en place une vérification d'identité, c'est ce document qui permettrait de confirmer que les personnes qui accueillent des animaux sont bien celles qu'elles disent être. Ce processus n'existe pas aujourd'hui.",
       "docLabel": "Votre pièce d'identité",
       "docHelp": "Facultatif dans cette démonstration.",
       "pending": "Document ajouté — aucune vérification n'a lieu dans cette démonstration",
@@ -235,10 +232,10 @@
       "noCriteria": "Tous les exemples",
       "edit": "Modifier",
       "editLabel": "Modifier ma recherche",
-      "editLabelCount": "Modifier ma recherche · {{count}} critères actifs"
+      "editLabelCount_one": "Modifier ma recherche · {{count}} critère actif",
+      "editLabelCount_other": "Modifier ma recherche · {{count}} critères actifs"
     },
     "filters": {
-      "title": "Filtrer",
       "maxPrice": "Prix maximum",
       "anyPrice": "Tous les prix",
       "upTo": "{{price}} ou moins",
@@ -453,6 +450,66 @@
     "answered": {
       "accepted": "Vous avez accepté cette demande. Le propriétaire voit ce statut de son côté. Les détails restent à convenir directement entre vous.",
       "declined": "Vous avez refusé cette demande. Le propriétaire voit ce statut de son côté."
+    }
+  },
+  "notAvailable": {
+    "title": "Cet écran ne fait pas partie de la démonstration",
+    "body": "L'adresse existe, mais l'écran n'a pas été construit. Cette démonstration ne contient que les parcours réellement utilisables : trouver un pet-sitter, envoyer une demande, créer un profil de pet-sitter et répondre aux demandes.",
+    "home": "Retour à l'accueil"
+  },
+  "notFound": {
+    "title": "Cette page n'existe pas",
+    "body": "L'adresse saisie ne correspond à aucun écran de Nidz."
+  },
+  "help": {
+    "title": "À propos de cette démonstration",
+    "intro": "Nidz est un prototype. Voici précisément ce qui fonctionne, ce qui est simulé, et ce qui n'existe pas encore.",
+    "q": {
+      "what": {
+        "q": "Qu'est-ce que je peux faire ici ?",
+        "a": "Décrire votre animal et vos dates, parcourir des pet-sitters, ouvrir un profil, envoyer une demande, créer votre propre profil de pet-sitter et répondre aux demandes reçues. Tout cela fonctionne réellement, mais uniquement dans ce navigateur."
+      },
+      "data": {
+        "q": "Où vont mes informations ?",
+        "a": "Nulle part. Nidz n'a pas de serveur : tout ce que vous saisissez reste dans le stockage local de ce navigateur, et rien n'est envoyé. Aucun SMS n'est envoyé, aucun fichier n'est téléversé, aucun compte n'est créé ailleurs."
+      },
+      "verification": {
+        "q": "Les pet-sitters sont-ils vérifiés ?",
+        "a": "Non, et aucun profil n'affiche « identité vérifiée ». Nidz n'a aujourd'hui aucun processus de vérification. Tout ce qui figure sur un profil est présenté comme déclaré par la personne elle-même. Il n'y a pas non plus d'avis, de notes ni de statistiques : rien ne les produit."
+      },
+      "booking": {
+        "q": "Une demande acceptée est-elle une réservation ?",
+        "a": "Non. Nidz ne gère ni réservation, ni paiement, ni assurance, et n'a pas décidé comment il le fera. Accepter une demande signifie qu'une personne est d'accord — le reste se convient directement entre les deux personnes."
+      },
+      "sitters": {
+        "q": "Les pet-sitters affichés sont-ils réels ?",
+        "a": "Non. Ce sont des exemples écrits pour la démonstration, signalés comme tels dans les résultats et sur leur profil. Il n'y a ni photos de personnes réelles, ni comptes réels. Le seul profil non fictif possible est celui que vous créez vous-même."
+      },
+      "coverage": {
+        "q": "Quelles régions sont couvertes ?",
+        "a": "Quelques communes d'Alger et d'Oran seulement, choisies pour la démonstration. Ce n'est pas une couverture nationale, et le découpage territorial algérien évolue : la liste des wilayas et communes est une donnée à actualiser, pas une constante."
+      }
+    },
+    "reset": {
+      "title": "Recommencer à zéro",
+      "body": "Efface tout ce que cette démonstration a retenu dans ce navigateur : votre nom, votre animal, vos demandes et votre profil de pet-sitter. Vous reviendrez à l'écran d'introduction.",
+      "cta": "Réinitialiser la démonstration",
+      "confirmTitle": "Effacer toutes vos données ?",
+      "confirmBody": "Votre nom, votre numéro, votre animal, vos demandes et votre profil de pet-sitter seront supprimés de ce navigateur. Cette action ne peut pas être annulée.",
+      "cancel": "Annuler",
+      "confirm": "Tout effacer"
+    }
+  },
+  "policies": {
+    "title": "Données et confidentialité",
+    "intro": "Cette page décrit ce que le prototype fait réellement de ce que vous saisissez. Ce n'est pas une politique de confidentialité : il n'y a pas de service derrière pour en avoir une.",
+    "points": {
+      "storage": "Tout ce que vous saisissez est conservé dans le stockage local de ce navigateur, sous une seule clé. Rien n'est conservé ailleurs.",
+      "transmit": "Aucune donnée n'est transmise : Nidz n'a pas de serveur, pas de base de données et aucun service tiers dans ce prototype.",
+      "location": "La localisation demandée est une commune, jamais une adresse. Nidz ne collecte aucune adresse exacte et n'utilise pas la géolocalisation de votre appareil.",
+      "documents": "Une pièce d'identité n'est jamais téléversée : seul le nom du fichier est retenu, localement, et cela ne produit aucune vérification.",
+      "photos": "Les photos que vous ajoutez restent sur votre appareil et disparaissent au rechargement de la page.",
+      "remove": "Vous pouvez tout effacer à tout moment depuis la page « À propos de cette démonstration »."
     }
   }
 }

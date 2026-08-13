@@ -346,10 +346,6 @@ function cheapestOf(sitter: SitterProfile, pool: CareType[]) {
   return { careType, amount: sitter.rates[careType] as number };
 }
 
-/** Cheapest rate the sitter offers, with the service it belongs to. */
-export function cheapestRate(sitter: SitterProfile): { amount: number; careType: CareType } | null {
-  return cheapestOf(sitter, offeredServices(sitter));
-}
 
 /**
  * The rate to display for a given search.

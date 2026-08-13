@@ -97,7 +97,11 @@ export default function RequestSummary({
           needs in order to answer honestly. */}
       {request.pet.notes && (
         <div className="mt-6">
-          <Heading className="eyebrow">{t("request.summary.needs")}</Heading>
+          {/* The most decision-relevant text a sitter reads. `.eyebrow` is a
+              filing label; this is a content heading. */}
+          <Heading className="text-base font-semibold text-foreground">
+            {t("request.summary.needs")}
+          </Heading>
           <p className="mt-2 max-w-[64ch] text-base leading-relaxed text-foreground">{request.pet.notes}</p>
         </div>
       )}

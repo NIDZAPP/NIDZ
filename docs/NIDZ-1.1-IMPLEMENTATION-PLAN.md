@@ -18,7 +18,7 @@ This plan consolidates the original 22-batch sequencing into 9 implementation gr
 - [x] Group 6 — Owner account, simulated OTP, request flow, and My Requests
 - [x] Group 7 — Sitter onboarding, profile builder, trust step, preview, and publish
 - [x] Group 8 — Sitter requests and role-specific navigation
-- [ ] Group 9 — Final demo-path cleanup, required states, i18n, RTL, accessibility, lint and build verification
+- [x] Group 9 — Final demo-path cleanup, required states, i18n, RTL, accessibility, lint and build verification
 
 ---
 
@@ -306,3 +306,23 @@ Also fixed from the review: the fourth tab now keys on `published` rather than o
 **Risk:** Low–Medium.
 
 **Constraint identified during review:** **do not delete routes** — deleting breaks deep links and browser back. Hide from navigation and serve a clear "non disponible dans cette démonstration" screen rather than a 404. This is also where `/admin` route gating is handled.
+
+### Status: COMPLETE
+
+**Legacy swept.** No `PetLink` anywhere. The six remaining "coming soon" stubs were deleted and their routes now serve one honest screen (`NotAvailable`) — including `/admin`, which was previously an admin-looking page with no gate; an honest absence is better than a screen that implies an authenticated area. `/sitter/dashboard` redirects to the real inbox. `/help` and `/policies` carry real content stating exactly what the prototype does and does not do, plus a confirmed "reset the demonstration" control. Orphaned `MapPreview` and the now-unused `mapbox-gl` dependency removed.
+
+**Two product-truth leaks found by the final design review, both fixed:**
+1. `home.subtitle` said "pet-sitters de confiance" / "trusted sitters" — asserting the supply is trustworthy, on the most-returned-to screen, and piped into `<meta name="description">`. Rewritten to frame the owner's task. (`entry.title` keeps "Trouvez une personne de confiance", which is the owner's *goal*, and is the audit's own line.)
+2. The affirmative fit heading could sit over reasons that were entirely absences — "Bien adapté à Milo" above nothing but "ne s'est pas déclaré indisponible". Now gated on at least one non-absence reason.
+
+**One Critical found by the final code review, fixed:** `emptySitterProfile` seeded `housing: { type: "apartment", outdoor: "none" }`, so the Group 7 guard (`profile?.housing.type ?? null`) never fired — the builder pre-selected both with a teal border and a check glyph, and the profile published them as declarations under "informations fournies par le pet-sitter". `SitterHousing.type` and `.outdoor` are now nullable so the compiler carries the distinction, the guards fire, and the profile omits what was never answered. Verified in the browser: the housing step now arrives with nothing selected and refuses to continue.
+
+Also fixed from that review: the three price inputs had no accessible name (an overridden `id` orphaned `FieldShell`'s `label[for]`); the progress denominator changed from 6 to 8 between two consecutive screens; `state.role` was persisted and read by nothing; `clearStoredState()` in the reset was undone by the persistence effect a tick later; the reset had no confirmation; the splash key was a duplicated literal; the sitter workspace slice is now validated field-by-field because `/search` puts a published profile straight into the match pool; an `ErrorBoundary` now catches the deliberate throw paths (`useDemo`, `ProvenanceLabel`, corrupt storage) that previously blanked the page.
+
+**Design review, acted on:** match tokens no longer share selection's exact treatment (teal-on-soft-teal with a check meant two different things one radius apart); one fact-label style across the three fact lists; the animal's needs promoted from a filing label to a content heading; terracotta removed from a data value it coloured on one screen only; the home page's navigable rows joined the hairline register; one measure and one rhythm for browsable pages.
+
+**Playfair Display removed entirely.** It was the wordmark's face and has no Arabic glyphs, so in one of the three product languages the brand fell back to an arbitrary system serif — and the header and the entry splash rendered the same name in two different faces. The terracotta `PawPrint` mark carries the brand instead, in both places, and the font is no longer loaded.
+
+**Lint is now 0 errors** (was 4 pre-existing): two empty interfaces became type aliases and `tailwind.config.ts` uses ESM imports. 7 warnings remain, all `react-refresh/only-export-components` on vendored shadcn primitives; fixing them means splitting `buttonVariants` and friends out of files imported across the app, which is a broad refactor for a cosmetic rule.
+
+`DESIGN.md` documents the system as built. `CLAUDE.md` updated to describe the built state.

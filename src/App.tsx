@@ -2,21 +2,19 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { DirectionProvider } from "@radix-ui/react-direction";
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import Layout from "@/components/layout/Layout";
+import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import DemoProvider from "@/state/demo/DemoProvider";
 
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import Auth from "@/pages/Auth";
-import Pets from "@/pages/Pets";
 import Search from "@/pages/Search";
 import SitterProfile from "@/pages/SitterProfile";
-import Book from "@/pages/Book";
-import Chat from "@/pages/Chat";
-import SitterDashboard from "@/pages/SitterDashboard";
-import AdminDashboard from "@/pages/AdminDashboard";
+import NotAvailable from "@/pages/NotAvailable";
 import Policies from "@/pages/Policies";
 import Help from "@/pages/Help";
 import Welcome from "@/pages/onboarding/Welcome";
@@ -63,15 +61,23 @@ function LegacySitterRedirect() {
  *    footer.
  *  - Flow screens own the full viewport, carry their own back control and
  *    their own action bar, and must not also show site chrome, so they are
- *    registered outside the layout route. (None exist yet — the first arrive
- *    with the owner need flow.)
+ *    registered outside the layout route.
  *
  * Public sitter profiles live under `/sitters/:id`; `/sitter/*` is the
  * sitter's own area. Keeping the two apart means no static sitter route can
  * ever be shadowed by a profile id.
  */
-const App = () => (
+const App = () => {
+  const { i18n } = useTranslation();
+  /* Radix reads its own context, not `<html dir>`. Without this the roving
+     focus in every radio group has its arrow keys reversed in Arabic, and
+     `align="end"` on a Select aligns to the wrong edge. */
+  const dir = i18n.language?.startsWith("ar") ? "rtl" : "ltr";
+
+  return (
+  <ErrorBoundary>
   <QueryClientProvider client={queryClient}>
+    <DirectionProvider dir={dir}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
@@ -108,21 +114,28 @@ const App = () => (
 
             <Route element={<Layout />}>
               <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/pets" element={<Pets />} />
+              {/* Registered, not implemented. The routes stay so deep links and
+                  Back keep working; each serves one honest screen saying the
+                  page is not part of this demonstration, rather than a
+                  "coming soon" stub promising features nobody has committed
+                  to. Admin is here too: it was never gated, and an
+                  admin-looking screen with no authentication behind it is
+                  worse than an honest absence. */}
+              <Route path="/auth" element={<NotAvailable />} />
+              <Route path="/pets" element={<NotAvailable />} />
               <Route path="/search" element={<Search />} />
               <Route path="/sitters/:id" element={<SitterProfile />} />
               {/* The legacy registration page promised a verification Nidz
                   cannot perform. The flow that replaced it starts here. */}
               <Route path="/sitter/register" element={<Navigate to="/sitter/start" replace />} />
               <Route path="/sitter/requests" element={<SitterRequests />} />
-              <Route path="/book/:listingId" element={<Book />} />
-              <Route path="/chat/:bookingId" element={<Chat />} />
+              <Route path="/book/:listingId" element={<NotAvailable />} />
+              <Route path="/chat/:bookingId" element={<NotAvailable />} />
               <Route path="/owner/requests" element={<OwnerRequests />} />
               <Route path="/owner/requests/:id" element={<OwnerRequestDetail />} />
               <Route path="/owner/bookings" element={<Navigate to="/owner/requests" replace />} />
-              <Route path="/sitter/dashboard" element={<SitterDashboard />} />
-              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/sitter/dashboard" element={<Navigate to="/sitter/requests" replace />} />
+              <Route path="/admin" element={<NotAvailable />} />
               <Route path="/policies" element={<Policies />} />
               <Route path="/help" element={<Help />} />
               {/* Profiles moved out of the sitter's own namespace; the old
@@ -135,7 +148,10 @@ const App = () => (
         </DemoProvider>
       </BrowserRouter>
     </TooltipProvider>
+    </DirectionProvider>
   </QueryClientProvider>
-);
+  </ErrorBoundary>
+  );
+};
 
 export default App;

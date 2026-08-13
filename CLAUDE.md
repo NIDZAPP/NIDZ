@@ -23,15 +23,23 @@ This is the **Nidz** product (a pet-care marketplace for Algeria). Before creati
 
 It is the authoritative spec for UX, UI, colors, typography, spacing, trust signals, and product behavior. When it conflicts with generic design advice, shadcn/Tailwind examples, or existing legacy UI, **the Nidz design system wins**. The `/nidz-design` skill (`.claude/skills/nidz-design/SKILL.md`) enforces this. Key product rule: **never make a simulated/demo feature look genuinely functional**, and never invent verification, reviews, availability, payment protection, booking confirmation, insurance, or trust metrics that don't exist.
 
-## Current state: demo front-end, no backend
+## Current state: complete demo front-end, no backend
 
-The app is a **UI prototype with no backend integration**. This is important context for any change:
+Both marketplace journeys are implemented end to end, entirely in the browser. There is still **no backend**, and that is load-bearing context for every change:
 
-- No `fetch`/`axios`/Supabase/Firebase/REST client exists anywhere in `src/`.
-- `@tanstack/react-query`'s `QueryClientProvider` is mounted in `src/App.tsx`, but **no `useQuery`/`useMutation` is ever called** — there is no data layer behind it yet.
-- Displayed data is hard-coded mock arrays, e.g. `src/pages/Search.tsx` (`// Mock data for pet sitters`) and `src/components/home/FeaturedSitters.tsx`.
-- Most routed pages are `coming soon` stubs (~14 lines each). Only `Index`, `Search`, `SitterRegister`, and `NotFound` have real content.
-- `localStorage` is used only for the i18n language cache and the Mapbox token placeholder (`src/components/map/MapPreview.tsx`); Mapbox is installed but not yet wired to a real map.
+- No `fetch`/`axios`/Supabase/Firebase/REST client exists anywhere in `src/`. `QueryClientProvider` is mounted but no query or mutation is ever called.
+- **All demo data lives in `src/data/`** — `demo-sitters.ts` is the only sitter fixture in the app, `locations.ts` is a deliberately partial wilaya/commune subset, `types.ts` holds the domain model. No component may hold data of its own.
+- **State is one reducer behind a context** (`src/state/demo/`), mirrored into `localStorage` under `nidz.demo.v1`. Storage is treated as untrusted input and validated per slice on read. The owner's request and the sitter's incoming request are the *same object* — there is no synchronisation to get wrong.
+- Routes that were `coming soon` stubs now serve `src/pages/NotAvailable.tsx` — a single honest screen. The routes stay registered so deep links and Back keep working. `/help` and `/policies` carry real content describing exactly what the prototype does and does not do.
+
+### Honesty rules that the code enforces, not just documents
+
+- `SitterProfile` has **no** `verified`, `rating`, `reviewCount`, `responseTime`, `completedStays` or `online` field, and none may be added without a real mechanism. `ProvenanceLabel` (`components/shared/trust.tsx`) throws in dev if a trust category with no mechanism is rendered.
+- `RequestStatus` has no `completed`: nothing can observe that a stay happened.
+- `declaredUnavailable` is a **statement by the sitter**, never a booking calendar. Not-declared-busy is never rendered as "available".
+- Adding an identity document produces no verified state anywhere.
+- `isDemoFixture` is what every surface reads to decide whether to mark an entry as an example — including the profile page, because those links are shareable.
+- Simulated behaviour (the code step, sending a request, publishing) carries a `DemoNotice` at full weight, never a footnote.
 
 **Product name**: the app is named **Nidz** throughout. The legacy name "PetLink DZ" was removed from the codebase, the PWA manifest (`vite.config.ts`), and all page `<Helmet>` titles in the Audit 1.1 rebrand; do not reintroduce it. The canonical string is the `common.appName` i18n key (`Nidz` in en/fr, `نيدز` in ar) — prefer `t("common.appName")` over a hardcoded literal in user-facing copy. Note the design system document styles the name as **NIDZ** in headings; the code uses **Nidz**.
 
@@ -39,8 +47,9 @@ The app is a **UI prototype with no backend integration**. This is important con
 
 Stack: **Vite 5 + React 18 + TypeScript** (SWC), **shadcn/ui** (Radix) components, **Tailwind CSS 3**, **react-router-dom 6**. Scaffolded via Lovable (`lovable-tagger` runs only in dev mode).
 
-- **Entry**: `src/main.tsx` → wraps `<App/>` in `HelmetProvider` and imports `./i18n` (i18n must be initialized before render). `src/App.tsx` composes providers (react-query, tooltips, two toasters) and defines **all routes flat** inside a single `<Layout>`. Add new routes above the catch-all `path="*"`.
-- **Layout**: `src/components/layout/Layout.tsx` = `Header` + `main` + `Footer`, applied globally to every route.
+- **Entry**: `src/main.tsx` → wraps `<App/>` in `HelmetProvider` and imports `./i18n` (i18n must be initialized before render). `src/App.tsx` composes providers (react-query, tooltips, two toasters, `DemoProvider`).
+- **Two route shapes.** Browsable screens sit inside the `Layout` route and get header, footer and the mobile bottom bar. **Flow screens** (entry, owner need, request, sitter onboarding) are registered *outside* it: they own the viewport, carry their own back control and their own action bar via `components/shared/FlowScreen.tsx`, and must never also show site chrome. Add browsable routes above the catch-all `path="*"`.
+- **Namespacing**: public profiles are `/sitters/:id`; `/sitter/*` is the sitter's own area. Keeping them apart means no static sitter route can be shadowed by a profile id.
 - **Path alias**: `@/` → `src/` (configured in both `vite.config.ts` and `tsconfig`). shadcn aliases live in `components.json`.
 
 ### Design tokens
@@ -50,7 +59,9 @@ All colors are **HSL CSS variables** defined in `src/index.css` (`:root`), mappe
 
 Radius scale is sm 8 / md 12 / lg 16 / xl 24; `rounded-2xl` and `rounded-3xl` are not part of it. Motion durations follow design system §24 and `prefers-reduced-motion` is honored globally. Dark mode is **not** part of V1: the `.dark` block in `index.css` is legacy, never applied, and still holds the old mint theme.
 
-Fonts: `Inter` (sans/default) carries the interface; `Playfair Display` (`font-display`) is brand expression only — the header wordmark and a single marketing display title. Never in forms, buttons, tables, or admin. Icons: **lucide-react** only, never emoji.
+Fonts: `Inter` (sans/default) carries the interface; `Playfair Display` (`font-display`) is brand expression only — **the header wordmark, and nothing else**. It has no Arabic face, so it must never carry copy that appears in all three languages. Icons: **lucide-react** only, never emoji.
+
+`DESIGN.md` documents the visual system as actually built. Read it before adding a screen.
 
 ### Internationalization + RTL (critical for every UI change)
 `src/i18n.ts` configures i18next for three locales — **`en`, `fr`, `ar`** (strings in `src/locales/*.json`), default `en`, detected from localStorage → querystring → navigator.

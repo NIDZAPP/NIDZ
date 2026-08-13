@@ -1,3 +1,4 @@
+import { PawPrint } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -30,12 +31,18 @@ export default function Header() {
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background">
       <div className="container flex h-16 items-center justify-between gap-4">
         <div className="flex min-w-0 items-center gap-4">
-          {/* The one Playfair role in the application: the wordmark. */}
+          {/* The same lockup the entry screens use: the terracotta mark plus
+              the name in Inter. Playfair was the one brand-expression role
+              here, but it has no Arabic face — so in Arabic the wordmark fell
+              back to an arbitrary system serif, and the header and the splash
+              rendered the brand in two different faces. The mark is what
+              carries the brand now, and it works in all three languages. */}
           <Link
             to="/"
             aria-label={`${t("common.appName")} — ${t("nav.home")}`}
-            className="shrink-0 rounded-md font-display text-xl tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="flex shrink-0 items-center gap-2 rounded-md text-lg font-semibold tracking-tight text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
+            <PawPrint className="size-5 text-brand" aria-hidden="true" />
             {t("common.appName")}
           </Link>
           <nav aria-label={t("nav.siteLabel")} className="hidden items-center gap-1 md:flex">

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useReducer, useRef } from "react";
 import type { ReactNode } from "react";
 
 import { DemoContext } from "./context";
-import { loadState, reducer, saveState } from "./reducer";
+import { INITIAL_STATE, clearStoredState, loadState, reducer, saveState } from "./reducer";
 
 /**
  * Holds the demo state and mirrors it into localStorage.
@@ -24,7 +24,11 @@ export default function DemoProvider({ children }: { children: ReactNode }) {
       hydrated.current = true;
       return;
     }
-    saveState(state);
+    /* Back to initial means the visitor asked to be forgotten, so the record
+       is removed rather than rewritten with empty values — "vous pouvez tout
+       effacer" has to leave nothing behind. */
+    if (state === INITIAL_STATE) clearStoredState();
+    else saveState(state);
   }, [state]);
 
   const value = useMemo(() => ({ state, dispatch }), [state]);

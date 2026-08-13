@@ -47,13 +47,13 @@ export default function SitterProfile() {
 
   if (!sitter || !publicallyVisible) {
     return (
-      <div className="container py-12 md:py-20">
+      <div className="container py-10 md:py-14">
         <Helmet>
           <title>
             {t("common.appName")} — {t("profile.notFoundTitle")}
           </title>
         </Helmet>
-        <div className="mx-auto max-w-[640px]">
+        <div className="mx-auto max-w-[720px]">
           <EmptyState
             /* This state IS the page, so it carries its heading. */
             headingLevel="h1"
@@ -142,7 +142,7 @@ export default function SitterProfile() {
         <meta name="description" content={localized(sitter.headline, lng)} />
       </Helmet>
 
-      <div className="container py-8 md:py-12">
+      <div className="container py-10 md:py-14">
         <div className="mx-auto max-w-[1120px]">
           {/* A real link, not history.back(): a shared URL has no results page
               behind it, and this reconstructs the exact result set. */}
