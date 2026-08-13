@@ -11,8 +11,8 @@ This plan consolidates the original 22-batch sequencing into 9 implementation gr
 ## Progress
 
 - [x] Group 1 — Nidz rebrand and public navigation cleanup
-- [ ] Group 2 — Global design system and interaction primitives
-- [ ] Group 3 — Demo foundations: honesty primitives, fixtures, state store, and routing shell
+- [x] Group 2 — Global design system and interaction primitives
+- [x] Group 3 — Demo foundations: honesty primitives, fixtures, state store, and routing shell
 - [ ] Group 4 — Entry flow and owner need-definition flow
 - [ ] Group 5 — Search results and sitter profile
 - [ ] Group 6 — Owner account, simulated OTP, request flow, and My Requests
@@ -81,6 +81,18 @@ These apply to every group and are not repeated per group:
 - **Verify `#7C8B86` against the ≥3:1 non-text contrast target** before adopting it for control borders.
 - Tailwind does not error on removed utility classes, so the gradient/shadow/hover-zoom sweep must be grep-driven, not compile-driven.
 
+### Status: COMPLETE
+
+- [x] Terracotta placed on a separate `--brand` token, never on a control; CSS `--accent` kept as shadcn's neutral hover/selection surface. Both documented at the top of `src/index.css`.
+- [x] `#7C8B86` adopted as `--input` (control boundary) at 3.41:1 on `--background` / 3.56:1 on `--card`; `--border` stays decorative-only.
+- [x] Radius scale 8/12/16/24; `rounded-2xl` / `rounded-3xl` removed from the scale.
+- [x] ≥44px targets across Button, input, select, checkbox, switch, tabs; Search's two Sliders replaced by worded chips (a 20px thumb missed the floor and the axis reversed meaning in RTL).
+- [x] Motion capped to §24 durations, `prefers-reduced-motion` honored globally via `animation-duration: 0.01ms` (not `none`, so Radix still receives `animationend`).
+- [x] `/search` rebuilt as need-definition → results, with the brief rail, the ruled honesty notice and the hairline register.
+- [x] Build passed; lint unchanged at the pre-existing baseline (4 errors, 7 warnings, all in untouched files).
+- [x] Browser-verified: need state, results state, 390×844 (no horizontal overflow), Arabic RTL (`dir="rtl"`, full AR copy, DZD via `formatDZD`). 0 console errors.
+- [x] Committed **e13f4fb**, pushed to `origin/nidz-1.1`.
+
 ---
 
 ## Group 3 — Demo foundations: honesty primitives, fixtures, state store, and routing shell
@@ -94,6 +106,26 @@ These apply to every group and are not repeated per group:
 **Dependencies:** Group 2.
 
 **Risk:** Medium. Not user-visible on its own; the routing change touches every route. The request model alone blocks five later screens (récapitulatif, succès, Mes demandes, demandes reçues, après acceptation).
+
+### Status: COMPLETE
+
+**Data boundary** — `src/data/types.ts` (domain model), `src/data/locations.ts` (wilaya → commune, a deliberately partial launch subset with no count ever rendered), `src/data/demo-sitters.ts` (the only sitter fixture in the app; declared unavailability authored as day offsets so it never drifts into the past).
+
+**State** — `src/state/demo/{reducer,context,DemoProvider}.tsx`: one `useReducer` behind a context, mirrored into `localStorage` under `nidz.demo.v1`. No store library: the platform already provides what a dozen actions need. Object-URL photo previews are stripped before persisting, because a persisted object URL points at nothing after a reload.
+
+**Primitives** — `components/shared/`: `Chip` (extracted from Search), `OptionGroup` (Radix radio rows, so arrow keys work), `FlowScreen` (the shell every wizard step uses), `trust.tsx` (`ProvenanceLabel` — throws in dev if a category with no mechanism is rendered — plus `DemoNotice` / `DemoLine`), `StatusBadge`, `EmptyState`, `fields.tsx` (`FieldShell`, `SelectField`, `PhotoField`, `DocumentField`).
+
+**Routing** — `Layout` became a layout route rendering `<Outlet/>`, so flow screens can sit outside the chrome. Public profiles moved to `/sitters/:id`; `/sitter/*` is now unambiguously the sitter's own area, with `/sitter/:id` kept as a redirect so old links still resolve.
+
+**Consolidation** — `Search.tsx` migrated onto the fixtures (design untouched); `communes.*` and `sitters.*` locale keys retired in favour of the data module; `species` / `speciesPlural` / `accepts` / `care` / `care.unit` promoted to top-level namespaces shared by every group; orphaned `FeaturedSitters.tsx` deleted (it carried a second, contradictory sitter fixture).
+
+**Code review** — one Critical, fixed and browser-verified: `rateFor` fell back to the globally cheapest rate whenever two or more services were requested, so a "boarding or home visits" search headlined a sitter at her 700 DZD *walk* price — and because `/search` filters on that same amount, she also passed a budget her real prices exceeded. It became reachable only in this group, when the fixture gained sitters offering three services. Fixed by pooling over the requested services; `offeredServices()` is now the single answer to "what does this person do" (`services` declares, `rates` prices).
+
+Also from the review: `loadState` validates each slice instead of asserting `as Partial<DemoState>` (localStorage is user-writable, and a hand-edited key must not white-screen the app); `DemoProvider` no longer writes storage on first paint; `ProvenanceLabel` throws only in dev; `FieldShell` hands the ARIA wiring to the control so help/error text is actually announced; `SelectField` no longer double-labels; `PhotoField` revokes object URLs on unmount and re-fires on the same file; legacy commune codes normalise instead of silently resolving to "all areas"; the profile stub no longer advertises "reviews"; `min-h-dvh` throughout; the legacy `/sitter/:id` redirect preserves query and hash; one RTL mechanism (`[dir="rtl"]`); bottom scroll padding scoped to the flow shell.
+
+- [x] Build passed; lint unchanged at baseline; `tsc --noEmit` clean; en/fr/ar structurally identical with every referenced key resolving.
+- [x] Browser-verified `/search` renders from the fixtures, links resolve to `/sitters/:slug`, 0 console errors.
+- [x] Committed and pushed to `origin/nidz-1.1`.
 
 ---
 

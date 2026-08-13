@@ -6,7 +6,14 @@
     "french": "Français",
     "arabic": "Arabe",
     "save": "Enregistrer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "back": "Retour",
+    "continue": "Continuer",
+    "remove": "Retirer",
+    "addPhoto": "Ajouter une photo",
+    "changePhoto": "Changer la photo",
+    "photoLocalOnly": "La photo reste sur votre appareil : cette démonstration n'envoie et n'enregistre aucun fichier.",
+    "progress": "Progression"
   },
   "nav": {
     "home": "Accueil",
@@ -29,6 +36,43 @@
     "title": "Un soin de confiance",
     "subtitle": "Connectez-vous avec des pet-sitters et promeneurs de confiance en Algérie",
     "searchCta": "Trouver un pet-sitter"
+  },
+  "species": {
+    "dog": "Chien",
+    "cat": "Chat"
+  },
+  "speciesPlural": {
+    "dog": "Chiens",
+    "cat": "Chats"
+  },
+  "accepts": {
+    "dog": "Accepte les chiens",
+    "cat": "Accepte les chats"
+  },
+  "care": {
+    "boarding": "Garde chez le pet-sitter",
+    "atOwner": "Garde à mon domicile",
+    "walk": "Promenade",
+    "unit": {
+      "night": "par nuit",
+      "visit": "par visite",
+      "walk": "par promenade"
+    }
+  },
+  "trust": {
+    "declared": "Déclaré par le pet-sitter"
+  },
+  "request": {
+    "status": {
+      "pending": "En attente",
+      "accepted": "Acceptée",
+      "declined": "Refusée"
+    }
+  },
+  "sitterFlow": {
+    "trust": {
+      "add": "Ajouter ma pièce d'identité"
+    }
   },
   "sitter": {
     "registration": "Inscription Pet-Sitter",
@@ -57,23 +101,10 @@
       "speciesLabel": "Votre animal",
       "communeLabel": "Où cherchez-vous ?",
       "communeAny": "Toutes les communes",
-      "communeHelp": "Cette démonstration couvre quelques communes d'Alger.",
+      "communeHelp": "Cette démonstration couvre quelques communes d'Alger et d'Oran.",
       "careLabel": "Quel type de garde recherchez-vous ?",
       "submit": "Voir les pet-sitters",
       "skip": "Voir les exemples sans critères"
-    },
-    "species": {
-      "dog": "Chien",
-      "cat": "Chat"
-    },
-    "accepts": {
-      "dog": "Accepte les chiens",
-      "cat": "Accepte les chats"
-    },
-    "care": {
-      "boarding": "Garde chez le pet-sitter",
-      "atOwner": "Garde à mon domicile",
-      "walk": "Promenade"
     },
     "context": {
       "noCriteria": "Tous les exemples",
@@ -101,24 +132,13 @@
     },
     "card": {
       "matchLabel": "Correspond à votre recherche",
-      "perNight": "par nuit",
       "viewProfile": "Voir le profil",
-      "viewProfileOf": "Voir le profil de {{name}}",
       "demoTag": "Exemple",
-      "from": "à partir de",
-      "unit": {
-        "night": "par nuit",
-        "visit": "par visite",
-        "walk": "par promenade"
-      }
+      "from": "à partir de"
     },
     "demo": {
       "title": "Exemples de démonstration",
       "body": "Ces pet-sitters sont fictifs et Nidz ne vérifie encore aucun profil. Aucune donnée n'est enregistrée, aucune demande ne peut être envoyée, et les profils s'ouvrent sur une page de démonstration incomplète."
-    },
-    "speciesPlural": {
-      "dog": "Chiens",
-      "cat": "Chats"
     },
     "brief": {
       "title": "Votre recherche",
@@ -129,37 +149,5 @@
       "anySpecies": "Chien ou chat",
       "anyCare": "Tous types de garde"
     }
-  },
-  "trust": {
-    "declared": "Déclaré par le pet-sitter"
-  },
-  "sitters": {
-    "s1": {
-      "bio": "Je garde des chiens chez moi, dans une maison avec une cour clôturée."
-    },
-    "s2": {
-      "bio": "Promenades quotidiennes et gardes courtes. J'ai grandi avec des chiens."
-    },
-    "s3": {
-      "bio": "Je m'occupe surtout de chats, chez leurs propriétaires, matin et soir."
-    },
-    "s4": {
-      "bio": "Appartement calme, sans autre animal. J'accueille un chat ou un petit chien."
-    }
-  },
-  "listing": {
-    "services": "Services"
-  },
-  "booking": {
-    "request": "Envoyer la demande",
-    "payProof": "Téléverser la preuve de paiement",
-    "startWalk": "Démarrer la promenade",
-    "endWalk": "Terminer la promenade"
-  },
-  "communes": {
-    "hydra": "Hydra",
-    "elBiar": "El Biar",
-    "kouba": "Kouba",
-    "babEzzouar": "Bab Ezzouar"
   }
 }

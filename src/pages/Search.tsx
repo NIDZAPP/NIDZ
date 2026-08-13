@@ -2,15 +2,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
-import { Cat, Check, Dog, Info, MapPin, PawPrint, SlidersHorizontal, User } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { Cat, Check, Dog, MapPin, PawPrint, SlidersHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -21,81 +22,28 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import Chip from "@/components/shared/Chip";
+import { DemoNotice, ProvenanceLabel } from "@/components/shared/trust";
+import EmptyState from "@/components/shared/EmptyState";
+import { DEMO_SITTERS, offeredServices, rateFor } from "@/data/demo-sitters";
+import { WILAYAS, communeName, normalizeCommuneCode } from "@/data/locations";
+import {
+  CARE_TYPES,
+  CARE_UNIT_KEY,
+  SPECIES,
+  localized,
+  type CareType,
+  type Species,
+} from "@/data/types";
 import { cn } from "@/lib/utils";
 import { formatDZD } from "@/utils/format";
 import { SUPPORTED_LOCALES, type AppLocale } from "@/i18n";
 
-/* ---------------------------------------------------------------------------
-   DEMONSTRATION DATA — NOT REAL PEOPLE, NOT REAL LISTINGS.
-   Every field is something a sitter would DECLARE about themselves
-   (design system §6 A). There is deliberately NO rating, review count,
-   verification flag, response time or availability: Nidz has no mechanism
-   behind any of those, and inventing them is forbidden (§6.1, §7, §8.3).
-   Rates are per service, because a nightly rate is not the price of a walk.
-   ------------------------------------------------------------------------ */
+/* Sitters, communes and rates all come from the demo fixtures — this screen
+   holds no data of its own. See src/data/demo-sitters.ts for why there is no
+   rating, review, availability or verification anywhere in it. */
 
-type Species = "dog" | "cat";
-type CareType = "boarding" | "atOwner" | "walk";
-
-type DemoSitter = {
-  id: number;
-  /** Public identity is first name + initial only (§27, Audit p.156). */
-  name: string;
-  /** Approximate zone. Nidz never has, and never shows, an exact address. */
-  communeKey: string;
-  species: Species[];
-  /** A rate exists only for a service the sitter actually offers. */
-  rates: Partial<Record<CareType, number>>;
-  bioKey: string;
-};
-
-const DEMO_SITTERS: DemoSitter[] = [
-  {
-    id: 1,
-    name: "Amina B.",
-    communeKey: "hydra",
-    species: ["dog"],
-    rates: { boarding: 1200, walk: 600 },
-    bioKey: "sitters.s1.bio",
-  },
-  {
-    id: 2,
-    name: "Karim B.",
-    communeKey: "elBiar",
-    species: ["dog"],
-    rates: { boarding: 900, walk: 500 },
-    bioKey: "sitters.s2.bio",
-  },
-  {
-    id: 3,
-    name: "Sarah M.",
-    communeKey: "kouba",
-    species: ["cat"],
-    rates: { atOwner: 800 },
-    bioKey: "sitters.s3.bio",
-  },
-  {
-    id: 4,
-    name: "Youcef H.",
-    communeKey: "babEzzouar",
-    species: ["cat", "dog"],
-    rates: { boarding: 800 },
-    bioKey: "sitters.s4.bio",
-  },
-];
-
-const COMMUNE_KEYS = ["hydra", "elBiar", "kouba", "babEzzouar"];
-const SPECIES: Species[] = ["dog", "cat"];
-const CARE_TYPES: CareType[] = ["boarding", "atOwner", "walk"];
 const PRICE_STEPS = [600, 900, 1200];
-
-/** The unit belongs to the service, never to the sitter. */
-const CARE_UNIT: Record<CareType, string> = {
-  boarding: "search.card.unit.night",
-  atOwner: "search.card.unit.visit",
-  walk: "search.card.unit.walk",
-};
-
 const ANY = "any";
 
 type Criteria = {
@@ -113,11 +61,12 @@ const NO_CRITERIA: Criteria = { species: [], care: [], commune: null, maxPrice: 
 function parseCriteria(params: URLSearchParams): Criteria {
   const list = (key: string) => (params.get(key) || "").split(",").filter(Boolean);
   const max = Number(params.get("max"));
-  const commune = params.get("commune");
   return {
     species: list("species").filter((v): v is Species => SPECIES.includes(v as Species)),
     care: list("care").filter((v): v is CareType => CARE_TYPES.includes(v as CareType)),
-    commune: commune && COMMUNE_KEYS.includes(commune) ? commune : null,
+    /* Normalised rather than matched exactly, so links written before the
+       commune codes were slugified still resolve to the right area. */
+    commune: normalizeCommuneCode(params.get("commune")),
     maxPrice: PRICE_STEPS.includes(max) ? max : null,
   };
 }
@@ -135,61 +84,8 @@ function toggle<T>(list: T[], value: T): T[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
 }
 
-const servicesOf = (s: DemoSitter) => (Object.keys(s.rates) as CareType[]);
-
-/* The price shown is the price of the service the owner asked for. When no
-   single service is selected we show the cheapest one the sitter offers and
-   label it "from" — a nightly rate is never presented as the price of a walk. */
-function displayRate(s: DemoSitter, care: CareType[]) {
-  const offered = servicesOf(s);
-  const selected = care.filter((c) => offered.includes(c));
-  const chosen = selected.length === 1 ? selected[0] : null;
-  if (chosen) return { amount: s.rates[chosen] as number, unit: CARE_UNIT[chosen], from: false };
-  const cheapest = offered.reduce((a, b) => ((s.rates[a] as number) <= (s.rates[b] as number) ? a : b));
-  return { amount: s.rates[cheapest] as number, unit: CARE_UNIT[cheapest], from: offered.length > 1 };
-}
-
 function isAppLocale(value: string): value is AppLocale {
   return (SUPPORTED_LOCALES as readonly string[]).includes(value);
-}
-
-/* A filter chip. Multi-select, so `checkbox` is the honest role. The check
-   glyph means state is never carried by colour alone (§12.2). The glyph slot
-   is always reserved so toggling never reflows the row under the user's
-   finger, and min-h-11 meets the Nidz ~44px touch floor (§17). These replace
-   two Radix Sliders whose 20px thumbs missed that floor and whose axis
-   reversed meaning in RTL — a worded chip cannot reverse. */
-function Chip({
-  selected,
-  onClick,
-  icon: Icon,
-  children,
-}: {
-  selected: boolean;
-  onClick: () => void;
-  icon?: LucideIcon;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      role="checkbox"
-      aria-checked={selected}
-      onClick={onClick}
-      className={cn(
-        "inline-flex min-h-12 items-center gap-2.5 rounded-full border px-5 text-[0.9375rem] font-medium transition-colors",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        selected
-          ? "border-primary bg-accent text-accent-foreground"
-          : "border-input bg-card text-foreground hover:bg-secondary",
-      )}
-    >
-      <span className="flex size-4 shrink-0 items-center justify-center" aria-hidden="true">
-        {selected ? <Check className="size-4" /> : Icon ? <Icon className="size-4 text-muted-foreground" /> : null}
-      </span>
-      {children}
-    </button>
-  );
 }
 
 export default function Search() {
@@ -222,16 +118,9 @@ export default function Search() {
     resultsHeading.current?.focus({ preventScroll: true });
   }, [stage]);
 
-  const speciesLabel = (s: Species) => t(`search.species.${s}`);
-  const careLabel = (c: CareType) => t(`search.care.${c}`);
-  const communeLabel = (key: string) => t(`communes.${key}`);
-
-  /* Uppercase is a no-op in Arabic and letter-spacing breaks cursive joining,
-     so the eyebrow keeps its size and weight but drops both there. */
-  const eyebrow = cn(
-    "text-eyebrow font-semibold text-muted-foreground",
-    lng === "ar" ? "tracking-normal" : "uppercase",
-  );
+  const speciesLabel = (s: Species) => t(`species.${s}`);
+  const careLabel = (c: CareType) => t(`care.${c}`);
+  const zoneLabel = (code: string) => communeName(code, lng) ?? code;
 
   const apply = (next: Criteria) => setSearchParams(serializeCriteria(next));
 
@@ -239,15 +128,15 @@ export default function Search() {
      reputation, no availability and no distance-from-user to rank by. Order is
      by the price actually displayed, and the UI says so. */
   const results = useMemo(() => {
-    return DEMO_SITTERS.map((s) => ({ sitter: s, rate: displayRate(s, criteria.care) }))
-      .filter(({ sitter, rate }) => {
-        if (criteria.species.length && !sitter.species.some((x) => criteria.species.includes(x))) return false;
-        if (criteria.care.length && !servicesOf(sitter).some((x) => criteria.care.includes(x))) return false;
-        if (criteria.commune && sitter.communeKey !== criteria.commune) return false;
-        if (criteria.maxPrice !== null && rate.amount > criteria.maxPrice) return false;
-        return true;
-      })
-      .sort((a, b) => a.rate.amount - b.rate.amount);
+    return DEMO_SITTERS.flatMap((sitter) => {
+      const rate = rateFor(sitter, criteria.care);
+      if (!rate) return [];
+      if (criteria.species.length && !sitter.acceptedSpecies.some((x) => criteria.species.includes(x))) return [];
+      if (criteria.care.length && !offeredServices(sitter).some((x) => criteria.care.includes(x))) return [];
+      if (criteria.commune && sitter.communeCode !== criteria.commune) return [];
+      if (criteria.maxPrice !== null && rate.amount > criteria.maxPrice) return [];
+      return [{ sitter, rate }];
+    }).sort((a, b) => a.rate.amount - b.rate.amount);
   }, [criteria]);
 
   const hasCriteria =
@@ -267,7 +156,7 @@ export default function Search() {
     {
       key: "zone",
       label: t("search.brief.zone"),
-      value: criteria.commune ? communeLabel(criteria.commune) : t("search.need.communeAny"),
+      value: criteria.commune ? zoneLabel(criteria.commune) : t("search.need.communeAny"),
     },
     {
       key: "budget",
@@ -282,7 +171,7 @@ export default function Search() {
   /* Only the criteria actually chosen, for the condensed mobile line. */
   const chosenParts = [
     ...criteria.care.map(careLabel),
-    ...(criteria.commune ? [communeLabel(criteria.commune)] : []),
+    ...(criteria.commune ? [zoneLabel(criteria.commune)] : []),
     ...(criteria.maxPrice !== null
       ? [t("search.filters.upTo", { price: formatDZD(criteria.maxPrice, lng) })]
       : []),
@@ -355,7 +244,9 @@ export default function Search() {
 
   /* Radix renders the trigger as a <button role="combobox">. `label[for]` does
      not name a button, and `combobox` forbids name-from-content, so the field
-     name has to be wired explicitly or AT announces only the current value. */
+     name has to be wired explicitly or AT announces only the current value.
+     Communes are grouped by wilaya: the demo covers two, and a flat list mixed
+     them into one undifferentiated column. */
   const communeField = (value: Criteria, set: (c: Criteria) => void, id: string) => (
     <div>
       <Label id={`${id}-label`} htmlFor={id} className="mb-3 block text-sm font-medium">
@@ -375,10 +266,15 @@ export default function Search() {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value={ANY}>{t("search.need.communeAny")}</SelectItem>
-          {COMMUNE_KEYS.map((c) => (
-            <SelectItem key={c} value={c}>
-              {communeLabel(c)}
-            </SelectItem>
+          {WILAYAS.map((wilaya) => (
+            <SelectGroup key={wilaya.code}>
+              <SelectLabel>{localized(wilaya.name, lng)}</SelectLabel>
+              {wilaya.communes.map((commune) => (
+                <SelectItem key={commune.code} value={commune.code}>
+                  {localized(commune.name, lng)}
+                </SelectItem>
+              ))}
+            </SelectGroup>
           ))}
         </SelectContent>
       </Select>
@@ -415,7 +311,7 @@ export default function Search() {
   /* ------------------------------------------------------------------ view */
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-dvh">
       <Helmet>
         <title>
           {t("common.appName")} — {t("nav.search")}
@@ -520,7 +416,7 @@ export default function Search() {
                   trailing edge: the rail is sticky and short, so a rule on it
                   would stop a third of the way down the page. */}
               <aside className="hidden xl:sticky xl:top-24 xl:block xl:pe-12">
-                <h2 className={cn(eyebrow, "mb-4")}>{t("search.brief.title")}</h2>
+                <h2 className="eyebrow mb-4">{t("search.brief.title")}</h2>
                 <dl className="space-y-4">
                   {brief.map((row) => (
                     <div key={row.key}>
@@ -558,30 +454,24 @@ export default function Search() {
                   {results.length > 0 && ` · ${t("search.results.sortedByPrice")}`}
                 </p>
 
-                {/* Honesty layer, as a ruled notice rather than a filled card:
-                    horizontal rules read as masthead apparatus, so it keeps
-                    positional weight without competing chromatically — and it
-                    rhymes with the register rules below (§6.1, §16). */}
-                <div className="my-6 border-y border-border py-4 md:my-8">
-                  <p className="flex items-center gap-2 text-sm font-medium text-foreground">
-                    <Info className="size-4 shrink-0" aria-hidden="true" />
-                    {t("search.demo.title")}
-                  </p>
-                  <p className="mt-1 max-w-[70ch] text-sm text-muted-foreground">{t("search.demo.body")}</p>
-                </div>
+                <DemoNotice
+                  className="my-6 md:my-8"
+                  title={t("search.demo.title")}
+                  body={t("search.demo.body")}
+                />
 
                 {results.length === 0 ? (
-                  <div className="border-b border-border py-10">
-                    <h2 className="text-name font-semibold text-foreground">{t("search.results.emptyTitle")}</h2>
-                    <p className="mt-2 max-w-[60ch] text-base text-muted-foreground">
-                      {t("search.results.emptyBody")}
-                    </p>
-                    {/* Opens the editor rather than wiping every criterion —
-                        a cat owner should not be shown dog sitters. */}
-                    <Button type="button" variant="outline" className="mt-6" onClick={() => setSheetOpen(true)}>
-                      {t("search.context.editLabel")}
-                    </Button>
-                  </div>
+                  <EmptyState
+                    title={t("search.results.emptyTitle")}
+                    body={t("search.results.emptyBody")}
+                    /* Opens the editor rather than wiping every criterion —
+                       a cat owner should not be shown dog sitters. */
+                    action={
+                      <Button type="button" variant="outline" onClick={() => setSheetOpen(true)}>
+                        {t("search.context.editLabel")}
+                      </Button>
+                    }
+                  />
                 ) : (
                   /* A register, not a grid of tiles: entries separated by
                      hairlines on the page ground. §16 ranks space > surface >
@@ -590,12 +480,12 @@ export default function Search() {
                   <ul role="list">
                     {results.map(({ sitter: s, rate }) => {
                       const facts = [
-                        ...s.species.map((sp) => ({
+                        ...s.acceptedSpecies.map((sp) => ({
                           key: `sp-${sp}`,
-                          label: t(`search.accepts.${sp}`),
+                          label: t(`accepts.${sp}`),
                           matched: criteria.species.includes(sp),
                         })),
-                        ...servicesOf(s).map((c) => ({
+                        ...offeredServices(s).map((c) => ({
                           key: `c-${c}`,
                           label: careLabel(c),
                           matched: criteria.care.includes(c),
@@ -623,29 +513,29 @@ export default function Search() {
                               aria-hidden="true"
                               className="flex size-10 items-center justify-center rounded-sm bg-secondary text-base font-semibold text-foreground md:size-12 md:text-name"
                             >
-                              {s.name.charAt(0)}
+                              {s.publicName.charAt(0)}
                             </span>
 
                             <div className="min-w-0">
                               {/* Species as a filing system: scanning the column
                                   shows the page is organised around animals
                                   before it is organised around people. */}
-                              <p className={eyebrow}>
-                                {s.species.map((sp) => t(`search.speciesPlural.${sp}`)).join(" · ")}
+                              <p className="eyebrow">
+                                {s.acceptedSpecies.map((sp) => t(`speciesPlural.${sp}`)).join(" · ")}
                               </p>
                               {/* <bdi> isolates these Latin strings: without it
                                   "Youcef H." renders as ".Youcef H" in Arabic,
                                   the trailing period being a neutral character. */}
                               <h2 className="mt-1.5 text-name font-semibold text-foreground">
-                                <bdi>{s.name}</bdi>
+                                <bdi>{s.publicName}</bdi>
                               </h2>
                               <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
                                 <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
-                                <bdi className="truncate">{communeLabel(s.communeKey)}</bdi>
+                                <bdi className="truncate">{zoneLabel(s.communeCode)}</bdi>
                               </p>
 
                               <p className="mt-3 max-w-[56ch] text-base leading-relaxed text-foreground">
-                                {t(s.bioKey)}
+                                {localized(s.headline, lng)}
                               </p>
 
                               {/* Declared facts. Species and services are hard
@@ -675,13 +565,10 @@ export default function Search() {
 
                               {/* Provenance byline, merged with the demo marker
                                   so the entry carries one honesty line rather
-                                  than two. One of four variants documented in
-                                  src/index.css; the other three have no
-                                  mechanism, so they have no call site. */}
-                              <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-                                <User className="size-3.5 shrink-0" aria-hidden="true" />
-                                {t("search.card.demoTag")} · {t("trust.declared")}
-                              </p>
+                                  than two. */}
+                              <ProvenanceLabel className="mt-3">
+                                {s.isDemoFixture ? ` · ${t("search.card.demoTag")}` : null}
+                              </ProvenanceLabel>
                             </div>
 
                             {/* Price on its own axis: at md+ the amounts line up
@@ -690,13 +577,13 @@ export default function Search() {
                                 reading as a pricing card. */}
                             <div className="col-span-2 mt-4 flex items-end justify-between gap-4 md:col-span-1 md:mt-0 md:block md:text-end">
                               <div>
-                                {rate.from && (
+                                {rate.isFrom && (
                                   <p className="text-sm text-muted-foreground">{t("search.card.from")}</p>
                                 )}
                                 <p className="text-price font-semibold tabular-nums text-foreground">
                                   {formatDZD(rate.amount, lng)}
                                 </p>
-                                <p className="text-sm text-muted-foreground">{t(rate.unit)}</p>
+                                <p className="text-sm text-muted-foreground">{t(CARE_UNIT_KEY[rate.careType])}</p>
                               </div>
                               {/* The entry's only action. The stretched pseudo
                                   element makes the whole row clickable while
@@ -704,9 +591,9 @@ export default function Search() {
                                   the accessible name via sr-only, so the visible
                                   label stays a prefix of it (WCAG 2.5.3). */}
                               <Button asChild className="md:mt-4">
-                                <Link to={`/sitter/${s.id}`} className="after:absolute after:inset-0">
+                                <Link to={`/sitters/${s.id}`} className="after:absolute after:inset-0">
                                   {t("search.card.viewProfile")}
-                                  <span className="sr-only"> — {s.name}</span>
+                                  <span className="sr-only"> — {s.publicName}</span>
                                 </Link>
                               </Button>
                             </div>

@@ -173,6 +173,36 @@
   }
 }
 
+@layer components {
+  /* The section eyebrow, defined once. Uppercase is a no-op in Arabic and
+     letter-spacing breaks cursive joining, so both are dropped there — the
+     role keeps its size and weight instead.
+
+     Keyed on `[dir="rtl"]`, which is what Tailwind's `rtl:` variant compiles
+     to, so the whole codebase has ONE right-to-left mechanism. (`src/i18n.ts`
+     sets both the attribute and a legacy `.rtl` class; only the attribute is
+     depended on.) */
+  .eyebrow {
+    @apply text-eyebrow font-semibold uppercase text-muted-foreground;
+  }
+
+  [dir="rtl"] .eyebrow {
+    @apply normal-case tracking-normal;
+  }
+
+  /* The flow shell pins its action bar to the bottom edge. Without this, a
+     field focused near the end of a long step is scrolled underneath it
+     (WCAG 2.2 AA — 2.4.11).
+
+     The scroll container is the document, so the padding has to go on <html>
+     — but only while a flow is mounted. Applied globally it would leave a
+     96px dead gap under focus scrolling on /search and every other screen,
+     none of which pin anything to the bottom. */
+  html:has(.flow-shell) {
+    scroll-padding-bottom: 6rem;
+  }
+}
+
 /* Motion must never block an action (§24). Use `animation-duration: 0.01ms`
    rather than `animation: none` so Radix still receives `animationend` and
    exit transitions do not strand elements in the DOM. */

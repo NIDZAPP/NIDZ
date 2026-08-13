@@ -6,7 +6,14 @@
     "french": "French",
     "arabic": "Arabic",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "back": "Back",
+    "continue": "Continue",
+    "remove": "Remove",
+    "addPhoto": "Add a photo",
+    "changePhoto": "Change the photo",
+    "photoLocalOnly": "The photo stays on your device: this demonstration does not upload or store any file.",
+    "progress": "Progress"
   },
   "nav": {
     "home": "Home",
@@ -29,6 +36,43 @@
     "title": "Care you can trust",
     "subtitle": "Connect with trusted pet sitters and walkers in Algeria",
     "searchCta": "Find a sitter"
+  },
+  "species": {
+    "dog": "Dog",
+    "cat": "Cat"
+  },
+  "speciesPlural": {
+    "dog": "Dogs",
+    "cat": "Cats"
+  },
+  "accepts": {
+    "dog": "Accepts dogs",
+    "cat": "Accepts cats"
+  },
+  "care": {
+    "boarding": "Boarding at the sitter's home",
+    "atOwner": "Care at my home",
+    "walk": "Walking",
+    "unit": {
+      "night": "per night",
+      "visit": "per visit",
+      "walk": "per walk"
+    }
+  },
+  "trust": {
+    "declared": "Stated by the sitter"
+  },
+  "request": {
+    "status": {
+      "pending": "Awaiting a reply",
+      "accepted": "Accepted",
+      "declined": "Declined"
+    }
+  },
+  "sitterFlow": {
+    "trust": {
+      "add": "Add my ID document"
+    }
   },
   "sitter": {
     "registration": "Sitter Registration",
@@ -57,23 +101,10 @@
       "speciesLabel": "Your animal",
       "communeLabel": "Where are you looking?",
       "communeAny": "All areas",
-      "communeHelp": "This demo covers a few areas of Algiers.",
+      "communeHelp": "This demonstration covers a few areas of Algiers and Oran.",
       "careLabel": "What kind of care do you need?",
       "submit": "See the sitters",
       "skip": "Browse the examples without criteria"
-    },
-    "species": {
-      "dog": "Dog",
-      "cat": "Cat"
-    },
-    "accepts": {
-      "dog": "Accepts dogs",
-      "cat": "Accepts cats"
-    },
-    "care": {
-      "boarding": "Boarding at the sitter's home",
-      "atOwner": "Care at my home",
-      "walk": "Walking"
     },
     "context": {
       "noCriteria": "All the examples",
@@ -101,24 +132,13 @@
     },
     "card": {
       "matchLabel": "Matches your search",
-      "perNight": "per night",
       "viewProfile": "View profile",
-      "viewProfileOf": "View {{name}}'s profile",
       "demoTag": "Example",
-      "from": "from",
-      "unit": {
-        "night": "per night",
-        "visit": "per visit",
-        "walk": "per walk"
-      }
+      "from": "from"
     },
     "demo": {
       "title": "Demonstration examples",
       "body": "These sitters are fictional and Nidz does not verify any profile yet. Nothing is saved, no request can be sent, and the profiles open onto an incomplete demonstration page."
-    },
-    "speciesPlural": {
-      "dog": "Dogs",
-      "cat": "Cats"
     },
     "brief": {
       "title": "Your search",
@@ -129,37 +149,5 @@
       "anySpecies": "Dog or cat",
       "anyCare": "Any kind of care"
     }
-  },
-  "trust": {
-    "declared": "Stated by the sitter"
-  },
-  "sitters": {
-    "s1": {
-      "bio": "I look after dogs at my place, in a house with a fenced yard."
-    },
-    "s2": {
-      "bio": "Daily walks and short stays. I grew up with dogs."
-    },
-    "s3": {
-      "bio": "I mostly care for cats, at their owners' homes, morning and evening."
-    },
-    "s4": {
-      "bio": "Quiet flat, no other animals. I can host one cat or a small dog."
-    }
-  },
-  "listing": {
-    "services": "Services"
-  },
-  "booking": {
-    "request": "Send request",
-    "payProof": "Upload payment proof",
-    "startWalk": "Start Walk",
-    "endWalk": "End Walk"
-  },
-  "communes": {
-    "hydra": "Hydra",
-    "elBiar": "El Biar",
-    "kouba": "Kouba",
-    "babEzzouar": "Bab Ezzouar"
   }
 }
