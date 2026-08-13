@@ -114,13 +114,24 @@ export default function SitterProfileView({
           {/* Card scale, deliberately. A 96px letter in a square is
               unmistakably a placeholder for a missing photograph; at this size
               it is the recognition mark carried over from the results row. */}
-          {sitter.publicName && (
-            <span
-              aria-hidden="true"
-              className="flex size-12 shrink-0 items-center justify-center rounded-sm bg-secondary text-name font-semibold text-foreground md:size-14"
-            >
-              {sitter.publicName.charAt(0)}
-            </span>
+          {/* The sitter's own photograph when they added one; otherwise a
+              monogram. Never a stock portrait — §21 and §40 both forbid
+              presenting one as a real person. */}
+          {sitter.photoUrl ? (
+            <img
+              src={sitter.photoUrl}
+              alt=""
+              className="size-12 shrink-0 rounded-sm object-cover md:size-14"
+            />
+          ) : (
+            sitter.publicName && (
+              <span
+                aria-hidden="true"
+                className="flex size-12 shrink-0 items-center justify-center rounded-sm bg-secondary text-name font-semibold text-foreground md:size-14"
+              >
+                {sitter.publicName.charAt(0)}
+              </span>
+            )
           )}
           <div className="min-w-0">
             <Heading className={cn("font-semibold text-foreground", headingLevel === "h1" ? "text-h1 md:text-h1-lg" : "text-name")}>

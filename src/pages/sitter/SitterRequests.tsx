@@ -1,0 +1,154 @@
+import { useRef } from "react";
+import { Helmet } from "react-helmet-async";
+import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
+
+import RequestSummary from "@/components/request/RequestSummary";
+import EmptyState from "@/components/shared/EmptyState";
+import StatusBadge from "@/components/shared/StatusBadge";
+import { DemoNotice } from "@/components/shared/trust";
+import { Button } from "@/components/ui/button";
+import { sitterNameFor } from "@/data/sitter-name";
+import { useDemo } from "@/state/demo/context";
+
+/**
+ * "Demandes reçues" — the sitter's side of the same records.
+ *
+ * These are literally the objects the owner created: one `requests` array in
+ * one store, so accepting here changes what the owner sees, without any
+ * synchronisation to get wrong.
+ *
+ * Accepting is a person saying yes. It is NOT a booking, there is no payment
+ * and there is no protection — §28 and the audit (p.522) both forbid claiming
+ * any of the three, and the copy under the actions says so.
+ *
+ * "Refuser" is a normal outcome, not a destructive one: a sitter whose home
+ * has a cat declining a cat-intolerant dog is the matching working correctly.
+ * It is therefore not a red button (§12.1).
+ */
+export default function SitterRequests() {
+  const { t } = useTranslation();
+  const { state, dispatch } = useDemo();
+  /* Which request was just answered, so focus can follow the outcome. */
+  const answeredRef = useRef<string | null>(null);
+
+  /* Only the requests addressed to THIS profile. Showing the ones sent to
+     demo sitters under a heading meaning "requests you received" would offer
+     Accept and Decline on somebody else's behalf. */
+  const myId = state.sitter?.profile.id;
+  const requests = myId ? state.requests.filter((r) => r.sitterId === myId) : [];
+
+  return (
+    <div className="container py-10 md:py-14">
+      <Helmet>
+        <title>
+          {t("common.appName")} — {t("sitterRequests.title")}
+        </title>
+      </Helmet>
+
+      <div className="mx-auto max-w-[720px]">
+        <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">{t("sitterRequests.title")}</h1>
+
+        {/* Above the branch: the first thing a new sitter reads must not be an
+            unqualified promise that owners will write to them. */}
+        <DemoNotice
+          className="mt-6"
+          title={t("sitterRequests.demoTitle")}
+          body={t("sitterRequests.demoBody")}
+        />
+
+        {requests.length === 0 ? (
+          <EmptyState
+            className="mt-8"
+            title={t("sitterRequests.emptyTitle")}
+            body={t("sitterRequests.emptyBody")}
+            action={
+              !state.sitter?.published ? (
+                <Button asChild variant="outline">
+                  <Link to="/sitter/start">{t("sitterFlow.start.cta")}</Link>
+                </Button>
+              ) : undefined
+            }
+          />
+        ) : (
+          <>
+            <ul role="list" className="mt-8 space-y-10">
+              {requests.map((request) => (
+                <li key={request.id} className="border-b border-border pb-10 last:border-0">
+                  <div className="flex flex-wrap items-baseline justify-between gap-3">
+                    <h2 className="text-name font-semibold text-foreground">
+                      <bdi>{request.pet.name}</bdi>
+                      <span className="font-normal text-muted-foreground">
+                        {" · "}
+                        <bdi>{request.ownerName}</bdi>
+                      </span>
+                    </h2>
+                    <StatusBadge status={request.status} />
+                  </div>
+
+                  {/* The same summary the owner confirmed — everything the
+                      sitter needs in order to answer honestly, including the
+                      animal's important needs. */}
+                  <RequestSummary
+                    className="mt-4"
+                    request={request}
+                    sitterName={sitterNameFor(state, request.sitterId)}
+                    headingLevel="h3"
+                  />
+
+                  {/* Announced and focusable: answering removes the buttons
+                      from the DOM, which would otherwise drop focus to the
+                      body with nothing said. */}
+                  {request.status === "pending" ? (
+                    <>
+                      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+                        <Button
+                          type="button"
+                          size="lg"
+                          onClick={() => {
+                            answeredRef.current = request.id;
+                            dispatch({ type: "respondToRequest", id: request.id, status: "accepted" });
+                          }}
+                        >
+                          {t("sitterRequests.accept")}
+                        </Button>
+                        {/* Secondary, and deliberately not destructive. */}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            answeredRef.current = request.id;
+                            dispatch({ type: "respondToRequest", id: request.id, status: "declined" });
+                          }}
+                        >
+                          {t("sitterRequests.decline")}
+                        </Button>
+                      </div>
+                      <p className="mt-3 max-w-[64ch] text-sm text-muted-foreground">
+                        {t("sitterRequests.acceptNote")}
+                      </p>
+                    </>
+                  ) : (
+                    <p
+                      role="status"
+                      tabIndex={-1}
+                      ref={(node) => {
+                        if (node && answeredRef.current === request.id) {
+                          node.focus();
+                          answeredRef.current = null;
+                        }
+                      }}
+                      className="mt-6 max-w-[64ch] text-base leading-relaxed text-muted-foreground focus:outline-none"
+                    >
+                      {t(`sitterRequests.answered.${request.status}`)}
+                    </p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}

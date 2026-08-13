@@ -120,28 +120,115 @@
   },
   "sitterFlow": {
     "trust": {
-      "add": "Ajouter ma pièce d'identité"
+      "add": "Ajouter ma pièce d'identité",
+      "title": "Pièce d'identité",
+      "intro": "Nidz demande une pièce d'identité pour pouvoir, plus tard, vérifier que les personnes qui accueillent des animaux sont bien celles qu'elles disent être.",
+      "docLabel": "Votre pièce d'identité",
+      "docHelp": "Facultatif dans cette démonstration.",
+      "pending": "Document ajouté — aucune vérification n'a lieu dans cette démonstration",
+      "explain": "Ajouter un document ne rend pas une identité vérifiée. Tant qu'un contrôle réel n'a pas eu lieu, aucun profil n'affiche « identité vérifiée » — et Nidz n'a aujourd'hui aucun processus de vérification.",
+      "demoNote": "Aucun fichier n'est envoyé : seul le nom du fichier est retenu dans ce navigateur."
+    },
+    "progress": "Étape {{current}} sur {{total}}",
+    "start": {
+      "title": "Faites de votre passion pour les animaux une activité rémunérée.",
+      "intro": "Créez votre profil, expliquez comment vous pouvez garder les animaux, et recevez des demandes qui correspondent vraiment à ce que vous pouvez accueillir.",
+      "points": {
+        "what": "Vous décrivez votre logement, les animaux que vous acceptez et la manière dont vous vous en occupez.",
+        "control": "Vous fixez vos tarifs, service par service.",
+        "limits": "Vous indiquez ce que vous ne pouvez pas accepter, pour éviter les gardes qui ne conviendraient pas."
+      },
+      "cta": "Créer mon profil",
+      "demoNote": "Cette démonstration ne met aucun profil en ligne et ne verse aucune rémunération."
+    },
+    "name": {
+      "intro": "Les propriétaires verront votre prénom et l'initiale de votre nom."
+    },
+    "phone": {
+      "intro": "C'est par téléphone qu'un propriétaire pourra vous joindre si vous acceptez sa demande."
+    },
+    "location": {
+      "title": "Où proposez-vous vos services ?",
+      "intro": "Votre commune permet aux propriétaires proches de vous trouver.",
+      "chooseCommune": "Choisissez une commune",
+      "communeRequired": "Choisissez la commune où vous proposez vos services.",
+      "privacy": "Seule votre commune sera affichée. Votre adresse exacte ne sera jamais visible publiquement — Nidz ne la demande pas."
+    },
+    "about": {
+      "title": "Vous et votre expérience",
+      "intro": "C'est ce qu'un propriétaire lit en premier pour se faire une idée de vous.",
+      "photoLabel": "Votre photo (facultatif)",
+      "headlineLabel": "En une phrase",
+      "headlineHelp": "Par exemple : « Je garde les chiens chez moi, dans une maison avec cour clôturée. »",
+      "headlineRequired": "Écrivez une phrase qui décrit ce que vous proposez.",
+      "aboutLabel": "Présentation",
+      "aboutHelp": "Comment se passe une journée avec un animal chez vous ? C'est ce qui aide le plus un propriétaire à se projeter.",
+      "yearsLabel": "Depuis combien d'années gardez-vous des animaux ?",
+      "speciesLabel": "Avec quels animaux avez-vous le plus d'expérience ?",
+      "professionalLabel": "Expérience professionnelle liée aux animaux (facultatif)",
+      "professionalHelp": "Bénévolat en refuge, formation, travail en clinique vétérinaire…",
+      "demoNote": "Ce que vous écrivez reste dans ce navigateur : rien n'est envoyé ni publié en ligne."
+    },
+    "services": {
+      "title": "Services et tarifs",
+      "intro": "Chaque service a son propre tarif et sa propre unité.",
+      "label": "Ce que vous proposez",
+      "required": "Choisissez au moins un service.",
+      "priceRequired": "Indiquez un tarif pour : {{service}}."
+    },
+    "animals": {
+      "title": "Animaux acceptés",
+      "label": "Espèces",
+      "required": "Indiquez au moins une espèce que vous pouvez garder.",
+      "sizesLabel": "Tailles de chiens acceptées",
+      "sizesRequired": "Indiquez les tailles de chiens que vous pouvez accueillir.",
+      "maxLabel": "Nombre maximum d'animaux à la fois",
+      "maxHelp": "En comptant les animaux confiés, pas les vôtres."
+    },
+    "housing": {
+      "title": "Votre logement et l'accueil",
+      "intro": "C'est ce qui permet à un propriétaire d'imaginer concrètement où son animal passera son séjour.",
+      "typeLabel": "Type de logement",
+      "outdoorLabel": "Espace extérieur",
+      "dogsLabel": "Chiens vivant chez vous",
+      "catsLabel": "Chats vivant chez vous",
+      "methodsLabel": "Comment les animaux seront-ils gardés ?",
+      "conditionsLabel": "Conditions importantes du logement (facultatif)",
+      "conditionsHelp": "Étage sans ascenseur, cour clôturée, enfants à la maison…",
+      "typeRequired": "Indiquez si vous vivez en appartement ou en maison.",
+      "outdoorRequired": "Indiquez si vous avez un espace extérieur."
+    },
+    "limits": {
+      "title": "Ce que vous ne pouvez pas accepter",
+      "intro": "C'est ce qui évite les demandes qui ne vous conviennent pas. Expliquez la raison : elle est aussi utile que la limite.",
+      "addLabel": "Ajouter une limite",
+      "addHelp": "Par exemple : « Je ne peux pas accueillir de chat : mon chien ne les supporte pas. »",
+      "add": "Ajouter"
+    },
+    "availability": {
+      "title": "Vos indisponibilités",
+      "intro": "Indiquez les périodes où vous ne pouvez pas garder d'animal. En dehors de ces périodes, rien n'est réservé pour autant.",
+      "addLabel": "Ajouter une période",
+      "add": "Ajouter cette période",
+      "demoNote": "Ce n'est pas un calendrier de réservation : Nidz n'enregistre aucune réservation."
+    },
+    "preview": {
+      "title": "Voici ce que les propriétaires verront",
+      "intro": "C'est exactement la page qu'un propriétaire ouvre depuis les résultats.",
+      "provenanceTitle": "Tout ici vient de vous",
+      "provenanceBody": "Chaque information de ce profil est présentée comme déclarée par vous. Nidz n'a rien vérifié, il n'y a aucun avis, et aucune donnée n'a été mesurée par la plateforme : ces trois choses n'existent pas encore.",
+      "publish": "Publier mon profil",
+      "edit": "Modifier mon profil",
+      "liveNote": "Votre profil est déjà publié : chaque modification est visible immédiatement."
+    },
+    "published": {
+      "title": "Votre profil est publié",
+      "intro": "Il apparaît maintenant dans les résultats de recherche de cette démonstration, et les demandes qui vous sont adressées arrivent dans « Demandes reçues ».",
+      "demoTitle": "Publié, ici seulement",
+      "demoBody": "Votre profil n'est pas en ligne : il existe dans ce navigateur. Aucun propriétaire réel ne peut le voir, aucune vérification n'a eu lieu, et Nidz ne promet ni demandes, ni revenus.",
+      "requests": "Voir mes demandes",
+      "viewProfile": "Voir mon profil"
     }
-  },
-  "sitter": {
-    "registration": "Inscription Pet-Sitter",
-    "registrationSubtitle": "Rejoignez notre communauté de pet-sitters de confiance",
-    "profileInfo": "Informations du Profil",
-    "firstName": "Prénom",
-    "lastName": "Nom",
-    "firstNamePlaceholder": "Entrez votre prénom",
-    "lastNamePlaceholder": "Entrez votre nom",
-    "bio": "Bio",
-    "bioPlaceholder": "Parlez de vous aux propriétaires, votre expérience avec les animaux...",
-    "dailyPrice": "Tarif Journalier (DZD)",
-    "priceRange": "Fourchette typique : 500-2000 DZD par jour",
-    "verification": "Vérification d'Identité",
-    "verificationDescription": "Téléversez votre pièce d'identité et prenez un selfie pour être vérifié",
-    "idCard": "Pièce d'Identité",
-    "uploadId": "Téléversez votre pièce d'identité (recto et verso)",
-    "selfie": "Selfie",
-    "takeSelfie": "Prenez un selfie pour la vérification",
-    "submit": "Soumettre l'Inscription"
   },
   "search": {
     "context": {
@@ -211,7 +298,9 @@
     "requestsCount_one": "{{count}} demande",
     "requestsCount_other": "{{count}} demandes",
     "requestsPending_one": "{{count}} en attente de réponse",
-    "requestsPending_other": "{{count}} en attente de réponse"
+    "requestsPending_other": "{{count}} en attente de réponse",
+    "sitterPublished": "Votre profil est publié",
+    "sitterDraft": "Votre profil n'est pas encore publié"
   },
   "intent": {
     "title": "Que souhaitez-vous faire aujourd'hui ?",
@@ -348,5 +437,19 @@
     "demoNote": "Ces demandes existent uniquement dans ce navigateur. Aucun pet-sitter n'a été prévenu.",
     "demoBody": "Cette demande existe uniquement dans ce navigateur. Aucun pet-sitter n'a été prévenu, aucune réservation n'a été créée et aucun paiement n'a eu lieu.",
     "alreadySent": "Vous aviez déjà envoyé cette demande. La voici."
+  },
+  "sitterRequests": {
+    "title": "Demandes reçues",
+    "emptyTitle": "Aucune demande pour le moment",
+    "emptyBody": "Lorsqu'un propriétaire vous enverra une demande de garde correspondant à votre profil, elle apparaîtra ici avec tout ce qu'il faut pour décider.",
+    "demoTitle": "Demandes de démonstration",
+    "demoBody": "Ces demandes ont été créées par vous, depuis le côté propriétaire de cette démonstration. Aucun propriétaire réel ne vous a contacté.",
+    "accept": "Accepter la demande",
+    "decline": "Refuser",
+    "acceptNote": "Accepter signifie que vous êtes d'accord pour cette garde. Ce n'est pas une réservation : Nidz ne gère ni réservation, ni paiement, ni assurance.",
+    "answered": {
+      "accepted": "Vous avez accepté cette demande. Le propriétaire voit ce statut de son côté. Les détails restent à convenir directement entre vous.",
+      "declined": "Vous avez refusé cette demande. Le propriétaire voit ce statut de son côté."
+    }
   }
 }

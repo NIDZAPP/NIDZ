@@ -2,6 +2,7 @@ import { Link, NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
+import { useDemo } from "@/state/demo/context";
 
 const navLinkCls = ({ isActive }: { isActive: boolean }) =>
   `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -12,6 +13,7 @@ const navLinkCls = ({ isActive }: { isActive: boolean }) =>
 
 export default function Header() {
   const { t } = useTranslation();
+  const { state } = useDemo();
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
@@ -24,12 +26,16 @@ export default function Header() {
             <NavLink to="/search" className={navLinkCls} end>
               {t("nav.search")}
             </NavLink>
-            <NavLink to="/pets" className={navLinkCls} end>
-              {t("nav.pets")}
+            <NavLink to="/owner/requests" className={navLinkCls} end>
+              {t("ownerRequests.title")}
             </NavLink>
-            <NavLink to="/sitter/dashboard" className={navLinkCls} end>
-              {t("nav.dashboard")}
-            </NavLink>
+            {/* Only once a sitter profile exists — a destination that would be
+                empty for everyone else is not navigation. */}
+            {state.sitter && (
+              <NavLink to="/sitter/requests" className={navLinkCls} end>
+                {t("sitterRequests.title")}
+              </NavLink>
+            )}
             {/* Admin is intentionally not exposed in public navigation. The /admin route remains reachable directly. */}
             <NavLink to="/help" className={navLinkCls} end>
               {t("nav.help")}

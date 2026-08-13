@@ -55,7 +55,7 @@ export default function Intent() {
             icon={Heart}
             label={t("intent.sitter")}
             description={t("intent.sitterDescription")}
-            onClick={() => choose("sitter", "/sitter/register")}
+            onClick={() => choose("sitter", "/sitter/start")}
           />
         </div>
 

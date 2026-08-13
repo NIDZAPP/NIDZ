@@ -90,6 +90,9 @@ export function emptySitterProfile(id: string): SitterProfile {
     acceptedSpecies: [],
     acceptedDogSizes: [],
     maxAnimals: 1,
+    /* Placeholders only until the housing step is answered — nothing reads
+       them before then, and the step refuses to continue without a real
+       choice, so no default is ever laundered into a declaration. */
     housing: { type: "apartment", outdoor: "none", residentPets: [], conditions: null },
     careMethods: [],
     limits: [],
@@ -113,6 +116,7 @@ export type DemoAction =
   | { type: "startSitterProfile"; id: string }
   | { type: "patchSitterProfile"; patch: Partial<SitterProfile> }
   | { type: "setIdDocument"; fileName: string }
+  | { type: "clearIdDocument" }
   | { type: "publishSitterProfile" }
   | { type: "reset" };
 
@@ -179,6 +183,12 @@ export function reducer(state: DemoState, action: DemoAction): DemoState {
           }
         : state;
 
+    case "clearIdDocument":
+      /* Back to null, not to an empty file name with a timestamp: on the one
+         screen where "a document is present" must never be overstated, the
+         state has to say plainly that none is. */
+      return state.sitter ? { ...state, sitter: { ...state.sitter, idDocument: null } } : state;
+
     case "publishSitterProfile":
       return state.sitter ? { ...state, sitter: { ...state.sitter, published: true } } : state;
 
@@ -196,9 +206,13 @@ export function reducer(state: DemoState, action: DemoAction): DemoState {
     points at nothing after a reload and renders a broken image. The photo is
     a live preview only — the rest of the pet survives. */
 function stripTransientFields(state: DemoState): DemoState {
+  const sitter = state.sitter;
   return {
     ...state,
     pets: state.pets.map(({ photoUrl: _photoUrl, ...pet }) => pet),
+    sitter: sitter
+      ? { ...sitter, profile: { ...sitter.profile, photoUrl: undefined } }
+      : null,
   };
 }
 

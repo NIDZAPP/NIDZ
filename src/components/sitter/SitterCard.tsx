@@ -72,12 +72,16 @@ export default function SitterCard({
             stock photography as a real person's profile. Kept at this size on
             the profile too, where it reads as a recognition mark carried over
             from this row rather than as a substitute for a face. */}
-        <span
-          aria-hidden="true"
-          className="flex size-10 items-center justify-center rounded-sm bg-secondary text-base font-semibold text-foreground md:size-12 md:text-name"
-        >
-          {sitter.publicName.charAt(0)}
-        </span>
+        {sitter.photoUrl ? (
+          <img src={sitter.photoUrl} alt="" className="size-10 rounded-sm object-cover md:size-12" />
+        ) : (
+          <span
+            aria-hidden="true"
+            className="flex size-10 items-center justify-center rounded-sm bg-secondary text-base font-semibold text-foreground md:size-12 md:text-name"
+          >
+            {sitter.publicName.charAt(0)}
+          </span>
+        )}
 
         <div className="min-w-0">
           {/* Species as a filing system: scanning the column shows the page is

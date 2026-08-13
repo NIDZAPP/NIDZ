@@ -54,7 +54,7 @@ const ANY = "any";
 export default function Search() {
   const { t } = useTranslation();
   const lng = useAppLocale();
-  const { dispatch } = useDemo();
+  const { state, dispatch } = useDemo();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const paramKey = searchParams.toString();
@@ -92,7 +92,15 @@ export default function Search() {
     dispatch({ type: "setNeed", patch: needPatchFromCriteria(next) });
   };
 
-  const results = useMemo(() => matchSitters(DEMO_SITTERS, criteria), [criteria]);
+  /* The fixtures plus the visitor's own profile, once they have published it.
+     Without this, "votre profil est publié" would be a claim the search does
+     not honour — and the two-sided loop would have no second side. */
+  const published = state.sitter?.published ? state.sitter.profile : null;
+  const pool = useMemo(
+    () => (published ? [...DEMO_SITTERS, published] : DEMO_SITTERS),
+    [published],
+  );
+  const results = useMemo(() => matchSitters(pool, criteria), [pool, criteria]);
   /* Every criteria-derived reason is true of every survivor by construction,
      so repeating it on each row is three lines of noise per entry that
      discriminates nothing. Shared reasons are stated once, above. */
@@ -250,7 +258,14 @@ export default function Search() {
               </p>
             )}
 
-            <DemoNotice className="my-6 md:my-8" title={t("search.demo.title")} body={t("search.demo.body")} />
+            {/* Scoped to the fixtures. Once the visitor publishes their own
+                profile it appears in this list, and a blanket "these profiles
+                are fictional" would be calling their real profile invented. */}
+            {results.some((r) => r.sitter.isDemoFixture) ? (
+              <DemoNotice className="my-6 md:my-8" title={t("search.demo.title")} body={t("search.demo.body")} />
+            ) : (
+              <div className="my-6 md:my-8" />
+            )}
 
             {results.length === 0 ? (
               <EmptyState

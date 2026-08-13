@@ -120,28 +120,115 @@
   },
   "sitterFlow": {
     "trust": {
-      "add": "Add my ID document"
+      "add": "Add my ID document",
+      "title": "Identity document",
+      "intro": "Nidz asks for an identity document so that, later, it can check that the people hosting animals are who they say they are.",
+      "docLabel": "Your identity document",
+      "docHelp": "Optional in this demonstration.",
+      "pending": "Document added — no verification takes place in this demonstration",
+      "explain": "Adding a document does not make an identity verified. Until a real check has happened, no profile shows “verified identity” — and Nidz has no verification process today.",
+      "demoNote": "No file is uploaded: only the file name is kept, in this browser."
+    },
+    "progress": "Step {{current}} of {{total}}",
+    "start": {
+      "title": "Turn your love of animals into paid work.",
+      "intro": "Create your profile, explain how you can look after animals, and receive requests that actually match what you can take on.",
+      "points": {
+        "what": "You describe your home, the animals you accept and how you look after them.",
+        "control": "You set your own rates, service by service.",
+        "limits": "You state what you cannot accept, so stays that would not suit anyone do not happen."
+      },
+      "cta": "Create my profile",
+      "demoNote": "This demonstration puts no profile online and pays nobody."
+    },
+    "name": {
+      "intro": "Owners will see your first name and the initial of your last name."
+    },
+    "phone": {
+      "intro": "The phone is how an owner can reach you if you accept their request."
+    },
+    "location": {
+      "title": "Where do you offer your services?",
+      "intro": "Your commune is how nearby owners find you.",
+      "chooseCommune": "Choose a commune",
+      "communeRequired": "Choose the commune where you offer your services.",
+      "privacy": "Only your commune is shown. Your exact address is never public — Nidz does not ask for it."
+    },
+    "about": {
+      "title": "You and your experience",
+      "intro": "This is the first thing an owner reads to get a sense of you.",
+      "photoLabel": "Your photo (optional)",
+      "headlineLabel": "In one sentence",
+      "headlineHelp": "For example: “I board dogs at my home, a house with a fenced yard.”",
+      "headlineRequired": "Write one sentence describing what you offer.",
+      "aboutLabel": "About you",
+      "aboutHelp": "What does a day with an animal at your place look like? That is what helps an owner picture it.",
+      "yearsLabel": "How many years have you been looking after animals?",
+      "speciesLabel": "Which animals do you have the most experience with?",
+      "professionalLabel": "Professional animal experience (optional)",
+      "professionalHelp": "Shelter volunteering, training, work in a veterinary practice…",
+      "demoNote": "What you write stays in this browser: nothing is sent or published online."
+    },
+    "services": {
+      "title": "Services and rates",
+      "intro": "Each service has its own rate and its own unit.",
+      "label": "What you offer",
+      "required": "Choose at least one service.",
+      "priceRequired": "Give a rate for: {{service}}."
+    },
+    "animals": {
+      "title": "Animals you accept",
+      "label": "Species",
+      "required": "State at least one species you can look after.",
+      "sizesLabel": "Dog sizes you accept",
+      "sizesRequired": "State the dog sizes you can take.",
+      "maxLabel": "Maximum number of animals at a time",
+      "maxHelp": "Counting the animals entrusted to you, not your own."
+    },
+    "housing": {
+      "title": "Your home and how you host",
+      "intro": "This is what lets an owner picture concretely where their animal will stay.",
+      "typeLabel": "Type of home",
+      "outdoorLabel": "Outdoor space",
+      "dogsLabel": "Dogs living with you",
+      "catsLabel": "Cats living with you",
+      "methodsLabel": "How will the animals be looked after?",
+      "conditionsLabel": "Important conditions about your home (optional)",
+      "conditionsHelp": "Upper floor with no lift, fenced yard, children at home…",
+      "typeRequired": "Say whether you live in a flat or a house.",
+      "outdoorRequired": "Say whether you have any outdoor space."
+    },
+    "limits": {
+      "title": "What you cannot accept",
+      "intro": "This is what keeps unsuitable requests away. Give the reason: it matters as much as the limit.",
+      "addLabel": "Add a limit",
+      "addHelp": "For example: “I cannot take a cat: my own dog does not tolerate them.”",
+      "add": "Add"
+    },
+    "availability": {
+      "title": "When you are not available",
+      "intro": "State the periods when you cannot take an animal. Outside them, nothing is reserved either.",
+      "addLabel": "Add a period",
+      "add": "Add this period",
+      "demoNote": "This is not a booking calendar: Nidz records no reservations."
+    },
+    "preview": {
+      "title": "This is what owners will see",
+      "intro": "This is exactly the page an owner opens from the results.",
+      "provenanceTitle": "Everything here comes from you",
+      "provenanceBody": "Every piece of information on this profile is presented as stated by you. Nidz has verified nothing, there are no reviews, and no data has been measured by the platform: none of those three exist yet.",
+      "publish": "Publish my profile",
+      "edit": "Edit my profile",
+      "liveNote": "Your profile is already published: every change is visible immediately."
+    },
+    "published": {
+      "title": "Your profile is published",
+      "intro": "It now appears in this demonstration's search results, and requests addressed to you arrive under “Requests received”.",
+      "demoTitle": "Published, here only",
+      "demoBody": "Your profile is not online: it exists in this browser. No real owner can see it, no verification took place, and Nidz promises neither requests nor income.",
+      "requests": "View my requests",
+      "viewProfile": "View my profile"
     }
-  },
-  "sitter": {
-    "registration": "Sitter Registration",
-    "registrationSubtitle": "Join our community of trusted pet sitters",
-    "profileInfo": "Profile Information",
-    "firstName": "First Name",
-    "lastName": "Last Name",
-    "firstNamePlaceholder": "Enter your first name",
-    "lastNamePlaceholder": "Enter your last name",
-    "bio": "Bio",
-    "bioPlaceholder": "Tell pet owners about yourself, your experience with pets...",
-    "dailyPrice": "Daily Rate (DZD)",
-    "priceRange": "Typical range: 500-2000 DZD per day",
-    "verification": "Identity Verification",
-    "verificationDescription": "Upload your ID and take a selfie to get verified and build trust with pet owners",
-    "idCard": "ID Card",
-    "uploadId": "Upload your ID card (front and back)",
-    "selfie": "Selfie",
-    "takeSelfie": "Take a selfie for verification",
-    "submit": "Submit Registration"
   },
   "search": {
     "context": {
@@ -211,7 +298,9 @@
     "requestsCount_one": "{{count}} request",
     "requestsCount_other": "{{count}} requests",
     "requestsPending_one": "{{count}} awaiting a reply",
-    "requestsPending_other": "{{count}} awaiting a reply"
+    "requestsPending_other": "{{count}} awaiting a reply",
+    "sitterPublished": "Your profile is published",
+    "sitterDraft": "Your profile is not published yet"
   },
   "intent": {
     "title": "What would you like to do today?",
@@ -348,5 +437,19 @@
     "demoNote": "These requests exist only in this browser. No sitter was notified.",
     "demoBody": "This request exists only in this browser. No sitter was notified, no booking was created and no payment took place.",
     "alreadySent": "You had already sent this request. Here it is."
+  },
+  "sitterRequests": {
+    "title": "Requests received",
+    "emptyTitle": "No requests yet",
+    "emptyBody": "When an owner sends you a care request matching your profile, it will appear here with everything you need in order to decide.",
+    "demoTitle": "Demonstration requests",
+    "demoBody": "These requests were created by you, from the owner side of this demonstration. No real owner has contacted you.",
+    "accept": "Accept the request",
+    "decline": "Decline",
+    "acceptNote": "Accepting means you agree to this stay. It is not a booking: Nidz handles no reservation, no payment and no insurance.",
+    "answered": {
+      "accepted": "You accepted this request. The owner sees this status on their side. The details remain to be agreed directly between you.",
+      "declined": "You declined this request. The owner sees this status on their side."
+    }
   }
 }

@@ -12,7 +12,6 @@ import NotFound from "./pages/NotFound";
 import Auth from "@/pages/Auth";
 import Pets from "@/pages/Pets";
 import Search from "@/pages/Search";
-import SitterRegister from "@/pages/SitterRegister";
 import SitterProfile from "@/pages/SitterProfile";
 import Book from "@/pages/Book";
 import Chat from "@/pages/Chat";
@@ -32,6 +31,20 @@ import RequestReview from "@/pages/owner/request/RequestReview";
 import RequestSent from "@/pages/owner/request/RequestSent";
 import OwnerRequests from "@/pages/owner/OwnerRequests";
 import OwnerRequestDetail from "@/pages/owner/OwnerRequestDetail";
+import SitterStart from "@/pages/sitter/SitterStart";
+import { SitterName, SitterPhone, SitterVerify, SitterLocation } from "@/pages/sitter/SitterJoin";
+import {
+  StepAbout,
+  StepServices,
+  StepAnimals,
+  StepHousing,
+  StepLimits,
+  StepAvailability,
+} from "@/pages/sitter/SitterBuilder";
+import SitterTrust from "@/pages/sitter/SitterTrust";
+import SitterPreview from "@/pages/sitter/SitterPreview";
+import SitterPublished from "@/pages/sitter/SitterPublished";
+import SitterRequests from "@/pages/sitter/SitterRequests";
 
 const queryClient = new QueryClient();
 
@@ -78,13 +91,31 @@ const App = () => (
             <Route path="/owner/request/:sitterId/review" element={<RequestReview />} />
             <Route path="/owner/request/:sitterId/sent" element={<RequestSent />} />
 
+            <Route path="/sitter/start" element={<SitterStart />} />
+            <Route path="/sitter/join/name" element={<SitterName />} />
+            <Route path="/sitter/join/phone" element={<SitterPhone />} />
+            <Route path="/sitter/join/verify" element={<SitterVerify />} />
+            <Route path="/sitter/join/location" element={<SitterLocation />} />
+            <Route path="/sitter/profile/about" element={<StepAbout />} />
+            <Route path="/sitter/profile/services" element={<StepServices />} />
+            <Route path="/sitter/profile/animals" element={<StepAnimals />} />
+            <Route path="/sitter/profile/housing" element={<StepHousing />} />
+            <Route path="/sitter/profile/limits" element={<StepLimits />} />
+            <Route path="/sitter/profile/availability" element={<StepAvailability />} />
+            <Route path="/sitter/trust" element={<SitterTrust />} />
+            <Route path="/sitter/preview" element={<SitterPreview />} />
+            <Route path="/sitter/published" element={<SitterPublished />} />
+
             <Route element={<Layout />}>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/pets" element={<Pets />} />
               <Route path="/search" element={<Search />} />
               <Route path="/sitters/:id" element={<SitterProfile />} />
-              <Route path="/sitter/register" element={<SitterRegister />} />
+              {/* The legacy registration page promised a verification Nidz
+                  cannot perform. The flow that replaced it starts here. */}
+              <Route path="/sitter/register" element={<Navigate to="/sitter/start" replace />} />
+              <Route path="/sitter/requests" element={<SitterRequests />} />
               <Route path="/book/:listingId" element={<Book />} />
               <Route path="/chat/:bookingId" element={<Chat />} />
               <Route path="/owner/requests" element={<OwnerRequests />} />

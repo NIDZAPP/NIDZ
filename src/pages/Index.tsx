@@ -77,16 +77,33 @@ export default function Index() {
           </Link>
         )}
 
-        {/* One quiet pointer at the other side of the marketplace, chosen by
-            the activity the person is not currently in. Not a second pair of
-            equal-weight cards. */}
+        {/* The sitter side of the same account, once it exists. Without this
+            the whole sitter area is unreachable after the published screen —
+            the header nav is hidden below md, and nothing else links to it. */}
+        {state.sitter && (
+          <Link
+            to="/sitter/requests"
+            className="mt-4 flex items-center justify-between gap-4 rounded-md border border-border p-4 transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <span>
+              <span className="block font-medium text-foreground">{t("sitterRequests.title")}</span>
+              <span className="mt-0.5 block text-sm text-muted-foreground">
+                {state.sitter.published ? t("entry.sitterPublished") : t("entry.sitterDraft")}
+              </span>
+            </span>
+            <ArrowRight className="size-5 shrink-0 text-muted-foreground rtl:-scale-x-100" aria-hidden="true" />
+          </Link>
+        )}
+
+        {/* One quiet pointer at the other side of the marketplace. Not a
+            second pair of equal-weight cards. */}
         <p className="mt-10 text-sm text-muted-foreground">
-          {state.role === "sitter" ? (
+          {state.sitter ? (
             <Link to="/owner/need/pet" className="font-medium text-primary underline-offset-4 hover:underline">
               {t("entry.switchToOwner")}
             </Link>
           ) : (
-            <Link to="/sitter/register" className="font-medium text-primary underline-offset-4 hover:underline">
+            <Link to="/sitter/start" className="font-medium text-primary underline-offset-4 hover:underline">
               {t("entry.switchToSitter")}
             </Link>
           )}

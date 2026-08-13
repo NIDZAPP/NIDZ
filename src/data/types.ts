@@ -21,6 +21,16 @@ export function localized(value: Localized, locale: AppLocale): string {
   return value[locale] ?? value.en;
 }
 
+/** One string in every locale slot.
+ *
+ * What a sitter types about themselves is their own words, and Nidz does not
+ * translate user content — so the same text is what every visitor sees,
+ * whichever language the interface is in. The `Localized` shape exists for the
+ * FIXTURES, which are authored three times on purpose. */
+export function asLocalized(text: string): Localized {
+  return { fr: text, en: text, ar: text };
+}
+
 /** Demo V1 is dogs and cats only (Audit p.97). */
 export type Species = "dog" | "cat";
 export const SPECIES: readonly Species[] = ["dog", "cat"];
@@ -127,6 +137,14 @@ export type SitterProfile = {
       outside these ranges means "not declared unavailable", never "confirmed
       free". Every surface that reads this must say so. */
   declaredUnavailable: DateRange[];
+  /** The sitter's own photograph, as an object URL.
+   *
+   * Never uploaded — there is no server — and never persisted, because an
+   * object URL points at nothing after a reload. Present only for a profile
+   * the visitor built in this session. The fixtures deliberately have none:
+   * stock photography presented as a real person's profile is an anti-pattern
+   * (§21, §40), so they render a monogram instead. */
+  photoUrl?: string;
   /** True for every profile shipped as a fixture. A profile the user builds
       in the sitter flow is false — it is their own data, not an example. */
   isDemoFixture: boolean;

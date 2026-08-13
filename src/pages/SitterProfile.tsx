@@ -119,7 +119,13 @@ export default function SitterProfile() {
   const pet = state.pets.find((p) => p.id === state.need.petId) ?? null;
   const petName = pet && state.need.species === criteria.species ? pet.name : null;
 
-  const cta = (
+  /* Your own profile does not invite you to request care from yourself; it
+     offers the thing you would actually want from this page. */
+  const cta = isOwnProfile ? (
+    <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
+      <Link to="/sitter/profile/about">{t("sitterFlow.preview.edit")}</Link>
+    </Button>
+  ) : (
     <Button asChild size="lg" className="w-full sm:w-auto">
       <Link to={{ pathname: `/owner/request/${sitter.id}`, search: paramKey }}>{t("profile.cta")}</Link>
     </Button>
