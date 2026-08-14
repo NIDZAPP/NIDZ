@@ -10,7 +10,7 @@
    ------------------------------------------------------------------------ */
 
 import type { AppLocale } from "@/i18n";
-import type { Pet } from "./pets";
+import type { SharedPet } from "./pets";
 
 /** Demo content that has to read naturally in all three product languages.
     Place names, sitter bios and declared conditions are DATA, not interface
@@ -88,7 +88,7 @@ export type DateRange = { start: string; end: string };
 
    The import is type-only in both directions, so the cycle is erased at build
    and exists only for the type checker, which resolves it. */
-export type { Pet } from "./pets";
+export type { Pet, SharedPet } from "./pets";
 
 /* ------------------------------------------------------------------ sitter */
 
@@ -213,9 +213,17 @@ export type CareRequest = {
   id: string;
   createdAt: string;
   sitterId: string;
-  /** A copy, not a reference: editing the pet later must not silently rewrite
-      what the sitter was asked to look after. */
-  pet: Pet;
+  /**
+   * A copy, not a reference: editing the pet later — or deleting it — must not
+   * silently rewrite what the sitter was asked to look after.
+   *
+   * `SharedPet`, not `Pet`: the private care plan (feeding, medication, vet,
+   * emergency contact) does not cross to a sitter with a request. §83 keeps
+   * that for someone actually caring for the animal, and having the type
+   * exclude it means the next person to add a detail block to a summary cannot
+   * leak it by accident.
+   */
+  pet: SharedPet;
   careType: CareType;
   dates: DateRange;
   /** The OWNER's area — what a sitter needs in order to answer a home visit or

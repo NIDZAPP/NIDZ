@@ -71,9 +71,19 @@ export default function Index() {
     return {
       ...EMPTY_CRITERIA,
       wilaya: account.wilayaId,
-      species: pets.length === 1 ? pets[0].species : null,
+      /* One saved animal narrows the suggestions to it. With none — the state
+         every new account is in — fall back to the species the owner declared
+         on the account, which is the one case `ownerAccount.speciesHelp`
+         promises to handle and which nothing was reading. With several, no
+         species: guessing which animal they meant would be a claim. */
+      species:
+        pets.length === 1
+          ? pets[0].species
+          : pets.length === 0 && account?.ownedSpecies.length === 1
+            ? account.ownedSpecies[0]
+            : null,
     };
-  }, [account?.wilayaId, pets]);
+  }, [account?.wilayaId, account?.ownedSpecies, pets]);
 
   const suggestions = useMemo(() => {
     if (!suggestionCriteria) return [];
@@ -160,6 +170,9 @@ export default function Index() {
                   askedCare={null}
                   search={suggestionSearch}
                   actionVariant="outline"
+                  /* The heading already says "who accept cats"; repeating it on
+                     every row discriminates nothing. Same rule /search applies. */
+                  showSpeciesEyebrow={!suggestionCriteria?.species}
                 />
               ))}
             </ul>
@@ -180,7 +193,10 @@ export default function Index() {
               primary destinations, and secondary entities reached from them.
               Shown once there is an account, because that is when an animal can
               be saved and reused rather than retyped per request. */}
-          {state.capabilities.owner && (
+          {/* Shown once there is anything to show. The need flow saves an
+              animal with no account at all, so gating on the capability alone
+              hid pets that genuinely existed. */}
+          {(pets.length > 0 || state.capabilities.owner) && (
             <Link to="/owner/pets" className={REGISTER_ROW}>
               <span>
                 <span className="block font-medium text-foreground">{t("nav.pets")}</span>

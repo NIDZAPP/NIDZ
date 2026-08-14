@@ -6,6 +6,7 @@ import FlowScreen from "@/components/shared/FlowScreen";
 import { DemoNotice } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { AUTH_PROVIDERS, hasWorkingProvider } from "@/auth/providers";
+import { sameOriginPath } from "@/utils/safe-path";
 
 /**
  * The sign-in gateway (§14).
@@ -33,10 +34,10 @@ export default function Auth() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
 
-  /* Same-origin paths only. An absolute URL in `next` would make this an open
-     redirect, and this is exactly the screen where someone would try one. */
-  const raw = searchParams.get("next");
-  const next = raw && raw.startsWith("/") && !raw.startsWith("//") ? raw : null;
+  /* Parsed with the browser's own URL parser rather than pattern-matched —
+     see `sameOriginPath`. This is exactly the screen where someone would try
+     an absolute URL, and a startsWith check does not survive a backslash. */
+  const next = sameOriginPath(searchParams.get("next"));
   const accountHref = next ? `/owner/account?next=${encodeURIComponent(next)}` : "/owner/account";
 
   return (

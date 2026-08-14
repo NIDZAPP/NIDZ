@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 
+import { petFacts } from "@/components/request/pet-facts";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { ProvenanceLabel } from "@/components/shared/trust";
 import { communeWithWilaya } from "@/data/algeria";
@@ -43,6 +44,12 @@ export default function RequestSummary({
   /* The owner's area, labelled as such. Unlabelled and sitting under the
      sitter's name, it read as a claim about where the SITTER is. */
   const ownerZone = communeWithWilaya(request.communeCode, lng);
+
+  /* The species-specific answers the owner actually gave. Unanswered questions
+     are omitted rather than listed as "I don't know": a short list of facts
+     tells a sitter something, nine rows of unknown tell them nothing and stop
+     them reading. */
+  const facts = petFacts(request.pet, t);
 
   const rows: { key: string; label: string; value: string }[] = [
     { key: "sitter", label: t("request.summary.sitter"), value: sitterName },
@@ -92,6 +99,30 @@ export default function RequestSummary({
           </div>
         ))}
       </dl>
+
+      {/* What the owner said about THIS animal. Collected on the pet screen
+          under an explicit promise that it helps a sitter judge whether they
+          can take it — so it has to arrive. */}
+      {facts.length > 0 && (
+        <div className="mt-6">
+          <Heading className="text-base font-semibold text-foreground">
+            {t("request.summary.aboutPet", { name: request.pet.name })}
+          </Heading>
+          <dl className="mt-2 border-t border-border">
+            {facts.map((fact) => (
+              <div
+                key={fact.key}
+                className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-border py-2.5"
+              >
+                <dt className="text-sm text-muted-foreground">{fact.label}</dt>
+                <dd className="text-base text-foreground">
+                  <bdi>{fact.value}</bdi>
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      )}
 
       {/* The needs travel with the request: they are the thing a sitter most
           needs in order to answer honestly. */}

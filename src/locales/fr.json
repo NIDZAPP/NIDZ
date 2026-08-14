@@ -68,7 +68,25 @@
     }
   },
   "trust": {
-    "declared": "Informations fournies par le pet-sitter"
+    "declared": "Informations fournies par le pet-sitter",
+    "badge": {
+      "identityVerified": {
+        "label": "Identité vérifiée",
+        "criteria": "Un document d’identité vérifié auprès de la personne, par un processus défini au résultat traçable. Ce processus n’existe pas."
+      },
+      "credentialVerified": {
+        "label": "Diplôme professionnel vérifié",
+        "criteria": "Une qualification confirmée auprès de l’organisme qui l’a délivrée. Déclarer une profession n’est pas cela."
+      },
+      "experienced": {
+        "label": "Pet-sitter expérimenté",
+        "criteria": "Un nombre de gardes que Nidz a lui-même vues aboutir. Nidz n’observe aucune garde."
+      },
+      "responsive": {
+        "label": "Réactif",
+        "criteria": "Un délai de réponse mesuré sur de vraies demandes. Nidz ne mesure aucun délai."
+      }
+    }
   },
   "request": {
     "status": {
@@ -78,7 +96,6 @@
     },
     "name": {
       "title": "Comment vous appelez-vous ?",
-      "intro": "{{name}} verra votre nom sur votre demande.",
       "firstLabel": "Prénom",
       "lastLabel": "Nom",
       "lastHelp": "Seuls votre prénom et l'initiale de votre nom seront visibles publiquement.",
@@ -88,22 +105,10 @@
     },
     "phone": {
       "title": "Votre numéro de téléphone",
-      "intro": "C'est par téléphone que le pet-sitter pourra vous joindre s'il accepte votre demande.",
       "label": "Numéro",
       "help": "9 chiffres après +213. Cette démonstration ne couvre que les numéros algériens.",
       "invalid": "Saisissez un numéro à 9 chiffres, par exemple 555 12 34 56.",
       "demoNote": "Aucun SMS ne sera envoyé : votre numéro reste dans ce navigateur."
-    },
-    "verify": {
-      "title": "Vérification du numéro",
-      "intro": "Numéro indiqué : {{phone}}",
-      "demoTitle": "Étape simulée",
-      "demoBody": "Nidz n'envoie aucun SMS et ne vérifie aucun numéro : il n'y a ni serveur ni opérateur derrière cette démonstration. Saisissez n'importe quel code à 6 chiffres pour continuer. Passer cette étape ne signifie pas que votre numéro a été vérifié.",
-      "codeLabel": "Code à 6 chiffres",
-      "invalid": "Saisissez 6 chiffres.",
-      "resend": "Renvoyer le code",
-      "resentNote": "Rien n'a été renvoyé : aucun code n'est généré dans cette démonstration.",
-      "changeNumber": "Modifier le numéro"
     },
     "review": {
       "title": "Votre demande",
@@ -125,7 +130,8 @@
       "dates": "Dates",
       "rate": "Tarif affiché",
       "needs": "Besoins importants",
-      "ownerZone": "Zone du propriétaire"
+      "ownerZone": "Zone du propriétaire",
+      "aboutPet": "À propos de {{name}}"
     }
   },
   "sitterFlow": {
@@ -267,7 +273,8 @@
       "emptyBody": "Essayez un autre type de garde, une autre commune, ou augmentez le prix maximum.",
       "titleAll": "Exemples de pet-sitters",
       "allOfThem": "Tous les résultats ci-dessous :",
-      "nearYouFirst": "{{commune}} en premier"
+      "nearYouFirst": "{{commune}} en premier",
+      "sortedNearFirst": "{{commune}} d’abord, puis par prix croissant"
     },
     "card": {
       "matchLabel": "Correspond à votre recherche : ",
@@ -338,7 +345,10 @@
       "ageHelp": "Par exemple : 8 mois, 3 ans.",
       "notesLabel": "Besoins ou contraintes importantes",
       "notesHelp": "Traitement en cours, peur des autres chiens, ne peut pas rester seul longtemps…",
-      "photoLabel": "Une photo (facultatif)"
+      "photoLabel": "Une photo (facultatif)",
+      "chooseLabel": "De quel animal s’agit-il ?",
+      "another": "Un autre animal",
+      "editElsewhere": "Vos animaux enregistrés se modifient dans Mes animaux, pas ici."
     },
     "location": {
       "title": "Où cherchez-vous ?",
@@ -423,7 +433,9 @@
       "dog_one": "{{count}} chien",
       "dog_other": "{{count}} chiens",
       "cat_one": "{{count}} chat",
-      "cat_other": "{{count}} chats"
+      "cat_other": "{{count}} chats",
+      "bird_one": "{{count}} oiseau à la maison",
+      "bird_other": "{{count}} oiseaux à la maison"
     },
     "cta": "Demander une garde",
     "backToResults": "Retour aux résultats",
@@ -547,6 +559,11 @@
       "confirmBody": "Votre nom, votre numéro, votre animal, vos demandes et votre profil de pet-sitter seront supprimés de ce navigateur. Cette action ne peut pas être annulée.",
       "cancel": "Annuler",
       "confirm": "Tout effacer"
+    },
+    "account": {
+      "title": "Votre compte",
+      "edit": "Informations personnelles",
+      "editLine": "Votre nom, votre date de naissance, où vous êtes, et les animaux que vous avez."
     }
   },
   "workspace": {
@@ -681,6 +698,37 @@
       "medication": "Traitements",
       "vet": "Vétérinaire",
       "emergency": "Contact d’urgence"
-    }
+    },
+    "notSure": "Je ne sais pas"
+  },
+  "reviews": {
+    "title": "Avis",
+    "count_one": "{{count}} avis",
+    "count_other": "{{count}} avis",
+    "none": {
+      "title": "Nouveau sur Nidz",
+      "body": "Personne n’a encore laissé d’avis sur {{name}}. Tout ce qui précède est ce que cette personne dit d’elle-même : lisez ses limites aussi attentivement que ce qu’elle propose, et rencontrez-la avant la première garde si vous le pouvez."
+    },
+    "demoNote": "Ces avis font partie de l’exemple. Ce pet-sitter n’est pas une personne réelle et aucune garde n’a eu lieu.",
+    "replyFrom": "Réponse de {{name}}",
+    "showAll_one": "Afficher l’avis",
+    "showAll_other": "Afficher les {{count}} avis",
+    "ratingLabel": "{{value}} sur 5",
+    "distributionRow_one": "{{count}} avis à {{star}} étoiles",
+    "distributionRow_other": "{{count}} avis à {{star}} étoiles"
+  },
+  "portfolio": {
+    "title": "Moments de garde",
+    "intro": "Des moments de garde réels, décrits par le pet-sitter. Utile quand il y a encore peu d’avis, parce que cela montre ce qu’une garde implique vraiment.",
+    "activity": {
+      "walk": "Une promenade",
+      "enrichment": "Stimulation",
+      "homeStay": "À la maison",
+      "feeding": "Repas",
+      "play": "Jeu",
+      "careSetup": "L’organisation"
+    },
+    "noPhotos": "Les photos ne font pas partie de ce prototype. Photographier l’animal de quelqu’un demande son accord, et Nidz n’a pas encore de moyen de le demander.",
+    "noPhotosDemo": "Ceci est un contenu d’exemple, et il n’a pas de photos : la photo d’un animal demande l’accord de son propriétaire, et en inventer une viderait de son sens une section censée servir de preuve."
   }
 }

@@ -29,7 +29,6 @@ function shouldSplash(): boolean {
   }
 }
 
-
 /* Four of the profile's sections, named. Rates is here because it is the thing
    a prospective sitter most wants to know they control, and leaving it out
    under-stated how much this path asks for — which is the opposite of what the

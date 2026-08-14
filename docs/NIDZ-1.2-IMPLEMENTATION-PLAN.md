@@ -304,7 +304,7 @@ verify the active branch is `nidz-1.2`, commit, push.
 | 6 | Auth gateway + fast owner account | **Completed** — see §6 |
 | 7 | Multi-pet system | **Completed** — see §6 |
 | 8 | Owner home + marketplace search | **Completed** — see §6 |
-| 9 | Public sitter profile + reviews + portfolio | — |
+| 9 | Public sitter profile + reviews + portfolio | **Completed** — see §6 |
 | 10 | Strict sitter onboarding, part 1 | — |
 | 11 | Strict sitter onboarding, part 2 | — |
 | 12 | Requests + meet & greet + care context | — |
@@ -869,6 +869,82 @@ an `actionVariant`, and Home passes `outline`.
 **Zero states hold.** A bird search finds nobody — no demo sitter accepts birds
 — and says so with a useful next step rather than fabricating a result. That is
 §33's honest zero state, produced by the data rather than special-cased.
+
+---
+
+### Group 9 — sitter profile, reviews and the care portfolio
+
+**Completed**, together with five critical fixes the code reviewer found in
+Groups 6–8. Those are recorded here because three of them were data-destroying
+and one was a straightforward untruth.
+
+**Trust evidence is modelled in the data** (§41), not only in the labels:
+`declared` / `verified` / `community` / `platform`, with `AVAILABLE_SOURCES`
+naming the two that have a mechanism. `VERIFICATION_STATUS` defines all six
+states §66 asks for and every entry is `not_started` with no code path that
+changes one. `BADGE_CRITERIA` defines four badges with their criteria written
+out — and `awardable: false` on every one, so `badgesFor()` returns nothing.
+Writing the criteria first is what stops a badge being invented backwards to
+fill a screen that looked empty.
+
+**Reviews are marketplace evidence** (§44–46). `summarise` returns `null` for
+an empty list *by design*: that is the mechanism behind the cold start, because
+a caller cannot render `0.0 ★` off an object that does not exist. Verified in
+the browser — Amina B. shows 4.7 with a 5/4/3/2/1 distribution, and Youcef H.
+shows "New on Nidz" with no zero anywhere.
+
+The fixtures are deliberately uneven: one sitter has **no** reviews, and not
+every review is five stars. A wall of fives is what fabricated reviews look
+like; the threes and fours here criticise things consistent with what that
+sitter actually declares.
+
+**The portfolio has no photographs, and says so.** It is a photographic feature
+and Nidz has no consented photography — and this is the one section where stock
+imagery would be worst, because the entire purpose is to be *evidence*, and
+fabricated evidence is not weaker evidence but the opposite. Each item carries
+everything a real one would except the image. Consent states are exercised
+rather than declared: two fixture items are `consent_requested` and
+`consent_withdrawn`, so `publicItemsFor`'s filter does visible work.
+
+#### Critical fixes from the Group 6–8 review
+
+1. **v2 storage records were being destroyed.** `STORAGE_VERSION` went 2 → 3
+   with no v2 branch, so every record written earlier in this branch —
+   accounts, pets, requests, sitter workspaces — was discarded whole on load.
+   The only shape that changed was the pet, which `restorePet` already handles.
+   `READABLE_VERSIONS` now accepts both. Version mismatch discards to prevent a
+   *crash*; it is not a licence to delete a version this build can read.
+2. **The results header stated an order that was not the order.** It said
+   "sorted by lowest price" and appended the commune tier as a trailing
+   fragment — but the first row is often not the cheapest, which is exactly
+   what the browser check demonstrated. It is one combined claim now, naming
+   the tier that actually dominates first.
+3. **`NeedPet` overwrote an existing animal.** With a dog saved, arriving to
+   arrange care for a cat rewrote the dog under the dog's own id, taking its
+   species detail and its feeding and medication notes with it, and the dog
+   vanished from My pets. It is a **picker** now: choosing a saved animal only
+   records the choice, and adding a new one always mints a new id.
+4. **Everything the pet form collected reached nobody**, while the copy
+   promised a sitter would use it to judge whether they could take the animal.
+   `petFacts` now renders the species-specific answers into the request
+   summary — omitting unanswered questions rather than listing nine rows of
+   "I don't know".
+5. **The `next` allowlist admitted `/\evil.com`.** A `startsWith` check does
+   not survive a backslash, which the URL parser treats as an authority slash.
+   `sameOriginPath` parses with the browser's own parser instead. The failure
+   mode was not theoretical: React Router's `replace()` throws a `SecurityError`
+   out of the submit handler *after* the account has been created.
+
+Also fixed from the same review: the private care plan crossing to a sitter
+(`CareRequest.pet` is now a `SharedPet` that structurally cannot carry it);
+object URLs persisting inside stored requests (checklist F5); `ownedSpecies`
+collected under a promise nothing kept, now the suggestion fallback for an
+account with no pets yet; the owner account being write-once with no route back
+to it, now linked from Settings; Home hiding pets that genuinely existed;
+`setDetail` accepting any key, so a typo inflated the answered-question count;
+the four `X | null` fields having no way back to "not answered"; `walksPerDay`
+accepting `NaN` and negatives; and eleven dead locale strings describing the
+retired OTP step, in three languages.
 
 ---
 

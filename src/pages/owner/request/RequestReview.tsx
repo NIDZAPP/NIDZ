@@ -11,6 +11,7 @@ import { parseCriteria } from "@/data/criteria";
 import { offeredServices } from "@/data/demo-sitters";
 import type { CareRequest } from "@/data/types";
 import { useSitter } from "@/hooks/use-sitter";
+import { forSharing } from "@/data/pets";
 import { useDemo } from "@/state/demo/context";
 
 /**
@@ -71,9 +72,12 @@ export default function RequestReview() {
      id and a time and stores it unchanged. */
   const draft: Omit<CareRequest, "id" | "createdAt"> = {
     sitterId: sitter.id,
-    /* A copy, not a reference: editing the pet later must not rewrite what
-       this sitter was asked to look after. */
-    pet: { ...pet },
+    /* A copy without the care plan. `forSharing` drops feeding, medication,
+       vet and emergency contact — those belong to someone actually looking
+       after the animal (§83), not to a request that has not been accepted. The
+       copy also means editing or deleting the animal later cannot rewrite what
+       this sitter was asked about. */
+    pet: forSharing(pet),
     careType,
     dates,
     /* The OWNER's area, which is what a sitter needs in order to answer a

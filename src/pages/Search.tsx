@@ -109,9 +109,11 @@ export default function Search() {
     () => matchSitters(pool, criteria, homeCommune),
     [pool, criteria, homeCommune],
   );
-  /* Only claimed when it actually changed the order. */
-  const nearFirst = useMemo(
-    () => usedHomeCommune(results, criteria, homeCommune),
+  /* Narrowed to a value rather than asserted at the call site: the invariant
+     that makes `homeCommune!` safe lives in another module. Null when the
+     tie-break did not actually change anything. */
+  const near = useMemo(
+    () => (usedHomeCommune(results, criteria, homeCommune) ? homeCommune : null),
     [results, criteria, homeCommune],
   );
   /* Every criteria-derived reason is true of every survivor by construction,
@@ -247,9 +249,17 @@ export default function Search() {
             <p className="mt-3 text-sm text-muted-foreground" aria-live="polite">
               {t("search.results.countLabel", { count: results.length })}
               {/* No ordering claim when there is nothing to order. */}
-              {results.length > 0 && ` · ${t("search.results.sortedByPrice")}`}
-              {nearFirst &&
-                ` · ${t("search.results.nearYouFirst", { commune: zoneLabel(homeCommune!) })}`}
+              {/* ONE claim, not two. Stating "sorted by lowest price" and then
+                  appending the commune tier put the precedence backwards: the
+                  first row is often not the cheapest, and the sentence said it
+                  was. The combined phrasing names the tier that actually
+                  dominates first. */}
+              {results.length > 0 &&
+                ` · ${
+                  near
+                    ? t("search.results.sortedNearFirst", { commune: zoneLabel(near) })
+                    : t("search.results.sortedByPrice")
+                }`}
             </p>
 
             {/* What every result has in common, said once. Repeating it as

@@ -37,9 +37,16 @@ import {
     version this code does not recognise is discarded rather than read
     optimistically, so a returning visitor never crashes on a renamed field.
 
-    Pets are the exception that needs no version branch: `restorePet` reads
-    every shape Nidz has shipped, so it is applied on all paths. */
+    Pets need no version branch of their own: `restorePet` reads every shape
+    Nidz has shipped and runs on every path that reaches `restore`. */
 const STORAGE_VERSION = 3;
+
+/** Versions whose records this build can read in full.
+ *
+ * v2 differs from v3 only in the pet shape, which `restorePet` normalises, so
+ * a v2 record is upgraded on read rather than thrown away. Anything outside
+ * this list is discarded — see `loadState`. */
+const READABLE_VERSIONS: readonly number[] = [2, 3];
 
 /** The version now lives INSIDE the record rather than in the key, so future
     versions migrate in place instead of orphaning the previous one. */
@@ -64,8 +71,9 @@ const LEGACY_STORAGE_KEY = "nidz.demo.v1";
 export type DemoAccount = {
   firstName: string;
   lastName: string;
-  /** ISO `YYYY-MM-DD`. **Private.** Collected for eligibility only and never
-      rendered on any public surface (§16, §95). */
+  /** ISO `YYYY-MM-DD`. **Private.** Required by §16 and held against a future
+      eligibility rule — there is no age rule today, and no code reads this
+      field for anything. Never rendered on any surface (§95). */
   dateOfBirth: string | null;
   /** Where this person is, at administrative granularity. Nidz holds no exact
       address for anyone, so there is nothing more precise to leak (§29). */
@@ -300,12 +308,21 @@ export function reducer(state: DemoState, action: DemoAction): DemoState {
 
 /** Object URLs are revoked when the document unloads, so a persisted one
     points at nothing after a reload and renders a broken image. The photo is
-    a live preview only — the rest of the pet survives. */
+    a live preview only — the rest of the pet survives.
+
+    Requests are stripped too. A request carries a COPY of the pet, so the
+    photo rode along into storage and stayed there as a dead `blob:` URL —
+    quietly breaking the "never persisted" rule this comment states, and the
+    F5 invariant in the regression checklist. */
 function stripTransientFields(state: DemoState): DemoState {
   const sitter = state.sitter;
   return {
     ...state,
     pets: state.pets.map(({ photoUrl: _photoUrl, ...pet }) => pet),
+    requests: state.requests.map((request) => ({
+      ...request,
+      pet: (({ photoUrl: _photoUrl, ...pet }) => pet)(request.pet) as CareRequest["pet"],
+    })),
     sitter: sitter
       ? { ...sitter, profile: { ...sitter.profile, photoUrl: undefined } }
       : null,
@@ -349,6 +366,37 @@ function restoreSitter(value: unknown): SitterWorkspace | null {
 const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
 
+/**
+ * The account, validated field by field.
+ *
+ * It was the one slice still cast rather than restored, which stopped being
+ * harmless when `ownedSpecies` arrived: it is read straight into state and
+ * then `.filter`-ed on the first chip tap, so a hand-edited `"dog"` string
+ * got past an `isObject` check and threw. B2 states the rule as "validated per
+ * slice"; this is the slice that was not.
+ */
+function restoreAccount(value: unknown): DemoAccount | null {
+  if (!isObject(value)) return null;
+  const str = (v: unknown) => (typeof v === "string" ? v : "");
+  const nullableStr = (v: unknown) => (typeof v === "string" && v ? v : null);
+  if (!str(value.firstName) && !str(value.lastName)) return null;
+  return {
+    firstName: str(value.firstName),
+    lastName: str(value.lastName),
+    dateOfBirth: nullableStr(value.dateOfBirth),
+    wilayaId: nullableStr(value.wilayaId),
+    communeId: nullableStr(value.communeId),
+    /* Narrowed to species this build knows. A stored "rabbit" would otherwise
+       reach a `Record<Species, ...>` lookup and render undefined. */
+    ownedSpecies: Array.isArray(value.ownedSpecies)
+      ? value.ownedSpecies.filter((s): s is Species => s === "dog" || s === "cat" || s === "bird")
+      : [],
+    phoneNumber: str(value.phoneNumber),
+    accountComplete: value.accountComplete === true,
+    createdAt: str(value.createdAt) || new Date().toISOString(),
+  };
+}
+
 /** Only the two flags, only when they are actually booleans. A hand-edited
     `{"owner":"yes"}` grants nothing. */
 function restoreCapabilities(value: unknown): AccountCapabilities {
@@ -359,7 +407,7 @@ function restoreCapabilities(value: unknown): AccountCapabilities {
 function restore(parsed: Record<string, unknown>): DemoState {
   const arrayOfObjects = (v: unknown) => (Array.isArray(v) && v.every(isObject) ? v : null);
 
-  const account = isObject(parsed.account) ? (parsed.account as unknown as DemoAccount) : null;
+  const account = restoreAccount(parsed.account);
   const sitter = restoreSitter(parsed.sitter);
   const stored = restoreCapabilities(parsed.capabilities);
 
@@ -434,10 +482,20 @@ export function loadState(): DemoState {
   try {
     const current = readRecord(STORAGE_KEY);
     if (current) {
-      /* A version this build does not know about — a record written by a NEWER
-         build, say, after the visitor moved back a version — is discarded
-         rather than read field by field and half-understood. */
-      return current.version === STORAGE_VERSION ? restore(current) : INITIAL_STATE;
+      /* v2 and v3 are both readable, and that distinction matters.
+         The ONLY shape that changed between them is the pet, and `restorePet`
+         already reads the v2 flat pet — so discarding a v2 record would throw
+         away an account, its pets, its requests and its sitter workspace to
+         avoid a migration this code has already written. Version mismatch
+         discards in order to prevent a CRASH (checklist B4); it is not a
+         licence to delete a version this build can understand.
+
+         A version this build does not know — a record written by a NEWER build,
+         after the visitor moved back — is still discarded rather than read
+         field by field and half-understood. */
+      return READABLE_VERSIONS.includes(current.version as number)
+        ? restore(current)
+        : INITIAL_STATE;
     }
 
     const legacy = readRecord(LEGACY_STORAGE_KEY);

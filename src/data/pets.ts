@@ -128,6 +128,26 @@ export type Pet =
   | (PetCommon & { species: "cat"; details: CatDetails })
   | (PetCommon & { species: "bird"; details: BirdDetails });
 
+/**
+ * A pet as it may be SHARED with a sitter: everything except the care plan.
+ *
+ * `Omit` on a union collapses it into one intersection, which would lose the
+ * `species`/`details` correlation that the whole model rests on — hence the
+ * distributive form. The point is that a request cannot carry feeding,
+ * medication, vet and emergency contact by accident: §83 keeps those for
+ * someone actually caring for the animal, and a type is the only version of
+ * that rule which survives the next person adding a field to a summary.
+ */
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+export type SharedPet = DistributiveOmit<Pet, "care">;
+
+/** Drop the private half. Used at the one point a pet crosses from the owner
+    to a sitter. */
+export function forSharing(pet: Pet): SharedPet {
+  const { care: _care, ...shared } = pet;
+  return shared as SharedPet;
+}
+
 /** The detail record for a species, with every question unanswered. */
 export function emptyDetails(species: "dog"): DogDetails;
 export function emptyDetails(species: "cat"): CatDetails;

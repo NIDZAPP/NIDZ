@@ -52,7 +52,7 @@ const LANGUAGE_OPTIONS: AppLocale[] = [...SUPPORTED_LOCALES];
 export default function Settings() {
   const { t } = useTranslation();
   const locale = useAppLocale();
-  const { dispatch } = useDemo();
+  const { state, dispatch } = useDemo();
   const navigate = useNavigate();
 
   /* Read once per render rather than held in state: nothing else in the app
@@ -109,6 +109,34 @@ export default function Settings() {
             }))}
           />
         </section>
+
+        {/* The account was write-once: nothing linked back to it, so a wrong
+            commune or a typo'd name could only be fixed by wiping all demo
+            state — and that commune is what Owner Home's whole suggestion
+            section keys off. */}
+        {state.capabilities.owner && (
+          <section aria-labelledby="settings-account" className="mt-12">
+            <h2 id="settings-account" className="text-name font-semibold text-foreground">
+              {t("settings.account.title")}
+            </h2>
+            <div className="mt-4">
+              <Link to="/owner/account" className={REGISTER_ROW}>
+                <span>
+                  <span className="block font-medium text-foreground">
+                    {t("settings.account.edit")}
+                  </span>
+                  <span className="mt-0.5 block text-sm text-muted-foreground">
+                    {t("settings.account.editLine")}
+                  </span>
+                </span>
+                <ArrowRight
+                  className="size-5 shrink-0 text-muted-foreground rtl:-scale-x-100"
+                  aria-hidden="true"
+                />
+              </Link>
+            </div>
+          </section>
+        )}
 
         <section aria-labelledby="settings-about" className="mt-12">
           <h2 id="settings-about" className="text-name font-semibold text-foreground">

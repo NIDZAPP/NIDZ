@@ -68,7 +68,25 @@
     }
   },
   "trust": {
-    "declared": "Information provided by the sitter"
+    "declared": "Information provided by the sitter",
+    "badge": {
+      "identityVerified": {
+        "label": "Identity verified",
+        "criteria": "An identity document checked against the person, through a defined process with a traceable result. No such process exists."
+      },
+      "credentialVerified": {
+        "label": "Professional credential verified",
+        "criteria": "A qualification confirmed with the body that issued it. Declaring a profession is not this."
+      },
+      "experienced": {
+        "label": "Experienced sitter",
+        "criteria": "A number of stays Nidz itself observed reaching completion. Nidz observes no stays."
+      },
+      "responsive": {
+        "label": "Responsive",
+        "criteria": "A reply time measured across real requests. Nidz measures no reply times."
+      }
+    }
   },
   "request": {
     "status": {
@@ -78,7 +96,6 @@
     },
     "name": {
       "title": "What is your name?",
-      "intro": "{{name}} will see your name on your request.",
       "firstLabel": "First name",
       "lastLabel": "Last name",
       "lastHelp": "Only your first name and the initial of your last name are shown publicly.",
@@ -88,22 +105,10 @@
     },
     "phone": {
       "title": "Your phone number",
-      "intro": "The phone is how the sitter can reach you if they accept your request.",
       "label": "Number",
       "help": "9 digits after +213. This demonstration covers Algerian numbers only.",
       "invalid": "Enter a 9-digit number, for example 555 12 34 56.",
       "demoNote": "No SMS will be sent: your number stays in this browser."
-    },
-    "verify": {
-      "title": "Number check",
-      "intro": "Number given: {{phone}}",
-      "demoTitle": "Simulated step",
-      "demoBody": "Nidz sends no SMS and verifies no number: there is neither a server nor an operator behind this demonstration. Enter any 6-digit code to continue. Completing this step does not mean your number has been verified.",
-      "codeLabel": "6-digit code",
-      "invalid": "Enter 6 digits.",
-      "resend": "Send the code again",
-      "resentNote": "Nothing was sent: no code is generated in this demonstration.",
-      "changeNumber": "Change the number"
     },
     "review": {
       "title": "Your request",
@@ -125,7 +130,8 @@
       "dates": "Dates",
       "rate": "Displayed rate",
       "needs": "Important needs",
-      "ownerZone": "Owner's area"
+      "ownerZone": "Owner's area",
+      "aboutPet": "About {{name}}"
     }
   },
   "sitterFlow": {
@@ -267,7 +273,8 @@
       "emptyBody": "Try another kind of care, another area, or raise the maximum price.",
       "titleAll": "Example sitters",
       "allOfThem": "Every result below:",
-      "nearYouFirst": "{{commune}} first"
+      "nearYouFirst": "{{commune}} first",
+      "sortedNearFirst": "{{commune}} first, then by lowest price"
     },
     "card": {
       "matchLabel": "Matches your search: ",
@@ -338,7 +345,10 @@
       "ageHelp": "For example: 8 months, 3 years.",
       "notesLabel": "Important needs or constraints",
       "notesHelp": "Ongoing medication, afraid of other dogs, cannot be left alone for long…",
-      "photoLabel": "A photo (optional)"
+      "photoLabel": "A photo (optional)",
+      "chooseLabel": "Which animal is this about?",
+      "another": "Another animal",
+      "editElsewhere": "Your saved animals are edited in My pets, not here."
     },
     "location": {
       "title": "Where are you looking?",
@@ -423,7 +433,9 @@
       "dog_one": "{{count}} dog",
       "dog_other": "{{count}} dogs",
       "cat_one": "{{count}} cat",
-      "cat_other": "{{count}} cats"
+      "cat_other": "{{count}} cats",
+      "bird_one": "{{count}} bird at home",
+      "bird_other": "{{count}} birds at home"
     },
     "cta": "Request care",
     "backToResults": "Back to the results",
@@ -547,6 +559,11 @@
       "confirmBody": "Your name, your number, your animal, your requests and your sitter profile will be deleted from this browser. This cannot be undone.",
       "cancel": "Cancel",
       "confirm": "Erase everything"
+    },
+    "account": {
+      "title": "Your account",
+      "edit": "Personal information",
+      "editLine": "Your name, date of birth, where you are, and which animals you have."
     }
   },
   "workspace": {
@@ -681,6 +698,37 @@
       "medication": "Medication",
       "vet": "Vet",
       "emergency": "Emergency contact"
-    }
+    },
+    "notSure": "Not sure"
+  },
+  "reviews": {
+    "title": "Reviews",
+    "count_one": "{{count}} review",
+    "count_other": "{{count}} reviews",
+    "none": {
+      "title": "New on Nidz",
+      "body": "Nobody has reviewed {{name}} yet. Everything above is what they say about themselves — read the limits they set as carefully as what they offer, and meet before the first stay if you can."
+    },
+    "demoNote": "These reviews are part of the example. This sitter is not a real person and no stay took place.",
+    "replyFrom": "{{name}} replied",
+    "showAll_one": "Show the review",
+    "showAll_other": "Show all {{count}} reviews",
+    "ratingLabel": "{{value}} out of 5",
+    "distributionRow_one": "{{count}} review at {{star}} stars",
+    "distributionRow_other": "{{count}} reviews at {{star}} stars"
+  },
+  "portfolio": {
+    "title": "Moments of care",
+    "intro": "Moments from real care, described by the sitter. Useful when there are few reviews yet, because it shows what a stay actually involves.",
+    "activity": {
+      "walk": "A walk",
+      "enrichment": "Enrichment",
+      "homeStay": "At home",
+      "feeding": "Feeding",
+      "play": "Play",
+      "careSetup": "How things are set up"
+    },
+    "noPhotos": "Photographs are not part of this prototype. A photo of someone else's animal needs their permission, and Nidz has no way to ask for it yet.",
+    "noPhotosDemo": "This is example content, and it has no photographs: a picture of an animal needs its owner's permission, and inventing one would defeat the point of a section meant to be evidence."
   }
 }

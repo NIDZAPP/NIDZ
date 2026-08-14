@@ -54,9 +54,9 @@ export function SitterPhone() {
  *
  * It accepted any six digits and set a flag — a staged verification of a
  * number nobody could check, which is precisely what §92 forbids when there is
- * no OTP provider. The route survives as a redirect because it is a `backTo`
- * target and a plausible bookmark; deleting it outright would give the step
- * after it a back control that lands on the catch-all.
+ * no OTP provider. The route survives as a redirect because it is a plausible
+ * bookmark and a live history entry for anyone mid-flow when this shipped —
+ * deleting it outright would turn Back into a 404 for them.
  */
 export function SitterVerify() {
   return <Navigate to="/sitter/join/location" replace />;

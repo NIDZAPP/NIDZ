@@ -14,6 +14,7 @@ import { PHONE_PREFIX, SPECIES, type Species } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useDemo } from "@/state/demo/context";
 import { toISODate, today } from "@/utils/dates";
+import { sameOriginPath } from "@/utils/safe-path";
 
 const FORM_ID = "owner-account";
 
@@ -35,11 +36,13 @@ const DIGITS = /^\d{9}$/;
  *   - First and last name. A sitter deciding whether to take your animal is
  *     entitled to know who is asking. Only the first name and an initial ever
  *     become public (§27).
- *   - Date of birth. PRIVATE. Never rendered on any surface, never sent to a
- *     sitter, and deliberately NOT used as an age gate: §52 establishes an
- *     adults-only rule for sitters and says nothing about owners, so enforcing
- *     one here would be inventing a product rule nobody has decided. It is
- *     validated as a real past date and nothing more.
+ *   - Date of birth. Required by §16, and PRIVATE: never rendered on any
+ *     surface and never sent to a sitter. It is held against a future
+ *     eligibility rule and is NOT one today — §52 sets an adults-only rule for
+ *     sitters and says nothing about owners, so enforcing one here would invent
+ *     a product decision nobody has made. Until that decision exists the field
+ *     is validated as a real past date and used for nothing else, and this is
+ *     the whole of what it does.
  *   - Wilaya and commune. This is how Nidz makes the first search relevant. It
  *     is administrative granularity on purpose — Nidz holds no exact address
  *     for anyone, so there is nothing more precise to leak (§29).
@@ -83,10 +86,11 @@ export default function OwnerAccount() {
 
   /* Where to go once the account exists. Carried in the URL rather than held in
      state, so the return trip survives a reload and a shared link cannot strand
-     someone on a screen with no way onward. Same-origin paths only — an
-     absolute URL here would be an open redirect. */
-  const next = searchParams.get("next");
-  const destination = next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
+     someone on a screen with no way onward. Parsed rather than pattern-matched
+     — see `sameOriginPath`: a cross-origin value here throws out of the submit
+     handler AFTER the account has been created, leaving a dead button and
+     half-applied state. */
+  const destination = sameOriginPath(searchParams.get("next")) ?? "/";
 
   const toggleSpecies = (value: Species) =>
     setSpecies((current) =>

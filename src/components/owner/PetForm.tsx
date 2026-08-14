@@ -20,6 +20,12 @@ import { DOG_SIZES, SPECIES, type Species } from "@/data/types";
 const DECLARED: readonly Declared[] = ["yes", "no", "unknown"];
 const SEXES: readonly PetSex[] = ["female", "male", "unknown"];
 
+/** `ChipGroup` is a Radix RadioGroup and has no deselect, so the four fields
+    modelled as `X | null` need an explicit way back to unanswered — otherwise
+    one mis-tap becomes a permanent declaration about someone else's animal,
+    and the module's own "a skipped question stays skipped" rule has no UI. */
+const UNSET = "";
+
 type DeclaredRenderer = (
   labelKey: string,
   value: Declared,
@@ -67,8 +73,16 @@ export default function PetForm({
 }) {
   const { t } = useTranslation();
 
-  const set = (patch: Partial<Pet>) => onChange({ ...pet, ...patch } as Pet);
-  const setDetail = (patch: Record<string, unknown>) =>
+  /* Deliberately NOT `Partial<Pet>`: that distributes over the union, so
+     `set({ species: "bird" })` would type-check and produce a bird carrying
+     DogDetails, with the cast silencing it. Species changes go through
+     `withSpecies`, which rebuilds the detail record. */
+  const set = (patch: Partial<Omit<Pet, "species" | "details">>) =>
+    onChange({ ...pet, ...patch } as Pet);
+  /* Keyed to THIS pet's detail shape rather than `Record<string, unknown>`,
+     which let a typo — `walksPerday` — compile and inject a junk key that then
+     inflated the answered-question total until the next reload dropped it. */
+  const setDetail = (patch: Partial<Pet["details"]>) =>
     onChange({ ...pet, details: { ...pet.details, ...patch } } as Pet);
   const setCare = (patch: Partial<Pet["care"]>) => onChange({ ...pet, care: { ...pet.care, ...patch } });
 
@@ -260,7 +274,10 @@ function DogFields({
           labelledBy="pet-dog-size"
           value={details.size ?? ""}
           onChange={(next) => setDetail({ size: next || null })}
-          options={DOG_SIZES.map((value) => ({ value, label: t(`dogSize.${value}`) }))}
+          options={[
+            ...DOG_SIZES.map((value) => ({ value: value as string, label: t(`dogSize.${value}`) })),
+            { value: UNSET, label: t("pets.notSure") },
+          ]}
         />
       </div>
 
@@ -282,8 +299,16 @@ function DogFields({
             value={details.walksPerDay ?? ""}
             aria-describedby={describedBy}
             /* Empty stays null rather than becoming 0: "not answered" and
-               "never walked" are very different facts about a dog. */
-            onChange={(e) => setDetail({ walksPerDay: e.target.value === "" ? null : Number(e.target.value) })}
+               "never walked" are very different facts about a dog. Anything
+               that is not a plausible whole count — a typed minus sign, a
+               pasted "1e9", the NaN an empty parse produces — is treated as
+               not answered, because the form is `noValidate` so the min/max
+               attributes never run. */
+            onChange={(e) => {
+              const n = Number(e.target.value);
+              const valid = e.target.value !== "" && Number.isInteger(n) && n >= 0 && n <= 24;
+              setDetail({ walksPerDay: valid ? n : null });
+            }}
           />
         )}
       </FieldShell>
@@ -324,10 +349,13 @@ function CatFields({
           labelledBy="pet-cat-living"
           value={details.living ?? ""}
           onChange={(next) => setDetail({ living: next || null })}
-          options={(["indoor", "outdoor", "both"] as const).map((value) => ({
-            value,
-            label: t(`pets.cat.livingOption.${value}`),
-          }))}
+          options={[
+            ...(["indoor", "outdoor", "both"] as const).map((value) => ({
+              value: value as string,
+              label: t(`pets.cat.livingOption.${value}`),
+            })),
+            { value: UNSET, label: t("pets.notSure") },
+          ]}
         />
       </div>
 
@@ -383,10 +411,13 @@ function BirdFields({
           labelledBy="pet-bird-housing"
           value={details.housing ?? ""}
           onChange={(next) => setDetail({ housing: next || null })}
-          options={(["cage", "aviary"] as const).map((value) => ({
-            value,
-            label: t(`pets.bird.housingOption.${value}`),
-          }))}
+          options={[
+            ...(["cage", "aviary"] as const).map((value) => ({
+              value: value as string,
+              label: t(`pets.bird.housingOption.${value}`),
+            })),
+            { value: UNSET, label: t("pets.notSure") },
+          ]}
         />
       </div>
 
@@ -399,10 +430,13 @@ function BirdFields({
           labelledBy="pet-bird-handling"
           value={details.handling ?? ""}
           onChange={(next) => setDetail({ handling: next || null })}
-          options={(["handleable", "limited", "none"] as const).map((value) => ({
-            value,
-            label: t(`pets.bird.handlingOption.${value}`),
-          }))}
+          options={[
+            ...(["handleable", "limited", "none"] as const).map((value) => ({
+              value: value as string,
+              label: t(`pets.bird.handlingOption.${value}`),
+            })),
+            { value: UNSET, label: t("pets.notSure") },
+          ]}
         />
       </div>
 

@@ -4,6 +4,12 @@ import type { ReactNode } from "react";
 
 import { MatchReasonList, MismatchList } from "@/components/sitter/match";
 import { ProvenanceLabel } from "@/components/shared/trust";
+import PortfolioSection from "@/components/sitter/PortfolioSection";
+import ReviewSection from "@/components/sitter/ReviewSection";
+import { DEMO_PORTFOLIO } from "@/data/demo-portfolio";
+import { DEMO_REVIEWS } from "@/data/demo-reviews";
+import { publicItemsFor } from "@/data/portfolio";
+import { reviewsFor } from "@/data/reviews";
 import { isAbsenceReason, type MatchReason } from "@/data/criteria";
 import { offeredServices } from "@/data/demo-sitters";
 import { communeWithWilaya } from "@/data/algeria";
@@ -61,6 +67,11 @@ export default function SitterProfileView({
 }) {
   const { t } = useTranslation();
   const lng = useAppLocale();
+  /* Looked up by sitter id rather than passed in, so the preview and the
+     public page cannot show different evidence for the same person — which is
+     the whole reason this is one component. */
+  const reviews = reviewsFor(DEMO_REVIEWS, sitter.id);
+  const portfolio = publicItemsFor(DEMO_PORTFOLIO, sitter.id);
 
   const Heading = headingLevel;
   /* Sections sit one level below the name, whatever level that is. Fixed at
@@ -328,6 +339,25 @@ export default function SitterProfileView({
         <p className="mt-3 max-w-[64ch] text-sm text-muted-foreground">{t("need.care.availabilityNote")}</p>
         <ProvenanceLabel className="mt-4" />
       </section>
+
+      {/* COMMUNITY evidence, and the absence of it.
+
+          Reviews come last because they qualify everything above rather than
+          replacing it: a reader who has just seen what this person declares is
+          in a position to weigh what other people said about it. The portfolio
+          sits with them because both answer "what is this actually like",
+          which the declarations cannot.
+
+          Both are absent for a profile the visitor built themselves — the
+          honest state of a sitter nobody has used yet — and the review section
+          says so rather than disappearing. */}
+      <PortfolioSection items={portfolio} isDemoFixture={sitter.isDemoFixture} />
+
+      <ReviewSection
+        reviews={reviews}
+        sitterName={sitter.publicName}
+        isDemoFixture={sitter.isDemoFixture}
+      />
     </div>
   );
 }

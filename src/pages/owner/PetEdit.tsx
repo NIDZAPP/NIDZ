@@ -49,7 +49,6 @@ export default function PetEdit() {
   );
   const [nameError, setNameError] = useState<string>();
   const nameRef = useRef<HTMLInputElement>(null);
-  const speciesRef = useRef<HTMLDivElement>(null);
 
   /* A pet id that names nothing — a stale bookmark, a deleted animal, a
      hand-edited URL — goes back to the list rather than rendering an empty
@@ -102,7 +101,11 @@ export default function PetEdit() {
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>{t("pets.deleteConfirmTitle", { name: pet.name })}</AlertDialogTitle>
+                  {/* The SAVED name, not the draft. Renaming and then deleting
+                      asked "Delete Mimi?" about a record stored as "Rex". */}
+                  <AlertDialogTitle>
+                    {t("pets.deleteConfirmTitle", { name: existing.name })}
+                  </AlertDialogTitle>
                   <AlertDialogDescription>{t("pets.deleteConfirmBody")}</AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -130,7 +133,6 @@ export default function PetEdit() {
             }}
             nameError={nameError}
             nameRef={nameRef}
-            speciesRef={speciesRef}
             /* Locked on an existing animal: changing species discards every
                species-specific answer, which is right while creating and
                destructive afterwards. */
