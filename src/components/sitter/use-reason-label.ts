@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 
-import { communeName, getWilaya } from "@/data/locations";
+import { communeName, getWilaya } from "@/data/algeria";
 import type { MatchReason } from "@/data/criteria";
 import type { CareType } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";

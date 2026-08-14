@@ -299,7 +299,7 @@ verify the active branch is `nidz-1.2`, commit, push.
 | 1 | Branch, baseline, documentation | **Completed** |
 | 2 | Design foundation + natural app shell | **Completed** — see §6 |
 | 3 | Language, routing, persistence foundation | **Completed** — see §6 |
-| 4 | Algerian geography | — |
+| 4 | Algerian geography | **Partial** — wilayas complete and verified; commune coverage is 10 of 69 wilayas, with the gap documented rather than filled by unverified data. See §6 |
 | 5 | Map + geolocation | — |
 | 6 | Auth gateway + fast owner account | — |
 | 7 | Multi-pet system | — |
@@ -552,6 +552,83 @@ carry a comment.
 
 **Carried forward:** the `entry.switchToOwner` key was retired with the fork it
 served; `help.reset.*` became `settings.reset.*` where the action now lives.
+
+---
+
+### Group 4 — Algerian geography
+
+**Partial, deliberately.** The architecture is complete; the wilaya layer is
+complete and verified; the commune layer covers ten wilayas and the reason it
+covers no more is recorded in code rather than glossed over.
+
+**Algeria has 69 wilayas, not 58.** This is the finding that shaped the group.
+The division went 48 (1984) → 58 (loi 19-12, 11 December 2019) → **69 (loi
+26-06, published in the Journal Officiel on 4 April 2026**, announced in the
+Council of Ministers on 16 November 2025). Most published datasets — including
+the most popular ones — still say 58, and Audit 1.1's own code comment described
+the 69-wilaya reform as "in transition". It is now in force, with the transfer
+of competences to the new wilayas running to 31 December 2026.
+
+**Three things could not be verified, and are recorded as gaps rather than
+guessed:**
+
+1. **The codes of the eleven new wilayas.** The eleven *names* are concordant
+   across every source consulted. The *numbers* are not: two otherwise-reliable
+   sources give completely different assignments for the same eleven names (one
+   has 60 Barika / 68 Bou Saâda, another 63 Barika / 64 Bou Saâda). One is
+   wrong and nothing available decides which. So `officialCode` is `null` for
+   those eleven — which is exactly what the design system asks for, a stable
+   internal id always and an official code only where verified. Nothing in Nidz
+   depends on the number.
+
+2. **The complete 1 541-commune list.** A consistent list exists in more than
+   one community dataset and the counts spot-checked here match published
+   figures, but none was usable as committed reference data: the best-sourced
+   one (othmanus/algeria-cities, 58 wilayas, cites the Ministry of the
+   Interior) **declares no licence** and so cannot be redistributed inside this
+   repository; another claims all 69 wilayas but states no source, no method
+   and no date, and invites contributors to correct it; a third is MIT licensed
+   but still on the 48-wilaya division abolished in 2019. None reflects the
+   commune-level consequences of loi 26-06 either.
+
+3. **Arabic names for the eleven new wilayas** were written from the standard
+   spellings of towns that already exist, not lifted from an official list.
+
+So Nidz carries **all 69 wilayas** and **371 communes covering ten of them** —
+Alger, Oran, Blida, Constantine, Annaba, Sétif, Tizi Ouzou, Béjaïa, Boumerdès,
+Tipaza — the wilayas where a launch would plausibly begin. The commune count for
+each was checked against independently published figures and matched in every
+case. The unlicensed dataset was used only as a cross-check for those ten, not
+redistributed.
+
+Completing this is a data edit: add rows to `communes.ts` and flip
+`communeCoverage` on the wilaya. **The audit's instruction for exactly this
+situation was to implement the architecture and report the gap rather than
+fabricate, and that is what happened.**
+
+**Honest UI for partial coverage.** A wilaya with no commune list shows a
+sentence saying so, not an empty picker — an empty commune list would read as
+"this wilaya has no communes", which is false everywhere.
+
+**Searchable combobox (§32).** 69 wilayas and 67 communes in Tizi Ouzou alone
+make a native option list a scroll hunt. The new `Combobox` (Radix Popover +
+cmdk) searches on a **folded** form: someone hunting "Béjaïa" types "bejaia";
+someone typing Arabic may leave out the harakat, and alef has several forms.
+Verified in the browser — typing `bejaia` finds Béjaïa, and typing `وهران` finds
+Oran **while the interface is in French**, because every row is findable by its
+name in all three languages.
+
+**Id stability.** `src/data/locations.ts` is gone; `src/data/algeria/index.ts`
+is the app-facing API. Commune ids are the bare slug except where a name occurs
+in more than one covered wilaya, where every member of that group is prefixed —
+prefixing the whole group rather than the later ones means adding a wilaya can
+never silently move an existing id. All nine Audit 1.1 commune codes still
+resolve; `oran-centre` is kept as a legacy alias because it is not a real
+commune (the wilaya's own commune is simply "Oran") and saved briefs would
+otherwise be silently downgraded to "anywhere".
+
+**Cost:** the bundle grew from 640 kB to 703 kB raw (200 → 219 kB gzip). That is
+the geography data, and it is a Group 16 splitting item.
 
 ---
 

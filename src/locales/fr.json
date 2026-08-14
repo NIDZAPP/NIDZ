@@ -337,7 +337,7 @@
       "communeLabel": "Commune",
       "anyCommune": "Toutes les communes",
       "privacy": "Votre adresse exacte ne sera pas affichée publiquement.",
-      "coverage": "Cette démonstration ne couvre que quelques communes d'Alger et d'Oran.",
+      "coverage": "Les 69 wilayas sont listées. Les listes de communes existent pour dix d'entre elles pour l'instant : ailleurs, la wilaya seule suffit.",
       "wilayaPlaceholder": "Choisissez une wilaya"
     },
     "care": {
@@ -495,7 +495,7 @@
       },
       "coverage": {
         "q": "Quelles régions sont couvertes ?",
-        "a": "Quelques communes d'Alger et d'Oran seulement, choisies pour la démonstration. Ce n'est pas une couverture nationale, et le découpage territorial algérien évolue : la liste des wilayas et communes est une donnée à actualiser, pas une constante."
+        "a": "Nidz liste les 69 wilayas d'Algérie et dispose de la liste complète des communes pour dix d'entre elles (Alger, Oran, Blida, Constantine, Annaba, Sétif, Tizi Ouzou, Béjaïa, Boumerdès, Tipaza). C'est une description des DONNÉES, pas du marché : les pet-sitters de cette démonstration sont des exemples et il n'y a de véritable offre nulle part. Le découpage territorial algérien évolue aussi — 48 wilayas, puis 58 en 2019, puis 69 en 2026 — donc cette liste est une donnée de référence à tenir à jour, jamais une constante."
       }
     },
     "reset": {
@@ -541,5 +541,11 @@
   "workspace": {
     "toSitter": "Passer à mon espace pet-sitter",
     "toOwner": "Passer à mon espace propriétaire"
+  },
+  "location": {
+    "searchWilaya": "Rechercher une wilaya",
+    "searchCommune": "Rechercher une commune",
+    "noMatch": "Aucun résultat",
+    "communeListUnavailable": "Nidz ne dispose pas encore de la liste des communes de cette wilaya. La wilaya seule suffit pour chercher."
   }
 }

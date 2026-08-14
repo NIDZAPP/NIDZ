@@ -6,7 +6,7 @@ import { MatchReasonList, MismatchList } from "@/components/sitter/match";
 import { ProvenanceLabel } from "@/components/shared/trust";
 import { isAbsenceReason, type MatchReason } from "@/data/criteria";
 import { offeredServices } from "@/data/demo-sitters";
-import { communeWithWilaya } from "@/data/locations";
+import { communeWithWilaya } from "@/data/algeria";
 import { CARE_UNIT_KEY, localized, type SitterProfile } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
 import { cn } from "@/lib/utils";

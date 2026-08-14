@@ -2,18 +2,18 @@ import { useId, useRef } from "react";
 import { ImagePlus, Paperclip, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import Combobox, { type ComboboxOption } from "@/components/shared/Combobox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { WILAYAS } from "@/data/locations";
-import { localized, type DateRange } from "@/data/types";
+  WILAYAS,
+  communesOf,
+  foldForSearch,
+  getWilaya,
+  hasCommuneCoverage,
+} from "@/data/algeria";
+import { localized, type DateRange, type Localized } from "@/data/types";
 import type { AppLocale } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { toISODate, today } from "@/utils/dates";
@@ -190,71 +190,87 @@ export function LocationFields({
   error?: string;
   className?: string;
 }) {
+  const { t } = useTranslation();
   const ANY = "__any__";
-  const wilaya = WILAYAS.find((w) => w.code === wilayaCode) ?? null;
+  const wilaya = getWilaya(wilayaCode);
+  const communes = communesOf(wilayaCode);
+  /* Three different states, and they must not be blurred into one empty list:
+     no wilaya chosen yet, a wilaya whose commune list Nidz does not carry, and
+     a wilaya with its communes. Only the third gets a picker. */
+  const communeListMissing = Boolean(wilaya) && !hasCommuneCoverage(wilayaCode);
+
+  const option = (value: string, name: Localized): ComboboxOption => ({
+    value,
+    label: localized(name, locale),
+    /* Findable by its name in any of the three languages, not only the one the
+       interface happens to be in. Algeria is bilingual in practice and someone
+       may know a place by its other name. */
+    keywords: [name.fr, name.en, name.ar],
+  });
+
+  const wilayaOptions: ComboboxOption[] = [
+    ...(anyWilayaLabel ? [{ value: ANY, label: anyWilayaLabel }] : []),
+    ...WILAYAS.map((w) => option(w.id, w.name)),
+  ];
+
+  const communeOptions: ComboboxOption[] = [
+    { value: ANY, label: anyCommuneLabel },
+    ...communes.map((c) => option(c.id, c.name)),
+  ];
 
   return (
     <div className={cn("space-y-5", className)}>
       <FieldShell label={wilayaLabel} error={error}>
         {({ id, describedBy, labelId, invalid }) => (
-          <Select
-            value={wilayaCode ?? (anyWilayaLabel ? ANY : "")}
-            onValueChange={(v) =>
+          <Combobox
+            id={id}
+            labelledBy={labelId}
+            describedBy={describedBy}
+            invalid={invalid}
+            triggerRef={wilayaRef}
+            value={wilayaCode ?? (anyWilayaLabel ? ANY : null)}
+            onChange={(v) =>
               /* Changing wilaya always clears the commune: keeping it would
                  leave a commune that belongs to a different wilaya. */
               onChange({ wilayaCode: v === ANY ? null : v, communeCode: null })
             }
-          >
-            <SelectTrigger
-              id={id}
-              ref={wilayaRef}
-              aria-labelledby={`${labelId} ${id}`}
-              aria-describedby={describedBy}
-              aria-invalid={invalid || undefined}
-              className="w-full"
-            >
-              <SelectValue placeholder={wilayaPlaceholder} />
-            </SelectTrigger>
-            <SelectContent>
-              {anyWilayaLabel && <SelectItem value={ANY}>{anyWilayaLabel}</SelectItem>}
-              {WILAYAS.map((w) => (
-                <SelectItem key={w.code} value={w.code}>
-                  {localized(w.name, locale)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            options={wilayaOptions}
+            placeholder={wilayaPlaceholder ?? wilayaLabel}
+            searchPlaceholder={t("location.searchWilaya")}
+            emptyLabel={t("location.noMatch")}
+            fold={foldForSearch}
+          />
         )}
       </FieldShell>
 
       <FieldShell label={communeLabel} help={help}>
-        {({ id, describedBy, labelId }) => (
-          <Select
-            /* Empty while no wilaya is chosen, so the disabled trigger shows
-               the reason rather than asserting "all communes" — a scope that is
-               not in effect. */
-            value={wilaya ? (communeCode ?? ANY) : ""}
-            onValueChange={(v) => onChange({ wilayaCode, communeCode: v === ANY ? null : v })}
-            disabled={!wilaya}
-          >
-            <SelectTrigger
+        {({ id, describedBy, labelId }) =>
+          communeListMissing ? (
+            /* Said plainly rather than shown as an empty picker. An empty
+               commune list would read as "this wilaya has no communes", which
+               is false everywhere — what is true is that Nidz does not carry
+               the list yet (see KNOWN_GAPS in src/data/algeria/metadata.ts). */
+            <p id={id} aria-describedby={describedBy} className="text-sm text-muted-foreground">
+              {t("location.communeListUnavailable")}
+            </p>
+          ) : (
+            <Combobox
               id={id}
-              aria-labelledby={`${labelId} ${id}`}
-              aria-describedby={describedBy}
-              className="w-full"
-            >
-              <SelectValue placeholder={communePlaceholder} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ANY}>{anyCommuneLabel}</SelectItem>
-              {(wilaya?.communes ?? []).map((commune) => (
-                <SelectItem key={commune.code} value={commune.code}>
-                  {localized(commune.name, locale)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
+              labelledBy={labelId}
+              describedBy={describedBy}
+              /* Disabled until a wilaya scopes it, so the control never offers
+                 371 communes from every wilaya at once. */
+              disabled={!wilaya}
+              value={wilaya ? (communeCode ?? ANY) : null}
+              onChange={(v) => onChange({ wilayaCode, communeCode: v === ANY ? null : v })}
+              options={communeOptions}
+              placeholder={communePlaceholder ?? communeLabel}
+              searchPlaceholder={t("location.searchCommune")}
+              emptyLabel={t("location.noMatch")}
+              fold={foldForSearch}
+            />
+          )
+        }
       </FieldShell>
     </div>
   );

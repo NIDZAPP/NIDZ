@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 
 import StatusBadge from "@/components/shared/StatusBadge";
 import { ProvenanceLabel } from "@/components/shared/trust";
-import { communeWithWilaya } from "@/data/locations";
+import { communeWithWilaya } from "@/data/algeria";
 import { CARE_UNIT_KEY, type CareRequest } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
 import { cn } from "@/lib/utils";

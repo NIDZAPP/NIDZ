@@ -5,7 +5,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { NameStep, PhoneStep, VerifyStep } from "@/components/account/AccountSteps";
 import FlowScreen from "@/components/shared/FlowScreen";
 import { LocationFields } from "@/components/shared/fields";
-import { getWilayaOfCommune } from "@/data/locations";
+import { getWilayaOfCommune } from "@/data/algeria";
 import { Button } from "@/components/ui/button";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useDemo } from "@/state/demo/context";
@@ -85,7 +85,7 @@ export function SitterLocation() {
      empty, disabled commune field while the profile still holds one — and
      does not lose it the moment they touch the wilaya select. */
   const [wilayaCode, setWilayaCode] = useState<string | null>(
-    getWilayaOfCommune(profile?.communeCode)?.code ?? null,
+    getWilayaOfCommune(profile?.communeCode)?.id ?? null,
   );
   const [communeCode, setCommuneCode] = useState<string | null>(profile?.communeCode || null);
   const [error, setError] = useState<string>();

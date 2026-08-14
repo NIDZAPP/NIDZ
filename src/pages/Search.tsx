@@ -31,7 +31,7 @@ import {
   type SearchCriteria,
 } from "@/data/criteria";
 import { DEMO_SITTERS } from "@/data/demo-sitters";
-import { communeName, getWilaya } from "@/data/locations";
+import { communeName, getWilaya } from "@/data/algeria";
 import { localized, type CareType, type Species } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
 import { cn } from "@/lib/utils";

@@ -13,7 +13,7 @@
    and what it needs.
    ------------------------------------------------------------------------ */
 
-import { normalizeCommuneCode, getWilaya, getWilayaOfCommune } from "./locations";
+import { normalizeCommuneId, getWilaya, getWilayaOfCommune } from "./algeria";
 import { offeredServices, overlapsDeclaredUnavailable, rateFor } from "./demo-sitters";
 import {
   CARE_TYPES,
@@ -72,10 +72,10 @@ export function parseCriteria(params: URLSearchParams): SearchCriteria {
   /* Normalised, not matched exactly, so links written before the commune codes
      were slugified still resolve to the right area rather than silently
      falling back to "anywhere". */
-  const commune = normalizeCommuneCode(params.get("commune"));
+  const commune = normalizeCommuneId(params.get("commune"));
   const wilaya = commune
-    ? (getWilayaOfCommune(commune)?.code ?? null)
-    : (getWilaya(params.get("wilaya"))?.code ?? null);
+    ? (getWilayaOfCommune(commune)?.id ?? null)
+    : (getWilaya(params.get("wilaya"))?.id ?? null);
 
   return normalizeCriteria({
     species: (SPECIES as readonly string[]).includes(species ?? "") ? (species as Species) : null,
@@ -183,7 +183,7 @@ export function reasonsFor(sitter: SitterProfile, c: SearchCriteria): MatchReaso
      one thing never explained. */
   if (c.commune && sitter.communeCode === c.commune) {
     reasons.push({ kind: "zone", zone: sitter.communeCode, level: "commune" });
-  } else if (!c.commune && c.wilaya && getWilayaOfCommune(sitter.communeCode)?.code === c.wilaya) {
+  } else if (!c.commune && c.wilaya && getWilayaOfCommune(sitter.communeCode)?.id === c.wilaya) {
     reasons.push({ kind: "zone", zone: c.wilaya, level: "wilaya" });
   }
   if (c.dates && !overlapsDeclaredUnavailable(sitter, c.dates)) {
@@ -310,7 +310,7 @@ export function matchSitters(sitters: SitterProfile[], c: SearchCriteria): Searc
       if (c.species && !sitter.acceptedSpecies.includes(c.species)) return [];
       if (c.care && !offeredServices(sitter).includes(c.care)) return [];
       if (c.commune && sitter.communeCode !== c.commune) return [];
-      if (!c.commune && c.wilaya && getWilayaOfCommune(sitter.communeCode)?.code !== c.wilaya) return [];
+      if (!c.commune && c.wilaya && getWilayaOfCommune(sitter.communeCode)?.id !== c.wilaya) return [];
       if (c.maxPrice !== null && rate.amount > c.maxPrice) return [];
       /* A period the sitter has DECLARED unavailable is a statement by them,
          and excluding it is honest. The reverse is not: not-declared-busy is

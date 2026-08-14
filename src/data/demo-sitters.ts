@@ -274,7 +274,11 @@ const SEEDS: DemoSitterSeed[] = [
   {
     id: "yasmine-t",
     publicName: "Yasmine T.",
-    communeCode: "oran-centre",
+    /* The commune is simply "Oran". Audit 1.1's fixture said "oran-centre",
+       which is not a commune of the wilaya — the reference dataset that
+       replaced the hand-written subset does not contain it. The old id still
+       resolves for saved briefs and bookmarks, via `LEGACY_COMMUNE_IDS`. */
+    communeCode: "oran",
     headline: {
       fr: "Visites et promenades à Oran, matin et fin de journée.",
       en: "Visits and walks in Oran, mornings and late afternoons.",

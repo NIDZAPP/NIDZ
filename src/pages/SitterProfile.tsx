@@ -10,7 +10,7 @@ import SitterProfileView, { QuotedRate } from "@/components/sitter/SitterProfile
 import { Button } from "@/components/ui/button";
 import { parseCriteria, reasonsFor } from "@/data/criteria";
 import { offeredServices, rateFor } from "@/data/demo-sitters";
-import { communeName, getWilaya } from "@/data/locations";
+import { communeName, getWilaya } from "@/data/algeria";
 import { localized } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useSitter } from "@/hooks/use-sitter";

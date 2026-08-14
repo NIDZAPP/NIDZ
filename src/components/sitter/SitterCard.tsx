@@ -7,7 +7,7 @@ import { ProvenanceLabel } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import type { MatchReason } from "@/data/criteria";
 import { offeredServices, type rateFor } from "@/data/demo-sitters";
-import { communeName } from "@/data/locations";
+import { communeName } from "@/data/algeria";
 import { CARE_UNIT_KEY, localized, type CareType, type Species, type SitterProfile } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
 import { cn } from "@/lib/utils";
