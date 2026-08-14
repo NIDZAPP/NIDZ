@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
 
 import EmptyState from "@/components/shared/EmptyState";
+import BackButton from "@/components/shared/BackButton";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -31,6 +32,7 @@ export default function NotFound() {
         <meta name="robots" content="noindex" />
       </Helmet>
       <div className="mx-auto max-w-[720px]">
+        <BackButton variant="labelled" fallback="/" className="mb-6" />
         <EmptyState
           headingLevel="h1"
           title={t("notFound.title")}

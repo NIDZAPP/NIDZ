@@ -296,8 +296,8 @@ verify the active branch is `nidz-1.2`, commit, push.
 
 | # | Group | Outcome |
 |---|---|---|
-| 1 | Branch, baseline, documentation | — |
-| 2 | Design foundation + natural app shell | — |
+| 1 | Branch, baseline, documentation | **Completed** |
+| 2 | Design foundation + natural app shell | **Completed** — see §6 |
 | 3 | Language, routing, persistence foundation | — |
 | 4 | Algerian geography | — |
 | 5 | Map + geolocation | — |
@@ -318,6 +318,143 @@ verify the active branch is `nidz-1.2`, commit, push.
 Outcomes are filled in as each group lands, using the vocabulary the audit asks
 for: **Completed**, **Partial**, **Deferred**, **Blocked** — with a reason.
 Architecture-only work is never recorded as fully functional.
+
+---
+
+## 6. Group outcomes
+
+### Group 2 — design foundation and app shell
+
+**Completed.** Reviewed by the project `ui-designer` before implementation; its
+contrast arithmetic was re-derived independently before being acted on.
+
+**Tokens.** Canvas to `#FFFFFF`, with `theme-color` and the PWA manifest tracking
+it. `--secondary` and `--muted` retuned from the warm beige ramp (`#EFEDE8` /
+`#F5F3EF`) into the cool green-grey family of `--border` (`#EAEFED` / `#F4F7F6`):
+the warm neutrals were chosen to sit on cream, and on white they read as a
+yellow cast. Everything else in the palette is unchanged, and every affected
+contrast ratio was recomputed rather than assumed — `--input` 3.41 → 3.56:1,
+`--border` 1.25 → 1.30:1, `--muted-foreground` 5.57 → 5.81:1, all improvements.
+
+Three consequences of the ground change, each handled:
+
+- `--muted` is 1.08:1 on white, too faint to carry an interaction. Application
+  row hovers moved to `--secondary` (1.16:1), so Nidz has one hover surface with
+  one meaning. `--muted` remains for shadcn primitives only.
+- Six sticky planes were white-on-white separated by a 1.30:1 hairline. A sticky
+  bar is the one genuinely elevated thing in the product, so `shadow-chrome-b` /
+  `shadow-chrome-t` were added at the lightest weight and applied permanently —
+  no scroll listener, because a plane that elevates only once you scroll is
+  misdescribing its position the rest of the time.
+- The identity monogram was a 1.16:1 tile. Moved to `bg-brand-soft text-brand`
+  (4.66:1 letter): the one warm surface now sits on the *person*, which is also
+  the only place in the product with no photograph to carry them.
+
+Removing the cream ground *and* the warm neutrals left `--brand` / `--brand-soft`
+carrying the entire warm half of the brand, so their placement stopped being
+decoration. Allocated to exactly three things and documented in `src/index.css`.
+
+The stale `.dark` block was deleted rather than carried forward. It was never
+applied, and it defined none of the tokens added since — anything that had
+switched it on would have inherited light values for a third of the system.
+
+**Typography.** Playfair withdrawn; the `display` key is gone. It was already
+dead: `index.html` never requested the font, so `font-display` resolved to an
+arbitrary system serif.
+
+**Workspace model.** `src/data/workspace.ts` — capabilities plus an active
+workspace, deliberately no `role`. `workspaceForPath` matches the first path
+segment exactly, because `/sitters/amina-b` starts with `/sitter` and a
+`startsWith` check would file a public profile an owner is browsing under the
+sitter's own workspace.
+
+**Navigation.** `BottomNav` replaced by `WorkspaceNav` over a single
+`workspace-nav.ts` destination list shared with the header, so a place cannot be
+renamed by crossing 768px. The 1.1 bar appended a sitter tab the moment a
+profile was published; the bar is now drawn from the active workspace instead.
+A bar with fewer than two destinations is not drawn at all, which is why the
+sitter side currently has none — it has one browsable screen, and one tab is not
+a bar. The target four-tab shape fills in at Groups 11, 13 and 15; each pending
+destination is commented in place with the group that brings it. **No tab points
+at `NotAvailable`.**
+
+**Back control.** `useFlowBack` → `useBack`; new shared `BackButton` with `bare`
+and `labelled` variants. `FlowScreen`'s API moved from `onBack: () => void` to
+`backTo: string`, removing 13 identical `useBack(parent)` lines; all 14
+fallbacks were cross-checked against their originals. Browsable screens that had
+no back affordance at all now have one, placed as the first element of the
+content column rather than in the header — only the page knows its parent, which
+is why the fallback is a required argument.
+
+The public sitter profile's back link was previously conditional on the URL
+carrying search criteria, so a profile opened from a shared link — the most
+likely way a stranger arrives — had no way back inside an installed PWA. It is
+now unconditional.
+
+**Entry.** `Welcome` and `Intent` merged. The first screen disclosed nothing and
+stood in front of the real decision. `/start` survives as a redirect because it
+is the `useBack` fallback of several steps.
+
+The audit asks each choice to carry a visual preview of its workflow, and
+suggests sitter photography. Nidz has none, and has no results, counts or
+reviews before a brief exists, so any rendered mock would depict data that does
+not exist. Instead each panel shows that world's own first control, live: the
+owner panel asks the actual first question (and answering it carries into the
+flow, removing a later tap), the sitter panel names the actual sections that
+will be asked for. The two differ in kind — lateral versus vertical — rather
+than in colour.
+
+**Review round.** The project `code-reviewer` found three real defects that the
+toolchain could not:
+
+- Hiding the footer below `md` made `/help` and `/policies` — and with them the
+  demo reset — **unreachable on a phone**, because Audit 1.2 had just removed
+  Help from the header and Settings does not arrive until Group 15. The footer
+  links are back at every width; only the copyright line is dropped on mobile.
+- The entry's species choice set `need.species` but left `need.petId` pointing
+  at a previously saved animal, and `NeedPet` resolves the saved pet *before*
+  the declared species. Saving a dog, returning to the entry and tapping Cat
+  opened a form pre-filled with the dog — and submitting would have overwritten
+  it under its own id. Fixed by clearing `petId`, and verified in the browser.
+- A second back control was left stacked above the first on the owner request
+  detail.
+
+Also corrected from the same review: the header listed Home beside a wordmark
+that already linked there; `BackButton`'s labelled variant could read "Back to
+results" while going elsewhere, so it now names a destination only when the URL
+actually carries one; the availability predicate was duplicated across header
+and bar *and* had silently reversed a documented 1.1 decision (a sitter
+destination requires a **published** profile), now one function in
+`workspace-nav.ts`; `has-bottom-nav` reserved scroll padding for a bar that is
+often absent; the sitter's "view my profile" link had been pointed at the
+builder's preview step, which shows a finished sitter an 8-of-8 progress bar and
+a primary action that returns to the screen they came from; and the merged entry
+had lost `FlowScreen`'s scroll-and-focus reset.
+
+One pre-existing bug surfaced and fixed: `search.context.editLabelCount` carried
+only `_one`/`_other` in Arabic, so 2–5 active criteria fell through to English
+inside the Arabic UI. It now has all six CLDR categories.
+
+One item is a **known carry-forward to Group 3**, commented in place:
+`Index.tsx` still forks on `Boolean(state.sitter)` to decide which "side" the
+visitor belongs to — the mutually exclusive shape `workspace.ts` exists to
+retire. It becomes a workspace *switch* once Group 3 gives it a persisted
+`activeWorkspace` to write to.
+
+**Verified in a browser** at 320×640, 390×844 and 1440×900, in French and in
+Arabic RTL: 0 console errors (2 pre-existing React Router v7 future-flag
+warnings), no horizontal overflow on any browsable route at 320px, `<html
+dir="rtl" lang="ar">` correct with panels and the inline-start rule mirrored,
+the species choice confirmed to reach `nidz.demo.v1` and to clear the stale pet,
+footer links reachable on mobile, and exactly one `/` link in the desktop
+header.
+
+**Deferred to later groups by design:** the sitter desktop rail (no consumer
+until the sitter workspace has a bar), the `/search` brief band's warm surface
+(Group 8), and moving the language switcher out of the chrome into Settings
+(Group 3, §89).
+
+---
 
 ### Standing constraint on scope
 

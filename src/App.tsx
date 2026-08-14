@@ -18,7 +18,6 @@ import NotAvailable from "@/pages/NotAvailable";
 import Policies from "@/pages/Policies";
 import Help from "@/pages/Help";
 import Welcome from "@/pages/onboarding/Welcome";
-import Intent from "@/pages/onboarding/Intent";
 import NeedPet from "@/pages/owner/need/NeedPet";
 import NeedLocation from "@/pages/owner/need/NeedLocation";
 import NeedCare from "@/pages/owner/need/NeedCare";
@@ -87,7 +86,13 @@ const App = () => {
             {/* Flow screens: full viewport, own back control, own action bar,
                 no site chrome. */}
             <Route path="/welcome" element={<Welcome />} />
-            <Route path="/start" element={<Intent />} />
+            {/* Audit 1.2 merged the introduction and the owner-or-sitter
+                choice into one screen: the first disclosed nothing and stood
+                in front of the real decision. The route stays as a redirect
+                because it is the `useBack` fallback of several steps, and
+                deleting it would give those steps a back control that lands on
+                the catch-all. */}
+            <Route path="/start" element={<Navigate to="/welcome" replace />} />
             <Route path="/owner/need/pet" element={<NeedPet />} />
             <Route path="/owner/need/location" element={<NeedLocation />} />
             <Route path="/owner/need/care" element={<NeedCare />} />

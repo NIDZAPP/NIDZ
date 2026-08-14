@@ -2,7 +2,6 @@ import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { PhoneStep } from "@/components/account/AccountSteps";
-import { useFlowBack } from "@/hooks/use-flow-back";
 import { useSitter } from "@/hooks/use-sitter";
 import { useDemo } from "@/state/demo/context";
 
@@ -15,7 +14,6 @@ export default function RequestPhone() {
   const { state } = useDemo();
   const search = searchParams.toString();
   const query = search ? `?${search}` : "";
-  const goBack = useFlowBack(`/owner/request/${sitterId ?? ""}${query}`);
 
   if (!sitter) return <Navigate to="/search" replace />;
   /* Reached without a name means the chain was entered mid-way. */
@@ -24,7 +22,7 @@ export default function RequestPhone() {
   return (
     <PhoneStep
       intro={t("request.phone.intro")}
-      onBack={goBack}
+      backTo={`/owner/request/${sitterId ?? ""}${query}`}
       onDone={() => navigate(`/owner/request/${sitter.id}/verify${query}`)}
     />
   );

@@ -1,9 +1,9 @@
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
 
 import RequestSummary from "@/components/request/RequestSummary";
+import BackButton from "@/components/shared/BackButton";
 import EmptyState from "@/components/shared/EmptyState";
 import { Button } from "@/components/ui/button";
 import { DemoNotice } from "@/components/shared/trust";
@@ -43,16 +43,14 @@ export default function OwnerRequestDetail() {
       </Helmet>
 
       <div className="mx-auto max-w-[720px]">
-        <Link
-          to="/owner/requests"
-          className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
-        >
-          <ArrowLeft className="size-4 rtl:-scale-x-100" aria-hidden="true" />
-          {t("ownerRequests.title")}
-        </Link>
-
+        <BackButton
+          variant="labelled"
+          fallback="/owner/requests"
+          label={t("common.backToRequests")}
+          className="mb-6"
+        />
         {!request ? (
-          /* No action: the back link above already goes to the only place
+          /* No action: the back control above already goes to the only place
              this state can send anyone, and two identical links to one
              destination is not a choice. */
           <EmptyState

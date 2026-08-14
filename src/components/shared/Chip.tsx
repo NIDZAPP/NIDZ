@@ -10,7 +10,7 @@ const chipClass = (selected: boolean) =>
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
     selected
       ? "border-primary bg-accent text-accent-foreground"
-      : "border-input bg-card text-foreground hover:bg-secondary",
+      : "border-input text-foreground hover:bg-secondary",
   );
 
 function ChipGlyph({ selected, icon: Icon }: { selected: boolean; icon?: LucideIcon }) {

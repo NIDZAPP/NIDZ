@@ -7,7 +7,6 @@ import FlowScreen from "@/components/shared/FlowScreen";
 import { DocumentField } from "@/components/shared/fields";
 import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
-import { useFlowBack } from "@/hooks/use-flow-back";
 import { useDemo } from "@/state/demo/context";
 
 /**
@@ -28,7 +27,6 @@ import { useDemo } from "@/state/demo/context";
 export default function SitterTrust() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const goBack = useFlowBack("/sitter/profile/availability");
   const { state, dispatch } = useDemo();
 
   /* The profile has to exist as a profile before its trustworthiness is
@@ -47,7 +45,7 @@ export default function SitterTrust() {
         </title>
       </Helmet>
       <FlowScreen
-        onBack={goBack}
+        backTo="/sitter/profile/availability"
         title={t("sitterFlow.trust.title")}
         intro={t("sitterFlow.trust.intro")}
         progress={{ current: 7, total: 8, label: t("sitterFlow.progress", { current: 7, total: 8 }) }}

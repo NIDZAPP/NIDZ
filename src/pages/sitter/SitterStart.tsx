@@ -6,7 +6,6 @@ import { PawPrint } from "lucide-react";
 import FlowScreen from "@/components/shared/FlowScreen";
 import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
-import { useFlowBack } from "@/hooks/use-flow-back";
 import { useDemo } from "@/state/demo/context";
 
 /**
@@ -21,7 +20,6 @@ import { useDemo } from "@/state/demo/context";
 export default function SitterStart() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const goBack = useFlowBack("/start");
   const { state, dispatch } = useDemo();
 
   const start = () => {
@@ -41,7 +39,7 @@ export default function SitterStart() {
         <meta name="description" content={t("sitterFlow.start.intro")} />
       </Helmet>
       <FlowScreen
-        onBack={goBack}
+        backTo="/start"
         title={t("sitterFlow.start.title")}
         intro={t("sitterFlow.start.intro")}
         showLanguageSwitcher

@@ -11,7 +11,8 @@
     "addPhoto": "Add a photo",
     "changePhoto": "Change the photo",
     "photoLocalOnly": "The photo stays on your device: this demonstration does not upload or store any file.",
-    "progress": "Progress"
+    "progress": "Progress",
+    "backToRequests": "Back to my requests"
   },
   "nav": {
     "home": "Home",
@@ -20,8 +21,9 @@
     "policies": "Policies",
     "myRequests": "Requests",
     "received": "Received",
-    "siteLabel": "Site navigation",
-    "footerLabel": "Footer links"
+    "footerLabel": "Footer links",
+    "ownerLabel": "Owner navigation",
+    "sitterLabel": "Sitter navigation"
   },
   "home": {
     "title": "Find care for your animal",
@@ -283,9 +285,8 @@
     }
   },
   "entry": {
-    "title": "Find someone you can trust to look after your animal.",
+    "title": "Find care for your animal, or offer care to others.",
     "intro": "Nidz connects dog and cat owners with sitters nearby, and spells out what each person offers and what they cannot take on.",
-    "start": "Get started",
     "browse": "See the sitters",
     "resume": "Resume my search",
     "findSitter": "Find a sitter",
@@ -297,10 +298,17 @@
     "requestsPending_one": "{{count}} awaiting a reply",
     "requestsPending_other": "{{count}} awaiting a reply",
     "sitterPublished": "Your profile is published",
-    "sitterDraft": "Your profile is not published yet"
+    "sitterDraft": "Your profile is not published yet",
+    "ownerPrompt": "Which animal needs care?",
+    "sitterCta": "Describe what you offer",
+    "sitterPreview": {
+      "home": "Your home and outdoor space",
+      "animals": "The animals you accept",
+      "limits": "How you care for them, and your limits",
+      "rates": "Your rates, service by service"
+    }
   },
   "intent": {
-    "title": "What would you like to do today?",
     "owner": "Find someone for my animal",
     "ownerDescription": "Describe your animal and your dates, then see who can look after it.",
     "sitter": "Look after animals",

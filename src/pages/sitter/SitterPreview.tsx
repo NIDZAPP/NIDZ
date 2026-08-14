@@ -6,7 +6,6 @@ import FlowScreen from "@/components/shared/FlowScreen";
 import SitterProfileView from "@/components/sitter/SitterProfileView";
 import { DemoNotice } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
-import { useFlowBack } from "@/hooks/use-flow-back";
 import { useDemo } from "@/state/demo/context";
 
 /**
@@ -24,7 +23,6 @@ import { useDemo } from "@/state/demo/context";
 export default function SitterPreview() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const goBack = useFlowBack("/sitter/trust");
   const { state, dispatch } = useDemo();
 
   const profile = state.sitter?.profile;
@@ -49,7 +47,7 @@ export default function SitterPreview() {
       </Helmet>
       <FlowScreen
         wide
-        onBack={goBack}
+        backTo="/sitter/trust"
         title={t("sitterFlow.preview.title")}
         intro={t("sitterFlow.preview.intro")}
         progress={{ current: 8, total: 8, label: t("sitterFlow.progress", { current: 8, total: 8 }) }}

@@ -38,8 +38,8 @@ value.
 
 | Token | Value | Role as used |
 |---|---|---|
-| `background` | `#FBFAF7` | the page ground, everywhere |
-| `card` | `#FFFFFF` | raised surfaces — used sparingly; most "cards" are hairlines instead |
+| `background` | `#FFFFFF` | the page ground, everywhere |
+| `card` | `#FFFFFF` | **the same colour as the ground.** An opaque surface that has to *cover* something — a dialog, a popover, or a control on a soft surface. Not a grouping device |
 | `foreground` | `#18211F` | body and headings |
 | `muted-foreground` | `#5B6864` | secondary text, labels, help |
 | `primary` | `#0F766E` | **the dominant action, and selection. Nothing else.** |
@@ -47,7 +47,8 @@ value.
 | `accent` | = `primary-soft` `#E7F3F1` | shadcn's hover / keyboard-highlight / selection surface, and the compatibility token on a result row |
 | `brand` | `#A84F32` | terracotta. **Non-interactive only** |
 | `brand-soft` | `#F7EAE4` | the one full-bleed editorial band |
-| `secondary` | `#EFEDE8` | neutral surface: monograms, secondary buttons, the phone prefix |
+| `secondary` | `#EAEFED` | neutral surface: secondary buttons, the phone prefix, and **the single hover surface** for rows and bordered controls |
+| `muted` | `#F4F7F6` | 1.08:1 on white — too faint to carry an interaction. shadcn primitives only |
 | `track` | `#B6C2BE` | filled-control tracks (progress) |
 | `border` | `#DCE3E0` | decorative separation — **never** the only indicator of a control |
 | `input` | `#7C8B86` | the functional control boundary, 3.41:1 on background |
@@ -59,10 +60,22 @@ on `--brand`. They are not interchangeable, and the comment block at the top of
 `src/index.css` explains why: terracotta and teal have nearly identical
 luminance, so terracotta on a control reads as important as the primary CTA.
 
-**Terracotta discipline.** It appears in exactly three places: the `PawPrint`
-mark on the entry and sitter-intro screens, the `bg-brand-soft` band, and the
-species value in the `/search` brief. Never a button, link, hover or selected
-state.
+**Terracotta discipline, and why it now matters more.** Audit 1.2 removed the
+cream ground *and* retuned `--secondary` / `--muted` out of the warm beige ramp
+into the same cool green-grey family as `--border`. That leaves `--brand` and
+`--brand-soft` carrying the entire warm half of the brand, so their placement is
+a decision rather than decoration. They appear in exactly three places: the
+`PawPrint` mark, the entry masthead band (and the splash that settles into it),
+and the identity monogram on a sitter card and profile — the warm surface goes
+on the *person*, which is also the one place in the product with no photograph
+to carry them. Never a button, link, hover or selected state.
+
+**No white card on a white ground.** When something feels like it needs a
+container, the answer is almost always a heading and space. Structure comes from
+spacing → typography → a hairline register → a soft *semantic* surface →
+elevation, in that order. `shadow-chrome-b` / `shadow-chrome-t` exist for the
+six sticky planes, which are the only genuinely elevated static things in the
+product; there is no card shadow.
 
 **Red is danger only.** "Refuser" is a normal, legitimate outcome — a sitter
 declining an animal their home does not suit is the matching working — so it is
@@ -77,10 +90,17 @@ carries a top rule, a heavier label and `aria-current`; errors carry text.
 
 ## 3. Typography
 
-`Inter` carries the entire interface. `Playfair Display` (`font-display`) has
-**one** call site: the header wordmark. It has no Arabic face, so it must never
-carry copy that appears in all three languages — a serif fallback would silently
-substitute an arbitrary system font in Arabic.
+**One family.** `Inter` carries the entire interface, and nothing else is
+loaded. Audit 1.2 withdrew `Playfair Display` (design system amendment 0.0-B):
+hierarchy comes from size, weight, spacing and layout, never from mixing
+families.
+
+It had already stopped being real before it was removed. `index.html` never
+requested the font, so `font-display` resolved to an arbitrary system serif; and
+it could not have been used honestly in any case, because Playfair has no Arabic
+face — a role it carried would have been monolingual by construction in a
+trilingual product. `Noto Sans Arabic` sits behind Inter in the stack to carry
+Arabic; Latin text never reaches it.
 
 Scale, defined in `tailwind.config.ts`:
 

@@ -23,7 +23,7 @@ import { useDemo } from "@/state/demo/context";
    Bordered boxes read as controls — that is `OptionGroup`'s silhouette — and
    made the emptiest screen in the product look like a dashboard stub. */
 const ROW =
-  "flex items-center justify-between gap-4 border-b border-border py-4 transition-colors first:border-t hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
+  "flex items-center justify-between gap-4 border-b border-border py-4 transition-colors first:border-t hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
 
 export default function Index() {
   const { t } = useTranslation();
@@ -84,9 +84,11 @@ export default function Index() {
           </Link>
         )}
 
-        {/* The sitter side of the same account, once it exists. Without this
-            the whole sitter area is unreachable after the published screen —
-            the header nav is hidden below md, and nothing else links to it. */}
+        {/* The sitter side of the same account, once it exists. Since Audit 1.2
+            the header carries the ACTIVE workspace's destinations, so while the
+            owner workspace is active there is no sitter link at any width —
+            making this row the only route into `/sitter/requests` on desktop as
+            well as on a phone, not just below md. */}
         {state.sitter && (
           <Link
             to="/sitter/requests"
@@ -105,7 +107,16 @@ export default function Index() {
         </div>
 
         {/* One quiet pointer at the other side of the marketplace. Not a
-            second pair of equal-weight cards. */}
+            second pair of equal-weight cards.
+
+            KNOWN CARRY-FORWARD TO GROUP 3. The branch below is a single boolean
+            deciding which "side" you belong to — exactly the mutually exclusive
+            role shape `src/data/workspace.ts` was written to retire. Someone
+            with both capabilities should be offered a workspace SWITCH, not a
+            fork; `hasBothCapabilities` exists for that case. It stays as-is
+            until Group 3 wires the persisted `activeWorkspace` that the switch
+            has to write to, because a switch control with nothing to switch
+            would be a button that only changes the page you are on. */}
         <p className="mt-10 text-sm text-muted-foreground">
           {state.sitter ? (
             <Link to="/owner/need/pet" className="font-medium text-primary underline-offset-4 hover:underline">

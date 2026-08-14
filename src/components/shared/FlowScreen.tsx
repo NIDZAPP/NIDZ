@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
-import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { ReactNode } from "react";
 
+import BackButton from "@/components/shared/BackButton";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import { cn } from "@/lib/utils";
 
@@ -19,14 +19,16 @@ import { cn } from "@/lib/utils";
  *    sits under the content, on a long one it pins to the bottom edge, so the
  *    primary action is always in thumb reach without ever overlaying a field
  *    (§15, §30).
- *  - The back control is `ArrowLeft` in a container that flips under
- *    `dir="rtl"`, so "top-left" means inline-start — top-right in Arabic (§34).
+ *  - The back control is `BackButton`, shared with the browsable shell so both
+ *    sides of the app have one back affordance rather than two that drift. It
+ *    sits at the inline start, which is top-right in Arabic (§34).
  *  - Focus and scroll are managed here rather than in fifteen screens: React
  *    Router resets neither, so without this a keyboard user loses their place
  *    on every step and a screen-reader user hears nothing on navigation.
  */
 export default function FlowScreen({
-  onBack,
+  backTo,
+  backLabel,
   progress,
   eyebrow,
   title,
@@ -42,9 +44,15 @@ export default function FlowScreen({
       key when several steps share one mounted FlowScreen. */
   stepKey,
 }: {
-  /** Omit on a root screen: the audit is explicit that root screens carry no
-      back control (Audit p.23). */
-  onBack?: () => void;
+  /** Where back goes. Omit on a root screen: the audit is explicit that root
+      screens carry no back control (Audit p.23).
+
+      A path rather than a callback, because the value a step actually needs to
+      supply is its logical parent — every screen was writing the same
+      `useBack(parent)` line to turn one into the other. `BackButton` owns that
+      now. */
+  backTo?: string;
+  backLabel?: string;
   /** Discreet completion indicator, for the multi-step sitter profile builder.
       Deliberately no "Étape 4 sur 7" text (Audit p.363) — the position is
       exposed to assistive technology, not printed on the screen. */
@@ -78,7 +86,7 @@ export default function FlowScreen({
   }, [stepKey, title]);
 
   const measure = wide ? "max-w-[720px]" : "max-w-[560px]";
-  const hasTopBar = Boolean(onBack || progress || showLanguageSwitcher);
+  const hasTopBar = Boolean(backTo || progress || showLanguageSwitcher);
 
   return (
     /* `has-pinned-action` is what src/index.css keys the bottom scroll padding
@@ -86,19 +94,10 @@ export default function FlowScreen({
        pinned action bar needs the room under it. */
     <div className="has-pinned-action flex min-h-dvh flex-col bg-background">
       {hasTopBar && (
-        <div className="sticky top-0 z-30 border-b border-border bg-background">
+        <div className="sticky top-0 z-30 border-b border-border bg-background shadow-chrome-b">
           <div className="container flex h-14 items-center gap-4">
-            {onBack ? (
-              <button
-                type="button"
-                onClick={onBack}
-                className="-ms-2 inline-flex size-11 shrink-0 items-center justify-center rounded-md text-foreground transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              >
-                {/* Mirrored under RTL, so the arrow points back in both
-                    directions rather than pointing "left" in Arabic. */}
-                <ArrowLeft className="size-5 rtl:-scale-x-100" aria-hidden="true" />
-                <span className="sr-only">{t("common.back")}</span>
-              </button>
+            {backTo ? (
+              <BackButton fallback={backTo} label={backLabel} />
             ) : (
               <span className="size-11 shrink-0" aria-hidden="true" />
             )}
@@ -112,7 +111,8 @@ export default function FlowScreen({
                 aria-valuenow={progress.current}
                 aria-valuetext={progress.label}
                 /* `--track` exists for exactly this (see src/index.css): a
-                   light neutral would be invisible against the warm ground. */
+                   light neutral would be invisible against the page ground,
+                   and `--border` would not separate from the primary fill. */
                 className="h-1 flex-1 overflow-hidden rounded-full bg-track"
               >
                 <div
@@ -151,7 +151,7 @@ export default function FlowScreen({
 
       {(action || secondaryAction || footNote) && (
         <div
-          className="sticky bottom-0 z-30 border-t border-border bg-background"
+          className="sticky bottom-0 z-30 border-t border-border bg-background shadow-chrome-t"
           /* The iOS home indicator overlaps a bottom-pinned bar and erodes the
              44px target underneath it. */
           style={{ paddingBottom: "env(safe-area-inset-bottom)" }}

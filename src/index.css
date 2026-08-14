@@ -4,8 +4,34 @@
 
 /* ============================================================================
    NIDZ DESIGN TOKENS
-   Source of truth: .claude/skills/nidz-design/NIDZ_DESIGN_SYSTEM.md (§12, §16)
+   Source of truth: .claude/skills/nidz-design/NIDZ_DESIGN_SYSTEM.md — read the
+   `## 0.0 Amendements actifs — Audit 1.2` block at the top of that file first;
+   it supersedes §12.1 and §13.2. Otherwise §12, §16.
    All colors MUST be HSL triplets (Tailwind wraps them as hsl(var(--token))).
+
+   AUDIT 1.2 — THE GROUND IS WHITE, AND THAT CHANGES WHAT `--card` IS FOR.
+
+   Until 1.1 the page ground was warm off-white #FBFAF7 and `--card` #FFFFFF
+   was, by itself, an elevation cue: a white block on cream read as raised
+   without needing a border or a shadow. That is why the 1.1 UI reached for a
+   card so often.
+
+   On a white ground that cue is gone. `--card` still exists and is still
+   white, but it now means exactly one thing: AN OPAQUE SURFACE THAT HAS TO
+   COVER SOMETHING — a dialog or popover over the page, or a control sitting
+   on a soft semantic surface such as `bg-primary-soft` / `bg-brand-soft`.
+   It is no longer a way to group content on the page ground, because against
+   the page ground it is invisible.
+
+   Page-level structure now comes from, in order of preference:
+     1. spacing and grouping        (nothing drawn at all)
+     2. typography and hierarchy    (size, weight, colour)
+     3. a hairline `border-border`  (a register of rows, a section rule)
+     4. a soft semantic surface     (`primary-soft` / `brand-soft`) — sparingly
+     5. real elevation (shadow)     — overlays only, never a static block
+
+   A card around every section is the anti-pattern this audit removes, not the
+   pattern it replaces cream with.
 
    IMPORTANT — two different things are called "accent":
      - CSS `--accent`  = shadcn's HOVER / HIGHLIGHT / SELECTION surface. It backs
@@ -42,9 +68,12 @@
 @layer base {
   :root {
     /* Surfaces */
-    --background: 45 33% 98%;           /* #FBFAF7 warm off-white */
+    --background: 0 0% 100%;            /* #FFFFFF — Audit 1.2 canvas */
     --foreground: 167 16% 11%;          /* #18211F dark green slate */
 
+    /* Same value as the ground on purpose. See the note above: this is the
+       "must cover something" surface (overlays, and controls that sit on a
+       soft surface), not a grouping device. */
     --card: 0 0% 100%;                  /* #FFFFFF */
     --card-foreground: 167 16% 11%;
 
@@ -57,20 +86,34 @@
     --primary-hover: 176 69% 22%;       /* #115E59 hover / pressed */
     --primary-soft: 170 33% 93%;        /* #E7F3F1 soft primary background */
 
-    /* Neutral surfaces — warm ramp, kept deliberately NON-brand so that
-       secondary actions stay visually secondary to the primary CTA (§17). */
-    --secondary: 43 18% 92%;            /* #EFEDE8 */
+    /* Neutral surfaces — kept deliberately NON-brand so that secondary actions
+       stay visually secondary to the primary CTA (§17).
+
+       Audit 1.2 retuned these from a warm beige ramp (#EFEDE8 / #F5F3EF) to the
+       same cool green-grey family as `--border` #DCE3E0. The warm neutrals were
+       chosen to sit on cream; on white they read as a yellow cast — a beige
+       block on a white page looks like a rendering fault, not a surface. Hue
+       154-160 keeps them relatives of the border and the control outline
+       instead of a second, unrelated grey. */
+    --secondary: 156 14% 93%;           /* #EAEFED */
     --secondary-foreground: 167 16% 11%;
-    --secondary-hover: 43 16% 87%;      /* neutrals are too light for /80 opacity
+    --secondary-hover: 156 13% 88%;     /* neutrals are too light for /80 opacity
                                            hover to be perceptible — use a real step */
 
-    --muted: 40 23% 95%;                /* #F5F3EF */
-    --muted-foreground: 162 7% 38%;     /* #5B6864 muted slate */
+    /* `--muted` is a PRIMITIVE-ONLY surface: 1.08:1 on white, which is too
+       faint to carry an interaction. Application row hovers all use
+       `--secondary` (1.16:1) so that Nidz has exactly one hover surface with
+       exactly one meaning. Kept because several shadcn primitives reference
+       it, and because `--muted-foreground` is a different, heavily-used role. */
+    --muted: 160 16% 96%;               /* #F4F7F6 — the lightest usable fill */
+    --muted-foreground: 162 7% 38%;     /* #5B6864 muted slate — 5.8:1 on white */
 
     /* Filled-control track (slider, progress, switch-off). Needs to be visible
        against the surface AND clearly distinct from the primary fill:
-       1.8:1 on --card, 3.0:1 against --primary. A light neutral fails the
-       second test, which is why this is not --secondary or --border. */
+       1.83:1 on the white ground, 3.0:1 against --primary. A light neutral
+       fails the second test, which is why this is not --secondary or --border.
+       Unchanged by the move to white — it was already measured against the
+       white card, which is the same value the ground now has. */
     --track: 160 9% 74%;                /* #B6C2BE */
 
     /* Hover / highlight / selection surface (see note above) */
@@ -78,8 +121,23 @@
     --accent-foreground: 175 77% 26%;   /* teal text: 4.8:1 on the soft surface */
 
     /* Nidz warm brand accent — NON-INTERACTIVE USE ONLY (see note above).
-       Consumers: the /search need panel + results context bar surface
-       (`bg-brand-soft`), the demo monogram avatars, and the PawPrint mark.
+
+       Audit 1.2 made this token load-bearing rather than optional. Removing the
+       cream ground AND retuning the neutrals out of the warm beige ramp leaves
+       the entire system in one cool green-grey family, and a Nidz that reads
+       clinical is a Nidz that reads like a bank (§3). These two tokens are now
+       the whole warm half of "chaleur humaine + rigueur fonctionnelle", so
+       where they land is a decision, not decoration.
+
+       Consumers, deliberately few:
+         - the entry masthead band and the splash it settles out of;
+         - the identity monogram on a sitter card and profile — the warm
+           surface belongs on the PERSON, which is also the one place in the
+           product with no photograph to carry them;
+         - the PawPrint mark.
+       The /search brief band is the one other candidate; that is a Group 8
+       decision, and until it is taken this comment describes what is true.
+
        Never a button, link, hover or selected state. */
     --brand: 15 54% 43%;                /* #A84F32 warm terracotta */
     --brand-foreground: 0 0% 100%;
@@ -95,11 +153,15 @@
     --info: 224 76% 48%;                /* #1D4ED8 */
     --info-foreground: 0 0% 100%;
 
-    /* Lines.
-       --border is decorative separation (1.25:1) and must NEVER be the sole
-       indicator of an interactive control.
-       --input is the functional control boundary: 3.41:1 on --background and
-       3.56:1 on --card, so it satisfies WCAG 1.4.11 non-text contrast. */
+    /* Lines. Both values are mandated unchanged by the Audit 1.2 palette.
+       --border is decorative separation (1.30:1 on white) and must NEVER be the
+       sole indicator of an interactive control. It carries more of the layout
+       now that a white block no longer groups anything by itself, so it is used
+       as a hairline register between rows rather than as a box around them.
+       --input is the functional control boundary: 3.56:1 on white, so it
+       satisfies WCAG 1.4.11 non-text contrast. With ground and card now the
+       same colour, a field is distinguished by this outline alone — which is
+       exactly what the token was sized for. */
     --border: 154 11% 88%;              /* #DCE3E0 */
     --input: 160 6% 52%;                /* #7C8B86 */
     --ring: 175 77% 26%;
@@ -118,43 +180,15 @@
     --sidebar-ring: var(--ring);
   }
 
-  /* LEGACY / UNMAINTAINED — dark mode is NOT part of Nidz V1 (design system
-     §38) and this block is never applied: nothing in the app ever adds the
-     `dark` class. These values are stale Lovable-era colours that do NOT match
-     the Nidz palette, and the block does not define the tokens added above
-     (--primary-hover, --primary-soft, --brand*, --track, status colours), so a
-     dark theme would silently inherit light values for them.
-     Deliberately not expanded. Delete it or author a real dark palette before
-     any dark-mode toggle ships. */
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 165 70% 65%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 165 35% 25%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 165 70% 65%;
-  }
+  /* There is deliberately no `.dark` block.
+     Dark mode is not part of Nidz V1 (design system §38). Until Audit 1.2 a
+     stale Lovable-era mint palette sat here: never applied, since nothing in
+     the app adds the `dark` class, and actively wrong — it did not define
+     --primary-hover, --primary-soft, --brand*, --track or the status colours,
+     so anything that HAD switched it on would have silently inherited light
+     values for a third of the system and produced an unreadable screen.
+     Removed rather than carried forward. A real dark palette is authored
+     deliberately, against the white-ground system, if and when a toggle ships. */
 }
 
 @layer base {

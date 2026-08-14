@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { parseCriteria } from "@/data/criteria";
 import { offeredServices } from "@/data/demo-sitters";
 import type { CareRequest } from "@/data/types";
-import { useFlowBack } from "@/hooks/use-flow-back";
 import { useSitter } from "@/hooks/use-sitter";
 import { useDemo } from "@/state/demo/context";
 
@@ -36,7 +35,6 @@ export default function RequestReview() {
   const { sitter } = useSitter(sitterId);
   const { state, dispatch } = useDemo();
   const search = searchParams.toString();
-  const goBack = useFlowBack(`/owner/request/${sitterId ?? ""}/verify${search ? `?${search}` : ""}`);
 
   /* Guards a same-tick double event; the duplicate check below guards the
      round trip. */
@@ -129,7 +127,7 @@ export default function RequestReview() {
       </Helmet>
       <FlowScreen
         wide
-        onBack={goBack}
+        backTo={`/owner/request/${sitterId ?? ""}/verify${search ? `?${search}` : ""}`}
         title={t("request.review.title")}
         action={
           <Button type="button" size="lg" onClick={send}>

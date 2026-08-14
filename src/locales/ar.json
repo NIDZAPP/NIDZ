@@ -11,7 +11,8 @@
     "addPhoto": "إضافة صورة",
     "changePhoto": "تغيير الصورة",
     "photoLocalOnly": "تبقى الصورة على جهازك: هذه النسخة التوضيحية لا ترفع أي ملف ولا تحفظه.",
-    "progress": "التقدّم"
+    "progress": "التقدّم",
+    "backToRequests": "العودة إلى طلباتي"
   },
   "nav": {
     "home": "الرئيسية",
@@ -20,8 +21,9 @@
     "policies": "السياسات",
     "myRequests": "الطلبات",
     "received": "الواردة",
-    "siteLabel": "تنقّل الموقع",
-    "footerLabel": "روابط التذييل"
+    "footerLabel": "روابط التذييل",
+    "ownerLabel": "تنقّل المالك",
+    "sitterLabel": "تنقّل الحاضن"
   },
   "home": {
     "title": "ابحث عن رعاية لحيوانك",
@@ -232,8 +234,12 @@
       "noCriteria": "كل الأمثلة",
       "edit": "تعديل",
       "editLabel": "تعديل بحثي",
+      "editLabelCount_zero": "تعديل بحثي",
       "editLabelCount_one": "تعديل بحثي · معيار واحد مفعّل",
-      "editLabelCount_other": "تعديل بحثي · {{count}} معايير مفعّلة"
+      "editLabelCount_two": "تعديل بحثي · معياران مفعّلان",
+      "editLabelCount_few": "تعديل بحثي · {{count}} معايير مفعّلة",
+      "editLabelCount_many": "تعديل بحثي · {{count}} معياراً مفعّلاً",
+      "editLabelCount_other": "تعديل بحثي · {{count}} معيار مفعّل"
     },
     "filters": {
       "maxPrice": "السعر الأقصى",
@@ -283,9 +289,8 @@
     }
   },
   "entry": {
-    "title": "اعثر على شخص تثق به ليعتني بحيوانك.",
+    "title": "اعثر على من يعتني بحيوانك، أو اعتنِ أنت بحيوانات الآخرين.",
     "intro": "تربط نيدز أصحاب الكلاب والقطط بحاضنين قريبين منهم، وتوضّح بجلاء ما يقدّمه كل شخص وما لا يستطيع قبوله.",
-    "start": "لنبدأ",
     "browse": "عرض الحاضنين",
     "resume": "متابعة بحثي",
     "findSitter": "ابحث عن حاضن",
@@ -305,10 +310,17 @@
     "requestsPending_many": "{{count}} طلباً في انتظار الرد",
     "requestsPending_other": "{{count}} في انتظار الرد",
     "sitterPublished": "ملفك منشور",
-    "sitterDraft": "ملفك لم يُنشر بعد"
+    "sitterDraft": "ملفك لم يُنشر بعد",
+    "ownerPrompt": "أي حيوان تريد أن تجد له رعاية؟",
+    "sitterCta": "صِف ما تقدّمه",
+    "sitterPreview": {
+      "home": "مسكنك ومساحتك الخارجية",
+      "animals": "الحيوانات التي تقبلها",
+      "limits": "كيف تعتني بها، وحدودك",
+      "rates": "أسعارك، خدمة بخدمة"
+    }
   },
   "intent": {
-    "title": "ماذا تودّ أن تفعل اليوم؟",
     "owner": "أبحث عن شخص لحيواني",
     "ownerDescription": "صِف حيوانك وتواريخك، ثم شاهد من يمكنه الاعتناء به.",
     "sitter": "حضانة الحيوانات",

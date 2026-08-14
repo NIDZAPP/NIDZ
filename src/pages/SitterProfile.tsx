@@ -2,8 +2,8 @@ import { useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
 
+import BackButton from "@/components/shared/BackButton";
 import EmptyState from "@/components/shared/EmptyState";
 import { DemoNotice } from "@/components/shared/trust";
 import SitterProfileView, { QuotedRate } from "@/components/sitter/SitterProfileView";
@@ -144,17 +144,27 @@ export default function SitterProfile() {
 
       <div className="container py-10 md:py-14">
         <div className="mx-auto max-w-[1120px]">
-          {/* A real link, not history.back(): a shared URL has no results page
-              behind it, and this reconstructs the exact result set. */}
-          {hasCriteria && (
-            <Link
-              to={{ pathname: "/search", search: paramKey }}
-              className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
-            >
-              <ArrowLeft className="size-4 rtl:-scale-x-100" aria-hidden="true" />
-              {t("profile.backToResults")}
-            </Link>
-          )}
+          {/* Unconditional at Audit 1.2 (§86). It used to appear only when the
+              URL carried search criteria, so a profile opened from a shared
+              link — the most likely way a stranger arrives here — had no way
+              back at all inside an installed PWA, which shows no browser
+              chrome.
+
+              `BackButton` pops real history when this app put something behind
+              us, so returning lands on the exact results the visitor left. The
+              fallback reconstructs that result set from the URL for anyone who
+              arrived cold. */}
+          <BackButton
+            variant="labelled"
+            fallback={hasCriteria ? `/search?${paramKey}` : "/search"}
+            /* Named only when the URL actually carries a result set. `useBack`
+               pops real history first, so a profile opened from Home, from a
+               request, or by a sitter looking at their own listing would
+               otherwise read "Back to results" and go somewhere else. A control
+               that states a destination has to keep the promise. */
+            label={hasCriteria ? t("profile.backToResults") : undefined}
+            className="mb-6"
+          />
 
           <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
             <div className="min-w-0 xl:pe-12">
@@ -217,7 +227,7 @@ export default function SitterProfile() {
            bottom:0 in the root stacking context, so without this the nav
            sat over the one conversion action in the product and swallowed
            the tap. Above md the nav is gone and this returns to the edge. */
-        className="has-pinned-action-sm sticky bottom-14 z-30 border-t border-border bg-background md:bottom-0 xl:hidden"
+        className="has-pinned-action-sm sticky bottom-14 z-30 border-t border-border bg-background shadow-chrome-t md:bottom-0 xl:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <div className="container flex items-center gap-4 py-3">

@@ -65,13 +65,15 @@ Stack: **Vite 5 + React 18 + TypeScript** (SWC), **shadcn/ui** (Radix) component
 - **Path alias**: `@/` → `src/` (configured in both `vite.config.ts` and `tsconfig`). shadcn aliases live in `components.json`.
 
 ### Design tokens
-All colors are **HSL CSS variables** defined in `src/index.css` (`:root`), mapped to Tailwind semantic classes in `tailwind.config.ts`. Brand palette is **deep-teal primary** (`#0F766E`) on a **warm off-white** background (`#FBFAF7`). Use the semantic tokens (`bg-primary`, `text-muted-foreground`, `border-input`, …) — never hard-code hex/HSL in components.
+All colors are **HSL CSS variables** defined in `src/index.css` (`:root`), mapped to Tailwind semantic classes in `tailwind.config.ts`. Brand palette is **deep-teal primary** (`#0F766E`) on a **white** background (`#FFFFFF` — Audit 1.2 replaced the warm off-white canvas). Use the semantic tokens (`bg-primary`, `text-muted-foreground`, `border-input`, …) — never hard-code hex/HSL in components.
+
+**On white, `bg-card` no longer groups anything** — it is the same colour as the ground. It now means only "an opaque surface that has to cover something": a dialog or popover, or a control sitting on a soft semantic surface. Page structure comes from spacing → typography → a `border-border` hairline → a soft semantic surface → real elevation, in that order of preference. **No white card on a white ground.** Row hovers use `bg-secondary`, which is the single hover surface; `--muted` is 1.08:1 on white and is a shadcn-primitive-only token. The warm terracotta pair (`--brand` / `--brand-soft`) is now the entire warm half of the system, so its placement is deliberate and rare — read the token comments in `src/index.css` before spending it.
 
 **Two different things are called "accent" — read the comment block at the top of `src/index.css` before touching colors.** CSS `--accent` is shadcn's *hover / keyboard-highlight / selection surface* (44 usages across 13 primitives); it is a neutral UI role. The design system's warm terracotta accent (`#A84F32`) lives on a separate `--brand` token and is reserved for **non-interactive** brand surfaces — never a button, link, hover, or selected state. `--secondary` is likewise a neutral surface (it backs the Slider and Progress tracks), not a brand color.
 
 Radius scale is sm 8 / md 12 / lg 16 / xl 24; `rounded-2xl` and `rounded-3xl` are not part of it. Motion durations follow design system §24 and `prefers-reduced-motion` is honored globally. Dark mode is **not** part of V1: the `.dark` block in `index.css` is legacy, never applied, and still holds the old mint theme.
 
-Fonts: `Inter` (sans/default) carries the interface; `Playfair Display` (`font-display`) is brand expression only — **the header wordmark, and nothing else**. It has no Arabic face, so it must never carry copy that appears in all three languages. Icons: **lucide-react** only, never emoji.
+Fonts: **`Inter` only** (`Noto Sans Arabic` sits behind it in the stack to carry Arabic; Latin never reaches it). Audit 1.2 withdrew `Playfair Display` and there is no `font-display` key — hierarchy comes from size, weight, spacing and layout, never from mixing families. Do not reintroduce a display face; that would be a deliberate multilingual brand decision, not a UI tweak. Icons: **lucide-react** only, never emoji.
 
 `DESIGN.md` documents the visual system as actually built. Read it before adding a screen.
 

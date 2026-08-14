@@ -133,7 +133,7 @@ export default function SitterProfileView({
             sitter.publicName && (
               <span
                 aria-hidden="true"
-                className="flex size-12 shrink-0 items-center justify-center rounded-sm bg-secondary text-name font-semibold text-foreground md:size-14"
+                className="flex size-12 shrink-0 items-center justify-center rounded-sm bg-brand-soft text-name font-semibold text-brand md:size-14"
               >
                 {sitter.publicName.charAt(0)}
               </span>

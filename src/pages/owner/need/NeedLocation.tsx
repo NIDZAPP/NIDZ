@@ -6,7 +6,6 @@ import { Navigate, useNavigate } from "react-router-dom";
 import FlowScreen from "@/components/shared/FlowScreen";
 import { LocationFields } from "@/components/shared/fields";
 import { Button } from "@/components/ui/button";
-import { useFlowBack } from "@/hooks/use-flow-back";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useDemo } from "@/state/demo/context";
 
@@ -27,7 +26,6 @@ export default function NeedLocation() {
   const { t } = useTranslation();
   const locale = useAppLocale();
   const navigate = useNavigate();
-  const goBack = useFlowBack("/owner/need/pet");
   const { state, dispatch } = useDemo();
 
   const [wilayaCode, setWilayaCode] = useState(state.need.wilayaCode);
@@ -60,7 +58,7 @@ export default function NeedLocation() {
         </title>
       </Helmet>
       <FlowScreen
-        onBack={goBack}
+        backTo="/owner/need/pet"
         title={t("need.location.title")}
         intro={t("need.location.intro")}
         action={

@@ -193,7 +193,7 @@ export default function Search() {
           (§15 endorses the sidebar <-> drawer transformation). Exactly one is
           displayed at any width, so only one is in the accessibility tree and
           there is never a duplicate control. */}
-      <div className="sticky top-16 z-30 border-b border-border bg-background xl:hidden">
+      <div className="sticky top-16 z-30 border-b border-border bg-background shadow-chrome-b xl:hidden">
         <div className="container flex h-14 items-center gap-3">
           <p className="flex min-w-0 flex-1 items-baseline gap-1.5 text-sm">
             {/* The species leads the line because it is the first thing every

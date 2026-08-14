@@ -27,12 +27,19 @@ export default {
 		},
 			extend: {
 				fontFamily: {
-					/* "Noto Sans Arabic" carries ar; Inter has no Arabic glyphs, so
+					/* ONE family. Audit 1.2 withdrew Playfair Display (design system
+					   amendment 0.0-B): hierarchy comes from size, weight, spacing and
+					   layout, never from mixing families. The `display` key that used to
+					   sit below was already dead — index.html never requested the font,
+					   so `font-display` resolved to an arbitrary system serif — and it
+					   could not have been used honestly anyway, because Playfair has no
+					   Arabic face and Nidz ships in three languages.
+
+					   "Noto Sans Arabic" carries ar; Inter has no Arabic glyphs, so
 					   without it Arabic fell back to an arbitrary system face (§21).
 					   Latin text never reaches it — Inter resolves first. Loaded from
 					   the same Google Fonts request as Inter: no new dependency. */
-					sans: ["Inter", "Noto Sans Arabic", "ui-sans-serif", "system-ui", "sans-serif"],
-					display: ["Playfair Display", "serif"]
+					sans: ["Inter", "Noto Sans Arabic", "ui-sans-serif", "system-ui", "sans-serif"]
 				},
 				/* Design system §13.3 made real, so screens stop reaching for
 				   arbitrary bracket values. Inter needs negative tracking above
@@ -120,6 +127,22 @@ export default {
 				lg: 'calc(var(--radius) + 4px)',
 				md: 'var(--radius)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			/* Sticky chrome separation.
+
+			   On the cream ground a white sticky bar separated itself from the page.
+			   On white it does not, and a 1.30:1 hairline alone is a very thin claim
+			   for a plane that content scrolls UNDER. A sticky bar is the one thing in
+			   Nidz that is genuinely elevated, which is the only case §16 permits a
+			   shadow at all.
+
+			   Deliberately at the lightest possible weight and permanently on: no
+			   scroll listener, because a plane that is elevated only once you scroll
+			   is lying about its position the rest of the time. `-t` is the same
+			   shadow cast upward, for bars pinned to the bottom edge. */
+			boxShadow: {
+				'chrome-b': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+				'chrome-t': '0 -1px 2px 0 rgb(0 0 0 / 0.05)'
 			},
 			keyframes: {
 				'accordion-down': {

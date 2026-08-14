@@ -19,8 +19,11 @@ export default defineConfig(({ mode }) => ({
         name: 'Nidz',
         short_name: 'Nidz',
         description: 'Algeria pet care marketplace',
-        theme_color: '#FBFAF7',
-        background_color: '#FBFAF7',
+        /* Must track --background in src/index.css. These paint the installed
+           PWA's chrome and its launch screen, so a stale value here is a flash
+           of the old colour before the app renders. Audit 1.2: white. */
+        theme_color: '#FFFFFF',
+        background_color: '#FFFFFF',
         icons: [
           { src: '/favicon.ico', sizes: '64x64 32x32 16x16', type: 'image/x-icon' }
         ]

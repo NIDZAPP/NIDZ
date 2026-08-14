@@ -65,7 +65,7 @@ export default function OwnerRequests() {
                 <li key={request.id} className="border-b border-border first:border-t">
                   <Link
                     to={`/owner/requests/${request.id}`}
-                    className="flex items-start justify-between gap-4 py-4 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className="flex items-start justify-between gap-4 py-4 transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   >
                     <span className="min-w-0">
                       <span className="block text-name font-semibold text-foreground">

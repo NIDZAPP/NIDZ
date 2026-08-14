@@ -10,7 +10,6 @@ import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { criteriaFromNeed, criteriaToParams } from "@/data/criteria";
 import { CARE_TYPES, type CareType, type DateRange } from "@/data/types";
-import { useFlowBack } from "@/hooks/use-flow-back";
 import { toISODate, today } from "@/utils/dates";
 import { useDemo } from "@/state/demo/context";
 
@@ -28,7 +27,6 @@ const FORM_ID = "need-care";
 export default function NeedCare() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const goBack = useFlowBack("/owner/need/location");
   const { state, dispatch } = useDemo();
 
   const [careType, setCareType] = useState<CareType | null>(state.need.careType);
@@ -68,7 +66,7 @@ export default function NeedCare() {
         </title>
       </Helmet>
       <FlowScreen
-        onBack={goBack}
+        backTo="/owner/need/location"
         title={t("need.care.title")}
         action={
           <Button type="submit" form={FORM_ID} size="lg">

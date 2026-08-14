@@ -4,7 +4,8 @@ import { useTranslation } from "react-i18next";
 
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import { cn } from "@/lib/utils";
-import { useDemo } from "@/state/demo/context";
+import type { Workspace } from "@/data/workspace";
+import { isNavigable, workspaceDestinations, type NavContext } from "./workspace-nav";
 
 const navLinkCls = ({ isActive }: { isActive: boolean }) =>
   cn(
@@ -16,27 +17,47 @@ const navLinkCls = ({ isActive }: { isActive: boolean }) =>
 /**
  * Desktop chrome.
  *
- * Carries the same destinations as the mobile bottom bar, and only
- * destinations that exist: "Mes animaux" and "Tableau de bord" pointed at
- * stubs and are gone. Admin stays out of public navigation.
+ * Carries the same destinations as the mobile bar, from the same list, so
+ * crossing 768px cannot rename a place or offer a different set of them.
+ *
+ * Help and Policies left the header at Audit 1.2. They are not tasks — nobody
+ * opens Nidz to read a policy — and they were competing for width with the
+ * places people actually go. They stay in the footer, and Group 15 gives them a
+ * home in Settings (§84-86).
  *
  * The header CTA was a second, competing "find a sitter" beside a nav link to
  * the same place; the nav link is enough (§4.2).
  */
-export default function Header() {
+export default function Header({
+  workspace,
+  navContext,
+}: {
+  workspace: Workspace;
+  navContext: NavContext;
+}) {
   const { t } = useTranslation();
-  const { state } = useDemo();
+  const all = workspaceDestinations(workspace, navContext);
+
+  /* Home leaves the DESKTOP nav only. The wordmark to its immediate left is
+     already a link to `/` with the accessible name "Nidz — Home", so listing it
+     again put two controls to the same place side by side (§4.2). It stays in
+     the mobile bar, which has no wordmark to carry it.
+
+     `isNavigable` is applied to the same list the bar uses, before the filter,
+     so the header and the bar can never disagree about whether this workspace
+     has navigation at all. */
+  const destinations = isNavigable(all) ? all.filter((d) => d.to !== "/") : [];
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-background">
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-background shadow-chrome-b">
       <div className="container flex h-16 items-center justify-between gap-4">
         <div className="flex min-w-0 items-center gap-4">
-          {/* The same lockup the entry screens use: the terracotta mark plus
-              the name in Inter. Playfair was the one brand-expression role
-              here, but it has no Arabic face — so in Arabic the wordmark fell
-              back to an arbitrary system serif, and the header and the splash
-              rendered the brand in two different faces. The mark is what
-              carries the brand now, and it works in all three languages. */}
+          {/* The same lockup the entry screen uses: the terracotta mark plus
+              the name in Inter. Audit 1.2 withdrew Playfair entirely — it had
+              no Arabic face, so in Arabic the wordmark fell back to an
+              arbitrary system serif and the header and the splash rendered the
+              brand in two different faces. The mark carries the brand now, and
+              it works in all three languages. */}
           <Link
             to="/"
             aria-label={`${t("common.appName")} — ${t("nav.home")}`}
@@ -45,27 +66,22 @@ export default function Header() {
             <PawPrint className="size-5 text-brand" aria-hidden="true" />
             {t("common.appName")}
           </Link>
-          <nav aria-label={t("nav.siteLabel")} className="hidden items-center gap-1 md:flex">
-            <NavLink to="/search" className={navLinkCls} end>
-              {t("nav.search")}
-            </NavLink>
-            {/* Same keys as the bottom bar: crossing 768px must not rename a
-                destination, and page-title keys are not nav labels. No `end`,
-                so the link stays current on the request detail page. */}
-            <NavLink to="/owner/requests" className={navLinkCls}>
-              {t("nav.myRequests")}
-            </NavLink>
-            {/* Only once a profile is published — a destination that would be
-                empty for everyone else is not navigation. */}
-            {state.sitter?.published && (
-              <NavLink to="/sitter/requests" className={navLinkCls}>
-                {t("nav.received")}
-              </NavLink>
-            )}
-            <NavLink to="/help" className={navLinkCls} end>
-              {t("nav.help")}
-            </NavLink>
-          </nav>
+
+          {destinations.length > 0 && (
+            <nav
+              /* Named per workspace, matching the mobile bar: two identically
+                 named navigations are indistinguishable in a screen reader's
+                 landmark list. */
+              aria-label={t(workspace === "sitter" ? "nav.sitterLabel" : "nav.ownerLabel")}
+              className="hidden items-center gap-1 md:flex"
+            >
+              {destinations.map(({ to, labelKey, end }) => (
+                <NavLink key={to} to={to} className={navLinkCls} end={end}>
+                  {t(labelKey)}
+                </NavLink>
+              ))}
+            </nav>
+          )}
         </div>
         <LanguageSwitcher />
       </div>

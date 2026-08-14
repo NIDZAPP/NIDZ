@@ -74,7 +74,7 @@ export default function OptionGroup<T extends string>({
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               selected
                 ? "border-primary bg-accent"
-                : "border-input bg-card hover:bg-secondary",
+                : "border-input hover:bg-secondary",
             )}
           >
             {Icon && (

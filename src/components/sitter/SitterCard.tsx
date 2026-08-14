@@ -61,7 +61,7 @@ export default function SitterCard({
           "relative grid rounded-md px-3 py-6 transition-colors md:py-8",
           "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
           /* Gated so the wash does not stick after a tap. */
-          "[@media(hover:hover)]:hover:bg-muted",
+          "[@media(hover:hover)]:hover:bg-secondary",
           /* Mobile: identity beside the entry, price on a second row.
              Desktop: adds the price axis as a third column. */
           "grid-cols-[40px_minmax(0,1fr)] gap-x-3",
@@ -77,7 +77,7 @@ export default function SitterCard({
         ) : (
           <span
             aria-hidden="true"
-            className="flex size-10 items-center justify-center rounded-sm bg-secondary text-base font-semibold text-foreground md:size-12 md:text-name"
+            className="flex size-10 items-center justify-center rounded-sm bg-brand-soft text-base font-semibold text-brand md:size-12 md:text-name"
           >
             {sitter.publicName.charAt(0)}
           </span>

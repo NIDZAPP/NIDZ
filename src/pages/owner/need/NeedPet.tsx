@@ -10,7 +10,6 @@ import { FieldShell, PhotoField } from "@/components/shared/fields";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useFlowBack } from "@/hooks/use-flow-back";
 import { SPECIES, type Pet, type Species } from "@/data/types";
 import { useDemo } from "@/state/demo/context";
 
@@ -27,7 +26,6 @@ const FORM_ID = "need-pet";
 export default function NeedPet() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const goBack = useFlowBack("/start");
   const { state, dispatch } = useDemo();
 
   const existing = state.pets.find((p) => p.id === state.need.petId) ?? null;
@@ -76,7 +74,7 @@ export default function NeedPet() {
         </title>
       </Helmet>
       <FlowScreen
-        onBack={goBack}
+        backTo="/start"
         title={t("need.pet.title")}
         intro={t("need.pet.intro")}
         action={

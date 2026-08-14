@@ -9,6 +9,7 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import { DemoNotice } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { sitterNameFor } from "@/data/sitter-name";
+import BackButton from "@/components/shared/BackButton";
 import { useDemo } from "@/state/demo/context";
 
 /**
@@ -47,12 +48,25 @@ export default function SitterRequests() {
       </Helmet>
 
       <div className="mx-auto max-w-[720px]">
+        <BackButton variant="labelled" fallback="/" className="mb-6" />
         <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">{t("sitterRequests.title")}</h1>
 
         {/* §22 lists "mon profil de garde" as a real sitter destination, and
             unlike Messages or Disponibilités that screen exists. Without this
             a published sitter can only reach it by finding themselves in the
-            search results. */}
+            search results.
+
+            It points at the PUBLIC profile, not at `/sitter/preview`. The
+            preview is the last step of the builder: it carries an 8-of-8
+            progress bar and, once published, a primary action that leads back
+            to this very screen. Sending a finished sitter there shows them a
+            wizard they have already completed and a button that goes in a
+            circle. The public route is also the honest answer to "view my
+            profile" — it is what an owner sees.
+
+            The owner chrome that comes with `/sitters/*` is correct and not a
+            bug to route around: `workspaceForPath` files public profiles on the
+            owner side because that is whose screen it is. */}
         {state.sitter?.published && (
           <p className="mt-3 text-sm">
             <Link

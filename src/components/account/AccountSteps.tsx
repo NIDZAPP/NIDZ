@@ -26,13 +26,13 @@ const DIGITS = /^\d{9}$/;
 export function NameStep({
   title,
   intro,
-  onBack,
+  backTo,
   onDone,
   progress,
 }: {
   title: string;
   intro?: string;
-  onBack: () => void;
+  backTo: string;
   onDone: () => void;
   progress?: { current: number; total: number; label: string };
 }) {
@@ -78,7 +78,7 @@ export function NameStep({
         </title>
       </Helmet>
       <FlowScreen
-        onBack={onBack}
+        backTo={backTo}
         progress={progress}
         title={title}
         intro={intro}
@@ -139,12 +139,12 @@ export function NameStep({
 
 export function PhoneStep({
   intro,
-  onBack,
+  backTo,
   onDone,
   progress,
 }: {
   intro: string;
-  onBack: () => void;
+  backTo: string;
   onDone: () => void;
   progress?: { current: number; total: number; label: string };
 }) {
@@ -186,7 +186,7 @@ export function PhoneStep({
         </title>
       </Helmet>
       <FlowScreen
-        onBack={onBack}
+        backTo={backTo}
         progress={progress}
         title={t("request.phone.title")}
         intro={intro}
@@ -256,12 +256,12 @@ export function PhoneStep({
  * as one — there is no `verified` flag anywhere in the model (§6 B).
  */
 export function VerifyStep({
-  onBack,
+  backTo,
   onDone,
   onChangeNumber,
   progress,
 }: {
-  onBack: () => void;
+  backTo: string;
   onDone: () => void;
   onChangeNumber: () => void;
   progress?: { current: number; total: number; label: string };
@@ -295,7 +295,7 @@ export function VerifyStep({
         </title>
       </Helmet>
       <FlowScreen
-        onBack={onBack}
+        backTo={backTo}
         progress={progress}
         title={t("request.verify.title")}
         /* Wrapped in bidi isolates: two European-number runs separated by a

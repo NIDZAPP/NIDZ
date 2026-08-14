@@ -7,7 +7,6 @@ import FlowScreen from "@/components/shared/FlowScreen";
 import { LocationFields } from "@/components/shared/fields";
 import { getWilayaOfCommune } from "@/data/locations";
 import { Button } from "@/components/ui/button";
-import { useFlowBack } from "@/hooks/use-flow-back";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useDemo } from "@/state/demo/context";
 import { useRef, useState } from "react";
@@ -23,13 +22,12 @@ import { useRef, useState } from "react";
 export function SitterName() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const goBack = useFlowBack("/sitter/start");
 
   return (
     <NameStep
       title={t("request.name.title")}
       intro={t("sitterFlow.name.intro")}
-      onBack={goBack}
+      backTo="/sitter/start"
       onDone={() => navigate("/sitter/join/phone")}
     />
   );
@@ -38,7 +36,6 @@ export function SitterName() {
 export function SitterPhone() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const goBack = useFlowBack("/sitter/join/name");
   const { state } = useDemo();
 
   if (!state.account) return <Navigate to="/sitter/join/name" replace />;
@@ -46,7 +43,7 @@ export function SitterPhone() {
   return (
     <PhoneStep
       intro={t("sitterFlow.phone.intro")}
-      onBack={goBack}
+      backTo="/sitter/join/name"
       onDone={() => navigate("/sitter/join/verify")}
     />
   );
@@ -54,14 +51,13 @@ export function SitterPhone() {
 
 export function SitterVerify() {
   const navigate = useNavigate();
-  const goBack = useFlowBack("/sitter/join/phone");
   const { state } = useDemo();
 
   if (!state.account?.phoneNumber) return <Navigate to="/sitter/join/phone" replace />;
 
   return (
     <VerifyStep
-      onBack={goBack}
+      backTo="/sitter/join/phone"
       onChangeNumber={() => navigate("/sitter/join/phone")}
       onDone={() => navigate("/sitter/join/location")}
     />
@@ -82,7 +78,6 @@ export function SitterLocation() {
   const { t } = useTranslation();
   const locale = useAppLocale();
   const navigate = useNavigate();
-  const goBack = useFlowBack("/sitter/join/verify");
   const { state, dispatch } = useDemo();
 
   const profile = state.sitter?.profile;
@@ -124,7 +119,7 @@ export function SitterLocation() {
         </title>
       </Helmet>
       <FlowScreen
-        onBack={goBack}
+        backTo="/sitter/join/verify"
         title={t("sitterFlow.location.title")}
         intro={t("sitterFlow.location.intro")}
         action={

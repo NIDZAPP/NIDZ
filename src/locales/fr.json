@@ -11,7 +11,8 @@
     "addPhoto": "Ajouter une photo",
     "changePhoto": "Changer la photo",
     "photoLocalOnly": "La photo reste sur votre appareil : cette démonstration n'envoie et n'enregistre aucun fichier.",
-    "progress": "Progression"
+    "progress": "Progression",
+    "backToRequests": "Retour à mes demandes"
   },
   "nav": {
     "home": "Accueil",
@@ -20,8 +21,9 @@
     "policies": "Politiques",
     "myRequests": "Demandes",
     "received": "Reçues",
-    "siteLabel": "Navigation du site",
-    "footerLabel": "Liens de bas de page"
+    "footerLabel": "Liens de bas de page",
+    "ownerLabel": "Navigation propriétaire",
+    "sitterLabel": "Navigation pet-sitter"
   },
   "home": {
     "title": "Trouver une garde pour votre animal",
@@ -283,9 +285,8 @@
     }
   },
   "entry": {
-    "title": "Trouvez une personne de confiance pour prendre soin de votre animal.",
+    "title": "Faites garder votre animal, ou gardez celui des autres.",
     "intro": "Nidz met en relation les propriétaires de chiens et de chats avec des pet-sitters près de chez eux, en expliquant clairement ce que chaque personne propose et ce qu'elle ne peut pas accepter.",
-    "start": "Commencer",
     "browse": "Voir les pet-sitters",
     "resume": "Reprendre ma recherche",
     "findSitter": "Trouver un pet-sitter",
@@ -297,10 +298,17 @@
     "requestsPending_one": "{{count}} en attente de réponse",
     "requestsPending_other": "{{count}} en attente de réponse",
     "sitterPublished": "Votre profil est publié",
-    "sitterDraft": "Votre profil n'est pas encore publié"
+    "sitterDraft": "Votre profil n'est pas encore publié",
+    "ownerPrompt": "Quel animal avez-vous à faire garder ?",
+    "sitterCta": "Décrire ce que vous proposez",
+    "sitterPreview": {
+      "home": "Votre logement et votre espace extérieur",
+      "animals": "Les animaux que vous acceptez",
+      "limits": "Comment vous vous en occupez, et vos limites",
+      "rates": "Vos tarifs, service par service"
+    }
   },
   "intent": {
-    "title": "Que souhaitez-vous faire aujourd'hui ?",
     "owner": "Trouver quelqu'un pour mon animal",
     "ownerDescription": "Décrivez votre animal et vos dates, puis voyez qui peut s'en occuper.",
     "sitter": "Garder des animaux",

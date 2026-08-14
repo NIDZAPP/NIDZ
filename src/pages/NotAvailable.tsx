@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 import EmptyState from "@/components/shared/EmptyState";
+import BackButton from "@/components/shared/BackButton";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -28,6 +29,7 @@ export default function NotAvailable() {
         <meta name="robots" content="noindex" />
       </Helmet>
       <div className="mx-auto max-w-[720px]">
+        <BackButton variant="labelled" fallback="/" className="mb-6" />
         <EmptyState
           headingLevel="h1"
           title={t("notAvailable.title")}

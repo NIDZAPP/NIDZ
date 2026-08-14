@@ -31,7 +31,6 @@ import {
   type Species,
 } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
-import { useFlowBack } from "@/hooks/use-flow-back";
 import { useDemo } from "@/state/demo/context";
 import { formatDateRange } from "@/utils/dates";
 import { formatDZD } from "@/utils/format";
@@ -89,7 +88,6 @@ function BuilderStep({
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const goBack = useFlowBack(back);
   const { state } = useDemo();
   const formId = `builder-${step}`;
 
@@ -105,7 +103,7 @@ function BuilderStep({
         </title>
       </Helmet>
       <FlowScreen
-        onBack={goBack}
+        backTo={back}
         progress={{ current: step, total: TOTAL, label: t("sitterFlow.progress", { current: step, total: TOTAL }) }}
         title={title}
         intro={intro}
