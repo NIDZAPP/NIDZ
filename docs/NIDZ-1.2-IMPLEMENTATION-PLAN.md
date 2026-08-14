@@ -302,7 +302,7 @@ verify the active branch is `nidz-1.2`, commit, push.
 | 4 | Algerian geography | **Partial** — wilayas complete and verified; commune coverage is 10 of 69 wilayas, with the gap documented rather than filled by unverified data. See §6 |
 | 5 | Map + geolocation | **Deferred** — blocked on verifiable coordinate data, not on the map library. Evaluation and constraints recorded in `NIDZ-1.2-MAP-AND-LOCATION.md`. See §6 |
 | 6 | Auth gateway + fast owner account | **Completed** — see §6 |
-| 7 | Multi-pet system | — |
+| 7 | Multi-pet system | **Completed** — see §6 |
 | 8 | Owner home + marketplace search | — |
 | 9 | Public sitter profile + reviews + portfolio | — |
 | 10 | Strict sitter onboarding, part 1 | — |
@@ -762,6 +762,59 @@ fields set, `accountComplete: true` and `capabilities.owner: true`.
 the species enum left `species.bird`, `speciesPlural.bird` and `accepts.bird`
 untranslated, so the chip rendered the raw key `species.bird`. Fixed, along with
 the four strings that enumerated "dog or cat" in prose.
+
+---
+
+### Group 7 — the multi-pet system
+
+**Completed.** The core domain change of Audit 1.2 (§17–19).
+
+**A bird is not a dog with different copy.** `Pet` is a discriminated union over
+species, not one flat record with conditionally-hidden fields. That distinction
+is the whole point: a hidden field still holds a value, and a value nobody was
+asked for is a fabricated declaration waiting to be rendered. A budgerigar has
+no "walks per day" — not blank, not zero, not hidden. Verified in the browser:
+switching the species swaps size / walks / lead for kind / housing / handling /
+time-out-of-cage / noise, with no dog field anywhere.
+
+**Unknown is an answer.** Almost nothing here is a boolean. "Is your dog good
+with cats?" has three honest answers and one of them is "I don't know" — an
+owner who has never seen it cannot say "no", and a sitter reading "no" would
+decline for a reason that does not exist. `Declared` carries yes / no /
+unknown, and `unknown` is the default, so a skipped question stays skipped
+instead of quietly becoming a claim. Same rule as the sitter's `null` housing
+type (regression checklist B1).
+
+**Progressive (§19).** A name and a species make a usable pet; the need flow
+still asks only that. Everything species-specific lives on the animal's own
+screen. The list shows an answered-question count that is **administrative
+only** — §118's rule applies to animals too, so it is never quality, health or
+suitability, and the copy says it is there to help decide whether a sitter can
+judge the animal properly.
+
+**Care detail is private** (§83): feeding, medication, vet and emergency
+contact sit in their own record, so "what a sitter sees" and "what is only
+shared with someone actually caring for the animal" stay structurally
+separable rather than separated by discipline.
+
+**Storage v3, with no version branch for pets.** `restorePet` reads every shape
+Nidz has shipped and is applied on all paths. Verified against a seeded Audit
+1.1 record: a dog's `size: "large"` survives — the owner really did give that —
+and every question the old shape never asked comes back `unknown`. Nothing is
+inferred: a dog is not assumed good with cats because the field is missing.
+Validation is per pet rather than per array, so one corrupt animal costs that
+animal and not the list.
+
+**Deleting an animal** is confirmed, clears a `need.petId` pointing at it, and
+leaves already-sent requests untouched — a request keeps its own copy, so
+deleting an animal never rewrites what a sitter was asked to look after.
+
+**Two housekeeping fixes:** `SPECIES_ICON` was written out four times as
+`s === "dog" ? Dog : Cat`, which is exactly the shape that silently drops a
+species when a third is added — a ternary has no third branch and the compiler
+cannot see the gap. It is now one `Record<Species, …>` that fails to compile
+instead. And `tsc -b` writes `*.tsbuildinfo`, a local cache that had been
+committed in Group 6; it is now ignored and untracked.
 
 ---
 

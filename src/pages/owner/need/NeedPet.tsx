@@ -2,15 +2,16 @@ import { useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { Cat, Dog } from "lucide-react";
 
 import FlowScreen from "@/components/shared/FlowScreen";
 import OptionGroup from "@/components/shared/OptionGroup";
+import { SPECIES_ICON } from "@/components/shared/species";
 import { FieldShell, PhotoField } from "@/components/shared/fields";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { SPECIES, type Pet, type Species } from "@/data/types";
+import { SPECIES, type Species } from "@/data/types";
+import { emptyPet, withSpecies, type Pet } from "@/data/pets";
 import { useDemo } from "@/state/demo/context";
 
 const FORM_ID = "need-pet";
@@ -50,14 +51,17 @@ export default function NeedPet() {
     if (next.species) return speciesRef.current?.focus();
     if (next.name) return nameRef.current?.focus();
 
+    /* The BASIC profile (§19): a name and a species are enough to search with.
+       Everything species-specific — a dog's size and compatibility, a cat's
+       escape risk, a bird's housing — is asked on the pet's own screen, where
+       there is room to explain why it helps. Starting from the existing pet
+       when there is one, so re-running this step never quietly discards detail
+       the owner already gave. */
+    const base = existing ?? emptyPet(`pet-${Date.now().toString(36)}`, species as Species);
     const pet: Pet = {
-      id: existing?.id ?? `pet-${Date.now().toString(36)}`,
+      ...withSpecies(base, species as Species),
       name: name.trim(),
-      species: species as Species,
       age: age.trim(),
-      /* Size is collected on the sitter side, not here: an owner should not
-         have to classify their own dog to get results. */
-      size: existing?.size ?? null,
       notes: notes.trim(),
       photoUrl,
     };
@@ -111,7 +115,7 @@ export default function NeedPet() {
               options={SPECIES.map((s) => ({
                 value: s,
                 label: t(`species.${s}`),
-                icon: s === "dog" ? Dog : Cat,
+                icon: SPECIES_ICON[s],
               }))}
             />
             {errors.species && (

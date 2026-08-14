@@ -24,6 +24,7 @@ import {
   type SitterProfile,
   type Species,
 } from "@/data/types";
+import { restorePet } from "@/data/pets";
 import {
   NO_CAPABILITIES,
   isWorkspace,
@@ -31,11 +32,14 @@ import {
   type Workspace,
 } from "@/data/workspace";
 
-/** Bumped by Audit 1.2, which added account capabilities and an active
-    workspace. A version this code does not recognise is discarded rather than
-    read optimistically, so a returning visitor never crashes on a renamed
-    field. */
-const STORAGE_VERSION = 2;
+/** Bumped twice by Audit 1.2: v2 added account capabilities and an active
+    workspace, v3 turned the flat pet into a species discriminated union. A
+    version this code does not recognise is discarded rather than read
+    optimistically, so a returning visitor never crashes on a renamed field.
+
+    Pets are the exception that needs no version branch: `restorePet` reads
+    every shape Nidz has shipped, so it is applied on all paths. */
+const STORAGE_VERSION = 3;
 
 /** The version now lives INSIDE the record rather than in the key, so future
     versions migrate in place instead of orphaning the previous one. */
@@ -163,6 +167,7 @@ export type DemoAction =
   | { type: "setWorkspace"; workspace: Workspace }
   | { type: "setNeed"; patch: Partial<OwnerNeed> }
   | { type: "savePet"; pet: Pet }
+  | { type: "removePet"; id: string }
   | { type: "setAccount"; account: DemoAccount }
   | { type: "completeAccount" }
   | { type: "addRequest"; request: CareRequest }
@@ -195,6 +200,19 @@ export function reducer(state: DemoState, action: DemoAction): DemoState {
         pets: exists ? state.pets.map((p) => (p.id === action.pet.id ? action.pet : p)) : [...state.pets, action.pet],
       };
     }
+
+    case "removePet":
+      return {
+        ...state,
+        pets: state.pets.filter((p) => p.id !== action.id),
+        /* A brief pointing at a deleted animal is a brief about nothing. The
+           species stays — it is still what the owner was looking for — but the
+           reference is cleared rather than left dangling for `/search` and the
+           request summary to resolve to null. Requests already sent keep their
+           own COPY of the pet, so deleting an animal never rewrites what a
+           sitter was asked to look after. */
+        need: state.need.petId === action.id ? { ...state.need, petId: null } : state.need,
+      };
 
     case "setAccount":
       /* Creating the account is what grants the owner capability. It is a fact
@@ -362,7 +380,11 @@ function restore(parsed: Record<string, unknown>): DemoState {
     },
     activeWorkspace: isWorkspace(parsed.activeWorkspace) ? parsed.activeWorkspace : "owner",
     need: isObject(parsed.need) ? { ...EMPTY_NEED, ...(parsed.need as Partial<OwnerNeed>) } : EMPTY_NEED,
-    pets: (arrayOfObjects(parsed.pets) as Pet[] | null) ?? [],
+    /* Per-pet rather than per-array: one corrupt animal costs that animal, not
+       the whole list. `restorePet` also migrates the pre-1.2 flat shape. */
+    pets: Array.isArray(parsed.pets)
+      ? parsed.pets.map(restorePet).filter((pet): pet is Pet => pet !== null)
+      : [],
     requests: (arrayOfObjects(parsed.requests) as CareRequest[] | null) ?? [],
     sitter,
   };

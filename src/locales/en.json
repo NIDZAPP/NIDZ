@@ -24,7 +24,8 @@
     "footerLabel": "Footer links",
     "ownerLabel": "Owner navigation",
     "sitterLabel": "Sitter navigation",
-    "settings": "Settings"
+    "settings": "Settings",
+    "pets": "My pets"
   },
   "home": {
     "title": "Find care for your animal",
@@ -586,5 +587,93 @@
     "phoneHelp": "Private. Nidz never gives it to a sitter unless you decide to share it.",
     "cta": "Create my account",
     "storageNote": "Everything you type stays in this browser. Nothing is sent anywhere and nothing is verified."
+  },
+  "pets": {
+    "title": "My pets",
+    "intro": "Everything a sitter needs to judge whether they can take your animal. You can add as many as you have.",
+    "empty": {
+      "title": "No animals yet",
+      "body": "Describe an animal once and you can send it with any request, instead of retyping it each time."
+    },
+    "add": "Add an animal",
+    "addTitle": "Add an animal",
+    "addIntro": "A name and a species are enough to start. The rest can wait.",
+    "editTitle": "This animal",
+    "save": "Save",
+    "delete": "Delete",
+    "deleteConfirmTitle": "Delete {{name}}?",
+    "deleteConfirmBody": "This removes the animal from your list. Requests you have already sent keep their own copy, so nothing a sitter was asked about changes. This cannot be undone.",
+    "deleteCancel": "Cancel",
+    "deleteConfirm": "Delete",
+    "answered": "{{answered}} of {{total}} details filled",
+    "sections": {
+      "basics": "The basics",
+      "details": "About this animal",
+      "detailsHelp": "None of this is required. It helps a sitter judge honestly whether they can take your animal — a fuller profile is not a better animal, it is a clearer one.",
+      "care": "Care details",
+      "careHelp": "Private. Kept for the person actually looking after your animal, and never shown on a public page."
+    },
+    "sexLabel": "Sex",
+    "sex": {
+      "female": "Female",
+      "male": "Male",
+      "unknown": "Not sure"
+    },
+    "declared": {
+      "yes": "Yes",
+      "no": "No",
+      "unknown": "I don’t know"
+    },
+    "dog": {
+      "size": "Size",
+      "neutered": "Neutered or spayed?",
+      "goodWithDogs": "Comfortable around other dogs?",
+      "goodWithCats": "Comfortable around cats?",
+      "goodWithChildren": "Comfortable around children?",
+      "walksPerDay": "Walks a day",
+      "walksPerDayHelp": "How many your dog is used to. Leave empty if it varies.",
+      "leashNotes": "On the lead",
+      "leashNotesHelp": "Pulling, reactive to other dogs, fine off the lead — whatever a sitter should expect."
+    },
+    "cat": {
+      "living": "Indoors or outdoors?",
+      "livingOption": {
+        "indoor": "Indoors only",
+        "outdoor": "Goes outside",
+        "both": "Both"
+      },
+      "neutered": "Neutered or spayed?",
+      "goodWithCats": "Comfortable around other cats?",
+      "goodWithDogs": "Comfortable around dogs?",
+      "escapeRisk": "Likely to bolt through an open door?",
+      "litterNotes": "Litter routine",
+      "litterNotesHelp": "Where it is, how often it is changed, anything unusual."
+    },
+    "bird": {
+      "kind": "What kind of bird?",
+      "kindHelp": "For example: budgerigar, canary, cockatiel.",
+      "housing": "Lives in",
+      "housingOption": {
+        "cage": "A cage",
+        "aviary": "An aviary"
+      },
+      "handling": "Can be handled?",
+      "handlingOption": {
+        "handleable": "Yes, used to being handled",
+        "limited": "A little, with care",
+        "none": "No"
+      },
+      "escapeRisk": "Likely to escape if a door or window is open?",
+      "outOfCageNotes": "Time out of the cage",
+      "outOfCageNotesHelp": "How long, how often, and what has to be shut first.",
+      "socialNotes": "Noise and company",
+      "socialNotesHelp": "How vocal it is, and whether it needs company during the day."
+    },
+    "care": {
+      "feeding": "Feeding",
+      "medication": "Medication",
+      "vet": "Vet",
+      "emergency": "Emergency contact"
+    }
   }
 }

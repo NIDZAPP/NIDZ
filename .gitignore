@@ -30,3 +30,6 @@ dist-ssr
 .playwright/
 .playwright-cli/
 *.auth-state.json
+
+# tsc -b writes incremental build info; it is a local cache, not source.
+*.tsbuildinfo

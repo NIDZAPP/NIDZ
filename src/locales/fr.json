@@ -24,7 +24,8 @@
     "footerLabel": "Liens de bas de page",
     "ownerLabel": "Navigation propriétaire",
     "sitterLabel": "Navigation pet-sitter",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "pets": "Mes animaux"
   },
   "home": {
     "title": "Trouver une garde pour votre animal",
@@ -586,5 +587,93 @@
     "phoneHelp": "Privé. Nidz ne le communique jamais à un pet-sitter sans que vous le décidiez.",
     "cta": "Créer mon compte",
     "storageNote": "Tout ce que vous saisissez reste dans ce navigateur. Rien n’est envoyé nulle part et rien n’est vérifié."
+  },
+  "pets": {
+    "title": "Mes animaux",
+    "intro": "Tout ce dont un pet-sitter a besoin pour juger s’il peut accueillir votre animal. Vous pouvez en ajouter autant que vous en avez.",
+    "empty": {
+      "title": "Aucun animal pour l’instant",
+      "body": "Décrivez un animal une fois et vous pourrez l’joindre à n’importe quelle demande, au lieu de tout retaper."
+    },
+    "add": "Ajouter un animal",
+    "addTitle": "Ajouter un animal",
+    "addIntro": "Un nom et une espèce suffisent pour commencer. Le reste peut attendre.",
+    "editTitle": "Cet animal",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "deleteConfirmTitle": "Supprimer {{name}} ?",
+    "deleteConfirmBody": "L’animal est retiré de votre liste. Les demandes déjà envoyées gardent leur propre copie : rien de ce qu’un pet-sitter a vu ne change. C’est irréversible.",
+    "deleteCancel": "Annuler",
+    "deleteConfirm": "Supprimer",
+    "answered": "{{answered}} détails sur {{total}} renseignés",
+    "sections": {
+      "basics": "L’essentiel",
+      "details": "À propos de cet animal",
+      "detailsHelp": "Rien n’est obligatoire. Cela aide un pet-sitter à juger honnêtement s’il peut accueillir votre animal — un profil plus complet ne rend pas l’animal meilleur, il le rend plus clair.",
+      "care": "Détails de garde",
+      "careHelp": "Privé. Réservé à la personne qui s’occupe réellement de votre animal, jamais affiché sur une page publique."
+    },
+    "sexLabel": "Sexe",
+    "sex": {
+      "female": "Femelle",
+      "male": "Mâle",
+      "unknown": "Je ne sais pas"
+    },
+    "declared": {
+      "yes": "Oui",
+      "no": "Non",
+      "unknown": "Je ne sais pas"
+    },
+    "dog": {
+      "size": "Taille",
+      "neutered": "Stérilisé ou castré ?",
+      "goodWithDogs": "À l’aise avec les autres chiens ?",
+      "goodWithCats": "À l’aise avec les chats ?",
+      "goodWithChildren": "À l’aise avec les enfants ?",
+      "walksPerDay": "Promenades par jour",
+      "walksPerDayHelp": "Ce à quoi votre chien est habitué. Laissez vide si cela varie.",
+      "leashNotes": "En laisse",
+      "leashNotesHelp": "Tire, réagit aux autres chiens, très bien sans laisse — ce à quoi un pet-sitter doit s’attendre."
+    },
+    "cat": {
+      "living": "À l’intérieur ou dehors ?",
+      "livingOption": {
+        "indoor": "Uniquement à l’intérieur",
+        "outdoor": "Sort dehors",
+        "both": "Les deux"
+      },
+      "neutered": "Stérilisé ou castré ?",
+      "goodWithCats": "À l’aise avec les autres chats ?",
+      "goodWithDogs": "À l’aise avec les chiens ?",
+      "escapeRisk": "Risque de filer par une porte ouverte ?",
+      "litterNotes": "Litière",
+      "litterNotesHelp": "Où elle se trouve, à quelle fréquence elle est changée, tout ce qui sort de l’ordinaire."
+    },
+    "bird": {
+      "kind": "Quel oiseau ?",
+      "kindHelp": "Par exemple : perruche, canari, calopsitte.",
+      "housing": "Vit dans",
+      "housingOption": {
+        "cage": "Une cage",
+        "aviary": "Une volière"
+      },
+      "handling": "Peut-on le manipuler ?",
+      "handlingOption": {
+        "handleable": "Oui, il en a l’habitude",
+        "limited": "Un peu, avec précaution",
+        "none": "Non"
+      },
+      "escapeRisk": "Risque de s’échapper si une porte ou une fenêtre est ouverte ?",
+      "outOfCageNotes": "Temps hors de la cage",
+      "outOfCageNotesHelp": "Combien de temps, à quelle fréquence, et ce qu’il faut fermer avant.",
+      "socialNotes": "Bruit et compagnie",
+      "socialNotesHelp": "À quel point il est bruyant, et s’il a besoin de compagnie dans la journée."
+    },
+    "care": {
+      "feeding": "Alimentation",
+      "medication": "Traitements",
+      "vet": "Vétérinaire",
+      "emergency": "Contact d’urgence"
+    }
   }
 }

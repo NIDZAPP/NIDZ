@@ -10,6 +10,7 @@
    ------------------------------------------------------------------------ */
 
 import type { AppLocale } from "@/i18n";
+import type { Pet } from "./pets";
 
 /** Demo content that has to read naturally in all three product languages.
     Place names, sitter bios and declared conditions are DATA, not interface
@@ -80,19 +81,14 @@ export type DateRange = { start: string; end: string };
 
 /* ------------------------------------------------------------------ animal */
 
-export type Pet = {
-  id: string;
-  name: string;
-  species: Species;
-  /** Free text, because "8 mois" and "3 ans" are both real answers. */
-  age: string;
-  size: DogSize | null;
-  /** Needs and constraints the owner considers important. */
-  notes: string;
-  /** Object URL of a locally previewed image. Never uploaded: there is no
-      server. Not persisted — an object URL does not survive a reload. */
-  photoUrl?: string;
-};
+/* The animal model moved to `./pets` at Audit 1.2, where it became a
+   discriminated union over species — a bird has no walk routine and a dog has
+   no cage, and the union is what stops either from existing as a blank field.
+   Re-exported here so the domain still has one front door.
+
+   The import is type-only in both directions, so the cycle is erased at build
+   and exists only for the type checker, which resolves it. */
+export type { Pet } from "./pets";
 
 /* ------------------------------------------------------------------ sitter */
 

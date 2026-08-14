@@ -24,6 +24,8 @@ import NeedLocation from "@/pages/owner/need/NeedLocation";
 import NeedCare from "@/pages/owner/need/NeedCare";
 import Auth from "@/pages/Auth";
 import OwnerAccount from "@/pages/owner/OwnerAccount";
+import PetsList from "@/pages/owner/PetsList";
+import PetEdit from "@/pages/owner/PetEdit";
 import RequestReview from "@/pages/owner/request/RequestReview";
 import RequestSent from "@/pages/owner/request/RequestSent";
 import OwnerRequests from "@/pages/owner/OwnerRequests";
@@ -112,6 +114,11 @@ const App = () => {
                 away mid-decision. */}
             <Route path="/auth" element={<Auth />} />
             <Route path="/owner/account" element={<OwnerAccount />} />
+            {/* Adding or editing an animal is a form with one dominant action,
+                so it is a flow screen. The LIST is browsable and sits inside
+                the layout below. */}
+            <Route path="/owner/pets/new" element={<PetEdit />} />
+            <Route path="/owner/pets/:id" element={<PetEdit />} />
 
             {/* The request summary IS the request flow now. Audit 1.1 put a
                 name step, a phone step and a SIMULATED code step in front of
@@ -148,7 +155,10 @@ const App = () => {
                   to. Admin is here too: it was never gated, and an
                   admin-looking screen with no authentication behind it is
                   worse than an honest absence. */}
-              <Route path="/pets" element={<NotAvailable />} />
+              {/* Audit 1.2 made this real (§17). The old bare `/pets` address
+                  redirects rather than 404s. */}
+              <Route path="/owner/pets" element={<PetsList />} />
+              <Route path="/pets" element={<Navigate to="/owner/pets" replace />} />
               <Route path="/search" element={<Search />} />
               <Route path="/sitters/:id" element={<SitterProfile />} />
               {/* The legacy registration page promised a verification Nidz

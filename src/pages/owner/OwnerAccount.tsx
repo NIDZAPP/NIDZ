@@ -2,10 +2,9 @@ import { useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Bird, Cat, Dog } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 
 import { Chip } from "@/components/shared/Chip";
+import { SPECIES_ICON } from "@/components/shared/species";
 import FlowScreen from "@/components/shared/FlowScreen";
 import { FieldShell, LocationFields } from "@/components/shared/fields";
 import { DemoLine } from "@/components/shared/trust";
@@ -17,8 +16,6 @@ import { useDemo } from "@/state/demo/context";
 import { toISODate, today } from "@/utils/dates";
 
 const FORM_ID = "owner-account";
-
-const SPECIES_ICON: Record<Species, LucideIcon> = { dog: Dog, cat: Cat, bird: Bird };
 
 /** Algerian mobile numbers are 9 digits after the country code. */
 const DIGITS = /^\d{9}$/;

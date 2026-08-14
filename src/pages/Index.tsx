@@ -77,6 +77,24 @@ export default function Index() {
             person's own data, so it is the one thing that can be counted.
             Absent entirely when there is nothing to count. */}
         <div className="mt-10">
+        {/* My pets lives inside Home rather than in the tab bar (§84): four
+            primary destinations, and secondary entities reached from them.
+            Shown once there is an account, because that is when an animal can
+            be saved and reused rather than retyped per request. */}
+        {state.capabilities.owner && (
+          <Link to="/owner/pets" className={REGISTER_ROW}>
+            <span>
+              <span className="block font-medium text-foreground">{t("nav.pets")}</span>
+              <span className="mt-0.5 block text-sm text-muted-foreground">
+                {state.pets.length > 0
+                  ? state.pets.map((p) => p.name).filter(Boolean).join(" · ")
+                  : t("pets.empty.title")}
+              </span>
+            </span>
+            <ArrowRight className="size-5 shrink-0 text-muted-foreground rtl:-scale-x-100" aria-hidden="true" />
+          </Link>
+        )}
+
         {state.requests.length > 0 && (
           <Link
             to="/owner/requests"
