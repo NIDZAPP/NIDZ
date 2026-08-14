@@ -205,9 +205,33 @@ export type SearchResult = {
 };
 
 /**
- * Hard constraints only (§8.1). Nothing is ranked by reputation, distance or
- * responsiveness, because Nidz measures none of those — the order is the price
- * actually displayed, and the results screen says so.
+ * Hard constraints, then one tie-break (§8.1, §116).
+ *
+ * WHAT ORDERS THE RESULTS, AND WHAT DELIBERATELY DOES NOT.
+ *
+ * Filtering is hard compatibility only: species, service, area, budget, and a
+ * period the sitter has declared unavailable. Then the order is
+ *
+ *   1. sitters in the owner's OWN commune, when Nidz knows it and the search
+ *      was not already narrowed to one commune;
+ *   2. the price actually displayed, ascending.
+ *
+ * Proximity is expressed as a shared administrative area, never as a distance.
+ * Nidz has no coordinates for anything (see docs/NIDZ-1.2-MAP-AND-LOCATION.md),
+ * so "2.1 km away" would be a precision claim with nothing behind it, while
+ * "in your commune" is a fact.
+ *
+ * Nothing else ranks, and each omission is a decision:
+ *
+ *   - REPUTATION and RESPONSE TIME: Nidz measures neither. There is no data.
+ *   - PROFILE COMPLETENESS: it would rank a fuller profile above a better
+ *     match, and it would push every new sitter to the bottom permanently —
+ *     the fairness failure §120 names. Completeness is administrative (§118).
+ *   - EXPERIENCE YEARS: a soft preference the owner did not express. Sorting on
+ *     it silently answers a question nobody asked.
+ *   - WEIGHTED SCORES: §116 rules out inventing weights for sophistication's
+ *     sake. Two tiers, both statable in one sentence, is the whole ranking, and
+ *     the results screen states it.
  */
 /**
  * Identity of a reason, for deduplication.
@@ -301,7 +325,17 @@ export function partitionReasons(results: SearchResult[]): {
   return { universal, perResult };
 }
 
-export function matchSitters(sitters: SitterProfile[], c: SearchCriteria): SearchResult[] {
+export function matchSitters(
+  sitters: SitterProfile[],
+  c: SearchCriteria,
+  /** The owner's own commune, when they have told Nidz. Used only to break
+      ties — never to filter, because someone looking for care in a commune
+      they are travelling to is a normal case. */
+  homeCommune: string | null = null,
+): SearchResult[] {
+  /* A no-op when the search already names a commune: every result is in it. */
+  const nearBy = c.commune ? null : homeCommune;
+
   return sitters
     .flatMap<SearchResult>((sitter) => {
       const rate = rateFor(sitter, c.care ? [c.care] : []);
@@ -319,5 +353,24 @@ export function matchSitters(sitters: SitterProfile[], c: SearchCriteria): Searc
 
       return [{ sitter, rate, reasons: reasonsFor(sitter, c) }];
     })
-    .sort((a, b) => a.rate.amount - b.rate.amount);
+    .sort((a, b) => {
+      if (nearBy) {
+        const aNear = a.sitter.communeCode === nearBy ? 0 : 1;
+        const bNear = b.sitter.communeCode === nearBy ? 0 : 1;
+        if (aNear !== bNear) return aNear - bNear;
+      }
+      return a.rate.amount - b.rate.amount;
+    });
+}
+
+/** Whether the home-commune tie-break actually changed anything, so the
+    results screen can state the order truthfully instead of claiming a rule
+    that did not apply. */
+export function usedHomeCommune(
+  results: SearchResult[],
+  c: SearchCriteria,
+  homeCommune: string | null,
+): boolean {
+  if (!homeCommune || c.commune) return false;
+  return results.some((r) => r.sitter.communeCode === homeCommune);
 }

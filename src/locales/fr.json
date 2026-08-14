@@ -29,7 +29,13 @@
   },
   "home": {
     "title": "Trouver une garde pour votre animal",
-    "subtitle": "Décrivez votre animal et vos dates, puis regardez qui peut s'en occuper — ce que chaque personne propose, et ce qu'elle ne peut pas accepter."
+    "subtitle": "Décrivez votre animal et vos dates, puis regardez qui peut s'en occuper — ce que chaque personne propose, et ce qu'elle ne peut pas accepter.",
+    "greeting": "Bonjour {{name}}",
+    "nearby": {
+      "title": "Des pet-sitters à {{wilaya}}",
+      "titleSpecies": "Des pet-sitters à {{wilaya}} qui acceptent les {{species}}",
+      "seeAll": "Voir tout le monde"
+    }
   },
   "species": {
     "dog": "Chien",
@@ -260,7 +266,8 @@
       "emptyTitle": "Aucun pet-sitter ne correspond à ces critères",
       "emptyBody": "Essayez un autre type de garde, une autre commune, ou augmentez le prix maximum.",
       "titleAll": "Exemples de pet-sitters",
-      "allOfThem": "Tous les résultats ci-dessous :"
+      "allOfThem": "Tous les résultats ci-dessous :",
+      "nearYouFirst": "{{commune}} en premier"
     },
     "card": {
       "matchLabel": "Correspond à votre recherche : ",

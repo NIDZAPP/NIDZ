@@ -303,7 +303,7 @@ verify the active branch is `nidz-1.2`, commit, push.
 | 5 | Map + geolocation | **Deferred** — blocked on verifiable coordinate data, not on the map library. Evaluation and constraints recorded in `NIDZ-1.2-MAP-AND-LOCATION.md`. See §6 |
 | 6 | Auth gateway + fast owner account | **Completed** — see §6 |
 | 7 | Multi-pet system | **Completed** — see §6 |
-| 8 | Owner home + marketplace search | — |
+| 8 | Owner home + marketplace search | **Completed** — see §6 |
 | 9 | Public sitter profile + reviews + portfolio | — |
 | 10 | Strict sitter onboarding, part 1 | — |
 | 11 | Strict sitter onboarding, part 2 | — |
@@ -815,6 +815,60 @@ species when a third is added — a ternary has no third branch and the compiler
 cannot see the gap. It is now one `Record<Species, …>` that fails to compile
 instead. And `tsc -b` writes `*.tsbuildinfo`, a local cache that had been
 committed in Group 6; it is now ignored and untracked.
+
+---
+
+### Group 8 — owner home and marketplace search
+
+**Completed.**
+
+**Ranking is two tiers, and both are statable in one sentence** (§116). Hard
+compatibility filters first — species, service, area, budget, declared
+unavailability — then results order by:
+
+1. sitters in the owner's **own commune**, when Nidz knows it and the search was
+   not already narrowed to one commune;
+2. the price actually displayed, ascending.
+
+Proximity is a **shared administrative area, never a distance**: Nidz has no
+coordinates, so "2.1 km away" would be a precision claim with nothing behind it
+while "in your commune" is a fact. The results header states the order, and
+`usedHomeCommune` means it is only claimed when the tie-break actually changed
+something.
+
+**What deliberately does not rank**, each with a reason recorded in the code:
+reputation and response time (no data exists); **profile completeness** (it
+would rank a fuller profile above a better match and push every new sitter
+permanently to the bottom — the fairness failure §120 names, and completeness is
+administrative per §118); experience years (a soft preference the owner never
+expressed); and weighted scores of any kind.
+
+Verified in the browser: with an owner in Kouba, Sarah M. (Kouba, 800 DZD) ranks
+above Nadia L. (Chéraga, 700 DZD). Price alone would have inverted them, so the
+tier is doing real work rather than decorating the existing sort.
+
+**Owner Home is an editorial flow, not a dashboard** (§20, §127). Greeting,
+one dominant action, suggestions, then the person's own things. **Every section
+is absent entirely when there is nothing behind it** — an empty placeholder is
+how a home page starts inventing activity.
+
+The suggestions are the part most at risk of overclaiming, so the heading names
+**the filter that produced them** — "Sitters in Algiers who accept cats" — never
+a verdict about the animal. §21 forbids pretending to know pet compatibility and
+§117 forbids showing a claim any part of which is unsupported. The section does
+not appear at all until Nidz knows where the owner is, because "near you"
+without a location is not a claim it can make. Every reason on a card is
+re-derived from the sitter's own declarations rather than echoed back from the
+query.
+
+**One hierarchy fix:** `SitterCard`'s action is filled on the results register,
+where opening a profile is the point of the screen, but three filled buttons
+under Home's own filled CTA is four competing primaries (§4.2). The card gained
+an `actionVariant`, and Home passes `outline`.
+
+**Zero states hold.** A bird search finds nobody — no demo sitter accepts birds
+— and says so with a useful next step rather than fabricating a result. That is
+§33's honest zero state, produced by the data rather than special-cased.
 
 ---
 

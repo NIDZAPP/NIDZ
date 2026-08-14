@@ -29,7 +29,13 @@
   },
   "home": {
     "title": "Find care for your animal",
-    "subtitle": "Describe your animal and your dates, then see who can look after it — what each person offers, and what they cannot accept."
+    "subtitle": "Describe your animal and your dates, then see who can look after it — what each person offers, and what they cannot accept.",
+    "greeting": "Hello {{name}}",
+    "nearby": {
+      "title": "Sitters in {{wilaya}}",
+      "titleSpecies": "Sitters in {{wilaya}} who accept {{species}}",
+      "seeAll": "See all of them"
+    }
   },
   "species": {
     "dog": "Dog",
@@ -260,7 +266,8 @@
       "emptyTitle": "No sitter matches these criteria",
       "emptyBody": "Try another kind of care, another area, or raise the maximum price.",
       "titleAll": "Example sitters",
-      "allOfThem": "Every result below:"
+      "allOfThem": "Every result below:",
+      "nearYouFirst": "{{commune}} first"
     },
     "card": {
       "matchLabel": "Matches your search: ",

@@ -33,6 +33,7 @@ export default function SitterCard({
       and offer a real "back to results" link. */
   search,
   showSpeciesEyebrow = true,
+  actionVariant = "default",
 }: {
   sitter: SitterProfile;
   rate: NonNullable<ReturnType<typeof rateFor>>;
@@ -41,6 +42,11 @@ export default function SitterCard({
   askedCare: CareType | null;
   search: string;
   showSpeciesEyebrow?: boolean;
+  /** Filled on the results register, where opening a profile is the whole
+      point of the screen. Outline where the card is a SUGGESTION under a page
+      that already has its own dominant action — three filled buttons under a
+      filled CTA is four competing primaries (§4.2). */
+  actionVariant?: "default" | "outline";
 }) {
   const { t } = useTranslation();
   const lng = useAppLocale();
@@ -129,7 +135,7 @@ export default function SitterCard({
               whole row clickable while keeping exactly one tab stop. The name
               is in the accessible name via sr-only, so the visible label stays
               a prefix of it (WCAG 2.5.3). */}
-          <Button asChild className="md:mt-4">
+          <Button asChild variant={actionVariant} className="md:mt-4">
             <Link to={{ pathname: `/sitters/${sitter.id}`, search }} className="after:absolute after:inset-0">
               {t("search.card.viewProfile")}
               <span className="sr-only"> — {sitter.publicName}</span>

@@ -24,6 +24,7 @@ import {
   activeCriteriaCount,
   criteriaToParams,
   matchSitters,
+  usedHomeCommune,
   needPatchFromCriteria,
   normalizeCriteria,
   parseCriteria,
@@ -100,7 +101,19 @@ export default function Search() {
     () => (published ? [...DEMO_SITTERS, published] : DEMO_SITTERS),
     [published],
   );
-  const results = useMemo(() => matchSitters(pool, criteria), [pool, criteria]);
+  /* The owner's own commune breaks ties, so a wilaya-wide search puts the
+     people nearest them first. It never filters: someone arranging care in a
+     commune they are travelling to is a normal case. */
+  const homeCommune = state.account?.communeId ?? null;
+  const results = useMemo(
+    () => matchSitters(pool, criteria, homeCommune),
+    [pool, criteria, homeCommune],
+  );
+  /* Only claimed when it actually changed the order. */
+  const nearFirst = useMemo(
+    () => usedHomeCommune(results, criteria, homeCommune),
+    [results, criteria, homeCommune],
+  );
   /* Every criteria-derived reason is true of every survivor by construction,
      so repeating it on each row is three lines of noise per entry that
      discriminates nothing. Shared reasons are stated once, above. */
@@ -235,6 +248,8 @@ export default function Search() {
               {t("search.results.countLabel", { count: results.length })}
               {/* No ordering claim when there is nothing to order. */}
               {results.length > 0 && ` · ${t("search.results.sortedByPrice")}`}
+              {nearFirst &&
+                ` · ${t("search.results.nearYouFirst", { commune: zoneLabel(homeCommune!) })}`}
             </p>
 
             {/* What every result has in common, said once. Repeating it as
