@@ -119,7 +119,7 @@
       "title": "Demande de démonstration envoyée",
       "intro": "Dans un vrai Nidz, {{sitter}} pourrait maintenant consulter votre demande pour {{pet}}.",
       "demoTitle": "Rien n'a été envoyé",
-      "demoBody": "Cette demande existe uniquement dans ce navigateur. Aucun pet-sitter n'a été prévenu, aucune réservation n'a été créée et aucun paiement n'a eu lieu. Vous pouvez la retrouver dans « Mes demandes ».",
+      "demoBody": "Cette demande existe uniquement dans ce navigateur. Aucun pet-sitter n'a été prévenu, aucune réservation n'a été créée et aucun paiement n'a eu lieu. Vous pouvez la retrouver dans « Mes demandes ».",
       "viewRequest": "Voir ma demande",
       "home": "Retour à l'accueil"
     },
@@ -142,10 +142,9 @@
       "docLabel": "Votre pièce d'identité",
       "docHelp": "Facultatif dans cette démonstration.",
       "pending": "Document ajouté — aucune vérification n'a lieu dans cette démonstration",
-      "explain": "Ajouter un document ne rend pas une identité vérifiée. Tant qu'un contrôle réel n'a pas eu lieu, aucun profil n'affiche « identité vérifiée » — et Nidz n'a aujourd'hui aucun processus de vérification.",
+      "explain": "Ajouter un document ne rend pas une identité vérifiée. Tant qu'un contrôle réel n'a pas eu lieu, aucun profil n'affiche « identité vérifiée » — et Nidz n'a aujourd'hui aucun processus de vérification.",
       "demoNote": "Aucun fichier n'est envoyé : seul le nom du fichier est retenu dans ce navigateur."
     },
-    "progress": "Étape {{current}} sur {{total}}",
     "start": {
       "title": "Faites de votre passion pour les animaux une activité rémunérée.",
       "intro": "Créez votre profil, expliquez comment vous pouvez garder les animaux, et recevez des demandes qui correspondent vraiment à ce que vous pouvez accueillir.",
@@ -175,7 +174,7 @@
       "intro": "C'est ce qu'un propriétaire lit en premier pour se faire une idée de vous.",
       "photoLabel": "Votre photo (facultatif)",
       "headlineLabel": "En une phrase",
-      "headlineHelp": "Par exemple : « Je garde les chiens chez moi, dans une maison avec cour clôturée. »",
+      "headlineHelp": "Par exemple : « Je garde les chiens chez moi, dans une maison avec cour clôturée. »",
       "headlineRequired": "Écrivez une phrase qui décrit ce que vous proposez.",
       "aboutLabel": "Présentation",
       "aboutHelp": "Comment se passe une journée avec un animal chez vous ? C'est ce qui aide le plus un propriétaire à se projeter.",
@@ -218,7 +217,7 @@
       "title": "Ce que vous ne pouvez pas accepter",
       "intro": "C'est ce qui évite les demandes qui ne vous conviennent pas. Expliquez la raison : elle est aussi utile que la limite.",
       "addLabel": "Ajouter une limite",
-      "addHelp": "Par exemple : « Je ne peux pas accueillir de chat : mon chien ne les supporte pas. »",
+      "addHelp": "Par exemple : « Je ne peux pas accueillir de chat : mon chien ne les supporte pas. »",
       "add": "Ajouter"
     },
     "availability": {
@@ -239,7 +238,7 @@
     },
     "published": {
       "title": "Votre profil est publié",
-      "intro": "Il apparaît maintenant dans les résultats de recherche de cette démonstration, et les demandes qui vous sont adressées arrivent dans « Demandes reçues ».",
+      "intro": "Il apparaît maintenant dans les résultats de recherche de cette démonstration, et les demandes qui vous sont adressées arrivent dans « Demandes reçues ».",
       "demoTitle": "Publié, ici seulement",
       "demoBody": "Votre profil n'est pas en ligne : il existe dans ce navigateur. Aucun propriétaire réel ne peut le voir, aucune vérification n'a eu lieu, et Nidz ne promet ni demandes, ni revenus.",
       "requests": "Voir mes demandes",
@@ -252,7 +251,8 @@
       "edit": "Modifier",
       "editLabel": "Modifier ma recherche",
       "editLabelCount_one": "Modifier ma recherche · {{count}} critère actif",
-      "editLabelCount_other": "Modifier ma recherche · {{count}} critères actifs"
+      "editLabelCount_other": "Modifier ma recherche · {{count}} critères actifs",
+      "editLabelCount_many": "Modifier ma recherche · {{count}} critères actifs"
     },
     "filters": {
       "maxPrice": "Prix maximum",
@@ -324,7 +324,9 @@
       "animals": "Les animaux que vous acceptez",
       "limits": "Comment vous vous en occupez, et vos limites",
       "rates": "Vos tarifs, service par service"
-    }
+    },
+    "requestsCount_many": "{{count}} demandes",
+    "requestsPending_many": "{{count}} en attente de réponse"
   },
   "intent": {
     "owner": "Trouver quelqu'un pour mon animal",
@@ -426,7 +428,8 @@
       "outdoor": "Espace extérieur",
       "residentPets": "Animaux au domicile",
       "maxValue_one": "{{count}} animal à la fois",
-      "maxValue_other": "{{count}} animaux à la fois"
+      "maxValue_other": "{{count}} animaux à la fois",
+      "maxValue_many": "{{count}} animaux à la fois"
     },
     "residentPets": {
       "none": "Aucun animal déclaré",
@@ -435,7 +438,10 @@
       "cat_one": "{{count}} chat",
       "cat_other": "{{count}} chats",
       "bird_one": "{{count}} oiseau à la maison",
-      "bird_other": "{{count}} oiseaux à la maison"
+      "bird_other": "{{count}} oiseaux à la maison",
+      "dog_many": "{{count}} chiens",
+      "cat_many": "{{count}} chats",
+      "bird_many": "{{count}} oiseaux à la maison"
     },
     "cta": "Demander une garde",
     "backToResults": "Retour aux résultats",
@@ -448,7 +454,13 @@
     "experienceYears_other": "{{count}} ans d'expérience déclarée.",
     "selfTestTitle": "Tester le côté pet-sitter",
     "selfTestBody": "Cette démonstration n'a pas d'autres utilisateurs. Envoyez-vous une demande à vous-même pour voir ce qu'un pet-sitter reçoit, et pouvoir y répondre.",
-    "selfTestCta": "M'envoyer une demande de test"
+    "selfTestCta": "M'envoyer une demande de test",
+    "professionalYears_one": "{{count}} an",
+    "professionalYears_other": "{{count}} ans",
+    "professionalUnverified": "Déclaré par cette personne. Nidz ne vérifie aucun diplôme.",
+    "experienceLine_many": "{{count}} ans d'expérience déclarée, surtout avec : {{species}}.",
+    "experienceYears_many": "{{count}} ans d'expérience déclarée.",
+    "professionalYears_many": "{{count}} ans"
   },
   "ownerRequests": {
     "title": "Mes demandes",
@@ -467,7 +479,8 @@
     "count_other": "{{count}} demandes",
     "demoNote": "Ces demandes existent uniquement dans ce navigateur. Aucun pet-sitter n'a été prévenu.",
     "demoBody": "Cette demande existe uniquement dans ce navigateur. Aucun pet-sitter n'a été prévenu, aucune réservation n'a été créée et aucun paiement n'a eu lieu.",
-    "alreadySent": "Vous aviez déjà envoyé cette demande. La voici."
+    "alreadySent": "Vous aviez déjà envoyé cette demande. La voici.",
+    "count_many": "{{count}} demandes"
   },
   "sitterRequests": {
     "title": "Demandes reçues",
@@ -506,7 +519,7 @@
       },
       "verification": {
         "q": "Les pet-sitters sont-ils vérifiés ?",
-        "a": "Non, et aucun profil n'affiche « identité vérifiée ». Nidz n'a aujourd'hui aucun processus de vérification. Tout ce qui figure sur un profil est présenté comme déclaré par la personne elle-même. Il n'y a pas non plus d'avis, de notes ni de statistiques : rien ne les produit."
+        "a": "Non, et aucun profil n'affiche « identité vérifiée ». Nidz n'a aujourd'hui aucun processus de vérification. Tout ce qui figure sur un profil est présenté comme déclaré par la personne elle-même. Il n'y a pas non plus d'avis, de notes ni de statistiques : rien ne les produit."
       },
       "booking": {
         "q": "Une demande acceptée est-elle une réservation ?",
@@ -646,7 +659,7 @@
     "declared": {
       "yes": "Oui",
       "no": "Non",
-      "unknown": "Je ne sais pas"
+      "unknown": "Ne pas répondre"
     },
     "dog": {
       "size": "Taille",
@@ -715,7 +728,10 @@
     "showAll_other": "Afficher les {{count}} avis",
     "ratingLabel": "{{value}} sur 5",
     "distributionRow_one": "{{count}} avis à {{star}} étoiles",
-    "distributionRow_other": "{{count}} avis à {{star}} étoiles"
+    "distributionRow_other": "{{count}} avis à {{star}} étoiles",
+    "count_many": "{{count}} avis",
+    "showAll_many": "Afficher les {{count}} avis",
+    "distributionRow_many": "{{count}} avis à {{star}} étoiles"
   },
   "portfolio": {
     "title": "Moments de garde",
@@ -730,5 +746,113 @@
     },
     "noPhotos": "Les photos ne font pas partie de ce prototype. Photographier l’animal de quelqu’un demande son accord, et Nidz n’a pas encore de moyen de le demander.",
     "noPhotosDemo": "Ceci est un contenu d’exemple, et il n’a pas de photos : la photo d’un animal demande l’accord de son propriétaire, et en inventer une viderait de son sens une section censée servir de preuve."
+  },
+  "sitterSections": {
+    "title": "Votre profil de pet-sitter",
+    "intro": "Répondez dans l’ordre que vous voulez et revenez quand vous voulez : rien ne se perd entre deux visites.",
+    "answeredNote": "C’est un décompte de ce que vous avez rempli, pas une note. Un profil plus court mais honnête vaut mieux qu’un profil complet qui ne l’est pas.",
+    "required": "nécessaire pour publier",
+    "save": "Enregistrer",
+    "preview": "Voir ce que verraient les propriétaires",
+    "missingTitle": "Avant de pouvoir publier, il manque encore :",
+    "demoTitle": "Rien ici ne va en ligne",
+    "demoBody": "Ceci est une démonstration. Publier place votre profil dans les résultats de recherche de ce navigateur, et nulle part ailleurs. Aucun propriétaire hors de cet appareil ne peut le voir, et rien de ce que vous saisissez n’est vérifié.",
+    "about": {
+      "label": "À propos de vous",
+      "hint": "Une photo, une phrase sur ce que vous proposez, et depuis quand vous gardez des animaux."
+    },
+    "services": {
+      "label": "Services et tarifs",
+      "hint": "Ce que vous proposez, et le prix de chaque service."
+    },
+    "animals": {
+      "label": "Animaux que vous acceptez",
+      "hint": "Espèces, tailles, et combien à la fois."
+    },
+    "experience": {
+      "label": "Ce que vous avez déjà fait",
+      "hint": "Traitements, chiots, animaux âgés, plusieurs à la fois."
+    },
+    "professional": {
+      "label": "Parcours professionnel",
+      "hint": "Travail ou études liés aux animaux. Déclaré, jamais vérifié."
+    },
+    "housing": {
+      "label": "Votre logement",
+      "hint": "Appartement ou maison, espace extérieur, vos propres animaux."
+    },
+    "limits": {
+      "label": "Comment vous gardez, et ce que vous ne pouvez pas accepter",
+      "hint": "Votre organisation, et les animaux que vous devriez refuser."
+    },
+    "availability": {
+      "label": "Périodes où vous n’êtes pas disponible",
+      "hint": "Les dates que vous connaissez déjà. Ce n’est pas un calendrier de réservation."
+    },
+    "verification": {
+      "label": "Vérification",
+      "hint": "Ce que Nidz vérifierait un jour, et ce qu’il vérifie aujourd’hui."
+    },
+    "done": "Retour à votre profil",
+    "answered_one": "{{count}} section sur {{total}} renseignée.",
+    "answered_other": "{{count}} sections sur {{total}} renseignées.",
+    "answered_many": "{{count}} sections sur {{total}} renseignées."
+  },
+  "sitterExperience": {
+    "intro": "Des questions concrètes plutôt qu’un nombre d’années. Laissez vide ce dont vous n’êtes pas sûr : une question sans réponse n’apparaît nulle part sur votre profil, alors qu’un « non » que vous ne pensiez pas se lit comme une limite ferme.",
+    "demoNote": "Ces réponses n’engagent que vous. Rien n’est vérifié et rien n’est noté.",
+    "puppiesKittens": {
+      "label": "Avez-vous gardé des chiots ou des chatons ?",
+      "fact": "Chiots et chatons"
+    },
+    "seniors": {
+      "label": "Avez-vous gardé des animaux âgés ?",
+      "fact": "Animaux âgés"
+    },
+    "specialNeeds": {
+      "label": "Avez-vous gardé un animal à besoins particuliers ?",
+      "fact": "Besoins particuliers"
+    },
+    "oralMedication": {
+      "label": "Savez-vous donner un traitement par voie orale ?",
+      "fact": "Traitement par voie orale"
+    },
+    "multipleAnimals": {
+      "label": "Avez-vous gardé plusieurs animaux à la fois ?",
+      "fact": "Plusieurs animaux à la fois"
+    },
+    "reactiveAnimals": {
+      "label": "Avez-vous géré un animal réactif ou anxieux ?",
+      "fact": "Animaux réactifs ou anxieux"
+    },
+    "paidBefore": {
+      "label": "Avez-vous déjà été payé pour garder des animaux ?"
+    },
+    "volunteered": {
+      "label": "Avez-vous été bénévole auprès d’animaux ?"
+    }
+  },
+  "sitterProfessional": {
+    "intro": "Si vous travaillez ou étudiez dans un domaine lié aux animaux, dites-le ici. Nidz ne peut rien vérifier : cela reste une déclaration de votre part, ne donne aucun badge et ne change rien à votre place dans les résultats.",
+    "demoNote": "Déclarer une profession ne vérifie rien. Nidz n’a aucun moyen de confirmer un diplôme, et votre profil le dira clairement.",
+    "kindLabel": "Travaillez-vous ou étudiez-vous dans un domaine lié aux animaux ?",
+    "detailLabel": "Que faites-vous ?",
+    "detailHelp": "Votre rôle, où, et ce que cela implique. Les propriétaires le lisent : restez concret.",
+    "yearsLabel": "Années dans ce domaine",
+    "evidenceLabel": "Pourriez-vous montrer un document si Nidz le demandait un jour ?",
+    "evidenceHelp": "Répondre oui ne change rien aujourd’hui. Il n’existe aucun processus de vérification, et aucun document n’est demandé ni conservé."
+  },
+  "profession": {
+    "veterinarian": "Vétérinaire",
+    "vetStudent": "Étudiant·e vétérinaire",
+    "vetAssistant": "Assistant·e vétérinaire",
+    "trainer": "Éducateur·rice canin",
+    "groomer": "Toiletteur·euse",
+    "breeder": "Éleveur·euse",
+    "shelter": "Refuge ou association",
+    "animalCare": "Métier du soin animalier",
+    "animalHealth": "Santé animale ou agriculture",
+    "other": "Autre chose",
+    "none": "Non, aucun de ceux-ci"
   }
 }

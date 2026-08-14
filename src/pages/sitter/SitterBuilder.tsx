@@ -36,48 +36,43 @@ import { formatDateRange } from "@/utils/dates";
 import { formatDZD } from "@/utils/format";
 
 /* ---------------------------------------------------------------------------
-   The profile builder.
+   Profile SECTIONS.
 
-   Six steps, not the audit's nine sections. Photo and experience are one
-   question about the person; services and prices depend on each other; housing
-   and how the animals are kept describe one environment. §4.5 warns against
-   turning a task into ten artificial screens, and a builder that feels like an
-   administrative file is the single most reliable way to lose a sitter halfway
-   through (§10).
+   Audit 1.1 made these six steps of a wizard, each one blocking the next.
+   §51 replaced that with a dashboard: every section is reachable in any order,
+   saves on its own, and returns to the list. There is no progress bar and no
+   step number, because there is no fixed sequence left to number — the
+   dashboard shows what has been answered.
 
-   The progress indicator is a thin rule with no "Étape 4 sur 7" printed on it
-   (Audit p.363); the position is exposed to assistive technology instead.
+   Grouping is unchanged and still deliberate: photo and self-description are
+   one question about the person, services and prices depend on each other,
+   housing and how the animals are kept describe one environment. §4.5 warns
+   against splitting a task into ten artificial screens as loudly as it warns
+   against one endless form.
 
-   Everything collected here is a declaration. Nothing in this flow can produce
-   a verification, a rating, a review or a real availability calendar, and no
-   step pretends otherwise.
+   Everything collected here is a declaration. Nothing in these sections can
+   produce a verification, a rating, a review or a real availability calendar,
+   and none of them pretends otherwise.
    ------------------------------------------------------------------------ */
-
-/* Eight, counting the identity document and the preview — the denominator
-   must not change between two consecutive screens. */
-const TOTAL = 8;
 
 function toggle<T>(list: T[], value: T): T[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
 }
 
-/** The shell every builder step shares. */
+/** Where every section returns to. §51 replaced the wizard with a dashboard,
+    so there is no "next step" to chain to any more. */
+const DASHBOARD = "/sitter/profile";
+
 function BuilderStep({
-  step,
   title,
   intro,
-  back,
-  next,
   onSubmit,
   error,
   children,
   footNote,
 }: {
-  step: number;
   title: string;
   intro?: string;
-  back: string;
-  next: string;
   /** Returns false to stay on the step. Each step focuses its own offending
       control before returning — the action bar is pinned to the bottom, so an
       error rendered above the fold is invisible on a phone. */
@@ -89,7 +84,7 @@ function BuilderStep({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { state } = useDemo();
-  const formId = `builder-${step}`;
+  const formId = "builder-section";
 
   /* Entering mid-way, by deep link or a stale tab, means there is no profile
      to write into. */
@@ -103,13 +98,12 @@ function BuilderStep({
         </title>
       </Helmet>
       <FlowScreen
-        backTo={back}
-        progress={{ current: step, total: TOTAL, label: t("sitterFlow.progress", { current: step, total: TOTAL }) }}
+        backTo={DASHBOARD}
         title={title}
         intro={intro}
         action={
           <Button type="submit" form={formId} size="lg">
-            {t("common.continue")}
+            {t("sitterSections.save")}
           </Button>
         }
         footNote={footNote}
@@ -120,7 +114,7 @@ function BuilderStep({
           className="space-y-8"
           onSubmit={(e) => {
             e.preventDefault();
-            if (onSubmit()) navigate(next);
+            if (onSubmit()) navigate(DASHBOARD);
           }}
         >
           {children}
@@ -155,19 +149,13 @@ export function StepAbout() {
   const [about, setAbout] = useState(profile ? localized(profile.about, lng) : "");
   const [years, setYears] = useState(profile?.experience.years ? String(profile.experience.years) : "");
   const [species, setSpecies] = useState<Species[]>(profile?.experience.species ?? []);
-  const [professional, setProfessional] = useState(
-    profile?.experience.professional ? localized(profile.experience.professional, lng) : "",
-  );
   const [error, setError] = useState<string>();
   const headlineRef = useRef<HTMLInputElement>(null);
 
   return (
     <BuilderStep
-      step={1}
       title={t("sitterFlow.about.title")}
       intro={t("sitterFlow.about.intro")}
-      back="/sitter/join/location"
-      next="/sitter/profile/services"
       error={error}
       footNote={<DemoLine>{t("sitterFlow.about.demoNote")}</DemoLine>}
       onSubmit={() => {
@@ -182,10 +170,13 @@ export function StepAbout() {
              words, and Nidz does not translate what people write. */
           headline: asLocalized(headline.trim()),
           about: asLocalized(about.trim()),
+          /* Spread the existing record: this step owns only the years and the
+             species, and rebuilding the object from those two would silently
+             reset the eight capability answers the experience section collects. */
           experience: {
+            ...profile!.experience,
             years: Number(years) || 0,
             species,
-            professional: professional.trim() ? asLocalized(professional.trim()) : null,
           },
         });
         return true;
@@ -251,17 +242,11 @@ export function StepAbout() {
         </div>
       </fieldset>
 
-      <FieldShell label={t("sitterFlow.about.professionalLabel")} help={t("sitterFlow.about.professionalHelp")}>
-        {({ id, describedBy }) => (
-          <Textarea
-            id={id}
-            rows={3}
-            value={professional}
-            aria-describedby={describedBy}
-            onChange={(e) => setProfessional(e.target.value)}
-          />
-        )}
-      </FieldShell>
+      {/* The professional declaration moved to its own section at Audit 1.2.
+          It was a free-text box here, which made "veterinarian" one of forty
+          spellings and put a qualification claim in the middle of a paragraph
+          about oneself. §40 wants it structured, and §68 wants it visibly
+          separate from any verification. */}
     </BuilderStep>
   );
 }
@@ -285,11 +270,8 @@ export function StepServices() {
 
   return (
     <BuilderStep
-      step={2}
       title={t("sitterFlow.services.title")}
       intro={t("sitterFlow.services.intro")}
-      back="/sitter/profile/about"
-      next="/sitter/profile/animals"
       error={error}
       onSubmit={() => {
         if (services.length === 0) {
@@ -352,7 +334,6 @@ export function StepServices() {
                     type="number"
                     min={1}
                     max={100000}
-                    step={50}
                     inputMode="numeric"
                     className="max-w-[10rem] tabular-nums"
                     value={rates[service] ?? ""}
@@ -392,10 +373,7 @@ export function StepAnimals() {
 
   return (
     <BuilderStep
-      step={3}
       title={t("sitterFlow.animals.title")}
-      back="/sitter/profile/services"
-      next="/sitter/profile/housing"
       error={error}
       onSubmit={() => {
         if (accepted.length === 0) {
@@ -499,12 +477,9 @@ export function StepHousing() {
 
   return (
     <BuilderStep
-      step={4}
       error={error}
       title={t("sitterFlow.housing.title")}
       intro={t("sitterFlow.housing.intro")}
-      back="/sitter/profile/animals"
-      next="/sitter/profile/limits"
       onSubmit={() => {
         if (!type) {
           setError(t("sitterFlow.housing.typeRequired"));
@@ -522,6 +497,7 @@ export function StepHousing() {
         ];
         patch({
           housing: {
+            ...profile!.housing,
             type,
             outdoor,
             residentPets,
@@ -630,11 +606,8 @@ export function StepLimits() {
 
   return (
     <BuilderStep
-      step={5}
       title={t("sitterFlow.limits.title")}
       intro={t("sitterFlow.limits.intro")}
-      back="/sitter/profile/housing"
-      next="/sitter/profile/availability"
       onSubmit={() => {
         /* Anything typed but not yet added would otherwise be silently lost. */
         const all = draft.trim() ? [...items, draft.trim()] : items;
@@ -694,15 +667,20 @@ export function StepAvailability() {
 
   return (
     <BuilderStep
-      step={6}
       title={t("sitterFlow.availability.title")}
       intro={t("sitterFlow.availability.intro")}
-      back="/sitter/profile/limits"
-      next="/sitter/trust"
       footNote={<DemoLine>{t("sitterFlow.availability.demoNote")}</DemoLine>}
       onSubmit={() => {
         const all = draft ? [...ranges, draft] : ranges;
-        patch({ declaredUnavailable: all });
+        /* Declaring nothing is a complete answer here, and an empty array is
+           indistinguishable from an unopened section — so saving records that
+           the question was actually answered. */
+        patch({
+          declaredUnavailable: all,
+          confirmedSections: profile?.confirmedSections.includes("availability")
+            ? profile.confirmedSections
+            : [...(profile?.confirmedSections ?? []), "availability"],
+        });
         return true;
       }}
     >

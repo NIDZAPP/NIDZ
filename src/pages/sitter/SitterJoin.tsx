@@ -106,7 +106,7 @@ export function SitterLocation() {
         publicName: `${state.account!.firstName} ${state.account!.lastName.charAt(0).toUpperCase()}.`,
       },
     });
-    navigate("/sitter/profile/about");
+    navigate("/sitter/profile");
   };
 
   return (

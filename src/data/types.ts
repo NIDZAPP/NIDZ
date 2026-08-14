@@ -10,7 +10,7 @@
    ------------------------------------------------------------------------ */
 
 import type { AppLocale } from "@/i18n";
-import type { SharedPet } from "./pets";
+import type { Declared, SharedPet } from "./pets";
 
 /** Demo content that has to read naturally in all three product languages.
     Place names, sitter bios and declared conditions are DATA, not interface
@@ -88,7 +88,7 @@ export type DateRange = { start: string; end: string };
 
    The import is type-only in both directions, so the cycle is erased at build
    and exists only for the type checker, which resolves it. */
-export type { Pet, SharedPet } from "./pets";
+export type { Declared, Pet, SharedPet } from "./pets";
 
 /* ------------------------------------------------------------------ sitter */
 
@@ -104,16 +104,91 @@ export type SitterHousing = {
       owners, and the reason "aucun chat déclaré" is a useful compatibility
       fact rather than a badge. */
   residentPets: { species: Species; count: number }[];
+  /** Whether the sitter can keep a visiting animal apart from their own (§56).
+      The single most useful thing an owner of a nervous animal can know, and
+      the difference between "I have a dog" being a dealbreaker or not. */
+  canSeparateAnimals: Declared;
   conditions: Localized | null;
 };
 
+/**
+ * A profession, DECLARED (§40).
+ *
+ * The list is closed so that "veterinarian" means the same thing on every
+ * profile and can be filtered on, rather than being one of forty spellings in
+ * a free-text box.
+ *
+ * TYPING ONE OF THESE VERIFIES NOTHING. Declared profession and verified
+ * credential are two different facts and are never merged: there is no
+ * credential check in Nidz, so every profile that names a profession is
+ * exactly as unverified as one that does not.
+ */
+export type ProfessionKind =
+  | "veterinarian"
+  | "vetStudent"
+  | "vetAssistant"
+  | "trainer"
+  | "groomer"
+  | "breeder"
+  | "shelter"
+  | "animalCare"
+  | "animalHealth"
+  | "other";
+
+export const PROFESSION_KINDS: readonly ProfessionKind[] = [
+  "veterinarian",
+  "vetStudent",
+  "vetAssistant",
+  "trainer",
+  "groomer",
+  "breeder",
+  "shelter",
+  "animalCare",
+  "animalHealth",
+  "other",
+];
+
+export type ProfessionalBackground = {
+  /** `null` means not answered. "No professional background" is `"none"` —
+      a real answer, and a different fact from silence. */
+  kind: ProfessionKind | "none" | null;
+  /** Role, organisation, what they actually did. The sitter's own words. */
+  /** Free text, so `Localized` like every other free-text field on a
+      profile: a fixture is authored in all three languages, and what a real
+      sitter types goes into all three slots via `asLocalized`. */
+  detail: Localized;
+  /** Years in that field. Null until answered; zero is a real answer. */
+  years: number | null;
+  /** Whether the sitter says they could produce a document if asked.
+      A STATEMENT BY THEM, and the furthest Nidz gets — nothing checks it and
+      no badge follows from it (§68). */
+  canEvidence: Declared;
+};
+
+/**
+ * What the sitter says they have done (§54).
+ *
+ * Concrete questions rather than a number: "six years" says much less about
+ * whether someone can give a cat a tablet than "can you give oral medication"
+ * does. Every one is three-state, because a sitter who has never been asked to
+ * handle a reactive dog cannot honestly answer "no" — and a "no" they did not
+ * mean would filter them out of work they could do.
+ *
+ * Years alone is never a proxy for safety, and nothing ranks on it.
+ */
 export type SitterExperience = {
   /** Years of caring for animals, as declared. */
   years: number;
   /** Species the sitter says they have the most experience with. */
   species: Species[];
-  /** Professional animal experience, when the sitter declares any. */
-  professional: Localized | null;
+  puppiesKittens: Declared;
+  seniors: Declared;
+  specialNeeds: Declared;
+  oralMedication: Declared;
+  multipleAnimals: Declared;
+  reactiveAnimals: Declared;
+  paidBefore: Declared;
+  volunteered: Declared;
 };
 
 /**
@@ -133,6 +208,10 @@ export type SitterProfile = {
   headline: Localized;
   about: Localized;
   experience: SitterExperience;
+  /** DECLARED profession (§40). Kept out of `experience` on purpose: one is
+      what someone has done, the other is what they are qualified as, and
+      merging them is how a declaration starts reading as a credential. */
+  professional: ProfessionalBackground;
   services: CareType[];
   /** A rate exists only for a service the sitter actually offers. */
   rates: Partial<Record<CareType, number>>;
@@ -150,6 +229,15 @@ export type SitterProfile = {
       outside these ranges means "not declared unavailable", never "confirmed
       free". Every surface that reads this must say so. */
   declaredUnavailable: DateRange[];
+  /** Sections the sitter has opened and explicitly saved.
+   *
+   * Exists for the one section whose complete answer is empty: a sitter with
+   * no unavailable period to declare has answered "Periods you cannot take"
+   * fully, and their answer is an empty array — indistinguishable from never
+   * having opened it. Every other section is judged on the data it collects,
+   * which is stronger evidence than a click. Without this the dashboard put a
+   * check beside a question the sitter had never seen. */
+  confirmedSections: string[];
   /** The sitter's own photograph, as an object URL.
    *
    * Never uploaded — there is no server — and never persisted, because an

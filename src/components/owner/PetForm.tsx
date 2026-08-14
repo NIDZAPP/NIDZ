@@ -17,6 +17,10 @@ import {
 } from "@/data/pets";
 import { DOG_SIZES, SPECIES, type Species } from "@/data/types";
 
+/* Same three chips and the same rule as `DeclaredField`, which the sitter side
+   uses: `unknown` is what an untouched question already stores, so it draws no
+   selection, and the third chip is the way back out of a mis-tap rather than an
+   answer of its own. */
 const DECLARED: readonly Declared[] = ["yes", "no", "unknown"];
 const SEXES: readonly PetSex[] = ["female", "male", "unknown"];
 
@@ -97,7 +101,7 @@ export default function PetForm({
         <ChipGroup
           className="mt-2"
           labelledBy={id}
-          value={value}
+          value={value === "unknown" ? null : value}
           onChange={apply}
           options={DECLARED.map((option) => ({ value: option, label: t(`pets.declared.${option}`) }))}
         />

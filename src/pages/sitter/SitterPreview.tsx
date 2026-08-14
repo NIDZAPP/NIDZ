@@ -47,10 +47,11 @@ export default function SitterPreview() {
       </Helmet>
       <FlowScreen
         wide
-        backTo="/sitter/trust"
+        backTo="/sitter/profile"
         title={t("sitterFlow.preview.title")}
         intro={t("sitterFlow.preview.intro")}
-        progress={{ current: 8, total: 8, label: t("sitterFlow.progress", { current: 8, total: 8 }) }}
+        /* No progress bar. The preview is reached from the dashboard, not at
+           the end of a chain, so "8 of 8" would be inventing a sequence. */
         action={
           published ? (
             /* Already published, and every builder step writes straight into
@@ -77,7 +78,7 @@ export default function SitterPreview() {
            means something. */
         secondaryAction={
           <Button asChild variant="link" className="text-muted-foreground">
-            <Link to="/sitter/profile/about">{t("sitterFlow.preview.edit")}</Link>
+            <Link to="/sitter/profile">{t("sitterFlow.preview.edit")}</Link>
           </Button>
         }
       >

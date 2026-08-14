@@ -70,6 +70,20 @@ export default function SitterProfileView({
   /* Looked up by sitter id rather than passed in, so the preview and the
      public page cannot show different evidence for the same person — which is
      the whole reason this is one component. */
+  /* Only the capabilities answered "yes". A "no" is a limit and belongs in
+     the limits section; an "unknown" is silence and belongs nowhere. */
+  const experienceFacts = (
+    [
+      ["puppiesKittens", sitter.experience.puppiesKittens],
+      ["seniors", sitter.experience.seniors],
+      ["specialNeeds", sitter.experience.specialNeeds],
+      ["oralMedication", sitter.experience.oralMedication],
+      ["multipleAnimals", sitter.experience.multipleAnimals],
+      ["reactiveAnimals", sitter.experience.reactiveAnimals],
+    ] as const
+  )
+    .filter(([, value]) => value === "yes")
+    .map(([key]) => t(`sitterExperience.${key}.fact`));
   const reviews = reviewsFor(DEMO_REVIEWS, sitter.id);
   const portfolio = publicItemsFor(DEMO_PORTFOLIO, sitter.id);
 
@@ -231,10 +245,44 @@ export default function SitterProfileView({
               : t("profile.experienceYears", { count: sitter.experience.years })}
           </p>
         )}
-        {sitter.experience.professional && (
-          <p className="mt-2 max-w-[64ch] text-base leading-relaxed text-muted-foreground">
-            {localized(sitter.experience.professional, lng)}
-          </p>
+        {/* A DECLARED profession (§40). The label says who said it, and the
+            wording never upgrades on its own: naming a profession is not a
+            credential, and there is no check behind it in Nidz (§68). "None"
+            and "not answered" both render as nothing — an absence is not a
+            claim either way. */}
+        {sitter.professional.kind && sitter.professional.kind !== "none" && (
+          <div className="mt-3">
+            <p className="max-w-[64ch] text-base text-foreground">
+              {t(`profession.${sitter.professional.kind}`)}
+              {sitter.professional.years !== null && (
+                <span className="text-muted-foreground">
+                  {" · "}
+                  {t("profile.professionalYears", { count: sitter.professional.years })}
+                </span>
+              )}
+            </p>
+            {localized(sitter.professional.detail, lng) && (
+              <p className="mt-1 max-w-[64ch] text-base leading-relaxed text-muted-foreground">
+                {localized(sitter.professional.detail, lng)}
+              </p>
+            )}
+            <p className="mt-1 max-w-[64ch] text-sm text-muted-foreground">
+              {t("profile.professionalUnverified")}
+            </p>
+          </div>
+        )}
+
+        {/* The §54 answers the sitter actually gave. Unanswered ones are
+            omitted rather than listed as "I don't know": a short list of
+            capabilities is useful, nine rows of uncertainty are not. */}
+        {experienceFacts.length > 0 && (
+          <ul role="list" className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5">
+            {experienceFacts.map((fact) => (
+              <li key={fact} className="text-base text-foreground">
+                {fact}
+              </li>
+            ))}
+          </ul>
         )}
       </section>
 

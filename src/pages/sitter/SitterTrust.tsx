@@ -45,13 +45,18 @@ export default function SitterTrust() {
         </title>
       </Helmet>
       <FlowScreen
-        backTo="/sitter/profile/availability"
+        backTo="/sitter/profile"
         title={t("sitterFlow.trust.title")}
         intro={t("sitterFlow.trust.intro")}
-        progress={{ current: 7, total: 8, label: t("sitterFlow.progress", { current: 7, total: 8 }) }}
+        /* No progress bar: §51 replaced the wizard, so "step 7 of 8" would be
+           describing a sequence that no longer exists. */
         action={
-          <Button type="button" size="lg" onClick={() => navigate("/sitter/preview")}>
-            {t("common.continue")}
+          /* Returns to the dashboard rather than chaining to the preview. The
+             document is stored the moment it is chosen, so this closes the
+             section — it does not submit anything, so it does not say "save"
+             either. */
+          <Button type="button" variant="outline" size="lg" onClick={() => navigate("/sitter/profile")}>
+            {t("sitterSections.done")}
           </Button>
         }
         footNote={<DemoLine>{t("sitterFlow.trust.demoNote")}</DemoLine>}

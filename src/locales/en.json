@@ -145,7 +145,6 @@
       "explain": "Adding a document does not make an identity verified. Until a real check has happened, no profile shows “verified identity” — and Nidz has no verification process today.",
       "demoNote": "No file is uploaded: only the file name is kept, in this browser."
     },
-    "progress": "Step {{current}} of {{total}}",
     "start": {
       "title": "Turn your love of animals into paid work.",
       "intro": "Create your profile, explain how you can look after animals, and receive requests that actually match what you can take on.",
@@ -448,7 +447,10 @@
     "experienceYears_other": "{{count}} years of stated experience.",
     "selfTestTitle": "Try the sitter side",
     "selfTestBody": "This demonstration has no other users. Send yourself a request to see what a sitter receives, and answer it.",
-    "selfTestCta": "Send myself a test request"
+    "selfTestCta": "Send myself a test request",
+    "professionalYears_one": "{{count}} year",
+    "professionalYears_other": "{{count}} years",
+    "professionalUnverified": "Declared by this person. Nidz does not verify qualifications."
   },
   "ownerRequests": {
     "title": "My requests",
@@ -646,7 +648,7 @@
     "declared": {
       "yes": "Yes",
       "no": "No",
-      "unknown": "I don’t know"
+      "unknown": "Leave blank"
     },
     "dog": {
       "size": "Size",
@@ -730,5 +732,112 @@
     },
     "noPhotos": "Photographs are not part of this prototype. A photo of someone else's animal needs their permission, and Nidz has no way to ask for it yet.",
     "noPhotosDemo": "This is example content, and it has no photographs: a picture of an animal needs its owner's permission, and inventing one would defeat the point of a section meant to be evidence."
+  },
+  "sitterSections": {
+    "title": "Your sitter profile",
+    "intro": "Answer these in any order, and come back whenever you like — nothing is lost between visits.",
+    "answeredNote": "That is a count of what you have filled in, not a score. A shorter profile answered honestly is worth more than a full one that is not.",
+    "required": "needed to publish",
+    "save": "Save",
+    "preview": "See what owners would see",
+    "missingTitle": "Before you can publish, these still need an answer:",
+    "demoTitle": "Nothing here goes online",
+    "demoBody": "This is a demonstration. Publishing puts your profile into the search results in this browser and nowhere else. No owner outside this device can see it, and nothing you enter is checked by anyone.",
+    "about": {
+      "label": "About you",
+      "hint": "A photo, one line about what you offer, and how long you have looked after animals."
+    },
+    "services": {
+      "label": "Services and rates",
+      "hint": "What you offer, and what you charge for each."
+    },
+    "animals": {
+      "label": "Animals you accept",
+      "hint": "Species, sizes, and how many at once."
+    },
+    "experience": {
+      "label": "What you have done",
+      "hint": "Medication, puppies, older animals, several at once."
+    },
+    "professional": {
+      "label": "Professional background",
+      "hint": "Any animal-related work or study. Declared, never verified."
+    },
+    "housing": {
+      "label": "Your home",
+      "hint": "Flat or house, outdoor space, your own animals."
+    },
+    "limits": {
+      "label": "How you care, and what you cannot accept",
+      "hint": "Your routine, and the animals you would have to turn down."
+    },
+    "availability": {
+      "label": "Periods you cannot take",
+      "hint": "Dates you already know you are away. Not a booking calendar."
+    },
+    "verification": {
+      "label": "Verification",
+      "hint": "What Nidz would check one day, and what it checks now."
+    },
+    "done": "Back to your profile",
+    "answered_other": "{{count}} of {{total}} sections answered.",
+    "answered_one": "{{count}} of {{total}} sections answered."
+  },
+  "sitterExperience": {
+    "intro": "Concrete questions rather than a number of years. Leave anything blank that you are not sure about — a blank question shows nowhere on your profile, whereas a “no” you did not mean reads to an owner as a firm limit.",
+    "demoNote": "Answers here are yours alone. Nothing is checked and nothing is scored.",
+    "puppiesKittens": {
+      "label": "Have you looked after puppies or kittens?",
+      "fact": "Puppies and kittens"
+    },
+    "seniors": {
+      "label": "Have you looked after older animals?",
+      "fact": "Older animals"
+    },
+    "specialNeeds": {
+      "label": "Have you looked after an animal with special needs?",
+      "fact": "Special needs"
+    },
+    "oralMedication": {
+      "label": "Can you give medication by mouth?",
+      "fact": "Oral medication"
+    },
+    "multipleAnimals": {
+      "label": "Have you looked after several animals at once?",
+      "fact": "Several animals at once"
+    },
+    "reactiveAnimals": {
+      "label": "Have you handled a reactive or anxious animal?",
+      "fact": "Reactive or anxious animals"
+    },
+    "paidBefore": {
+      "label": "Have you been paid to look after animals before?"
+    },
+    "volunteered": {
+      "label": "Have you volunteered with animals?"
+    }
+  },
+  "sitterProfessional": {
+    "intro": "If you work or study in an animal-related field, say so here. Nidz cannot check any of it, so this stays a statement by you — it produces no badge and changes nothing about where you appear.",
+    "demoNote": "Naming a profession verifies nothing. Nidz has no way to confirm a qualification, and your profile will say that plainly.",
+    "kindLabel": "Do you work or study in an animal-related field?",
+    "detailLabel": "What do you do?",
+    "detailHelp": "Your role, where, and what it involves. Owners read this, so keep it concrete.",
+    "yearsLabel": "Years in that field",
+    "evidenceLabel": "Could you show a document if Nidz ever asked?",
+    "evidenceHelp": "Answering yes changes nothing today. There is no verification process, and no document is requested or stored."
+  },
+  "profession": {
+    "veterinarian": "Veterinarian",
+    "vetStudent": "Veterinary student",
+    "vetAssistant": "Veterinary assistant",
+    "trainer": "Dog trainer or behaviourist",
+    "groomer": "Groomer",
+    "breeder": "Breeder",
+    "shelter": "Shelter or rescue worker",
+    "animalCare": "Animal-care professional",
+    "animalHealth": "Animal health or agriculture",
+    "other": "Something else",
+    "none": "No, none of these"
   }
 }

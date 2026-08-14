@@ -946,6 +946,78 @@ the four `X | null` fields having no way back to "not answered"; `walksPerDay`
 accepting `NaN` and negatives; and eleven dead locale strings describing the
 retired OTP step, in three languages.
 
+### Group 10 — sitter onboarding, part 1
+
+**Completed.** The eleven-step wizard is gone; §50–51 asked for modular
+sections with save and resume, and this group replaced the flow rather than
+decorating it.
+
+**`/sitter/profile` is now a dashboard**, not step one. `src/data/sitter-sections.ts`
+declares the nine sections, each with its own `isAnswered` predicate and a
+`required` flag, and `SitterProfileHome` renders them as a list any of which
+can be opened in any order. `SitterBuilder`'s `BuilderStep` lost its `step` /
+`back` / `next` / progress-bar machinery and became a section shell that saves
+and returns to the dashboard; `SitterSections.tsx` carries the two new
+sections on the same shell. Every stale link into the old chain was
+re-pointed — `SitterJoin` now lands on the dashboard, and the "edit" links on
+both the preview and the public profile go there instead of to step one.
+
+**The count is administrative and the screen says so.** No progress bar, no
+badge, no congratulation: §51 asks for meaningful completion without gamifying
+it, and §118's line between administrative completeness and quality applies to
+a sitter exactly as it does to an animal. Verification is excluded from the
+denominator, because it can never be answered and would otherwise cap every
+sitter below 100% forever.
+
+**Experience is eight concrete questions** (§54) rather than a number of years:
+puppies, seniors, special needs, oral medication, several at once, reactive
+animals, paid before, volunteered. Years alone does not mark the section
+answered.
+
+**Professional background is a closed list** (§40, §55) — eleven kinds
+including "none" as a real answer — with conditional follow-ups and an explicit
+statement that nothing is checked. §68 wants declared profession, submitted
+document, pending verification and verified credential kept apart; Nidz has
+only the first, so choosing "Veterinarian" produces no badge, no ranking change
+and one line on the public profile saying it is unverified.
+
+#### Four defects found by exercising it in the browser
+
+1. **The tri-state control pre-selected an answer nobody gave.** Every
+   yes/no/unknown question opened with "I don't know" already filled in teal
+   with a check glyph — this system's own signal for *you chose this* — because
+   `unknown` is both the stored default and a chip value. It also contradicted
+   the dashboard, which counted the same section as unanswered. `unknown` now
+   draws no selection, and the third chip is relabelled as the action it
+   performs ("Leave blank"), which keeps the escape route out of a mis-tap that
+   `PetForm` already documented as necessary. Fixed on **both** sides of the
+   marketplace, since the owner's pet form shares the control.
+2. **The dashboard checked a section the sitter had never opened.** Declaring
+   no unavailable period is a complete answer, and an empty array is
+   indistinguishable from silence — so availability was hard-coded as always
+   answered. `SitterProfile.confirmedSections` records that a section was
+   actually saved, and availability keys on that.
+3. **English rendered a raw key.** `sitterSections.answered` had `_other` but
+   no `_one`, and i18next does not fall back — it prints the key. French had
+   the same class of gap in **fifteen** pre-existing families, all missing
+   `_many`. Both fixed, and `npm run check:locales` now exists so the class
+   cannot recur silently.
+4. **The professional detail was a bare string**, so the fixtures showed
+   English text on a French page. It is `Localized` like every other free-text
+   field, with a storage normaliser that promotes an old string rather than
+   discarding what a sitter had typed.
+
+**`npm run check:locales`** (`scripts/check-locales.mjs`) is the new gate:
+three-locale parity, plural completeness per locale's own `Intl.PluralRules`,
+and every literal `t()` key resolving. It found defects 3 and 4's siblings that
+`tsc` and ESLint structurally cannot see.
+
+**Known, deferred:** the `PetSex` chips and the four `UNSET` sentinel chips in
+`PetForm` pre-select "Not sure" on an untouched form — the same shape as defect
+1, but they round-trip correctly and sit in Group 7 surface. Recorded for Group
+16 rather than reworked mid-group.
+
+
 ---
 
 ### Standing constraint on scope

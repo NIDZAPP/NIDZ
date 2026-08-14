@@ -71,7 +71,10 @@ export function ChipGroup<T extends string>({
       announce the question twice. */
   label?: string;
   labelledBy?: string;
-  value: T;
+  /** `null` renders the group with NOTHING selected. Needed wherever the
+      absence of an answer is a real state: pre-selecting an option shows the
+      user a choice they never made. */
+  value: T | null;
   onChange: (value: T) => void;
   options: { value: T; label: string; icon?: LucideIcon }[];
   className?: string;
@@ -80,7 +83,7 @@ export function ChipGroup<T extends string>({
     <RadioGroupPrimitive.Root
       aria-label={labelledBy ? undefined : label}
       aria-labelledby={labelledBy}
-      value={value}
+      value={value ?? ""}
       onValueChange={(v) => onChange(v as T)}
       className={cn("flex flex-wrap gap-2", className)}
     >

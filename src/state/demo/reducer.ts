@@ -17,13 +17,16 @@
 
 import {
   EMPTY_NEED,
+  asLocalized,
   type CareRequest,
+  type Localized,
   type OwnerNeed,
   type Pet,
   type RequestStatus,
   type SitterProfile,
   type Species,
 } from "@/data/types";
+import type { AppLocale } from "@/i18n";
 import { restorePet } from "@/data/pets";
 import {
   NO_CAPABILITIES,
@@ -150,17 +153,45 @@ export function emptySitterProfile(id: string): SitterProfile {
     communeCode: "",
     headline: { fr: "", en: "", ar: "" },
     about: { fr: "", en: "", ar: "" },
-    experience: { years: 0, species: [], professional: null },
+    /* Every question unanswered. `unknown` is not a default answer — it is
+       the absence of one, and the profile renders it as absence (§54). */
+    experience: {
+      years: 0,
+      species: [],
+      puppiesKittens: "unknown",
+      seniors: "unknown",
+      specialNeeds: "unknown",
+      oralMedication: "unknown",
+      multipleAnimals: "unknown",
+      reactiveAnimals: "unknown",
+      paidBefore: "unknown",
+      volunteered: "unknown",
+    },
+    /* `kind: null` is "not asked yet". "No professional background" is the
+       separate, deliberate answer `"none"`. */
+    professional: {
+      kind: null,
+      detail: { fr: "", en: "", ar: "" },
+      years: null,
+      canEvidence: "unknown",
+    },
     services: [],
     rates: {},
     acceptedSpecies: [],
     acceptedDogSizes: [],
     maxAnimals: 1,
+    confirmedSections: [],
     /* Unanswered, not "apartment with no outdoor space". Seeding a value here
        pre-selected it in the builder — teal border and check glyph, this
        system's own signal for "you chose this" — and published it as a
        declaration on the profile. */
-    housing: { type: null, outdoor: null, residentPets: [], conditions: null },
+    housing: {
+      type: null,
+      outdoor: null,
+      residentPets: [],
+      canSeparateAnimals: "unknown",
+      conditions: null,
+    },
     careMethods: [],
     limits: [],
     declaredUnavailable: [],
@@ -341,6 +372,21 @@ function stripTransientFields(state: DemoState): DemoState {
     `.filter`/`.some` — `/search` puts a published profile straight into the
     match pool — so a container check is not enough. Anything missing a
     required array or string is discarded rather than crashing the results. */
+/**
+ * A `Localized` record out of storage, or the fallback.
+ *
+ * Storage is untrusted input (B2), and this field in particular changed shape
+ * mid-audit: a bare string is accepted and promoted rather than discarded, so
+ * a sitter who typed their background before the change keeps it.
+ */
+function normaliseLocalized(value: unknown, fallback: Localized): Localized {
+  if (typeof value === "string") return asLocalized(value);
+  if (typeof value !== "object" || value === null) return fallback;
+  const raw = value as Record<string, unknown>;
+  const pick = (key: AppLocale) => (typeof raw[key] === "string" ? (raw[key] as string) : "");
+  return { en: pick("en"), fr: pick("fr"), ar: pick("ar") };
+}
+
 function restoreSitter(value: unknown): SitterWorkspace | null {
   if (typeof value !== "object" || value === null) return null;
   const workspace = value as Record<string, unknown>;
@@ -353,8 +399,33 @@ function restoreSitter(value: unknown): SitterWorkspace | null {
   if (typeof profile.rates !== "object" || profile.rates === null) return null;
   if (typeof profile.housing !== "object" || profile.housing === null) return null;
 
+  /* Fields Audit 1.2 added. A profile saved before them has no `professional`
+     record and no capability answers, so a screen reading
+     `sitter.professional.kind` would crash on a returning sitter's own draft.
+     Filled with UNANSWERED values rather than plausible ones: this is a
+     migration, and a migration that invents a declaration is exactly what the
+     regression checklist forbids (B3). */
+  const empty = emptySitterProfile(profile.id);
+  const restored: SitterProfile = {
+    ...empty,
+    ...profile,
+    experience: { ...empty.experience, ...(profile.experience ?? {}) },
+    professional: {
+      ...empty.professional,
+      ...(profile.professional ?? {}),
+      /* `detail` was a plain string in the first 1.2 draft of this record. A
+         string reaching `localized()` returns undefined and renders "undefined"
+         on the sitter's own profile, so it is normalised rather than trusted. */
+      detail: normaliseLocalized(profile.professional?.detail, empty.professional.detail),
+    },
+    housing: { ...empty.housing, ...(profile.housing ?? {}) },
+    confirmedSections: Array.isArray(profile.confirmedSections)
+      ? profile.confirmedSections.filter((id): id is string => typeof id === "string")
+      : [],
+  };
+
   return {
-    profile: profile as SitterProfile,
+    profile: restored,
     published: workspace.published === true,
     idDocument:
       typeof workspace.idDocument === "object" && workspace.idDocument !== null

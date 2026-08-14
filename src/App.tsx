@@ -40,6 +40,8 @@ import {
   StepLimits,
   StepAvailability,
 } from "@/pages/sitter/SitterBuilder";
+import SitterProfileHome from "@/pages/sitter/SitterProfileHome";
+import { SectionExperience, SectionProfessional } from "@/pages/sitter/SitterSections";
 import SitterTrust from "@/pages/sitter/SitterTrust";
 import SitterPreview from "@/pages/sitter/SitterPreview";
 import SitterPublished from "@/pages/sitter/SitterPublished";
@@ -136,7 +138,12 @@ const App = () => {
             <Route path="/sitter/join/phone" element={<SitterPhone />} />
             <Route path="/sitter/join/verify" element={<SitterVerify />} />
             <Route path="/sitter/join/location" element={<SitterLocation />} />
+            {/* The dashboard (§51) replaced the wizard. Sections are reachable
+                in any order and each returns here. */}
+            <Route path="/sitter/profile" element={<SitterProfileHome />} />
             <Route path="/sitter/profile/about" element={<StepAbout />} />
+            <Route path="/sitter/profile/experience" element={<SectionExperience />} />
+            <Route path="/sitter/profile/professional" element={<SectionProfessional />} />
             <Route path="/sitter/profile/services" element={<StepServices />} />
             <Route path="/sitter/profile/animals" element={<StepAnimals />} />
             <Route path="/sitter/profile/housing" element={<StepHousing />} />

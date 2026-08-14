@@ -125,7 +125,7 @@ export default function SitterProfile() {
      rendered with it. */
   const cta = isOwnProfile ? (
     <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
-      <Link to="/sitter/profile/about">{t("sitterFlow.preview.edit")}</Link>
+      <Link to="/sitter/profile">{t("sitterFlow.preview.edit")}</Link>
     </Button>
   ) : (
     <Button asChild size="lg" className="w-full sm:w-auto">

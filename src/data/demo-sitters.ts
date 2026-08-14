@@ -28,7 +28,10 @@ import type { CareType, DateRange, SitterProfile } from "./types";
     a week that has already happened. */
 type DemoUnavailable = { fromDay: number; toDay: number };
 
-type DemoSitterSeed = Omit<SitterProfile, "declaredUnavailable" | "isDemoFixture"> & {
+type DemoSitterSeed = Omit<
+  SitterProfile,
+  "declaredUnavailable" | "isDemoFixture" | "confirmedSections"
+> & {
   unavailable: DemoUnavailable[];
 };
 
@@ -55,7 +58,20 @@ const SEEDS: DemoSitterSeed[] = [
     experience: {
       years: 6,
       species: ["dog"],
-      professional: null,
+      puppiesKittens: "unknown",
+      seniors: "yes",
+      specialNeeds: "no",
+      oralMedication: "yes",
+      multipleAnimals: "yes",
+      reactiveAnimals: "no",
+      paidBefore: "yes",
+      volunteered: "unknown",
+    },
+    professional: {
+      kind: "none",
+      detail: { fr: "", en: "", ar: "" },
+      years: null,
+      canEvidence: "unknown",
     },
     services: ["boarding", "walk"],
     rates: { boarding: 1200, walk: 600 },
@@ -66,6 +82,7 @@ const SEEDS: DemoSitterSeed[] = [
       type: "house",
       outdoor: "yard",
       residentPets: [{ species: "dog", count: 1 }],
+      canSeparateAnimals: "no",
       conditions: {
         fr: "La cour est clôturée sur tout son périmètre. Je vis au rez-de-chaussée, sans escalier à monter.",
         en: "The yard is fenced all the way round. I live on the ground floor, with no stairs to climb.",
@@ -104,7 +121,20 @@ const SEEDS: DemoSitterSeed[] = [
     experience: {
       years: 3,
       species: ["dog"],
-      professional: null,
+      puppiesKittens: "unknown",
+      seniors: "unknown",
+      specialNeeds: "no",
+      oralMedication: "unknown",
+      multipleAnimals: "no",
+      reactiveAnimals: "no",
+      paidBefore: "yes",
+      volunteered: "no",
+    },
+    professional: {
+      kind: "none",
+      detail: { fr: "", en: "", ar: "" },
+      years: null,
+      canEvidence: "unknown",
     },
     services: ["boarding", "walk"],
     rates: { boarding: 900, walk: 500 },
@@ -115,6 +145,7 @@ const SEEDS: DemoSitterSeed[] = [
       type: "apartment",
       outdoor: "balcony",
       residentPets: [],
+      canSeparateAnimals: "unknown",
       conditions: {
         fr: "Appartement au 3e étage avec ascenseur. Pas d'autre animal chez moi.",
         en: "Third-floor flat with a lift. No other animal at home.",
@@ -148,11 +179,26 @@ const SEEDS: DemoSitterSeed[] = [
     experience: {
       years: 4,
       species: ["cat"],
-      professional: {
-        fr: "J'ai été bénévole deux ans dans une association de protection des chats.",
-        en: "I volunteered for two years with a cat rescue association.",
-        ar: "تطوّعت لمدة سنتين في جمعية لحماية القطط.",
+      puppiesKittens: "yes",
+      seniors: "yes",
+      specialNeeds: "yes",
+      oralMedication: "yes",
+      multipleAnimals: "yes",
+      reactiveAnimals: "unknown",
+      paidBefore: "yes",
+      volunteered: "yes",
+    },
+    professional: {
+      kind: "shelter",
+      detail: {
+        en: "Two years volunteering with a cat rescue association: feeding rounds, medication and socialising new arrivals.",
+        fr: "Deux ans de bénévolat dans une association de sauvetage de chats : distribution des repas, traitements et socialisation des nouveaux arrivants.",
+        ar: "سنتان من التطوّع في جمعية لإنقاذ القطط: توزيع الوجبات، إعطاء الأدوية، وتأنيس الوافدين الجدد.",
       },
+      years: 2,
+      /* She says she could show something. Nothing checks it, and no badge
+         follows from it (§68). */
+      canEvidence: "yes",
     },
     services: ["atOwner"],
     rates: { atOwner: 800 },
@@ -163,6 +209,7 @@ const SEEDS: DemoSitterSeed[] = [
       type: "apartment",
       outdoor: "none",
       residentPets: [{ species: "cat", count: 2 }],
+      canSeparateAnimals: "no",
       conditions: null,
     },
     careMethods: ["ownerRoutine"],
@@ -192,7 +239,20 @@ const SEEDS: DemoSitterSeed[] = [
     experience: {
       years: 2,
       species: ["cat", "dog"],
-      professional: null,
+      puppiesKittens: "no",
+      seniors: "yes",
+      specialNeeds: "unknown",
+      oralMedication: "unknown",
+      multipleAnimals: "no",
+      reactiveAnimals: "no",
+      paidBefore: "unknown",
+      volunteered: "no",
+    },
+    professional: {
+      kind: "none",
+      detail: { fr: "", en: "", ar: "" },
+      years: null,
+      canEvidence: "unknown",
     },
     services: ["boarding"],
     rates: { boarding: 800 },
@@ -203,6 +263,7 @@ const SEEDS: DemoSitterSeed[] = [
       type: "apartment",
       outdoor: "balcony",
       residentPets: [],
+      canSeparateAnimals: "unknown",
       conditions: {
         fr: "Balcon fermé et sécurisé. Immeuble calme, 2e étage sans ascenseur.",
         en: "Enclosed, secured balcony. Quiet building, second floor with no lift.",
@@ -241,7 +302,20 @@ const SEEDS: DemoSitterSeed[] = [
     experience: {
       years: 10,
       species: ["cat", "dog"],
-      professional: null,
+      puppiesKittens: "yes",
+      seniors: "yes",
+      specialNeeds: "yes",
+      oralMedication: "yes",
+      multipleAnimals: "yes",
+      reactiveAnimals: "unknown",
+      paidBefore: "yes",
+      volunteered: "yes",
+    },
+    professional: {
+      kind: "none",
+      detail: { fr: "", en: "", ar: "" },
+      years: null,
+      canEvidence: "unknown",
     },
     services: ["boarding", "atOwner", "walk"],
     rates: { boarding: 1500, atOwner: 900, walk: 700 },
@@ -255,6 +329,7 @@ const SEEDS: DemoSitterSeed[] = [
         { species: "cat", count: 1 },
         { species: "dog", count: 1 },
       ],
+      canSeparateAnimals: "yes",
       conditions: {
         fr: "Jardin entièrement clôturé. Deux enfants vivent à la maison.",
         en: "Fully fenced garden. Two children live at the house.",
@@ -292,7 +367,24 @@ const SEEDS: DemoSitterSeed[] = [
     experience: {
       years: 2,
       species: ["cat", "dog"],
-      professional: null,
+      puppiesKittens: "unknown",
+      seniors: "unknown",
+      specialNeeds: "no",
+      oralMedication: "no",
+      multipleAnimals: "yes",
+      reactiveAnimals: "no",
+      paidBefore: "no",
+      volunteered: "unknown",
+    },
+    professional: {
+      kind: "vetStudent",
+      detail: {
+        en: "Second-year veterinary student. Not a qualification, and nothing here is checked.",
+        fr: "Étudiante en deuxième année de médecine vétérinaire. Ce n’est pas un diplôme, et rien ici n’est vérifié.",
+        ar: "طالبة في السنة الثانية من الطب البيطري. هذه ليست شهادة، ولا يُتحقق من أي شيء هنا.",
+      },
+      years: 2,
+      canEvidence: "no",
     },
     services: ["atOwner", "walk"],
     rates: { atOwner: 700, walk: 500 },
@@ -303,6 +395,7 @@ const SEEDS: DemoSitterSeed[] = [
       type: "apartment",
       outdoor: "none",
       residentPets: [],
+      canSeparateAnimals: "unknown",
       conditions: null,
     },
     careMethods: ["ownerRoutine"],
@@ -324,6 +417,10 @@ const SEEDS: DemoSitterSeed[] = [
 export const DEMO_SITTERS: SitterProfile[] = SEEDS.map(({ unavailable, ...seed }) => ({
   ...seed,
   declaredUnavailable: unavailable.map((u) => range(u.fromDay, u.toDay)),
+  /* Nobody sat in the dashboard and confirmed a section on a fixture, so it
+     claims none. Fixtures are never shown in the dashboard anyway; the empty
+     array is what is true rather than what is convenient. */
+  confirmedSections: [],
   isDemoFixture: true,
 }));
 
