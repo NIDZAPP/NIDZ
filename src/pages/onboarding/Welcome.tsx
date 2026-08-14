@@ -9,13 +9,12 @@ import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
 import { SPECIES, type Species } from "@/data/types";
 import { useDemo } from "@/state/demo/context";
+import { SPLASH_KEY } from "@/state/splash";
 
 /* The splash is a state of this screen, not a route of its own: a route would
    be a back-button trap, a thing a deep link could land on, and a flash of
-   empty page. `sessionStorage` rather than the demo store, because "has seen
-   the wordmark" is a per-tab question — `entered` means "has been through the
-   introduction", which outlives the tab. */
-export const SPLASH_KEY = "nidz.splash.seen";
+   empty page. The key it remembers itself by lives in `src/state/splash.ts` —
+   see the note there. */
 
 function shouldSplash(): boolean {
   if (typeof window === "undefined") return false;
@@ -169,7 +168,7 @@ export default function Welcome() {
           can land an Algerian visitor in English (§34). */}
       <div className="bg-brand-soft">
         <div className="container flex h-14 items-center justify-end">
-          <LanguageSwitcher compact />
+          <LanguageSwitcher />
         </div>
       </div>
 

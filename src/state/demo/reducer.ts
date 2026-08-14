@@ -23,11 +23,25 @@ import {
   type RequestStatus,
   type SitterProfile,
 } from "@/data/types";
+import {
+  NO_CAPABILITIES,
+  isWorkspace,
+  type AccountCapabilities,
+  type Workspace,
+} from "@/data/workspace";
 
-/** Bumping this discards incompatible state saved by an older build rather
-    than crashing a returning visitor on a renamed field. */
-const STORAGE_VERSION = 1;
-const STORAGE_KEY = "nidz.demo.v1";
+/** Bumped by Audit 1.2, which added account capabilities and an active
+    workspace. A version this code does not recognise is discarded rather than
+    read optimistically, so a returning visitor never crashes on a renamed
+    field. */
+const STORAGE_VERSION = 2;
+
+/** The version now lives INSIDE the record rather than in the key, so future
+    versions migrate in place instead of orphaning the previous one. */
+const STORAGE_KEY = "nidz.demo";
+
+/** Audit 1.1's key. Read once, migrated, then removed — see `loadState`. */
+const LEGACY_STORAGE_KEY = "nidz.demo.v1";
 
 /** A local, unverified identity. `phoneConfirmed` records that the person
     completed the SIMULATED code step — it is not phone verification, and no
@@ -55,6 +69,23 @@ export type DemoState = {
   /** The intro has been seen — a returning visitor is not shown it again. */
   entered: boolean;
   account: DemoAccount | null;
+  /**
+   * What this account is ABLE to do. Both may be true; that is the point.
+   *
+   * `owner` is granted when the quick owner account is created. `sitter` is
+   * granted when a sitter profile exists at all — starting the builder opens
+   * the workspace, even before anything is published. Whether a sitter
+   * DESTINATION is worth navigating to is a different and narrower question,
+   * answered by `sitter.published` in `workspace-nav.ts`.
+   */
+  capabilities: AccountCapabilities;
+  /**
+   * Which side the visitor is currently looking at.
+   *
+   * Separate from `capabilities` on purpose: this is a view, not an identity,
+   * and switching it must never discard the other side's data.
+   */
+  activeWorkspace: Workspace;
   need: OwnerNeed;
   pets: Pet[];
   requests: CareRequest[];
@@ -65,6 +96,10 @@ export const INITIAL_STATE: DemoState = {
   version: STORAGE_VERSION,
   entered: false,
   account: null,
+  capabilities: NO_CAPABILITIES,
+  /* Owner is the honest default: it is the only side a visitor can use without
+     having built anything. */
+  activeWorkspace: "owner",
   need: EMPTY_NEED,
   pets: [],
   requests: [],
@@ -100,6 +135,7 @@ export function emptySitterProfile(id: string): SitterProfile {
 
 export type DemoAction =
   | { type: "enter" }
+  | { type: "setWorkspace"; workspace: Workspace }
   | { type: "setNeed"; patch: Partial<OwnerNeed> }
   | { type: "savePet"; pet: Pet }
   | { type: "setAccount"; account: DemoAccount }
@@ -118,6 +154,12 @@ export function reducer(state: DemoState, action: DemoAction): DemoState {
     case "enter":
       return { ...state, entered: true };
 
+    /* Changes the view only. Capabilities and every slice of data are left
+       exactly as they are — switching to the sitter side must never look like
+       giving up being an owner. */
+    case "setWorkspace":
+      return { ...state, activeWorkspace: action.workspace };
+
     case "setNeed":
       return { ...state, need: { ...state.need, ...action.patch } };
 
@@ -130,7 +172,14 @@ export function reducer(state: DemoState, action: DemoAction): DemoState {
     }
 
     case "setAccount":
-      return { ...state, account: action.account };
+      /* Creating the account is what grants the owner capability. It is a fact
+         about what this person can now do — send a request — not a claim about
+         who they are, and it never revokes the sitter side. */
+      return {
+        ...state,
+        account: action.account,
+        capabilities: { ...state.capabilities, owner: true },
+      };
 
     case "confirmPhone":
       return state.account ? { ...state, account: { ...state.account, phoneConfirmed: true } } : state;
@@ -147,10 +196,23 @@ export function reducer(state: DemoState, action: DemoAction): DemoState {
       };
 
     case "startSitterProfile":
-      /* Idempotent: re-entering the flow must not wipe a profile in progress. */
-      return state.sitter
-        ? state
-        : { ...state, sitter: { profile: emptySitterProfile(action.id), published: false, idDocument: null } };
+      /* Idempotent about the PROFILE — re-entering the flow must not wipe one
+         in progress — but the capability is granted either way: opening the
+         builder is what opens that side of the account.
+
+         It deliberately does NOT move the active workspace. This fires from the
+         first tap on the sitter introduction, before a single field is filled
+         in, and moving the workspace there would permanently relocate `/` to an
+         empty sitter inbox for anyone who tapped once and changed their mind —
+         against the initial state's own reasoning that owner is the default
+         precisely because it is the side you can use without having built
+         anything. Publishing is what moves it. */
+      return {
+        ...state,
+        capabilities: { ...state.capabilities, sitter: true },
+        sitter:
+          state.sitter ?? { profile: emptySitterProfile(action.id), published: false, idDocument: null },
+      };
 
     case "patchSitterProfile":
       return state.sitter
@@ -177,7 +239,11 @@ export function reducer(state: DemoState, action: DemoAction): DemoState {
       return state.sitter ? { ...state, sitter: { ...state.sitter, idDocument: null } } : state;
 
     case "publishSitterProfile":
-      return state.sitter ? { ...state, sitter: { ...state.sitter, published: true } } : state;
+      /* Publishing is the moment the sitter side becomes somewhere with
+         content, so it is the moment the account moves there. */
+      return state.sitter
+        ? { ...state, activeWorkspace: "sitter", sitter: { ...state.sitter, published: true } }
+        : state;
 
     case "reset":
       return INITIAL_STATE;
@@ -237,32 +303,112 @@ function restoreSitter(value: unknown): SitterWorkspace | null {
   };
 }
 
+const isObject = (v: unknown): v is Record<string, unknown> =>
+  typeof v === "object" && v !== null && !Array.isArray(v);
+
+/** Only the two flags, only when they are actually booleans. A hand-edited
+    `{"owner":"yes"}` grants nothing. */
+function restoreCapabilities(value: unknown): AccountCapabilities {
+  if (!isObject(value)) return NO_CAPABILITIES;
+  return { owner: value.owner === true, sitter: value.sitter === true };
+}
+
 function restore(parsed: Record<string, unknown>): DemoState {
-  const isObject = (v: unknown): v is Record<string, unknown> =>
-    typeof v === "object" && v !== null && !Array.isArray(v);
   const arrayOfObjects = (v: unknown) => (Array.isArray(v) && v.every(isObject) ? v : null);
+
+  const account = isObject(parsed.account) ? (parsed.account as unknown as DemoAccount) : null;
+  const sitter = restoreSitter(parsed.sitter);
+  const stored = restoreCapabilities(parsed.capabilities);
 
   return {
     version: STORAGE_VERSION,
     entered: parsed.entered === true,
-    account: isObject(parsed.account) ? (parsed.account as unknown as DemoAccount) : null,
+    account,
+    /* Clamped against the data that is actually here, not trusted as written.
+       Each slice is validated independently — by design, so one bad field costs
+       only that field — which means `restoreSitter` can legitimately discard a
+       malformed profile while `capabilities.sitter` still says `true`. That
+       combination sends `/` to an inbox for a profile that no longer exists and
+       advertises a draft that was thrown away. A capability describes what the
+       stored data supports; it cannot outlive it. */
+    capabilities: {
+      owner: stored.owner && account !== null,
+      sitter: stored.sitter && sitter !== null,
+    },
+    activeWorkspace: isWorkspace(parsed.activeWorkspace) ? parsed.activeWorkspace : "owner",
     need: isObject(parsed.need) ? { ...EMPTY_NEED, ...(parsed.need as Partial<OwnerNeed>) } : EMPTY_NEED,
     pets: (arrayOfObjects(parsed.pets) as Pet[] | null) ?? [],
     requests: (arrayOfObjects(parsed.requests) as CareRequest[] | null) ?? [],
-    sitter: restoreSitter(parsed.sitter),
+    sitter,
   };
+}
+
+/**
+ * Audit 1.1 → 1.2.
+ *
+ * The two fields v1 never had are DERIVED FROM WHAT IS THERE, never assumed:
+ *
+ *   - `capabilities.owner` from the existence of an account. Someone who
+ *     completed the 1.1 account really can send a request.
+ *   - `capabilities.sitter` from the existence of a sitter workspace. Someone
+ *     who opened the 1.1 builder really does have a sitter side.
+ *
+ * That is reading a fact, not inventing one, which is the line the regression
+ * checklist draws (B3). Nothing here fabricates a declaration: no housing type,
+ * no service, no rate and no verification state is filled in — a v1 profile
+ * that left a field unanswered still has it unanswered, because `restore`
+ * copies the profile as it was and `emptySitterProfile` is not consulted.
+ *
+ * `activeWorkspace` is not derivable from v1 at all — nothing recorded which
+ * side the visitor was last looking at — so it takes the initial value rather
+ * than a guess dressed as a memory.
+ */
+function migrateFromV1(parsed: Record<string, unknown>): DemoState {
+  const restored = restore(parsed);
+  return {
+    ...restored,
+    capabilities: {
+      owner: restored.account !== null,
+      sitter: restored.sitter !== null,
+    },
+    activeWorkspace: INITIAL_STATE.activeWorkspace,
+  };
+}
+
+function readRecord(key: string): Record<string, unknown> | null {
+  const raw = window.localStorage.getItem(key);
+  if (!raw) return null;
+  const parsed: unknown = JSON.parse(raw);
+  return isObject(parsed) ? parsed : null;
 }
 
 export function loadState(): DemoState {
   if (typeof window === "undefined") return INITIAL_STATE;
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return INITIAL_STATE;
-    const parsed: unknown = JSON.parse(raw);
-    if (typeof parsed !== "object" || parsed === null) return INITIAL_STATE;
-    const record = parsed as Record<string, unknown>;
-    if (record.version !== STORAGE_VERSION) return INITIAL_STATE;
-    return restore(record);
+    const current = readRecord(STORAGE_KEY);
+    if (current) {
+      /* A version this build does not know about — a record written by a NEWER
+         build, say, after the visitor moved back a version — is discarded
+         rather than read field by field and half-understood. */
+      return current.version === STORAGE_VERSION ? restore(current) : INITIAL_STATE;
+    }
+
+    const legacy = readRecord(LEGACY_STORAGE_KEY);
+    if (legacy && legacy.version === 1) {
+      const migrated = migrateFromV1(legacy);
+      /* The old record is removed ONLY once the new one is known to be on
+         disk. Ordering alone is not enough: `saveState` swallows its own
+         exception, so on a full quota or in Safari private mode it returns
+         normally having written nothing — and `removeItem` succeeds in exactly
+         those cases. That combination would destroy the visitor's account,
+         pets, requests and sitter profile silently. If the write failed, the
+         v1 record stays and migration is retried on the next load. */
+      if (saveState(migrated)) window.localStorage.removeItem(LEGACY_STORAGE_KEY);
+      return migrated;
+    }
+    /* A legacy record of some other version is not migratable; leave it alone
+       rather than deleting data this build cannot interpret. */
+    return INITIAL_STATE;
   } catch {
     /* Corrupt or unreadable (private mode, quota, hand-edited): start clean
        rather than trapping the visitor on a crashing screen. */
@@ -270,12 +416,16 @@ export function loadState(): DemoState {
   }
 }
 
-export function saveState(state: DemoState): void {
-  if (typeof window === "undefined") return;
+/** Returns whether the record actually reached storage. The migration depends
+    on the answer before it deletes anything. */
+export function saveState(state: DemoState): boolean {
+  if (typeof window === "undefined") return false;
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stripTransientFields(state)));
+    return true;
   } catch {
     /* Storage unavailable — the demo keeps working in memory for this tab. */
+    return false;
   }
 }
 
@@ -283,6 +433,10 @@ export function clearStoredState(): void {
   if (typeof window === "undefined") return;
   try {
     window.localStorage.removeItem(STORAGE_KEY);
+    /* The 1.1 key too. "You can erase everything" has to be true even for a
+       visitor whose migration had not run yet, and a leftover record under the
+       old key would come back on the next load. */
+    window.localStorage.removeItem(LEGACY_STORAGE_KEY);
   } catch {
     /* ignore */
   }

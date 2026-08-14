@@ -9,7 +9,7 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import { DemoNotice } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { sitterNameFor } from "@/data/sitter-name";
-import BackButton from "@/components/shared/BackButton";
+import { useSwitchWorkspace } from "@/hooks/use-workspace";
 import { useDemo } from "@/state/demo/context";
 
 /**
@@ -30,6 +30,7 @@ import { useDemo } from "@/state/demo/context";
 export default function SitterRequests() {
   const { t } = useTranslation();
   const { state, dispatch } = useDemo();
+  const switchWorkspace = useSwitchWorkspace();
   /* Which request was just answered, so focus can follow the outcome. */
   const answeredRef = useRef<string | null>(null);
 
@@ -48,7 +49,10 @@ export default function SitterRequests() {
       </Helmet>
 
       <div className="mx-auto max-w-[720px]">
-        <BackButton variant="labelled" fallback="/" className="mb-6" />
+        {/* No back control: this is the ROOT of the sitter workspace (§86), and
+            a back that fell through to `/` would bounce straight here again —
+            `/` sends an account whose active workspace is sitter to this very
+            screen. The way out of a workspace is the switch below, not Back. */}
         <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">{t("sitterRequests.title")}</h1>
 
         {/* §22 lists "mon profil de garde" as a real sitter destination, and
@@ -177,6 +181,19 @@ export default function SitterRequests() {
             </ul>
           </>
         )}
+
+        {/* The way back to the other side of the same account. A workspace has
+            to have an exit that is not the browser's Back button, and this one
+            records the move so the chrome and every shared screen follow. */}
+        <p className="mt-12 border-t border-border pt-8 text-sm text-muted-foreground">
+          <button
+            type="button"
+            onClick={() => switchWorkspace("owner")}
+            className="min-h-11 font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            {t("workspace.toOwner")}
+          </button>
+        </p>
       </div>
     </div>
   );

@@ -1,6 +1,9 @@
 import { Component } from "react";
 import type { ErrorInfo, ReactNode } from "react";
 
+import { clearSplash } from "@/state/splash";
+import { clearStoredState } from "@/state/demo/reducer";
+
 /**
  * The last resort.
  *
@@ -31,13 +34,15 @@ export default class ErrorBoundary extends Component<Props, State> {
     console.error("Nidz crashed:", error, info.componentStack);
   }
 
+  /* The keys come from the modules that own them, never as literals here.
+     They were literals, and Audit 1.2 moved the demo record from
+     `nidz.demo.v1` to `nidz.demo` — which left this button clearing a key
+     nothing uses any more. It would then reload, re-read the same poisoned
+     record and crash again, while the copy above promised otherwise. A
+     recovery control that does not recover is worse than no control. */
   private reset = () => {
-    try {
-      window.localStorage.removeItem("nidz.demo.v1");
-      window.sessionStorage.removeItem("nidz.splash.seen");
-    } catch {
-      /* Storage unavailable — reloading is still worth a try. */
-    }
+    clearStoredState();
+    clearSplash();
     window.location.assign("/");
   };
 

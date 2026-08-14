@@ -27,7 +27,9 @@ than replacing it with a comment.
 |---|---|---|
 | B1 | Sitter declarations are never prepopulated in a way that later reads as user-provided. | `SitterHousing.type` and `.outdoor` are `null` until answered; `emptySitterProfile()` seeds nothing. The type carries the distinction so the compiler does too. |
 | B2 | Persisted state is untrusted input, validated per slice on read; one bad field costs only that field. | `restore()` / `restoreSitter()` in `state/demo/reducer.ts`. Audit 1.2 extends this to every new slice. |
-| B3 | Migration never invents a sitter claim. An absent 1.1 field becomes unknown, not a default that reads as a declaration. | Group 3's v1 → v2 migration. |
+| B3 | Migration never invents a sitter claim. An absent 1.1 field becomes unknown, not a default that reads as a declaration. | `migrateFromV1` derives the two new fields from data that is present (an account, a sitter workspace) and consults `emptySitterProfile` for nothing. A field a 1.1 visitor left unanswered stays unanswered. |
+| B5 | Migration never destroys the old record before the new one is on disk. | `saveState` reports whether the write succeeded, and the v1 key is removed only then. Ordering alone was not enough: `saveState` swallows its exception, so on a full quota it returned normally having written nothing, while `removeItem` succeeded. |
+| B6 | A capability cannot outlive the data that supports it. | `restore` clamps `capabilities` against the account and sitter workspace that survived validation. Per-slice validation means a malformed profile can be discarded while a stored flag still claims it exists. |
 | B4 | A corrupt or old storage record must not crash the app. | Version mismatch discards; parse failure returns `INITIAL_STATE`; the app-level `ErrorBoundary` stays mounted. |
 
 ## C. Availability, booking and money
@@ -57,7 +59,8 @@ than replacing it with a comment.
 | E2 | No public admin dashboard is resurrected. An admin-looking screen with no authentication behind it is worse than an honest absence. | `/admin` → `NotAvailable`. |
 | E3 | `/help` and `/policies` describe exactly what the prototype does and does not do. Audit 1.2 grows the product, so these must be **updated**, not left describing 1.1. | Group 15/17. |
 | E4 | Simulated behaviour carries its notice at full weight, never as a footnote. | `DemoNotice` usage. |
-| E5 | Demo state can always be reset, and reset leaves nothing behind. | `reset` action removes the storage record rather than rewriting empty values. |
+| E5 | Demo state can always be reset, and reset leaves nothing behind. | `reset` action removes the storage record rather than rewriting empty values. Since Group 3 the control lives in **Settings** (one trigger, not two), and `clearStoredState` removes the 1.2 key **and** the 1.1 key, so a visitor whose migration had not yet run is not left with a record that returns on the next load. The error boundary's recovery calls the same function rather than repeating a key literal. |
+| E6 | Every screen that states what the prototype cannot do stays reachable on a phone. | `/help` and `/policies` are in the footer at every width and in Settings; Settings itself is one tap from the header on browsable screens and from the top bar on flow screens. Hiding the footer below `md` once made all three unreachable on the primary device. |
 
 ## F. Privacy
 

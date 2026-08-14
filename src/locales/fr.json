@@ -23,7 +23,8 @@
     "received": "Reçues",
     "footerLabel": "Liens de bas de page",
     "ownerLabel": "Navigation propriétaire",
-    "sitterLabel": "Navigation pet-sitter"
+    "sitterLabel": "Navigation pet-sitter",
+    "settings": "Paramètres"
   },
   "home": {
     "title": "Trouver une garde pour votre animal",
@@ -291,8 +292,7 @@
     "resume": "Reprendre ma recherche",
     "findSitter": "Trouver un pet-sitter",
     "myRequests": "Mes demandes",
-    "switchToOwner": "Chercher une garde pour mon animal",
-    "switchToSitter": "Devenir pet-sitter sur Nidz",
+    "switchToSitter": "Garder des animaux sur Nidz",
     "requestsCount_one": "{{count}} demande",
     "requestsCount_other": "{{count}} demandes",
     "requestsPending_one": "{{count}} en attente de réponse",
@@ -501,11 +501,7 @@
     "reset": {
       "title": "Recommencer à zéro",
       "body": "Efface tout ce que cette démonstration a retenu dans ce navigateur : votre nom, votre animal, vos demandes et votre profil de pet-sitter. Vous reviendrez à l'écran d'introduction.",
-      "cta": "Réinitialiser la démonstration",
-      "confirmTitle": "Effacer toutes vos données ?",
-      "confirmBody": "Votre nom, votre numéro, votre animal, vos demandes et votre profil de pet-sitter seront supprimés de ce navigateur. Cette action ne peut pas être annulée.",
-      "cancel": "Annuler",
-      "confirm": "Tout effacer"
+      "inSettings": "Tout effacer, dans les paramètres"
     }
   },
   "policies": {
@@ -517,7 +513,33 @@
       "location": "La localisation demandée est une commune, jamais une adresse. Nidz ne collecte aucune adresse exacte et n'utilise pas la géolocalisation de votre appareil.",
       "documents": "Une pièce d'identité n'est jamais téléversée : seul le nom du fichier est retenu, localement, et cela ne produit aucune vérification.",
       "photos": "Les photos que vous ajoutez restent sur votre appareil et disparaissent au rechargement de la page.",
-      "remove": "Vous pouvez tout effacer à tout moment depuis la page « À propos de cette démonstration »."
+      "remove": "Vous pouvez tout effacer à tout moment depuis les paramètres."
     }
+  },
+  "settings": {
+    "title": "Paramètres",
+    "language": {
+      "title": "Langue",
+      "following": "Nidz suit la langue de votre appareil. Choisissez-en une ci-dessous pour la conserver quel que soit l'appareil.",
+      "chosen": "Vous avez choisi cette langue : Nidz la conserve au lieu de suivre votre appareil."
+    },
+    "about": {
+      "title": "À propos de ce prototype",
+      "helpLine": "Ce qui fonctionne, ce qui est simulé, et ce qui n'existe pas encore.",
+      "policiesLine": "Ce que deviennent les informations que vous saisissez."
+    },
+    "reset": {
+      "title": "Recommencer à zéro",
+      "body": "Efface tout ce que cette démonstration a retenu dans ce navigateur : votre nom, votre animal, vos demandes et votre profil de pet-sitter. Vous reviendrez à l'écran d'introduction.",
+      "cta": "Réinitialiser la démonstration",
+      "confirmTitle": "Effacer toutes vos données ?",
+      "confirmBody": "Votre nom, votre numéro, votre animal, vos demandes et votre profil de pet-sitter seront supprimés de ce navigateur. Cette action ne peut pas être annulée.",
+      "cancel": "Annuler",
+      "confirm": "Tout effacer"
+    }
+  },
+  "workspace": {
+    "toSitter": "Passer à mon espace pet-sitter",
+    "toOwner": "Passer à mon espace propriétaire"
   }
 }

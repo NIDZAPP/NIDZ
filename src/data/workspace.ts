@@ -34,17 +34,26 @@ export function isWorkspace(value: unknown): value is Workspace {
  * What this account is able to do. Both flags may be true at once; that is the
  * whole point of the type.
  *
- * `owner` is granted as soon as someone completes the quick owner account —
- * it costs almost nothing and unlocks sending a request. `sitter` is granted
- * only when a sitter profile actually exists, because a workspace with nothing
- * in it is not a capability, it is an empty room.
+ * `owner` is granted as soon as someone completes the quick owner account — it
+ * costs almost nothing and unlocks sending a request. `sitter` is granted when
+ * a sitter profile exists at all, because opening the builder is what opens
+ * that side of the account.
+ *
+ * Do not confuse this with whether a sitter DESTINATION is worth navigating to.
+ * That is a narrower question — it needs a *published* profile — and it is
+ * answered in `components/layout/workspace-nav.ts`. A capability says what this
+ * person may do; navigation says where there is currently something to see.
  */
 export type AccountCapabilities = {
   owner: boolean;
   sitter: boolean;
 };
 
-export const NO_CAPABILITIES: AccountCapabilities = { owner: false, sitter: false };
+/** Frozen: one object is shared by the initial state and by every restore that
+    finds nothing, so a single stray mutation would grant a capability to every
+    capability-less state at once. Every reducer path spreads rather than
+    mutates today; this makes that stay true. */
+export const NO_CAPABILITIES: AccountCapabilities = Object.freeze({ owner: false, sitter: false });
 
 export function can(capabilities: AccountCapabilities, workspace: Workspace): boolean {
   return capabilities[workspace];
@@ -93,3 +102,17 @@ export function resolveWorkspace(pathname: string, active: Workspace): Workspace
 export function otherWorkspace(workspace: Workspace): Workspace {
   return workspace === "owner" ? "sitter" : "owner";
 }
+
+/**
+ * Where each workspace begins.
+ *
+ * Switching has to land somewhere that belongs to the side you switched to,
+ * otherwise the chrome changes and the content does not — which is how a
+ * workspace switch turns into a confusing colour change. The sitter root is
+ * their inbox because that is what the sitter workspace is for: things arrive.
+ * Group 15 may move these once each side has a Profile.
+ */
+export const WORKSPACE_ROOT: Record<Workspace, string> = {
+  owner: "/",
+  sitter: "/sitter/requests",
+};

@@ -23,7 +23,8 @@
     "received": "Received",
     "footerLabel": "Footer links",
     "ownerLabel": "Owner navigation",
-    "sitterLabel": "Sitter navigation"
+    "sitterLabel": "Sitter navigation",
+    "settings": "Settings"
   },
   "home": {
     "title": "Find care for your animal",
@@ -291,8 +292,7 @@
     "resume": "Resume my search",
     "findSitter": "Find a sitter",
     "myRequests": "My requests",
-    "switchToOwner": "Look for care for my animal",
-    "switchToSitter": "Become a sitter on Nidz",
+    "switchToSitter": "Look after animals on Nidz",
     "requestsCount_one": "{{count}} request",
     "requestsCount_other": "{{count}} requests",
     "requestsPending_one": "{{count}} awaiting a reply",
@@ -501,11 +501,7 @@
     "reset": {
       "title": "Start over",
       "body": "Erases everything this demonstration kept in this browser: your name, your animal, your requests and your sitter profile. You will return to the introduction screen.",
-      "cta": "Reset the demonstration",
-      "confirmTitle": "Erase all your data?",
-      "confirmBody": "Your name, your number, your animal, your requests and your sitter profile will be deleted from this browser. This cannot be undone.",
-      "cancel": "Cancel",
-      "confirm": "Erase everything"
+      "inSettings": "Erase everything, in Settings"
     }
   },
   "policies": {
@@ -517,7 +513,33 @@
       "location": "The location asked for is a commune, never an address. Nidz collects no exact address and does not use your device's geolocation.",
       "documents": "An identity document is never uploaded: only the file name is kept, locally, and it produces no verification.",
       "photos": "Photos you add stay on your device and disappear when the page is reloaded.",
-      "remove": "You can erase everything at any time from the “About this demonstration” page."
+      "remove": "You can erase everything at any time from Settings."
     }
+  },
+  "settings": {
+    "title": "Settings",
+    "language": {
+      "title": "Language",
+      "following": "Nidz is following your device's language. Choose one below to keep it whichever device you use.",
+      "chosen": "You chose this language, so Nidz keeps it instead of following your device."
+    },
+    "about": {
+      "title": "About this prototype",
+      "helpLine": "What works, what is simulated, and what does not exist yet.",
+      "policiesLine": "What happens to everything you type."
+    },
+    "reset": {
+      "title": "Start over",
+      "body": "Erases everything this demonstration kept in this browser: your name, your animal, your requests and your sitter profile. You will return to the introduction screen.",
+      "cta": "Reset the demonstration",
+      "confirmTitle": "Erase all your data?",
+      "confirmBody": "Your name, your number, your animal, your requests and your sitter profile will be deleted from this browser. This cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Erase everything"
+    }
+  },
+  "workspace": {
+    "toSitter": "Switch to my sitter side",
+    "toOwner": "Switch to my owner side"
   }
 }

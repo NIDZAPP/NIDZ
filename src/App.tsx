@@ -17,6 +17,7 @@ import SitterProfile from "@/pages/SitterProfile";
 import NotAvailable from "@/pages/NotAvailable";
 import Policies from "@/pages/Policies";
 import Help from "@/pages/Help";
+import Settings from "@/pages/Settings";
 import Welcome from "@/pages/onboarding/Welcome";
 import NeedPet from "@/pages/owner/need/NeedPet";
 import NeedLocation from "@/pages/owner/need/NeedLocation";
@@ -143,6 +144,12 @@ const App = () => {
               <Route path="/admin" element={<NotAvailable />} />
               <Route path="/policies" element={<Policies />} />
               <Route path="/help" element={<Help />} />
+              {/* Shared by both workspaces — it follows whichever is active
+                  rather than belonging to one. Group 15 folds it under Profile;
+                  it exists from Group 3 because §89 moved the language chooser
+                  here, and a trilingual product needs somewhere to change
+                  language. */}
+              <Route path="/settings" element={<Settings />} />
               {/* Profiles moved out of the sitter's own namespace; the old
                   path stays reachable so existing links do not break. */}
               <Route path="/sitter/:id" element={<LegacySitterRedirect />} />

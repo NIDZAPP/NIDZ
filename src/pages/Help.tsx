@@ -1,22 +1,8 @@
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { SPLASH_KEY } from "@/pages/onboarding/Welcome";
 import BackButton from "@/components/shared/BackButton";
-import { useDemo } from "@/state/demo/context";
 
 /**
  * What this demonstration is, and what it is not.
@@ -30,21 +16,6 @@ const QUESTIONS = ["what", "data", "verification", "booking", "sitters", "covera
 
 export default function Help() {
   const { t } = useTranslation();
-  const { dispatch } = useDemo();
-  const navigate = useNavigate();
-
-  const reset = () => {
-    /* The reducer reset is what clears storage: DemoProvider removes the key
-       when the state is back to initial, so calling clearStoredState() here
-       would be undone by the persistence effect a tick later. */
-    dispatch({ type: "reset" });
-    try {
-      window.sessionStorage.removeItem(SPLASH_KEY);
-    } catch {
-      /* Private mode — the reducer reset is enough. */
-    }
-    navigate("/welcome", { replace: true });
-  };
 
   return (
     <div className="container py-10 md:py-14">
@@ -71,30 +42,23 @@ export default function Help() {
           ))}
         </dl>
 
+        {/* The reset itself lives in Settings (§88). Erasing everything is a
+            destructive action, and a destructive action with two triggers in
+            two places is one more thing to reach by accident — so this points
+            at it rather than repeating it. */}
         <div className="mt-12 border-t border-border pt-8">
           <h2 className="text-name font-semibold text-foreground">{t("help.reset.title")}</h2>
           <p className="mt-2 max-w-[64ch] text-base leading-relaxed text-muted-foreground">
             {t("help.reset.body")}
           </p>
-          {/* Confirmed, because this erases the animal, the requests and the
-              whole sitter profile the visitor built, and nothing undoes it. */}
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button type="button" variant="outline" className="mt-4">
-                {t("help.reset.cta")}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t("help.reset.confirmTitle")}</AlertDialogTitle>
-                <AlertDialogDescription>{t("help.reset.confirmBody")}</AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t("help.reset.cancel")}</AlertDialogCancel>
-                <AlertDialogAction onClick={reset}>{t("help.reset.confirm")}</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <p className="mt-4">
+            <Link
+              to="/settings"
+              className="font-medium text-primary underline-offset-4 hover:underline"
+            >
+              {t("help.reset.inSettings")}
+            </Link>
+          </p>
         </div>
       </div>
     </div>

@@ -28,12 +28,15 @@ export default function Footer() {
         <p className="hidden md:block">
           © {new Date().getFullYear()} {t("common.appName")}
         </p>
-        <nav aria-label={t("nav.footerLabel")} className="flex gap-4">
+        <nav aria-label={t("nav.footerLabel")} className="flex flex-wrap justify-center gap-x-4 gap-y-2">
           <Link className="hover:underline" to="/policies">
             {t("nav.policies")}
           </Link>
           <Link className="hover:underline" to="/help">
             {t("nav.help")}
+          </Link>
+          <Link className="hover:underline" to="/settings">
+            {t("nav.settings")}
           </Link>
         </nav>
       </div>

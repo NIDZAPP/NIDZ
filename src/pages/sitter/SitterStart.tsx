@@ -42,7 +42,6 @@ export default function SitterStart() {
         backTo="/start"
         title={t("sitterFlow.start.title")}
         intro={t("sitterFlow.start.intro")}
-        showLanguageSwitcher
         headerExtra={<PawPrint className="mt-8 size-8 text-brand" aria-hidden="true" />}
         action={
           <Button type="button" size="lg" onClick={start}>

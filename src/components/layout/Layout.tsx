@@ -28,15 +28,15 @@ export default function Layout() {
   const { pathname } = useLocation();
   const { state } = useDemo();
 
-  /* Which workspace's chrome to draw. Read from the path, so a public sitter
-     profile — an owner-side screen living under `/sitters/` — keeps the owner's
-     navigation even for a visitor who is themselves a sitter.
+  /* Which workspace's chrome to draw. The PATH decides when it belongs to one
+     side — so a public sitter profile, an owner-side screen living under
+     `/sitters/`, keeps the owner's navigation even for a visitor who is
+     themselves a sitter. A shared screen (Settings, Help, Policies) follows the
+     workspace the account is actually in.
 
-     The `"owner"` default is what a path with no workspace of its own (Help,
-     Policies, `/`) falls back to. Group 3 replaces it with the account's
-     persisted active workspace; until that exists, owner is the honest default
-     because it is the only side a visitor can use without building anything. */
-  const workspace: Workspace = resolveWorkspace(pathname, "owner");
+     Reading the state here never WRITES it. Only an explicit switch changes the
+     active workspace; drawing a nav must not decide who you are. */
+  const workspace: Workspace = resolveWorkspace(pathname, state.activeWorkspace);
 
   const navContext: NavContext = {
     entered: state.entered,

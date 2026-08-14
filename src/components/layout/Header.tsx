@@ -1,10 +1,9 @@
-import { PawPrint } from "lucide-react";
+import { PawPrint, SlidersHorizontal } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import { cn } from "@/lib/utils";
-import type { Workspace } from "@/data/workspace";
+import { WORKSPACE_ROOT, type Workspace } from "@/data/workspace";
 import { isNavigable, workspaceDestinations, type NavContext } from "./workspace-nav";
 
 const navLinkCls = ({ isActive }: { isActive: boolean }) =>
@@ -22,8 +21,7 @@ const navLinkCls = ({ isActive }: { isActive: boolean }) =>
  *
  * Help and Policies left the header at Audit 1.2. They are not tasks — nobody
  * opens Nidz to read a policy — and they were competing for width with the
- * places people actually go. They stay in the footer, and Group 15 gives them a
- * home in Settings (§84-86).
+ * places people actually go. They live in the footer and in Settings (§84-86).
  *
  * The header CTA was a second, competing "find a sitter" beside a nav link to
  * the same place; the nav link is enough (§4.2).
@@ -58,8 +56,13 @@ export default function Header({
               arbitrary system serif and the header and the splash rendered the
               brand in two different faces. The mark carries the brand now, and
               it works in all three languages. */}
+          {/* Home means the ACTIVE workspace's root, not `/`. `/` belongs to
+              whichever workspace is active and bounces a sitter straight back
+              here, so a wordmark hard-wired to `/` was a "Home" control that
+              visibly did nothing on the sitter side — and left a duplicate
+              history entry on every tap. */}
           <Link
-            to="/"
+            to={WORKSPACE_ROOT[workspace]}
             aria-label={`${t("common.appName")} — ${t("nav.home")}`}
             className="flex shrink-0 items-center gap-2 rounded-md text-lg font-semibold tracking-tight text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
@@ -83,7 +86,27 @@ export default function Header({
             </nav>
           )}
         </div>
-        <LanguageSwitcher />
+        {/* Where the language chooser used to sit. §89 moves language into
+            Settings so it stops appearing on every screen in the product; this
+            is the affordance that keeps it one tap away at both breakpoints
+            while there is no Profile tab to hold it (Group 15).
+
+            Icon-only, so it needs its accessible name in text. */}
+        <NavLink
+          to="/settings"
+          className={({ isActive }) =>
+            cn(
+              "inline-flex size-11 shrink-0 items-center justify-center rounded-md transition-colors",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+              isActive
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+            )
+          }
+        >
+          <SlidersHorizontal className="size-5" aria-hidden="true" />
+          <span className="sr-only">{t("nav.settings")}</span>
+        </NavLink>
       </div>
     </header>
   );

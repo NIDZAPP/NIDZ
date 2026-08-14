@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
+import { SlidersHorizontal } from "lucide-react";
 import type { ReactNode } from "react";
 
 import BackButton from "@/components/shared/BackButton";
-import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import { cn } from "@/lib/utils";
 
 /**
@@ -38,7 +39,6 @@ export default function FlowScreen({
   secondaryAction,
   footNote,
   headerExtra,
-  showLanguageSwitcher = false,
   wide = false,
   /** Changes to this value re-run the scroll-and-focus reset. Pass the step
       key when several steps share one mounted FlowScreen. */
@@ -68,7 +68,6 @@ export default function FlowScreen({
   footNote?: ReactNode;
   /** Rendered between the intro and the fields, full column width. */
   headerExtra?: ReactNode;
-  showLanguageSwitcher?: boolean;
   /** Widen the column for steps that show a summary rather than a form. */
   wide?: boolean;
   stepKey?: string;
@@ -86,7 +85,7 @@ export default function FlowScreen({
   }, [stepKey, title]);
 
   const measure = wide ? "max-w-[720px]" : "max-w-[560px]";
-  const hasTopBar = Boolean(backTo || progress || showLanguageSwitcher);
+  const hasTopBar = Boolean(backTo || progress);
 
   return (
     /* `has-pinned-action` is what src/index.css keys the bottom scroll padding
@@ -124,7 +123,20 @@ export default function FlowScreen({
               <span className="flex-1" />
             )}
 
-            {showLanguageSwitcher && <LanguageSwitcher compact />}
+            {/* Flow screens are registered outside `Layout`, so they carry no
+                header and no footer — which meant that after §89 moved the
+                language chooser into Settings, someone mid-way through the
+                sitter builder whose device language was detected wrong had to
+                press Back six times to reach the one screen that still has a
+                chooser. This is the route out, without putting a language
+                selector back on every screen. */}
+            <Link
+              to="/settings"
+              className="inline-flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <SlidersHorizontal className="size-5" aria-hidden="true" />
+              <span className="sr-only">{t("nav.settings")}</span>
+            </Link>
           </div>
         </div>
       )}

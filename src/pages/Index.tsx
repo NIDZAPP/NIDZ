@@ -4,11 +4,15 @@ import { Link, Navigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { REGISTER_ROW } from "@/components/shared/register";
 import { activeCriteriaCount, criteriaFromNeed, criteriaToParams } from "@/data/criteria";
+import { WORKSPACE_ROOT } from "@/data/workspace";
+import { useSwitchWorkspace } from "@/hooks/use-workspace";
+import { cn } from "@/lib/utils";
 import { useDemo } from "@/state/demo/context";
 
 /**
- * Home, for someone who has already been through the introduction.
+ * The OWNER home, for someone who has already been through the introduction.
  *
  * Deliberately not a dashboard. Everything a dashboard would show either does
  * not exist yet or would have to be invented, and this is the easiest screen
@@ -16,22 +20,28 @@ import { useDemo } from "@/state/demo/context";
  * thing here is the person's own requests, which is the only thing that can
  * honestly be counted.
  *
- * The role fork is not repeated: it was asked once, and §22 says to ask it
- * only when the choice is necessary.
+ * `/` belongs to whichever workspace is active, so someone whose account is
+ * currently on the sitter side is sent to the sitter root instead of being
+ * shown the owner home under sitter chrome. That is what makes the wordmark
+ * mean "my home" on both sides rather than "the owner's home, always".
  */
-/* A hairline register, like every other list of navigable things in the app.
-   Bordered boxes read as controls — that is `OptionGroup`'s silhouette — and
-   made the emptiest screen in the product look like a dashboard stub. */
-const ROW =
-  "flex items-center justify-between gap-4 border-b border-border py-4 transition-colors first:border-t hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
 
 export default function Index() {
   const { t } = useTranslation();
   const { state } = useDemo();
+  const switchWorkspace = useSwitchWorkspace();
 
   /* A first-time visitor belongs on the introduction, which is a full-screen
      route outside the site chrome. */
   if (!state.entered) return <Navigate to="/welcome" replace />;
+
+  /* Not a redirect loop: the sitter root is `/sitter/requests`, which resolves
+     to the sitter workspace and never back to here. Guarded on the capability
+     as well as the preference, so a stale `activeWorkspace` in storage can
+     never strand someone on a side they have nothing on. */
+  if (state.activeWorkspace === "sitter" && state.capabilities.sitter) {
+    return <Navigate to={WORKSPACE_ROOT.sitter} replace />;
+  }
 
   const pending = state.requests.filter((r) => r.status === "pending").length;
   const criteria = criteriaFromNeed(state.need);
@@ -70,7 +80,7 @@ export default function Index() {
         {state.requests.length > 0 && (
           <Link
             to="/owner/requests"
-            className={ROW}
+            className={REGISTER_ROW}
           >
             <span>
               <span className="block font-medium text-foreground">{t("entry.myRequests")}</span>
@@ -84,50 +94,36 @@ export default function Index() {
           </Link>
         )}
 
-        {/* The sitter side of the same account, once it exists. Since Audit 1.2
-            the header carries the ACTIVE workspace's destinations, so while the
-            owner workspace is active there is no sitter link at any width —
-            making this row the only route into `/sitter/requests` on desktop as
-            well as on a phone, not just below md. */}
-        {state.sitter && (
-          <Link
-            to="/sitter/requests"
-            className={ROW}
-          >
+        {/* The SWITCH, not a fork.
+            Audit 1.2 retired the shape this used to have — one boolean deciding
+            which "side" you belong to. Having a sitter profile does not stop
+            you being an owner, so this does not replace the owner home; it
+            offers the other workspace and records that you moved, so shared
+            screens and the chrome follow you there. Nothing is discarded. */}
+        {state.capabilities.sitter && (
+          <button type="button" onClick={() => switchWorkspace("sitter")} className={cn(REGISTER_ROW, "w-full text-start")}>
             <span>
-              <span className="block font-medium text-foreground">{t("sitterRequests.title")}</span>
+              <span className="block font-medium text-foreground">{t("workspace.toSitter")}</span>
               <span className="mt-0.5 block text-sm text-muted-foreground">
-                {state.sitter.published ? t("entry.sitterPublished") : t("entry.sitterDraft")}
+                {state.sitter?.published ? t("entry.sitterPublished") : t("entry.sitterDraft")}
               </span>
             </span>
             <ArrowRight className="size-5 shrink-0 text-muted-foreground rtl:-scale-x-100" aria-hidden="true" />
-          </Link>
+          </button>
         )}
 
         </div>
 
-        {/* One quiet pointer at the other side of the marketplace. Not a
-            second pair of equal-weight cards.
-
-            KNOWN CARRY-FORWARD TO GROUP 3. The branch below is a single boolean
-            deciding which "side" you belong to — exactly the mutually exclusive
-            role shape `src/data/workspace.ts` was written to retire. Someone
-            with both capabilities should be offered a workspace SWITCH, not a
-            fork; `hasBothCapabilities` exists for that case. It stays as-is
-            until Group 3 wires the persisted `activeWorkspace` that the switch
-            has to write to, because a switch control with nothing to switch
-            would be a button that only changes the page you are on. */}
-        <p className="mt-10 text-sm text-muted-foreground">
-          {state.sitter ? (
-            <Link to="/owner/need/pet" className="font-medium text-primary underline-offset-4 hover:underline">
-              {t("entry.switchToOwner")}
-            </Link>
-          ) : (
+        {/* One quiet invitation, only for someone who has no sitter side yet.
+            Phrased as an activity rather than an identity: answering it does
+            not make you a different kind of user. */}
+        {!state.capabilities.sitter && (
+          <p className="mt-10 text-sm text-muted-foreground">
             <Link to="/sitter/start" className="font-medium text-primary underline-offset-4 hover:underline">
               {t("entry.switchToSitter")}
             </Link>
-          )}
-        </p>
+          </p>
+        )}
       </div>
     </div>
   );

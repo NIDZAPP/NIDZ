@@ -298,7 +298,7 @@ verify the active branch is `nidz-1.2`, commit, push.
 |---|---|---|
 | 1 | Branch, baseline, documentation | **Completed** |
 | 2 | Design foundation + natural app shell | **Completed** — see §6 |
-| 3 | Language, routing, persistence foundation | — |
+| 3 | Language, routing, persistence foundation | **Completed** — see §6 |
 | 4 | Algerian geography | — |
 | 5 | Map + geolocation | — |
 | 6 | Auth gateway + fast owner account | — |
@@ -453,6 +453,105 @@ header.
 until the sitter workspace has a bar), the `/search` brief band's warm surface
 (Group 8), and moving the language switcher out of the chrome into Settings
 (Group 3, §89).
+
+---
+
+### Group 3 — language, routing and persistence
+
+**Completed.** Reviewed by the project `code-reviewer`; two of its findings were
+genuine data-loss or dead-control bugs and are described below.
+
+**Language (§89).** i18next's detector was caching whatever it *detected* under
+`i18nextLng`, which collapsed two different facts — a language Nidz guessed and
+a language the person chose — into one indistinguishable value. Detection is now
+cacheless; `setLocale` is the only writer, under `nidz.lang`; and Settings says
+which of the two is happening rather than implying a decision nobody made. The
+1.1 key is adopted once and deleted.
+
+`querystring` was removed from the detection order. It was a third source that
+Settings could not honestly describe: someone arriving on a shared `?lng=ar`
+link would have been told Nidz was "following your device's language" while it
+was doing nothing of the kind. Two sources, one statable rule.
+
+**Settings exists from Group 3, not Group 15.** Taking the language chooser out
+of the header without giving it a home would have made a trilingual product's
+language unchangeable. It holds Language, Help, Policies and the demo reset —
+which moved out of `/help`, so that a destructive action has one trigger rather
+than two. It is deliberately small: §88 lists account, notifications, privacy
+and security sections, and each arrives with the feature behind it instead of as
+a row that leads nowhere.
+
+The chooser now appears on the entry screen only — the one place detection is
+most likely to have guessed wrong, and the only screen a first-time visitor sees
+before they could know Settings exists. Everywhere else there is a Settings
+link: in the header on browsable screens, and in the top bar on flow screens.
+That last one was a review finding: flow routes are registered outside `Layout`,
+so removing the chooser from `FlowScreen` had left someone mid-way through the
+sitter builder needing six Back presses to reach a language control.
+
+**Persisted state v2.** `capabilities` and `activeWorkspace` are added, the
+record moves from `nidz.demo.v1` to `nidz.demo` with the version inside it, and
+`migrateFromV1` derives the two new fields **from data that is present** — an
+account means the owner capability, a sitter workspace means the sitter one.
+That is reading a fact, not inventing one. Nothing consults
+`emptySitterProfile`, so a 1.1 profile that left a field unanswered still has it
+unanswered, and `activeWorkspace` takes the initial value because v1 recorded
+nothing about it.
+
+Two safety corrections from review:
+
+- The migration deleted the v1 record after writing the v2 one, with a comment
+  claiming ordering made that safe. It did not: `saveState` swallowed its own
+  exception, so on a full quota or in Safari private mode it returned normally
+  having written nothing — and `removeItem` succeeds in exactly those cases.
+  That combination would have silently destroyed the visitor's account, pets,
+  requests and sitter profile. `saveState` now reports success and the delete is
+  gated on it.
+- `restore` trusted stored capabilities in isolation while `restoreSitter` could
+  legitimately discard a malformed profile in the same call, producing
+  `capabilities.sitter === true` with `sitter === null` — which sent `/` to an
+  inbox for a profile that no longer existed. Capabilities are now clamped
+  against the data that survived validation.
+
+**The error boundary's recovery button had stopped recovering.** It removed the
+literal `"nidz.demo.v1"`, so after the key move it cleared nothing, reloaded,
+re-read the same poisoned record and crashed again — while its copy promised
+otherwise. It now calls `clearStoredState()`, and both storage keys come from
+the modules that own them. `SPLASH_KEY` moved to `src/state/splash.ts` so the
+boundary that wraps the whole app no longer imports a page module to reach one
+string.
+
+**Workspace switching.** `useSwitchWorkspace` records the move and navigates
+together — doing either alone leaves the chrome and the content disagreeing.
+`/` belongs to whichever workspace is active, and the header wordmark points at
+`WORKSPACE_ROOT[workspace]`; hard-wiring it to `/` made "Home" a control that
+visibly did nothing on the sitter side and accumulated duplicate history
+entries.
+
+`startSitterProfile` grants the sitter capability but deliberately does **not**
+move the active workspace. It fires from the first tap on the sitter
+introduction, before any field is filled, so moving the workspace there would
+permanently relocate `/` to an empty inbox for anyone who tapped once and
+changed their mind. Publishing moves it, because publishing is when that side
+becomes somewhere with content.
+
+**Verified in a browser**: a seeded 1.1 record migrates with account, pets and
+sitter intact, `capabilities: {owner: true, sitter: true}` derived, unanswered
+housing fields still `null`, and both legacy keys removed; `i18nextLng: "ar"`
+becomes `nidz.lang: "ar"` with `dir="rtl"`; the workspace switch persists in
+both directions and `/` follows it; choosing a language in Settings writes an
+explicit preference and flips the status line; the flow-screen Settings link and
+the corrected Policies copy both render.
+
+**One trap worth recording for whoever hits it next.** `lovable-tagger`, the
+dev-only Vite plugin, injects its `data-lov-*` attributes *between* a component
+name and an explicit JSX type argument, so `<OptionGroup<AppLocale> …>` is a
+syntax error in dev while `tsc` and `npm run build` both pass. The symptom is a
+500 for one module from the dev server only. Both sites that could hit it now
+carry a comment.
+
+**Carried forward:** the `entry.switchToOwner` key was retired with the fork it
+served; `help.reset.*` became `settings.reset.*` where the action now lives.
 
 ---
 
