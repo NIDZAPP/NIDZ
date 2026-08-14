@@ -300,7 +300,7 @@ verify the active branch is `nidz-1.2`, commit, push.
 | 2 | Design foundation + natural app shell | **Completed** — see §6 |
 | 3 | Language, routing, persistence foundation | **Completed** — see §6 |
 | 4 | Algerian geography | **Partial** — wilayas complete and verified; commune coverage is 10 of 69 wilayas, with the gap documented rather than filled by unverified data. See §6 |
-| 5 | Map + geolocation | — |
+| 5 | Map + geolocation | **Deferred** — blocked on verifiable coordinate data, not on the map library. Evaluation and constraints recorded in `NIDZ-1.2-MAP-AND-LOCATION.md`. See §6 |
 | 6 | Auth gateway + fast owner account | — |
 | 7 | Multi-pet system | — |
 | 8 | Owner home + marketplace search | — |
@@ -629,6 +629,51 @@ otherwise be silently downgraded to "anywhere".
 
 **Cost:** the bundle grew from 640 kB to 703 kB raw (200 → 219 kB gzip). That is
 the geography data, and it is a Group 16 splitting item.
+
+---
+
+### Group 5 — map and geolocation
+
+**Deferred, and the reason is data rather than tooling.** Full evaluation in
+`docs/NIDZ-1.2-MAP-AND-LOCATION.md`.
+
+MapLibre GL JS is the right engine and remains the choice for whenever a map
+ships. It is not installed, because **Nidz has no coordinates for anything**:
+no sitter has a position (deliberately — §29 forbids ever publishing one), no
+commune has one, they cannot be derived without the bulk geocoding §27 rules
+out, and inventing them is fabricated geography whose errors would be invisible.
+A map drawn from invented centroids renders perfectly convincing markers in the
+wrong places.
+
+The same gap blocks "Use my location". `navigator.geolocation` returns a
+latitude and longitude, and turning those into a commune needs either centroids
+to compare against or a reverse geocoder. Asking for the browser's most
+sensitive permission and then being unable to act on the answer is worse than
+not asking.
+
+Tile providers were evaluated too, and none adopted: MapLibre's demotiles are
+country-level and cannot distinguish communes inside Algiers; the OSMF tile
+policy says applications should not use their tiles; keyed free tiers require a
+secret that must not be committed. OpenFreeMap is the most promising and is
+named as the first thing to re-examine. None of that is the blocker, though —
+the coordinates are.
+
+**What ships instead:** nothing decorative. No greyed-out map panel, no "coming
+soon", no disabled location button. The results register stays the whole
+discovery experience, which §25 already makes the accessible, failure-safe path,
+and **proximity is expressed as shared administrative area rather than as a
+distance** — "in your commune" is a fact Nidz can support without a coordinate;
+"2.1 km away" is not.
+
+The document also fixes the rules a future map must obey — approximate by
+construction rather than by rounding an exact position that was already sent to
+the browser, commune area never a house, no false precision, list works with the
+map off, lazy-loaded, attributed — and the six geolocation outcomes to handle
+when it becomes possible.
+
+**To unblock:** a licensed, sourced set of commune positions. That single item
+turns on the map, area markers and coarse proximity. Everything else is
+scaffolding around an empty middle until it exists.
 
 ---
 
