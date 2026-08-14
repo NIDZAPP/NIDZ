@@ -35,7 +35,14 @@ export default function SitterPreview() {
     Boolean(profile?.publicName) &&
     Boolean(profile?.communeCode) &&
     (profile?.services.length ?? 0) > 0;
-  if (!state.sitter || !profile || !complete) return <Navigate to="/sitter/start" replace />;
+  /* Two different situations, two different destinations. No workspace at all
+     means the flow was never entered, and the introduction is where that
+     starts. A workspace with an unfinished profile means the sitter is
+     mid-build — sending them back to the introduction would throw away the
+     dashboard they were working from, which is the screen that can actually
+     tell them what is missing. */
+  if (!state.sitter || !profile) return <Navigate to="/sitter/start" replace />;
+  if (!complete) return <Navigate to="/sitter/profile" replace />;
   const published = state.sitter.published;
 
   return (

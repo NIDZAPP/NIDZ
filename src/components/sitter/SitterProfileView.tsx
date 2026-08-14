@@ -2,6 +2,7 @@ import { MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { ReactNode } from "react";
 
+import { careLines } from "@/components/sitter/care-lines";
 import { MatchReasonList, MismatchList } from "@/components/sitter/match";
 import { ProvenanceLabel } from "@/components/shared/trust";
 import PortfolioSection from "@/components/sitter/PortfolioSection";
@@ -136,6 +137,10 @@ export default function SitterProfileView({
       : []),
     { key: "pets", label: t("profile.facts.residentPets"), value: residentPets },
   ];
+
+  /* Blocks with nothing answered are dropped, so the whole section can end
+     up empty on a profile whose sitter skipped it. */
+  const careBlocks = careLines(sitter.care, sitter.acceptedSpecies, t, lng);
 
   return (
     <div className="space-y-10 md:space-y-14">
@@ -286,24 +291,41 @@ export default function SitterProfileView({
         )}
       </section>
 
-      {(sitter.careMethods.length > 0 || sitter.housing.conditions) && (
+      {(careBlocks.length > 0 || sitter.housing.conditions) && (
         <section>
           <Section className="text-name font-semibold text-foreground">{t("profile.section.care")}</Section>
           {/* Sentences, not chips: §20's question is "can I picture concretely
               how my animal will be looked after", and four tokens cannot
-              answer it. */}
-          <ul role="list" className="mt-4 max-w-[64ch] space-y-2 empty:hidden">
-            {sitter.careMethods.map((method) => (
-              <li key={method} className="text-base leading-relaxed text-foreground">
-                {t(`careMethod.${method}`)}
-              </li>
+              answer it. Grouped, because §57 turned four tokens into around
+              twenty facts and an ungrouped list of twenty is worse than four.
+
+              Only ANSWERED questions are here — `careLines` drops the rest
+              rather than printing "not specified" twenty times, which would
+              read as a failing grade for a sitter who has simply not finished
+              (§118). */}
+          <div className="mt-4 max-w-[64ch] space-y-6">
+            {careBlocks.map((block) => (
+              <div key={block.id}>
+                <h3 className="text-sm font-semibold text-foreground">{block.title}</h3>
+                <ul role="list" className="mt-2 space-y-1.5">
+                  {block.lines.map((line, i) => (
+                    <li key={i} className="text-base leading-relaxed text-foreground">
+                      {line}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
-          </ul>
+          </div>
           {sitter.housing.conditions && (
-            <p className="mt-3 max-w-[64ch] text-base leading-relaxed text-foreground">
+            <p className="mt-6 max-w-[64ch] text-base leading-relaxed text-foreground">
               {localized(sitter.housing.conditions, lng)}
             </p>
           )}
+          {/* One provenance line for the whole section, not one per fact. */}
+          <p className="mt-4 max-w-[64ch] text-sm text-muted-foreground">
+            {t("profile.care.declaredNote")}
+          </p>
         </section>
       )}
 

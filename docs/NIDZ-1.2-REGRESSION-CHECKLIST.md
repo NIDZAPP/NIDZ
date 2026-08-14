@@ -21,6 +21,8 @@ than replacing it with a comment.
 | A4 | Typing a profession never creates a credential badge. Declared profession and verified credential stay separate concepts. | Group 10/11 must model them as separate fields with separate states. |
 | A5 | Profile completeness is an administrative fact. It may never be labelled quality, trust, safety or potential. | Naming discipline; checked in Group 17's language sweep. |
 
+| A6 | Containment is asked about neutrally and never rendered without its reason. Omitting the question does not stop sitters crating; it stops owners finding out in time. | `SectionCare` refuses to save a containment answer with an empty reason, and `careLines` renders the reason with the fact or neither. |
+
 ## B. Unknown stays unknown
 
 | # | Rule | Enforced by |
@@ -63,6 +65,8 @@ than replacing it with a comment.
 | E4 | Simulated behaviour carries its notice at full weight, never as a footnote. | `DemoNotice` usage. |
 | E5 | Demo state can always be reset, and reset leaves nothing behind. | `reset` action removes the storage record rather than rewriting empty values. Since Group 3 the control lives in **Settings** (one trigger, not two), and `clearStoredState` removes the 1.2 key **and** the 1.1 key, so a visitor whose migration had not yet run is not left with a record that returns on the next load. The error boundary's recovery calls the same function rather than repeating a key literal. |
 | E6 | Every screen that states what the prototype cannot do stays reachable on a phone. | `/help` and `/policies` are in the footer at every width and in Settings; Settings itself is one tap from the header on browsable screens and from the top bar on flow screens. Hiding the footer below `md` once made all three unreachable on the primary device. |
+
+| E7 | A verification state machine that exists only in a type file is not a disclosure. The states are SHOWN, with every domain at `not_started` and a sentence saying no process exists. | `SitterTrust` renders `VERIFICATION_DOMAINS` against `VERIFICATION_STATUS` and lists `VERIFICATION_STATES`. Muted text, never a badge or a pill — styling an absence as a status makes it look like progress. |
 
 ## F. Privacy
 

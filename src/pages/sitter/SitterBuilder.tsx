@@ -14,14 +14,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  CARE_METHODS,
   CARE_TYPES,
   CARE_UNIT_KEY,
   DOG_SIZES,
   SPECIES,
   asLocalized,
   localized,
-  type CareMethod,
   type CareType,
   type DateRange,
   type DogSize,
@@ -470,7 +468,6 @@ export function StepHousing() {
   const [conditions, setConditions] = useState(
     profile?.housing.conditions ? localized(profile.housing.conditions, lng) : "",
   );
-  const [methods, setMethods] = useState<CareMethod[]>(profile?.careMethods ?? []);
   const [error, setError] = useState<string>();
   const typeRef = useRef<HTMLDivElement>(null);
   const outdoorRef = useRef<HTMLDivElement>(null);
@@ -503,7 +500,6 @@ export function StepHousing() {
             residentPets,
             conditions: conditions.trim() ? asLocalized(conditions.trim()) : null,
           },
-          careMethods: methods,
         });
         return true;
       }}
@@ -560,17 +556,6 @@ export function StepHousing() {
           )}
         </FieldShell>
       </div>
-
-      <fieldset>
-        <legend className="mb-3 text-sm font-medium text-foreground">{t("sitterFlow.housing.methodsLabel")}</legend>
-        <div className="flex flex-col gap-2">
-          {CARE_METHODS.map((m) => (
-            <Chip key={m} selected={methods.includes(m)} onClick={() => setMethods(toggle(methods, m))}>
-              {t(`careMethod.${m}`)}
-            </Chip>
-          ))}
-        </div>
-      </fieldset>
 
       <FieldShell label={t("sitterFlow.housing.conditionsLabel")} help={t("sitterFlow.housing.conditionsHelp")}>
         {({ id, describedBy }) => (

@@ -4,6 +4,7 @@ import type { LucideIcon } from "lucide-react";
 
 import { SPECIES_ICON } from "@/components/shared/species";
 import type { PortfolioActivity, PortfolioItem } from "@/data/portfolio";
+import { localized } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
 import { formatDate } from "@/utils/dates";
 
@@ -77,7 +78,7 @@ export default function PortfolioSection({
                     {t(`species.${item.species}`)}
                   </span>
                 </p>
-                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{item.caption}</p>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{localized(item.caption, locale)}</p>
                 <p className="mt-1 text-xs text-muted-foreground">{formatDate(item.createdAt, locale)}</p>
               </div>
             </li>

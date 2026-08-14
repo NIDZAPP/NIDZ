@@ -7,6 +7,11 @@ import FlowScreen from "@/components/shared/FlowScreen";
 import { DocumentField } from "@/components/shared/fields";
 import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
+import {
+  VERIFICATION_DOMAINS,
+  VERIFICATION_STATES,
+  VERIFICATION_STATUS,
+} from "@/data/trust";
 import { useDemo } from "@/state/demo/context";
 
 /**
@@ -32,8 +37,11 @@ export default function SitterTrust() {
   /* The profile has to exist as a profile before its trustworthiness is
      discussed: no name, no commune, no account means the flow was entered
      part-way. */
-  if (!state.sitter || !state.account?.accountComplete || !state.sitter.profile.publicName) {
-    return <Navigate to="/sitter/start" replace />;
+  if (!state.sitter) return <Navigate to="/sitter/start" replace />;
+  /* Same rule as the preview: a sitter part-way through belongs on their
+     dashboard, not back at the introduction. */
+  if (!state.account?.accountComplete || !state.sitter.profile.publicName) {
+    return <Navigate to="/sitter/profile" replace />;
   }
   const idDocument = state.sitter.idDocument;
 
@@ -83,6 +91,45 @@ export default function SitterTrust() {
         <p className="max-w-[64ch] text-sm leading-relaxed text-muted-foreground">
           {t("sitterFlow.trust.explain")}
         </p>
+
+        {/* §66 asks for the six verification states to exist as a model rather
+            than as one boolean, and for none of them to be claimed until a
+            process produces it. Showing the model is the point: a state machine
+            that lives only in a type file is indistinguishable, to the person
+            whose identity it describes, from one that will never be built.
+
+            Every row reads `VERIFICATION_STATUS`, which is `not_started`
+            across the board and has no code path that changes it. If a
+            transition is ever added, it has to be added with the process behind
+            it — and this table is where the lie would show first. */}
+        <section aria-labelledby="verif-states" className="border-t border-border pt-8">
+          <h2 id="verif-states" className="text-name font-semibold text-foreground">
+            {t("sitterFlow.trust.statesTitle")}
+          </h2>
+          <p className="mt-3 max-w-[64ch] text-sm leading-relaxed text-muted-foreground">
+            {t("sitterFlow.trust.statesIntro")}
+          </p>
+
+          <dl className="mt-5 space-y-3">
+            {VERIFICATION_DOMAINS.map((domain) => (
+              <div key={domain} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-border pb-3">
+                <dt className="text-base text-foreground">{t(`verification.domain.${domain}`)}</dt>
+                {/* Muted, never a badge and never teal: this is the ABSENCE of
+                    a check, and styling it as a status pill is how "not
+                    started" starts looking like progress. */}
+                <dd className="text-sm text-muted-foreground">
+                  {t(`verification.state.${VERIFICATION_STATUS[domain]}`)}
+                </dd>
+              </div>
+            ))}
+          </dl>
+
+          <p className="mt-5 max-w-[64ch] text-sm leading-relaxed text-muted-foreground">
+            {t("sitterFlow.trust.statesList", {
+              states: VERIFICATION_STATES.map((state) => t(`verification.state.${state}`)).join(" · "),
+            })}
+          </p>
+        </section>
       </FlowScreen>
     </>
   );

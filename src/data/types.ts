@@ -10,6 +10,7 @@
    ------------------------------------------------------------------------ */
 
 import type { AppLocale } from "@/i18n";
+import type { CareConditions } from "./care-conditions";
 import type { Declared, SharedPet } from "./pets";
 
 /** Demo content that has to read naturally in all three product languages.
@@ -65,16 +66,12 @@ export const DOG_SIZES: readonly DogSize[] = ["small", "medium", "large"];
 export type HousingType = "apartment" | "house";
 export type OutdoorSpace = "none" | "balcony" | "yard" | "garden";
 
-/** How the animals are actually kept. Deliberately no "cage" option: the audit
-    (p.414) allows it only when genuinely applicable and explained, and no demo
-    sitter uses it, so offering it as a default normalises it. */
-export type CareMethod = "freeInHome" | "separatedZones" | "outdoorAccess" | "ownerRoutine";
-export const CARE_METHODS: readonly CareMethod[] = [
-  "freeInHome",
-  "separatedZones",
-  "outdoorAccess",
-  "ownerRoutine",
-];
+/* Audit 1.1 modelled care as four coarse flags — free in the home, separated
+   zones, outdoor access, follows the owner's routine. §57 asks for something an
+   owner can actually act on, so `CareConditions` in `./care-conditions`
+   replaced them: where the animal may go, containment AND ITS REASON, hours
+   alone, who is home, sleeping, feeding, enrichment, transport, emergencies,
+   and a per-species block for each species the sitter accepts. */
 
 /** A closed date range, ISO `YYYY-MM-DD`, both ends inclusive. */
 export type DateRange = { start: string; end: string };
@@ -89,6 +86,7 @@ export type DateRange = { start: string; end: string };
    The import is type-only in both directions, so the cycle is erased at build
    and exists only for the type checker, which resolves it. */
 export type { Declared, Pet, SharedPet } from "./pets";
+export type { CareConditions } from "./care-conditions";
 
 /* ------------------------------------------------------------------ sitter */
 
@@ -220,7 +218,8 @@ export type SitterProfile = {
   acceptedDogSizes: DogSize[];
   maxAnimals: number;
   housing: SitterHousing;
-  careMethods: CareMethod[];
+  /** How care actually happens in this home (§57). Declared, never observed. */
+  care: CareConditions;
   /** Situations and animals the sitter says they cannot accept. Presented as
       the sitter's own limits, never as a warning about the sitter. */
   limits: Localized[];

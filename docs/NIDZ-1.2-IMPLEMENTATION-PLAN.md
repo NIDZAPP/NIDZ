@@ -1018,6 +1018,83 @@ and every literal `t()` key resolving. It found defects 3 and 4's siblings that
 16 rather than reworked mid-group.
 
 
+### Group 11 — sitter onboarding, part 2
+
+**Completed.** The centrepiece is §57 — how animals are actually cared for —
+which Audit 1.1 modelled as four coarse flags (`freeInHome`, `separatedZones`,
+`outdoorAccess`, `ownerRoutine`) sitting inside the housing step.
+
+**`src/data/care-conditions.ts` replaced them.** Around twenty declared facts:
+where in the home the animal may go, rooms that are off limits, containment
+and its reason, hours alone, who is home during the day, sleeping, feeding,
+enrichment, transport, and what the sitter would do in an emergency — plus a
+per-species block shown only for species the sitter accepts. Asking a cat
+sitter for a walk count is the dead field §50 warns about, so a cat-only sitter
+never sees one.
+
+The reason this section earns its length: it is the part of a sitter an owner
+cannot infer from a photograph, a price or a commune. Two people can both be
+good with animals and run completely different homes, and without these
+questions the mismatch surfaces on collection day.
+
+**Containment is asked about neutrally, and the reason is required.** Audit 1.1
+left the crate out of the model entirely, reasoning that offering it normalises
+it. That was the wrong fix to a real problem — a sitter who crates at night
+still crates at night, and hiding the question only moves the discovery later.
+§57 asks for crate and cage use *and why*, so `SectionCare` refuses to save a
+containment answer with no reason, and `careLines` never renders the fact
+without it. Twenty minutes in an open crate and a whole night shut in are
+different declarations; an owner can only tell them apart if the sitter had
+somewhere to say which.
+
+**The public profile renders it as grouped sentences**, not chips, and only the
+answered ones — `careLines` drops a blank rather than printing "not specified"
+twenty times, which would read as a failing grade for a sitter who simply has
+not finished (§118). `"no"` is an answer and does appear: "the cat is not kept
+indoors" is exactly what an indoor cat's owner needs.
+
+**Verification states are now visible, not just defined** (§66).
+`VERIFICATION_STATUS` has been `not_started` across four domains since Group 9;
+the trust section now shows that table and names all six states, saying plainly
+that nothing in Nidz is past the first because no checking process exists. A
+state machine that lives only in a type file is indistinguishable, to the
+person whose identity it describes, from one that will never be built. Nothing
+is styled as a badge — "not started" in muted text, never a teal pill, because
+a status pill makes an absence look like progress.
+
+**Migration carries forward only what is unambiguous.** `restoreCareConditions`
+maps `freeInHome` → whole home and `separatedZones` → some rooms, and DROPS
+`outdoorAccess` and `ownerRoutine` rather than guessing: outdoor space is
+already `housing.outdoor`, and "follows the owner's routine" is not the same
+statement as any of the three feeding plans. Inventing a declaration during a
+migration is what checklist B3 forbids, and a dropped answer costs one question
+to re-answer.
+
+#### Three defects fixed along the way
+
+1. **Nine portfolio captions were bare strings**, so a French or Arabic reader
+   saw English text on the profile — the same defect the professional
+   background had in Group 10. `PortfolioItem.caption` is `Localized` and all
+   nine fixtures are translated.
+2. **`/sitter/preview` and `/sitter/trust` threw an unfinished sitter back to
+   the introduction.** Correct before the dashboard existed; wrong after it,
+   because the dashboard is the screen that can say what is missing. No
+   workspace still goes to `/sitter/start`; an incomplete profile now goes to
+   `/sitter/profile`.
+3. **The fixture free text fought its own label** — "Off limits: The children's
+   bedrooms are off limits." The stored value is a phrase, not a sentence.
+
+**Section count:** the dashboard now lists ten, with "How you look after
+animals" and "What you cannot accept" split apart — the brief lists them as two
+deliverables and they answer two different questions.
+
+**Known, carried forward:** `ChoiceField` call sites pass `(next) => setX(next)`
+rather than the setter directly. Passing a `Dispatch` gives TypeScript an
+inference candidate for the generic from a contravariant position, which widens
+it to `string` and breaks every other prop on the component. Commented at the
+call site so it is not "simplified" back.
+
+
 ---
 
 ### Standing constraint on scope

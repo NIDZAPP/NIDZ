@@ -51,7 +51,27 @@ export type VerificationState =
   | "rejected"
   | "expired";
 
+/** In the order a verification would move through them. Exported so the sitter
+    can be SHOWN the model rather than have it exist only in this file: a
+    process nobody can see is indistinguishable from a process that will never
+    be built, and §66 asks for the states to be stated. */
+export const VERIFICATION_STATES: readonly VerificationState[] = [
+  "not_started",
+  "submitted",
+  "pending",
+  "verified",
+  "rejected",
+  "expired",
+];
+
 export type VerificationDomain = "phone" | "email" | "identity" | "credential";
+
+export const VERIFICATION_DOMAINS: readonly VerificationDomain[] = [
+  "phone",
+  "email",
+  "identity",
+  "credential",
+];
 
 /**
  * What Nidz would verify, and what it actually does.

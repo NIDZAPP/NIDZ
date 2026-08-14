@@ -89,7 +89,34 @@ const SEEDS: DemoSitterSeed[] = [
         ar: "الفناء مسيَّج بالكامل. أسكن في الطابق الأرضي دون درج.",
       },
     },
-    careMethods: ["freeInHome", "outdoorAccess"],
+    care: {
+      /* House with a fenced yard, dog sleeps indoors, long walk each morning —
+         all of it straight out of her bio. */
+      movement: "wholeHome",
+      restrictedRooms: { en: "", fr: "", ar: "" },
+      containment: { use: "never", reason: { en: "", fr: "", ar: "" } },
+      maxHoursAlone: 4,
+      presence: "mostOfDay",
+      sleeping: "livingSpace",
+      feeding: "ownerFoodOwnRoutine",
+      enrichment: {
+        en: "A long walk every morning and the yard whenever the dog wants it. I am around most of the day.",
+        fr: "Une longue promenade chaque matin et la cour à volonté. Je suis là la plus grande partie de la journée.",
+        ar: "نزهة طويلة كل صباح والفناء متاح متى شاء الكلب. أكون في البيت معظم اليوم.",
+      },
+      transport: ["onFoot"],
+      emergency: {
+        canReachVet: "yes",
+        plan: {
+          en: "There is a vet a ten-minute walk away. I would call the owner first, and go straight there if I could not reach them.",
+          fr: "Il y a un vétérinaire à dix minutes à pied. J’appellerais d’abord le propriétaire, et j’irais directement si je n’arrivais pas à le joindre.",
+          ar: "هناك طبيب بيطري على بعد عشر دقائق سيراً. سأتصل بالمالك أولاً، وأذهب مباشرة إن لم أستطع الوصول إليه.",
+        },
+      },
+      dog: { walksPerDay: 2, walkMinutes: 45, offLeash: "no", gardenAccess: "yes" },
+      cat: { litterBoxes: null, indoorOnly: "unknown", hidingSpaces: "unknown" },
+      bird: { outOfCageHours: null, flightSafeRoom: "unknown", coversAtNight: "unknown" },
+    },
     limits: [
       {
         fr: "Je ne peux pas accueillir de chat : mon chien ne les supporte pas.",
@@ -152,7 +179,35 @@ const SEEDS: DemoSitterSeed[] = [
         ar: "شقة في الطابق الثالث مع مصعد. لا يوجد حيوان آخر في البيت.",
       },
     },
-    careMethods: ["freeInHome"],
+    care: {
+      /* One dog at a time, in a flat. He crates at night and says why — the
+         section exists so that this can be stated plainly rather than
+         discovered on collection day. */
+      movement: "someRooms",
+      restrictedRooms: {
+        en: "the bedroom",
+        fr: "la chambre",
+        ar: "غرفة النوم",
+      },
+      containment: {
+        use: "atNight",
+        reason: {
+          en: "I use an open crate at night only. My flat has a balcony without a safety rail and I would rather the dog slept somewhere I know is safe. It stays open during the day.",
+          fr: "J’utilise une caisse ouverte, la nuit seulement. Mon appartement a un balcon sans rambarde de sécurité et je préfère que le chien dorme dans un endroit sûr. Elle reste ouverte la journée.",
+          ar: "أستعمل قفصاً مفتوحاً في الليل فقط. شقتي بها شرفة دون حاجز أمان وأفضّل أن ينام الكلب في مكان آمن. يبقى مفتوحاً طوال النهار.",
+        },
+      },
+      maxHoursAlone: 5,
+      presence: "morningsEvenings",
+      sleeping: "ownQuietRoom",
+      feeding: "ownerFoodAndRoutine",
+      enrichment: { en: "", fr: "", ar: "" },
+      transport: ["onFoot"],
+      emergency: { canReachVet: "yes", plan: { en: "", fr: "", ar: "" } },
+      dog: { walksPerDay: 3, walkMinutes: 30, offLeash: "no", gardenAccess: "no" },
+      cat: { litterBoxes: null, indoorOnly: "unknown", hidingSpaces: "unknown" },
+      bird: { outOfCageHours: null, flightSafeRoom: "unknown", coversAtNight: "unknown" },
+    },
     limits: [
       {
         fr: "Je ne peux pas accueillir de grand chien : mon appartement est trop petit.",
@@ -212,7 +267,35 @@ const SEEDS: DemoSitterSeed[] = [
       canSeparateAnimals: "no",
       conditions: null,
     },
-    careMethods: ["ownerRoutine"],
+    care: {
+      /* She goes to the owner's home, so most of the household questions are
+         not hers to answer and she has left them alone. That is what an
+         at-owner sitter's section honestly looks like. */
+      movement: null,
+      restrictedRooms: { en: "", fr: "", ar: "" },
+      containment: { use: "never", reason: { en: "", fr: "", ar: "" } },
+      maxHoursAlone: null,
+      presence: "shortVisits",
+      sleeping: null,
+      feeding: "ownerFoodAndRoutine",
+      enrichment: {
+        en: "I stay a while at each visit rather than just filling the bowl — play, brushing, and time on the floor with the cat.",
+        fr: "Je reste un moment à chaque visite plutôt que de remplir la gamelle et partir : jeu, brossage, et du temps par terre avec le chat.",
+        ar: "أبقى مدة في كل زيارة بدل ملء الوعاء والمغادرة: لعب، تمشيط، ووقت على الأرض مع القطة.",
+      },
+      transport: ["noTransport"],
+      emergency: {
+        canReachVet: "no",
+        plan: {
+          en: "I have no vehicle, so I would call the owner and their vet straight away rather than move the cat myself.",
+          fr: "Je n’ai pas de véhicule : j’appellerais immédiatement le propriétaire et son vétérinaire plutôt que de déplacer le chat moi-même.",
+          ar: "لا أملك سيارة، لذا سأتصل فوراً بالمالك وبطبيبه البيطري بدل نقل القطة بنفسي.",
+        },
+      },
+      dog: { walksPerDay: null, walkMinutes: null, offLeash: "unknown", gardenAccess: "unknown" },
+      cat: { litterBoxes: 1, indoorOnly: "yes", hidingSpaces: "yes" },
+      bird: { outOfCageHours: null, flightSafeRoom: "unknown", coversAtNight: "unknown" },
+    },
     limits: [
       {
         fr: "Je ne fais pas de garde chez moi : mes deux chats n'acceptent pas d'autres chats.",
@@ -270,7 +353,25 @@ const SEEDS: DemoSitterSeed[] = [
         ar: "شرفة مغلقة ومؤمّنة. عمارة هادئة، الطابق الثاني بدون مصعد.",
       },
     },
-    careMethods: ["freeInHome"],
+    care: {
+      /* Deliberately the thinnest section of the six: he has answered three
+         questions and left the rest. His profile is the one that shows what a
+         mostly-empty care section looks like — no penalty, no shaming, just
+         fewer lines on the public page. */
+      movement: "wholeHome",
+      restrictedRooms: { en: "", fr: "", ar: "" },
+      containment: { use: null, reason: { en: "", fr: "", ar: "" } },
+      maxHoursAlone: 6,
+      presence: null,
+      sleeping: null,
+      feeding: null,
+      enrichment: { en: "", fr: "", ar: "" },
+      transport: [],
+      emergency: { canReachVet: "unknown", plan: { en: "", fr: "", ar: "" } },
+      dog: { walksPerDay: null, walkMinutes: null, offLeash: "unknown", gardenAccess: "unknown" },
+      cat: { litterBoxes: null, indoorOnly: "unknown", hidingSpaces: "unknown" },
+      bird: { outOfCageHours: null, flightSafeRoom: "unknown", coversAtNight: "unknown" },
+    },
     limits: [
       {
         fr: "Un seul animal à la fois, je n'accepte pas deux animaux de foyers différents.",
@@ -336,7 +437,39 @@ const SEEDS: DemoSitterSeed[] = [
         ar: "حديقة مسيَّجة بالكامل. طفلان يعيشان في البيت.",
       },
     },
-    careMethods: ["freeInHome", "separatedZones", "outdoorAccess"],
+    care: {
+      /* Family house, fenced garden, two children, and she can separate the
+         spaces — the fullest section of the six, matching a sitter who takes
+         three animals across two species. */
+      movement: "wholeHome",
+      restrictedRooms: {
+        en: "the children's bedrooms",
+        fr: "les chambres des enfants",
+        ar: "غرف الأطفال",
+      },
+      containment: { use: "never", reason: { en: "", fr: "", ar: "" } },
+      maxHoursAlone: 3,
+      presence: "alwaysSomeone",
+      sleeping: "ownQuietRoom",
+      feeding: "ownerFoodOwnRoutine",
+      enrichment: {
+        en: "There is always someone at home. The dogs go out into the garden through the day, and a cat that wants quiet gets a room to itself.",
+        fr: "Il y a toujours quelqu’un à la maison. Les chiens sortent au jardin dans la journée, et un chat qui veut du calme a une pièce pour lui.",
+        ar: "هناك دائماً أحد في البيت. تخرج الكلاب إلى الحديقة خلال النهار، والقطة التي تريد الهدوء تحصل على غرفة لها وحدها.",
+      },
+      transport: ["onFoot", "ownVehicle"],
+      emergency: {
+        canReachVet: "yes",
+        plan: {
+          en: "We have a car and a vet we already use for our own animals. I would call the owner on the way.",
+          fr: "Nous avons une voiture et un vétérinaire que nous utilisons déjà pour nos propres animaux. J’appellerais le propriétaire en chemin.",
+          ar: "لدينا سيارة وطبيب بيطري نتعامل معه لحيواناتنا. سأتصل بالمالك في الطريق.",
+        },
+      },
+      dog: { walksPerDay: 2, walkMinutes: 40, offLeash: "no", gardenAccess: "yes" },
+      cat: { litterBoxes: 2, indoorOnly: "yes", hidingSpaces: "yes" },
+      bird: { outOfCageHours: null, flightSafeRoom: "unknown", coversAtNight: "unknown" },
+    },
     limits: [
       {
         fr: "Je n'accepte pas d'animal qui ne supporte ni les enfants ni les autres animaux.",
@@ -398,7 +531,31 @@ const SEEDS: DemoSitterSeed[] = [
       canSeparateAnimals: "unknown",
       conditions: null,
     },
-    careMethods: ["ownerRoutine"],
+    care: {
+      /* At-owner visits and walks, so the home questions are not hers either.
+         The vet student who cannot drive: "can you reach a vet" is answered
+         "no" and explained, which is more useful to an owner than a blank. */
+      movement: null,
+      restrictedRooms: { en: "", fr: "", ar: "" },
+      containment: { use: "never", reason: { en: "", fr: "", ar: "" } },
+      maxHoursAlone: null,
+      presence: "shortVisits",
+      sleeping: null,
+      feeding: "ownerFoodAndRoutine",
+      enrichment: { en: "", fr: "", ar: "" },
+      transport: ["onFoot", "taxi"],
+      emergency: {
+        canReachVet: "no",
+        plan: {
+          en: "I do not drive. I would call the owner, then their vet, and take a taxi if the vet said to come.",
+          fr: "Je ne conduis pas. J’appellerais le propriétaire, puis son vétérinaire, et je prendrais un taxi si le vétérinaire me disait de venir.",
+          ar: "لا أقود السيارة. سأتصل بالمالك ثم بطبيبه البيطري، وآخذ سيارة أجرة إن طلب مني الحضور.",
+        },
+      },
+      dog: { walksPerDay: 2, walkMinutes: 30, offLeash: "no", gardenAccess: "no" },
+      cat: { litterBoxes: null, indoorOnly: "unknown", hidingSpaces: "yes" },
+      bird: { outOfCageHours: null, flightSafeRoom: "unknown", coversAtNight: "unknown" },
+    },
     limits: [
       {
         fr: "Je ne garde pas d'animal chez moi, uniquement des visites à domicile.",

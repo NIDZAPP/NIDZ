@@ -41,7 +41,7 @@ import {
   StepAvailability,
 } from "@/pages/sitter/SitterBuilder";
 import SitterProfileHome from "@/pages/sitter/SitterProfileHome";
-import { SectionExperience, SectionProfessional } from "@/pages/sitter/SitterSections";
+import { SectionCare, SectionExperience, SectionProfessional } from "@/pages/sitter/SitterSections";
 import SitterTrust from "@/pages/sitter/SitterTrust";
 import SitterPreview from "@/pages/sitter/SitterPreview";
 import SitterPublished from "@/pages/sitter/SitterPublished";
@@ -147,6 +147,7 @@ const App = () => {
             <Route path="/sitter/profile/services" element={<StepServices />} />
             <Route path="/sitter/profile/animals" element={<StepAnimals />} />
             <Route path="/sitter/profile/housing" element={<StepHousing />} />
+            <Route path="/sitter/profile/care" element={<SectionCare />} />
             <Route path="/sitter/profile/limits" element={<StepLimits />} />
             <Route path="/sitter/profile/availability" element={<StepAvailability />} />
             <Route path="/sitter/trust" element={<SitterTrust />} />

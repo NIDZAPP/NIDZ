@@ -1,3 +1,5 @@
+import type { Localized } from "./types";
+
 /* ---------------------------------------------------------------------------
    THE CARE PORTFOLIO — evidence of care, not a social network (§47-49).
 
@@ -78,7 +80,10 @@ export type PortfolioItem = {
    */
   imageUrl?: string;
   /** The sitter's own words about what is happening. */
-  caption: string;
+  /** The sitter's own words about the moment. `Localized` like every other
+      free-text field on a profile — a fixture is authored in all three
+      languages, and what a real sitter types goes into all three slots. */
+  caption: Localized;
   createdAt: string;
   species: Species;
   activity: PortfolioActivity;

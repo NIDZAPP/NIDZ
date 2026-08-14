@@ -143,7 +143,10 @@
       "docHelp": "Facultatif dans cette démonstration.",
       "pending": "Document ajouté — aucune vérification n'a lieu dans cette démonstration",
       "explain": "Ajouter un document ne rend pas une identité vérifiée. Tant qu'un contrôle réel n'a pas eu lieu, aucun profil n'affiche « identité vérifiée » — et Nidz n'a aujourd'hui aucun processus de vérification.",
-      "demoNote": "Aucun fichier n'est envoyé : seul le nom du fichier est retenu dans ce navigateur."
+      "demoNote": "Aucun fichier n'est envoyé : seul le nom du fichier est retenu dans ce navigateur.",
+      "statesTitle": "Ce que Nidz vérifierait, et ce qu’il vérifie aujourd’hui",
+      "statesIntro": "Une vraie place de marché vérifie quelques éléments précis, et chacun a son propre état : ce n’est pas un badge unique allumé ou éteint. Voici la liste complète, et où en est réellement la vôtre.",
+      "statesList": "Une vérification passerait par ces états : {{states}}. Chez Nidz, rien ni personne n’a dépassé le premier, parce qu’aucun processus de vérification n’existe encore."
     },
     "start": {
       "title": "Faites de votre passion pour les animaux une activité rémunérée.",
@@ -207,7 +210,6 @@
       "outdoorLabel": "Espace extérieur",
       "dogsLabel": "Chiens vivant chez vous",
       "catsLabel": "Chats vivant chez vous",
-      "methodsLabel": "Comment les animaux seront-ils gardés ?",
       "conditionsLabel": "Conditions importantes du logement (facultatif)",
       "conditionsHelp": "Étage sans ascenseur, cour clôturée, enfants à la maison…",
       "typeRequired": "Indiquez si vous vivez en appartement ou en maison.",
@@ -393,12 +395,6 @@
       "garden": "Jardin"
     }
   },
-  "careMethod": {
-    "freeInHome": "Les animaux vivent librement dans le logement.",
-    "separatedZones": "Je peux séparer les espaces lorsqu'un animal a besoin de calme.",
-    "outdoorAccess": "Les animaux ont accès à l'extérieur plusieurs fois par jour.",
-    "ownerRoutine": "Je respecte les habitudes de l'animal chez lui, sans le déplacer."
-  },
   "profile": {
     "section": {
       "fit": "Pourquoi ce pet-sitter correspond",
@@ -460,7 +456,70 @@
     "professionalUnverified": "Déclaré par cette personne. Nidz ne vérifie aucun diplôme.",
     "experienceLine_many": "{{count}} ans d'expérience déclarée, surtout avec : {{species}}.",
     "experienceYears_many": "{{count}} ans d'expérience déclarée.",
-    "professionalYears_many": "{{count}} ans"
+    "professionalYears_many": "{{count}} ans",
+    "care": {
+      "declaredNote": "Décrit par cette personne à propos de son propre logement. Nidz ne l’a pas vu et ne vérifie rien.",
+      "movement": {
+        "wholeHome": "L’animal accueilli peut aller partout dans le logement.",
+        "someRooms": "L’animal accueilli a certaines pièces, pas tout le logement.",
+        "oneRoom": "L’animal accueilli reste dans une seule pièce."
+      },
+      "restrictedRooms": "Interdit : {{rooms}}",
+      "sleeping": {
+        "sitterRoom": "Dort dans la chambre du gardien.",
+        "livingSpace": "Dort dans le séjour.",
+        "ownQuietRoom": "Dort dans une pièce calme rien que pour lui.",
+        "outdoorShelter": "Dort dehors, dans un abri."
+      },
+      "containment": {
+        "never": "Aucune caisse, aucun enclos, aucune cage.",
+        "shortPeriods": "Une caisse, un enclos ou une cage est utilisé pour de courtes périodes.",
+        "whenAlone": "Une caisse, un enclos ou une cage est utilisé quand le gardien s’absente.",
+        "atNight": "Une caisse, un enclos ou une cage est utilisé la nuit.",
+        "mostOfTheDay": "Une caisse, un enclos ou une cage est utilisé la majeure partie de la journée."
+      },
+      "presence": {
+        "alwaysSomeone": "Il y a quelqu’un à la maison toute la journée.",
+        "mostOfDay": "Le gardien est là la plus grande partie de la journée.",
+        "morningsEvenings": "Le gardien est là matins et soirs.",
+        "shortVisits": "Le gardien vient en visite."
+      },
+      "maxHoursAlone_one": "Seul au maximum {{count}} heure lors d’une journée normale.",
+      "maxHoursAlone_many": "Seul au maximum {{count}} heures lors d’une journée normale.",
+      "maxHoursAlone_other": "Seul au maximum {{count}} heures lors d’une journée normale.",
+      "feeding": {
+        "ownerFoodAndRoutine": "Donne la nourriture du propriétaire, selon ses horaires.",
+        "ownerFoodOwnRoutine": "Donne la nourriture du propriétaire, selon ses propres horaires.",
+        "sitterProvides": "Fournit la nourriture."
+      },
+      "dog": {
+        "walks_zero": "Aucune promenade — le gardien l’a indiqué.",
+        "walks_one": "{{count}} promenade par jour.",
+        "walks_many": "{{count}} promenades par jour.",
+        "walks_other": "{{count}} promenades par jour.",
+        "minutes_one": "Environ {{count}} minute par promenade.",
+        "minutes_many": "Environ {{count}} minutes par promenade.",
+        "minutes_other": "Environ {{count}} minutes par promenade.",
+        "offLeash": "Détache le chien : {{answer}}",
+        "garden": "Le chien accueilli accède à l’espace extérieur : {{answer}}"
+      },
+      "cat": {
+        "litter_one": "{{count}} bac à litière.",
+        "litter_many": "{{count}} bacs à litière.",
+        "litter_other": "{{count}} bacs à litière.",
+        "indoor": "Garde le chat accueilli à l’intérieur : {{answer}}",
+        "hiding": "Un endroit où le chat peut se cacher : {{answer}}"
+      },
+      "bird": {
+        "outOfCage_one": "{{count}} heure hors de la cage par jour.",
+        "outOfCage_many": "{{count}} heures hors de la cage par jour.",
+        "outOfCage_other": "{{count}} heures hors de la cage par jour.",
+        "flightSafe": "Une pièce où voler sans danger : {{answer}}",
+        "covers": "Couvre la cage la nuit : {{answer}}"
+      },
+      "transport": "Peut se déplacer : {{modes}}",
+      "canReachVet": "Pourrait emmener un animal chez le vétérinaire : {{answer}}"
+    }
   },
   "ownerRequests": {
     "title": "Mes demandes",
@@ -782,8 +841,8 @@
       "hint": "Appartement ou maison, espace extérieur, vos propres animaux."
     },
     "limits": {
-      "label": "Comment vous gardez, et ce que vous ne pouvez pas accepter",
-      "hint": "Votre organisation, et les animaux que vous devriez refuser."
+      "label": "Ce que vous ne pouvez pas accepter",
+      "hint": "Les animaux et les situations que vous devriez refuser."
     },
     "availability": {
       "label": "Périodes où vous n’êtes pas disponible",
@@ -796,7 +855,11 @@
     "done": "Retour à votre profil",
     "answered_one": "{{count}} section sur {{total}} renseignée.",
     "answered_other": "{{count}} sections sur {{total}} renseignées.",
-    "answered_many": "{{count}} sections sur {{total}} renseignées."
+    "answered_many": "{{count}} sections sur {{total}} renseignées.",
+    "care": {
+      "label": "Comment vous vous occupez des animaux",
+      "hint": "Où l’animal dort, combien de temps il reste seul, l’usage d’une caisse ou d’une cage, les sorties, les urgences."
+    }
   },
   "sitterExperience": {
     "intro": "Des questions concrètes plutôt qu’un nombre d’années. Laissez vide ce dont vous n’êtes pas sûr : une question sans réponse n’apparaît nulle part sur votre profil, alors qu’un « non » que vous ne pensiez pas se lit comme une limite ferme.",
@@ -854,5 +917,109 @@
     "animalHealth": "Santé animale ou agriculture",
     "other": "Autre chose",
     "none": "Non, aucun de ceux-ci"
+  },
+  "sitterCare": {
+    "intro": "C’est la partie de vous qu’un propriétaire ne peut deviner ni d’une photo, ni d’un prix, ni d’une commune. Deux personnes peuvent être aussi douées l’une que l’autre et tenir des maisons complètement différentes. Répondez à ce qui vous concerne et laissez le reste.",
+    "demoNote": "Tout ici est votre propre description de votre propre logement. Rien n’est vérifié, rien n’est noté, et en remplir davantage ne vous fait pas remonter dans les résultats.",
+    "containmentReasonRequired": "Dites pourquoi vous utilisez une caisse ou une cage. Seul, ce fait se lit mal, dans les deux sens.",
+    "blocks": {
+      "inTheHome": "Chez vous",
+      "containment": "Caisse ou cage",
+      "theDay": "Une journée normale",
+      "dogs": "Chiens",
+      "cats": "Chats",
+      "birds": "Oiseaux",
+      "outsideAndEmergencies": "Sorties et urgences"
+    },
+    "movementLabel": "Où l’animal accueilli peut-il aller ?",
+    "movement": {
+      "wholeHome": "Partout dans le logement",
+      "someRooms": "Certaines pièces, pas toutes",
+      "oneRoom": "Une seule pièce"
+    },
+    "restrictedRoomsLabel": "Y a-t-il des endroits interdits ?",
+    "restrictedRoomsHelp": "La chambre, le balcon, l’étage — ce que c’est chez vous.",
+    "sleepingLabel": "Où dort l’animal ?",
+    "sleeping": {
+      "sitterRoom": "Dans ma chambre",
+      "livingSpace": "Dans le séjour",
+      "ownQuietRoom": "Dans une pièce calme rien que pour lui",
+      "outdoorShelter": "Dehors, dans un abri"
+    },
+    "containmentIntro": "Certains gardiens utilisent une caisse, un enclos ou une cage, d’autres jamais. Ni l’un ni l’autre n’est un problème ici : rester flou en est un. Un propriétaire doit le savoir avant la garde, pas le jour même.",
+    "containmentLabel": "Utilisez-vous une caisse, un enclos ou une cage ?",
+    "containment": {
+      "never": "Jamais",
+      "shortPeriods": "Pour de courtes périodes",
+      "whenAlone": "Quand je m’absente",
+      "atNight": "La nuit",
+      "mostOfTheDay": "La majeure partie de la journée"
+    },
+    "containmentReasonLabel": "Pourquoi, et dans quelles conditions",
+    "containmentReasonHelp": "Vingt minutes dans une caisse ouverte et une nuit entière enfermé ne sont pas la même chose. Dites laquelle est la vôtre.",
+    "presenceLabel": "Qui est à la maison dans la journée ?",
+    "presence": {
+      "alwaysSomeone": "Il y a toujours quelqu’un",
+      "mostOfDay": "Je suis là la plus grande partie de la journée",
+      "morningsEvenings": "Matins et soirs",
+      "shortVisits": "Je viens en visite"
+    },
+    "maxHoursAloneLabel": "Durée maximale seul (heures)",
+    "maxHoursAloneHelp": "Une journée normale, pas la pire.",
+    "feedingLabel": "Les repas",
+    "feeding": {
+      "ownerFoodAndRoutine": "Nourriture et horaires du propriétaire",
+      "ownerFoodOwnRoutine": "Nourriture du propriétaire, mes horaires",
+      "sitterProvides": "Je fournis la nourriture"
+    },
+    "enrichmentLabel": "À quoi ressemble vraiment une journée ?",
+    "enrichmentHelp": "Jeu, compagnie, sorties. Quelques phrases, avec vos mots.",
+    "dog": {
+      "walksLabel": "Promenades par jour",
+      "walksHelp": "Zéro est une vraie réponse : dites-le si c’est la vôtre.",
+      "minutesLabel": "Minutes par promenade",
+      "offLeashLabel": "Détachez-vous le chien ?",
+      "offLeashHelp": "Les propriétaires d’un chien qui fugue ont besoin de cette réponse.",
+      "gardenLabel": "Le chien accueilli a-t-il accès à votre espace extérieur ?"
+    },
+    "cat": {
+      "litterLabel": "Bacs à litière disponibles",
+      "indoorLabel": "Gardez-vous le chat accueilli à l’intérieur ?",
+      "hidingLabel": "Un endroit où se cacher ?",
+      "hidingHelp": "Un chat sans refuge dans une maison inconnue, c’est la cause la plus fréquente d’une garde qui se passe mal."
+    },
+    "bird": {
+      "outOfCageLabel": "Heures hors de la cage par jour",
+      "flightSafeLabel": "Y a-t-il une pièce où il peut voler sans danger ?",
+      "flightSafeHelp": "Fenêtres fermées, ventilateurs éteints, aucun autre animal dans la pièce.",
+      "coversLabel": "Couvrez-vous la cage la nuit ?"
+    },
+    "transportLabel": "Comment déplaceriez-vous un animal ?",
+    "transport": {
+      "onFoot": "À pied",
+      "ownVehicle": "Mon véhicule",
+      "taxi": "En taxi",
+      "noTransport": "Je ne peux pas transporter un animal"
+    },
+    "canReachVetLabel": "Pourriez-vous emmener un animal chez le vétérinaire ?",
+    "canReachVetHelp": "Un non franc est utile. Un propriétaire préfère le savoir maintenant plutôt que pendant une urgence.",
+    "emergencyPlanLabel": "Que feriez-vous en cas de problème ?",
+    "emergencyPlanHelp": "Qui vous appelleriez, dans quel ordre, et comment vous iriez."
+  },
+  "verification": {
+    "domain": {
+      "phone": "Numéro de téléphone",
+      "email": "Adresse e-mail",
+      "identity": "Identité",
+      "credential": "Qualification professionnelle"
+    },
+    "state": {
+      "not_started": "Non commencé",
+      "submitted": "Transmis",
+      "pending": "En cours de vérification",
+      "verified": "Vérifié",
+      "rejected": "Refusé",
+      "expired": "Expiré"
+    }
   }
 }

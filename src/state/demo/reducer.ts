@@ -27,6 +27,7 @@ import {
   type Species,
 } from "@/data/types";
 import type { AppLocale } from "@/i18n";
+import { emptyCareConditions, restoreCareConditions } from "@/data/care-conditions";
 import { restorePet } from "@/data/pets";
 import {
   NO_CAPABILITIES,
@@ -192,7 +193,7 @@ export function emptySitterProfile(id: string): SitterProfile {
       canSeparateAnimals: "unknown",
       conditions: null,
     },
-    careMethods: [],
+    care: emptyCareConditions(),
     limits: [],
     declaredUnavailable: [],
     /** The person's own profile is not an example — the demo marker belongs
@@ -393,7 +394,13 @@ function restoreSitter(value: unknown): SitterWorkspace | null {
   const profile = workspace.profile as Partial<SitterProfile> | undefined;
   if (!profile || typeof profile !== "object") return null;
 
-  const arrays = [profile.services, profile.acceptedSpecies, profile.acceptedDogSizes, profile.careMethods, profile.limits, profile.declaredUnavailable];
+  const arrays = [
+    profile.services,
+    profile.acceptedSpecies,
+    profile.acceptedDogSizes,
+    profile.limits,
+    profile.declaredUnavailable,
+  ];
   if (arrays.some((a) => !Array.isArray(a))) return null;
   if (typeof profile.id !== "string" || typeof profile.publicName !== "string") return null;
   if (typeof profile.rates !== "object" || profile.rates === null) return null;
@@ -419,6 +426,12 @@ function restoreSitter(value: unknown): SitterWorkspace | null {
       detail: normaliseLocalized(profile.professional?.detail, empty.professional.detail),
     },
     housing: { ...empty.housing, ...(profile.housing ?? {}) },
+    /* Validated field by field, and handed the retired 1.1 `careMethods` so a
+       draft written before §57 keeps what can be carried forward. */
+    care: restoreCareConditions(
+      profile.care,
+      (profile as unknown as { careMethods?: unknown }).careMethods,
+    ),
     confirmedSections: Array.isArray(profile.confirmedSections)
       ? profile.confirmedSections.filter((id): id is string => typeof id === "string")
       : [],

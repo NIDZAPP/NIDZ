@@ -143,7 +143,10 @@
       "docHelp": "Optional in this demonstration.",
       "pending": "Document added — no verification takes place in this demonstration",
       "explain": "Adding a document does not make an identity verified. Until a real check has happened, no profile shows “verified identity” — and Nidz has no verification process today.",
-      "demoNote": "No file is uploaded: only the file name is kept, in this browser."
+      "demoNote": "No file is uploaded: only the file name is kept, in this browser.",
+      "statesTitle": "What Nidz would check, and what it checks now",
+      "statesIntro": "A real marketplace verifies a few specific things, and each one has its own state — it is not one badge that is either on or off. Here is the full list, and where yours actually stands.",
+      "statesList": "A check would move through these states: {{states}}. Nothing in Nidz is past the first one, for anybody, because no checking process exists yet."
     },
     "start": {
       "title": "Turn your love of animals into paid work.",
@@ -207,7 +210,6 @@
       "outdoorLabel": "Outdoor space",
       "dogsLabel": "Dogs living with you",
       "catsLabel": "Cats living with you",
-      "methodsLabel": "How will the animals be looked after?",
       "conditionsLabel": "Important conditions about your home (optional)",
       "conditionsHelp": "Upper floor with no lift, fenced yard, children at home…",
       "typeRequired": "Say whether you live in a flat or a house.",
@@ -390,12 +392,6 @@
       "garden": "Garden"
     }
   },
-  "careMethod": {
-    "freeInHome": "Animals live freely in the home.",
-    "separatedZones": "I can separate the spaces when an animal needs quiet.",
-    "outdoorAccess": "Animals get outdoor access several times a day.",
-    "ownerRoutine": "I keep to the animal's own routine at home, without moving it."
-  },
   "profile": {
     "section": {
       "fit": "Why this sitter fits",
@@ -450,7 +446,65 @@
     "selfTestCta": "Send myself a test request",
     "professionalYears_one": "{{count}} year",
     "professionalYears_other": "{{count}} years",
-    "professionalUnverified": "Declared by this person. Nidz does not verify qualifications."
+    "professionalUnverified": "Declared by this person. Nidz does not verify qualifications.",
+    "care": {
+      "declaredNote": "Described by this person about their own home. Nidz has not seen it and does not check any of it.",
+      "movement": {
+        "wholeHome": "A visiting animal can go anywhere in the home.",
+        "someRooms": "A visiting animal has some rooms, not the whole home.",
+        "oneRoom": "A visiting animal stays in one room."
+      },
+      "restrictedRooms": "Off limits: {{rooms}}",
+      "sleeping": {
+        "sitterRoom": "Sleeps in the sitter's room.",
+        "livingSpace": "Sleeps in the living area.",
+        "ownQuietRoom": "Sleeps in a quiet room of its own.",
+        "outdoorShelter": "Sleeps outside, in a shelter."
+      },
+      "containment": {
+        "never": "No crate, pen or cage is used.",
+        "shortPeriods": "A crate, pen or cage is used for short periods.",
+        "whenAlone": "A crate, pen or cage is used when the sitter is out.",
+        "atNight": "A crate, pen or cage is used at night.",
+        "mostOfTheDay": "A crate, pen or cage is used for most of the day."
+      },
+      "presence": {
+        "alwaysSomeone": "Someone is at home all day.",
+        "mostOfDay": "The sitter is at home most of the day.",
+        "morningsEvenings": "The sitter is at home mornings and evenings.",
+        "shortVisits": "The sitter comes for visits."
+      },
+      "maxHoursAlone_one": "Alone for at most {{count}} hour on a normal day.",
+      "maxHoursAlone_other": "Alone for at most {{count}} hours on a normal day.",
+      "feeding": {
+        "ownerFoodAndRoutine": "Feeds the owner's food, on the owner's routine.",
+        "ownerFoodOwnRoutine": "Feeds the owner's food, on their own timings.",
+        "sitterProvides": "Provides the food."
+      },
+      "dog": {
+        "walks_zero": "No walks — this sitter has said so.",
+        "walks_one": "{{count}} walk a day.",
+        "walks_other": "{{count}} walks a day.",
+        "minutes_one": "About {{count}} minute per walk.",
+        "minutes_other": "About {{count}} minutes per walk.",
+        "offLeash": "Lets a dog off the lead: {{answer}}",
+        "garden": "Visiting dogs get into the outdoor space: {{answer}}"
+      },
+      "cat": {
+        "litter_one": "{{count}} litter tray.",
+        "litter_other": "{{count}} litter trays.",
+        "indoor": "Keeps a visiting cat indoors: {{answer}}",
+        "hiding": "Somewhere for a cat to hide: {{answer}}"
+      },
+      "bird": {
+        "outOfCage_one": "{{count}} hour out of the cage a day.",
+        "outOfCage_other": "{{count}} hours out of the cage a day.",
+        "flightSafe": "A room that is safe to fly in: {{answer}}",
+        "covers": "Covers the cage at night: {{answer}}"
+      },
+      "transport": "Can travel: {{modes}}",
+      "canReachVet": "Could get an animal to a vet: {{answer}}"
+    }
   },
   "ownerRequests": {
     "title": "My requests",
@@ -768,8 +822,8 @@
       "hint": "Flat or house, outdoor space, your own animals."
     },
     "limits": {
-      "label": "How you care, and what you cannot accept",
-      "hint": "Your routine, and the animals you would have to turn down."
+      "label": "What you cannot accept",
+      "hint": "The animals and situations you would have to turn down."
     },
     "availability": {
       "label": "Periods you cannot take",
@@ -781,7 +835,11 @@
     },
     "done": "Back to your profile",
     "answered_other": "{{count}} of {{total}} sections answered.",
-    "answered_one": "{{count}} of {{total}} sections answered."
+    "answered_one": "{{count}} of {{total}} sections answered.",
+    "care": {
+      "label": "How you look after animals",
+      "hint": "Where the animal sleeps, how long it is alone, crate or cage use, walks, emergencies."
+    }
   },
   "sitterExperience": {
     "intro": "Concrete questions rather than a number of years. Leave anything blank that you are not sure about — a blank question shows nowhere on your profile, whereas a “no” you did not mean reads to an owner as a firm limit.",
@@ -839,5 +897,109 @@
     "animalHealth": "Animal health or agriculture",
     "other": "Something else",
     "none": "No, none of these"
+  },
+  "sitterCare": {
+    "intro": "This is the part of you an owner cannot guess from a photo, a price or a commune. Two people can both be good with animals and run completely different homes. Answer what applies and leave the rest.",
+    "demoNote": "Everything here is your own description of your own home. Nothing is checked, nothing is scored, and answering more of it does not move you up the results.",
+    "containmentReasonRequired": "Please say why you use a crate or cage. On its own the fact is easy to misread, in both directions.",
+    "blocks": {
+      "inTheHome": "In your home",
+      "containment": "Crate or cage",
+      "theDay": "A normal day",
+      "dogs": "Dogs",
+      "cats": "Cats",
+      "birds": "Birds",
+      "outsideAndEmergencies": "Going out, and emergencies"
+    },
+    "movementLabel": "Where can a visiting animal go?",
+    "movement": {
+      "wholeHome": "Anywhere in the home",
+      "someRooms": "Some rooms, not all",
+      "oneRoom": "One room"
+    },
+    "restrictedRoomsLabel": "Anywhere that stays off limits?",
+    "restrictedRoomsHelp": "The bedroom, the balcony, upstairs — whatever it is.",
+    "sleepingLabel": "Where does the animal sleep?",
+    "sleeping": {
+      "sitterRoom": "In my room",
+      "livingSpace": "In the living area",
+      "ownQuietRoom": "In a quiet room of its own",
+      "outdoorShelter": "Outside, in a shelter"
+    },
+    "containmentIntro": "Some sitters use a crate, a pen or a cage and some never do. Neither is a problem here — being unclear about it is. An owner needs to know before the stay, not on the day.",
+    "containmentLabel": "Do you use a crate, a pen or a cage?",
+    "containment": {
+      "never": "Never",
+      "shortPeriods": "For short periods",
+      "whenAlone": "When I am out",
+      "atNight": "At night",
+      "mostOfTheDay": "Most of the day"
+    },
+    "containmentReasonLabel": "Why, and what it is like",
+    "containmentReasonHelp": "Twenty minutes in an open crate and a whole night shut in are not the same thing. Say which yours is.",
+    "presenceLabel": "Who is at home during the day?",
+    "presence": {
+      "alwaysSomeone": "Someone is always there",
+      "mostOfDay": "I am there most of the day",
+      "morningsEvenings": "Mornings and evenings",
+      "shortVisits": "I come for visits"
+    },
+    "maxHoursAloneLabel": "Longest the animal would be alone (hours)",
+    "maxHoursAloneHelp": "On a normal day, not the worst one.",
+    "feedingLabel": "Food",
+    "feeding": {
+      "ownerFoodAndRoutine": "Owner's food, owner's routine",
+      "ownerFoodOwnRoutine": "Owner's food, my own timings",
+      "sitterProvides": "I provide the food"
+    },
+    "enrichmentLabel": "What does a day actually look like?",
+    "enrichmentHelp": "Play, company, going out. A few sentences in your own words.",
+    "dog": {
+      "walksLabel": "Walks a day",
+      "walksHelp": "Zero is a real answer — say it if it is yours.",
+      "minutesLabel": "Minutes per walk",
+      "offLeashLabel": "Do you let a dog off the lead?",
+      "offLeashHelp": "Owners of a dog that runs need to know this one.",
+      "gardenLabel": "Does a visiting dog get into your outdoor space?"
+    },
+    "cat": {
+      "litterLabel": "Litter trays available",
+      "indoorLabel": "Do you keep a visiting cat indoors?",
+      "hidingLabel": "Somewhere to hide?",
+      "hidingHelp": "A cat with nowhere to retreat to in a strange home is the most common reason a stay goes badly."
+    },
+    "bird": {
+      "outOfCageLabel": "Hours out of the cage a day",
+      "flightSafeLabel": "Is there a room that is safe to fly in?",
+      "flightSafeHelp": "Windows shut, fans off, no other animal in the room.",
+      "coversLabel": "Do you cover the cage at night?"
+    },
+    "transportLabel": "How would you get an animal somewhere?",
+    "transport": {
+      "onFoot": "On foot",
+      "ownVehicle": "My own vehicle",
+      "taxi": "By taxi",
+      "noTransport": "I cannot transport an animal"
+    },
+    "canReachVetLabel": "Could you get an animal to a vet?",
+    "canReachVetHelp": "A straight no is useful. An owner would rather know now than find out during an emergency.",
+    "emergencyPlanLabel": "What would you do if something went wrong?",
+    "emergencyPlanHelp": "Who you would call, in what order, and how you would get there."
+  },
+  "verification": {
+    "domain": {
+      "phone": "Phone number",
+      "email": "Email address",
+      "identity": "Identity",
+      "credential": "Professional qualification"
+    },
+    "state": {
+      "not_started": "Not started",
+      "submitted": "Submitted",
+      "pending": "Being checked",
+      "verified": "Verified",
+      "rejected": "Rejected",
+      "expired": "Expired"
+    }
   }
 }

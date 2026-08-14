@@ -1,3 +1,4 @@
+import { careAnswered } from "./care-conditions";
 import type { SitterProfile } from "./types";
 
 /* ---------------------------------------------------------------------------
@@ -108,14 +109,22 @@ export const SITTER_SECTIONS: readonly SitterSection[] = [
     required: false,
   },
   {
+    id: "care",
+    path: "/sitter/profile/care",
+    labelKey: "sitterSections.care.label",
+    hintKey: "sitterSections.care.hint",
+    /* §57 asks what an owner cannot infer from anything else on the profile,
+       so it is the one optional section the dashboard puts first among the
+       optional ones. */
+    isAnswered: (p) => careAnswered(p.care),
+    required: false,
+  },
+  {
     id: "limits",
     path: "/sitter/profile/limits",
     labelKey: "sitterSections.limits.label",
     hintKey: "sitterSections.limits.hint",
-    /* Care methods OR stated limits. Both describe how care actually happens,
-       and a sitter who has said either has answered the question this section
-       asks. */
-    isAnswered: (p) => p.careMethods.length > 0 || p.limits.length > 0,
+    isAnswered: (p) => p.limits.length > 0,
     required: false,
   },
   {
