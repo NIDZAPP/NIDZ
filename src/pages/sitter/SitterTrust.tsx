@@ -32,7 +32,7 @@ export default function SitterTrust() {
   /* The profile has to exist as a profile before its trustworthiness is
      discussed: no name, no commune, no account means the flow was entered
      part-way. */
-  if (!state.sitter || !state.account?.phoneConfirmed || !state.sitter.profile.publicName) {
+  if (!state.sitter || !state.account?.accountComplete || !state.sitter.profile.publicName) {
     return <Navigate to="/sitter/start" replace />;
   }
   const idDocument = state.sitter.idDocument;

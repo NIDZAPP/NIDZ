@@ -22,6 +22,7 @@ import {
   type Pet,
   type RequestStatus,
   type SitterProfile,
+  type Species,
 } from "@/data/types";
 import {
   NO_CAPABILITIES,
@@ -43,14 +44,38 @@ const STORAGE_KEY = "nidz.demo";
 /** Audit 1.1's key. Read once, migrated, then removed — see `loadState`. */
 const LEGACY_STORAGE_KEY = "nidz.demo.v1";
 
-/** A local, unverified identity. `phoneConfirmed` records that the person
-    completed the SIMULATED code step — it is not phone verification, and no
-    surface may present it as one. */
+/**
+ * A local, unverified identity — a name typed into this browser.
+ *
+ * Nothing here was checked by anybody. There is no sign-in, no session, no
+ * token and no verification of any field, and no surface may suggest
+ * otherwise.
+ *
+ * Audit 1.2 replaced `phoneConfirmed` with `accountComplete`. The old name
+ * described a SIMULATED code step, and every guard in the app was really
+ * asking "did this person finish the account steps" — so the field now says
+ * that, and the simulated verification it was named after is gone (§92: with
+ * no OTP provider, never claim a code was sent).
+ */
 export type DemoAccount = {
   firstName: string;
   lastName: string;
+  /** ISO `YYYY-MM-DD`. **Private.** Collected for eligibility only and never
+      rendered on any public surface (§16, §95). */
+  dateOfBirth: string | null;
+  /** Where this person is, at administrative granularity. Nidz holds no exact
+      address for anyone, so there is nothing more precise to leak (§29). */
+  wilayaId: string | null;
+  communeId: string | null;
+  /** Which animals they have. Multi-select — one household is often not one
+      species. Used to make the first search relevant, never as a claim about
+      the animals themselves. */
+  ownedSpecies: Species[];
+  /** Optional and unverified. Private by default: it is never exchanged with
+      another user without explicit consent (§78). */
   phoneNumber: string;
-  phoneConfirmed: boolean;
+  /** The account steps were completed. NOT a verification of anything. */
+  accountComplete: boolean;
   createdAt: string;
 };
 
@@ -139,7 +164,7 @@ export type DemoAction =
   | { type: "setNeed"; patch: Partial<OwnerNeed> }
   | { type: "savePet"; pet: Pet }
   | { type: "setAccount"; account: DemoAccount }
-  | { type: "confirmPhone" }
+  | { type: "completeAccount" }
   | { type: "addRequest"; request: CareRequest }
   | { type: "respondToRequest"; id: string; status: Exclude<RequestStatus, "pending"> }
   | { type: "startSitterProfile"; id: string }
@@ -181,8 +206,8 @@ export function reducer(state: DemoState, action: DemoAction): DemoState {
         capabilities: { ...state.capabilities, owner: true },
       };
 
-    case "confirmPhone":
-      return state.account ? { ...state, account: { ...state.account, phoneConfirmed: true } } : state;
+    case "completeAccount":
+      return state.account ? { ...state, account: { ...state.account, accountComplete: true } } : state;
 
     case "addRequest":
       return { ...state, requests: [action.request, ...state.requests] };

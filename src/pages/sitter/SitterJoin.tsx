@@ -91,7 +91,7 @@ export function SitterLocation() {
   const [error, setError] = useState<string>();
   const wilayaRef = useRef<HTMLButtonElement>(null);
 
-  if (!state.account?.phoneConfirmed) return <Navigate to="/sitter/join/name" replace />;
+  if (!state.account?.accountComplete) return <Navigate to="/sitter/join/name" replace />;
 
   const submit = () => {
     if (!communeCode) {

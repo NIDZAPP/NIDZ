@@ -59,11 +59,19 @@ export function NameStep({
       account: {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
+        /* Not asked on this step, and therefore genuinely unknown rather than
+           defaulted to something that would read as an answer. The quick owner
+           account (§16) collects them; until it does, they stay null and no
+           screen may present an empty value as a declaration. */
+        dateOfBirth: state.account?.dateOfBirth ?? null,
+        wilayaId: state.account?.wilayaId ?? null,
+        communeId: state.account?.communeId ?? null,
+        ownedSpecies: state.account?.ownedSpecies ?? [],
         phoneNumber: state.account?.phoneNumber ?? "",
         /* Preserved: a confirmation belongs to the phone NUMBER, which is
            unchanged here. Resetting it would push someone fixing a typo in
            their surname back through the code step. */
-        phoneConfirmed: state.account?.phoneConfirmed ?? false,
+        accountComplete: state.account?.accountComplete ?? false,
         createdAt: state.account?.createdAt ?? new Date().toISOString(),
       },
     });
@@ -172,7 +180,7 @@ export function PhoneStep({
         phoneNumber: digits,
         /* A confirmation belongs to the number it was given for. Changing the
            number invalidates it. */
-        phoneConfirmed: account.phoneNumber === digits && account.phoneConfirmed,
+        accountComplete: account.phoneNumber === digits && account.accountComplete,
       },
     });
     onDone();
@@ -251,7 +259,7 @@ export function PhoneStep({
  * clearly identified as a demonstration (p.241), and a marker quieter than the
  * thing it qualifies is not a marker.
  *
- * Completing it sets `phoneConfirmed`, which means exactly "went through the
+ * Completing it sets `accountComplete`, which means exactly "went through the
  * simulated step". It is NOT phone verification and no surface may present it
  * as one — there is no `verified` flag anywhere in the model (§6 B).
  */
@@ -283,7 +291,7 @@ export function VerifyStep({
       inputRef.current?.focus();
       return;
     }
-    dispatch({ type: "confirmPhone" });
+    dispatch({ type: "completeAccount" });
     onDone();
   };
 

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
-import { Cat, Dog, House, ListChecks, PawPrint, Wallet } from "lucide-react";
+import { Bird, Cat, Dog, House, ListChecks, PawPrint, Wallet } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
@@ -28,7 +28,7 @@ function shouldSplash(): boolean {
   }
 }
 
-const SPECIES_ICON: Record<Species, LucideIcon> = { dog: Dog, cat: Cat };
+const SPECIES_ICON: Record<Species, LucideIcon> = { dog: Dog, cat: Cat, bird: Bird };
 
 /* Four of the profile's sections, named. Rates is here because it is the thing
    a prospective sitter most wants to know they control, and leaving it out

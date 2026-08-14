@@ -11,7 +11,10 @@ npm run build      # production build
 npm run build:dev  # build in development mode
 npm run preview    # preview the production build locally
 npm run lint       # run ESLint over the repo
+npm run typecheck  # tsc -b --force — see the warning below
 ```
+
+**`npx tsc --noEmit` type-checks NOTHING in this repo, and never has.** `tsconfig.json` is a solution file: `"files": []` plus project references. Without `-b`, `tsc` compiles the empty file list and exits 0 — so it reports success on a codebase with real type errors in it. Audit 1.2 found this the hard way: it was silently passing while `fields.tsx` referenced a `Select` component whose import had been removed, which would have crashed a live screen. Use **`npm run typecheck`** (`tsc -b --force`). `--force` matters too, because `tsc -b` caches and will skip a project it believes is unchanged.
 
 There is **no test framework configured** — there are no test scripts, no test runner in `package.json`, and no test files. Do not assume `npm test` works; if tests are needed, the harness must be added first.
 

@@ -301,7 +301,7 @@ verify the active branch is `nidz-1.2`, commit, push.
 | 3 | Language, routing, persistence foundation | **Completed** — see §6 |
 | 4 | Algerian geography | **Partial** — wilayas complete and verified; commune coverage is 10 of 69 wilayas, with the gap documented rather than filled by unverified data. See §6 |
 | 5 | Map + geolocation | **Deferred** — blocked on verifiable coordinate data, not on the map library. Evaluation and constraints recorded in `NIDZ-1.2-MAP-AND-LOCATION.md`. See §6 |
-| 6 | Auth gateway + fast owner account | — |
+| 6 | Auth gateway + fast owner account | **Partial** — provider boundary, domain and the `bird` species landed; the gateway screen and the quick-account form are outstanding. See §6 |
 | 7 | Multi-pet system | — |
 | 8 | Owner home + marketplace search | — |
 | 9 | Public sitter profile + reviews + portfolio | — |
@@ -674,6 +674,58 @@ when it becomes possible.
 **To unblock:** a licensed, sourced set of commune positions. That single item
 turns on the map, area markers and coarse proximity. Everything else is
 scaffolding around an empty middle until it exists.
+
+---
+
+### Group 6 — auth gateway and the fast owner account
+
+**Partial.** The foundations landed; the two screens did not.
+
+**THE MOST IMPORTANT THING THIS GROUP FOUND HAS NOTHING TO DO WITH AUTH.**
+
+`npx tsc --noEmit` — the command in this audit's brief, in `CLAUDE.md`, and in
+every "tsc: 0 errors" line reported in Groups 1 to 5 — **type-checks nothing in
+this repository**. `tsconfig.json` is a solution file: `"files": []` plus
+project references. Without `-b`, `tsc` compiles the empty file list and exits
+0. It reports success on a codebase with real type errors in it.
+
+It was hiding one. Group 4 removed the `Select` imports from
+`components/shared/fields.tsx` while another field in the same file still used
+them — `Cannot find name 'Select'`, a **value** that would be `undefined` at
+runtime and crash that screen. `npm run build` did not catch it either, because
+Vite strips types rather than checking them. The bug is fixed, and
+`npm run typecheck` (`tsc -b --force`) now exists and is documented in
+`CLAUDE.md` and the regression checklist. `--force` matters as well: `tsc -b`
+caches and will skip a project it believes is unchanged.
+
+Worth knowing alongside it: `tsconfig.app.json` sets `"strict": false`, so even
+the real checker is more permissive than it looks.
+
+**Delivered**
+
+- `src/auth/providers.ts` — the sign-in boundary. Google, Microsoft and phone
+  are declared with `available: false` and a stated reason, in one place, so
+  marking one available without wiring it would be a deliberate act rather than
+  drift. No OAuth client, no token, no session, no OTP sender, no verifiable
+  code. The future phone-verification states are written down so nobody
+  implements a subset and calls the result "verified".
+- **`bird` is a real third species.** Not a dog with different copy: a bird has
+  a cage rather than a garden, is let out rather than walked, and escapes
+  differently. Adding it creates no supply — no demo sitter accepts birds, so a
+  bird search finds nobody, which is the honest zero state §33 asks for.
+- **Account model for §16**: date of birth (private, eligibility only, never
+  rendered publicly), wilaya and commune, and owned species as a multi-select.
+  Fields not yet asked for are `null` / `[]` — genuinely unknown rather than
+  defaulted into something that would read as an answer.
+- **The simulated phone verification is gone.** `phoneConfirmed` became
+  `accountComplete`, which is what every guard in the app was actually asking.
+  The old name described a fake code step; §92 forbids claiming an SMS was sent,
+  and the cleanest way to stop claiming it is to stop having it.
+
+**Outstanding** — the `/auth` gateway screen (provider list rendered honestly
+from the descriptors, plus the guest "explore" path) and the quick owner-account
+form that collects the four new fields. The domain is in place for both; what is
+missing is the UI.
 
 ---
 

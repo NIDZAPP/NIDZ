@@ -31,9 +31,21 @@ export function asLocalized(text: string): Localized {
   return { fr: text, en: text, ar: text };
 }
 
-/** Demo V1 is dogs and cats only (Audit p.97). */
-export type Species = "dog" | "cat";
-export const SPECIES: readonly Species[] = ["dog", "cat"];
+/**
+ * The animals Nidz handles.
+ *
+ * Audit 1.2 adds `bird` (§16-19). It is a real third species, not a dog with
+ * different copy: a bird has a cage or an aviary rather than a garden, is let
+ * out rather than walked, and escapes in a way a dog does not. Every form that
+ * asks about an animal has to branch on this rather than assume four legs —
+ * "number of daily walks" must never appear for a bird.
+ *
+ * Adding a species to this list does NOT create supply. No demo sitter
+ * currently declares that they accept birds, so a bird search finds nobody —
+ * which is the honest zero state §33 asks for, not a bug to paper over.
+ */
+export type Species = "dog" | "cat" | "bird";
+export const SPECIES: readonly Species[] = ["dog", "cat", "bird"];
 
 export type CareType = "boarding" | "atOwner" | "walk";
 export const CARE_TYPES: readonly CareType[] = ["boarding", "atOwner", "walk"];

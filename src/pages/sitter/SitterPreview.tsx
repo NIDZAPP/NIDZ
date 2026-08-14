@@ -31,7 +31,7 @@ export default function SitterPreview() {
      from the results — so "votre profil est publié" would be false the moment
      it was shown. */
   const complete =
-    Boolean(state.account?.phoneConfirmed) &&
+    Boolean(state.account?.accountComplete) &&
     Boolean(profile?.publicName) &&
     Boolean(profile?.communeCode) &&
     (profile?.services.length ?? 0) > 0;

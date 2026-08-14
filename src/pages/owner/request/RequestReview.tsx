@@ -52,7 +52,7 @@ export default function RequestReview() {
   if (!state.account?.phoneNumber) {
     return <Navigate to={`/owner/request/${sitter.id}/phone${search ? `?${search}` : ""}`} replace />;
   }
-  if (!state.account.phoneConfirmed) {
+  if (!state.account.accountComplete) {
     return <Navigate to={`/owner/request/${sitter.id}/verify${search ? `?${search}` : ""}`} replace />;
   }
   /* A request is about an animal, a service and a period. Missing any of them,

@@ -85,7 +85,8 @@ than replacing it with a comment.
 
 | # | Rule |
 |---|---|
-| H1 | `npm run build`, `npx tsc --noEmit`, `npm run lint` and `git diff --check` all pass at every group boundary. |
+| H1 | `npm run build`, **`npm run typecheck`**, `npm run lint` and `git diff --check` all pass at every group boundary. **Not `npx tsc --noEmit`** — see H5. |
+| H5 | The type-check must actually type-check. `tsconfig.json` is a solution file (`"files": []` + references), so `tsc --noEmit` compiles nothing and exits 0 on a broken codebase. Only `tsc -b --force` reads `tsconfig.app.json`. Note also that `"strict": false` in that config, so the checker is more permissive than it looks. |
 | H2 | Lint warning count does not exceed the 7 pre-existing shadcn `react-refresh` warnings recorded in the implementation plan. |
 | H3 | No new `any`. |
 | H4 | `main`, `nidz-1.1` and `stash@{0}` are byte-identical at the end of the audit to what they were at the start. |
