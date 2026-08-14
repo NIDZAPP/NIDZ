@@ -49,11 +49,14 @@ export default function RequestReview() {
   const dates = criteria.dates ?? state.need.dates;
 
   if (!sitter) return <Navigate to="/search" replace />;
-  if (!state.account?.phoneNumber) {
-    return <Navigate to={`/owner/request/${sitter.id}/phone${search ? `?${search}` : ""}`} replace />;
-  }
-  if (!state.account.accountComplete) {
-    return <Navigate to={`/owner/request/${sitter.id}/verify${search ? `?${search}` : ""}`} replace />;
+
+  /* The first and only point at which Nidz needs to know who is asking.
+     Everything before it — browsing, filtering, reading this sitter's profile
+     — works with no account at all (§15), so the gateway appears here rather
+     than at the door. `next` brings them straight back to this summary. */
+  if (!state.account?.accountComplete) {
+    const here = `/owner/request/${sitter.id}${search ? `?${search}` : ""}`;
+    return <Navigate to={`/auth?next=${encodeURIComponent(here)}`} replace />;
   }
   /* A request is about an animal, a service and a period. Missing any of them,
      the owner goes back to the step that collects it — a summary must never
@@ -127,7 +130,10 @@ export default function RequestReview() {
       </Helmet>
       <FlowScreen
         wide
-        backTo={`/owner/request/${sitterId ?? ""}/verify${search ? `?${search}` : ""}`}
+        /* Back to the profile this request is about, not to a retired step.
+           The search travels with it so the profile still explains the same
+           match it did on the way in. */
+        backTo={`/sitters/${sitterId ?? ""}${search ? `?${search}` : ""}`}
         title={t("request.review.title")}
         action={
           <Button type="button" size="lg" onClick={send}>

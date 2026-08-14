@@ -22,9 +22,8 @@ import Welcome from "@/pages/onboarding/Welcome";
 import NeedPet from "@/pages/owner/need/NeedPet";
 import NeedLocation from "@/pages/owner/need/NeedLocation";
 import NeedCare from "@/pages/owner/need/NeedCare";
-import RequestName from "@/pages/owner/request/RequestName";
-import RequestPhone from "@/pages/owner/request/RequestPhone";
-import RequestVerify from "@/pages/owner/request/RequestVerify";
+import Auth from "@/pages/Auth";
+import OwnerAccount from "@/pages/owner/OwnerAccount";
 import RequestReview from "@/pages/owner/request/RequestReview";
 import RequestSent from "@/pages/owner/request/RequestSent";
 import OwnerRequests from "@/pages/owner/OwnerRequests";
@@ -52,6 +51,16 @@ function LegacySitterRedirect() {
   const { id } = useParams();
   const { search, hash } = useLocation();
   return <Navigate to={{ pathname: `/sitters/${id}`, search, hash }} replace />;
+}
+
+/** The three retired request steps — name, phone and the simulated code — all
+    resolve to the summary that replaced them. The search is carried across,
+    because it is what tells the summary which service and dates were asked
+    for. */
+function LegacyRequestRedirect() {
+  const { sitterId } = useParams();
+  const { search } = useLocation();
+  return <Navigate to={{ pathname: `/owner/request/${sitterId}`, search }} replace />;
 }
 
 /**
@@ -97,10 +106,22 @@ const App = () => {
             <Route path="/owner/need/pet" element={<NeedPet />} />
             <Route path="/owner/need/location" element={<NeedLocation />} />
             <Route path="/owner/need/care" element={<NeedCare />} />
-            <Route path="/owner/request/:sitterId" element={<RequestName />} />
-            <Route path="/owner/request/:sitterId/phone" element={<RequestPhone />} />
-            <Route path="/owner/request/:sitterId/verify" element={<RequestVerify />} />
-            <Route path="/owner/request/:sitterId/review" element={<RequestReview />} />
+            {/* The sign-in gateway and the quick owner account. Both are flow
+                screens: they own the viewport and carry their own action bar,
+                and neither should sit under site chrome offering to navigate
+                away mid-decision. */}
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/owner/account" element={<OwnerAccount />} />
+
+            {/* The request summary IS the request flow now. Audit 1.1 put a
+                name step, a phone step and a SIMULATED code step in front of
+                it; §92 forbids claiming a code was sent, and the other two are
+                the quick account's job. The three old addresses redirect here
+                so existing links and Back still resolve. */}
+            <Route path="/owner/request/:sitterId" element={<RequestReview />} />
+            <Route path="/owner/request/:sitterId/phone" element={<LegacyRequestRedirect />} />
+            <Route path="/owner/request/:sitterId/verify" element={<LegacyRequestRedirect />} />
+            <Route path="/owner/request/:sitterId/review" element={<LegacyRequestRedirect />} />
             <Route path="/owner/request/:sitterId/sent" element={<RequestSent />} />
 
             <Route path="/sitter/start" element={<SitterStart />} />
@@ -127,7 +148,6 @@ const App = () => {
                   to. Admin is here too: it was never gated, and an
                   admin-looking screen with no authentication behind it is
                   worse than an honest absence. */}
-              <Route path="/auth" element={<NotAvailable />} />
               <Route path="/pets" element={<NotAvailable />} />
               <Route path="/search" element={<Search />} />
               <Route path="/sitters/:id" element={<SitterProfile />} />

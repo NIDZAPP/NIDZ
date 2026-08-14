@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Helmet } from "react-helmet-async";
 import { Navigate, useNavigate } from "react-router-dom";
 
-import { NameStep, PhoneStep, VerifyStep } from "@/components/account/AccountSteps";
+import { NameStep, PhoneStep } from "@/components/account/AccountSteps";
 import FlowScreen from "@/components/shared/FlowScreen";
 import { LocationFields } from "@/components/shared/fields";
 import { getWilayaOfCommune } from "@/data/algeria";
@@ -44,24 +44,22 @@ export function SitterPhone() {
     <PhoneStep
       intro={t("sitterFlow.phone.intro")}
       backTo="/sitter/join/name"
-      onDone={() => navigate("/sitter/join/verify")}
+      onDone={() => navigate("/sitter/join/location")}
     />
   );
 }
 
+/**
+ * The simulated code step, retired.
+ *
+ * It accepted any six digits and set a flag — a staged verification of a
+ * number nobody could check, which is precisely what §92 forbids when there is
+ * no OTP provider. The route survives as a redirect because it is a `backTo`
+ * target and a plausible bookmark; deleting it outright would give the step
+ * after it a back control that lands on the catch-all.
+ */
 export function SitterVerify() {
-  const navigate = useNavigate();
-  const { state } = useDemo();
-
-  if (!state.account?.phoneNumber) return <Navigate to="/sitter/join/phone" replace />;
-
-  return (
-    <VerifyStep
-      backTo="/sitter/join/phone"
-      onChangeNumber={() => navigate("/sitter/join/phone")}
-      onDone={() => navigate("/sitter/join/location")}
-    />
-  );
+  return <Navigate to="/sitter/join/location" replace />;
 }
 
 const FORM_ID = "sitter-location";
@@ -119,7 +117,7 @@ export function SitterLocation() {
         </title>
       </Helmet>
       <FlowScreen
-        backTo="/sitter/join/verify"
+        backTo="/sitter/join/phone"
         title={t("sitterFlow.location.title")}
         intro={t("sitterFlow.location.intro")}
         action={

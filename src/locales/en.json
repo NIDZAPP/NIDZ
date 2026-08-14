@@ -32,15 +32,18 @@
   },
   "species": {
     "dog": "Dog",
-    "cat": "Cat"
+    "cat": "Cat",
+    "bird": "Bird"
   },
   "speciesPlural": {
     "dog": "Dogs",
-    "cat": "Cats"
+    "cat": "Cats",
+    "bird": "Birds"
   },
   "accepts": {
     "dog": "Accepts dogs",
-    "cat": "Accepts cats"
+    "cat": "Accepts cats",
+    "bird": "Accepts birds"
   },
   "care": {
     "boarding": "Boarding at the sitter's home",
@@ -274,7 +277,7 @@
       "care": "Kind of care",
       "zone": "Area",
       "budget": "Budget",
-      "anySpecies": "Dog or cat",
+      "anySpecies": "Any animal",
       "anyCare": "Any kind of care",
       "dates": "Dates",
       "anyDates": "Any dates",
@@ -287,7 +290,7 @@
   },
   "entry": {
     "title": "Find care for your animal, or offer care to others.",
-    "intro": "Nidz connects dog and cat owners with sitters nearby, and spells out what each person offers and what they cannot take on.",
+    "intro": "Nidz connects owners of dogs, cats and birds with sitters nearby, and spells out what each person offers and what they cannot take on.",
     "browse": "See the sitters",
     "resume": "Resume my search",
     "findSitter": "Find a sitter",
@@ -320,7 +323,7 @@
       "title": "Your animal",
       "intro": "This is what a sitter needs in order to know whether they can genuinely take your animal.",
       "speciesLabel": "Which animal are you looking for care for?",
-      "speciesRequired": "Tell us whether it is a dog or a cat.",
+      "speciesRequired": "Choose the animal this is about.",
       "nameLabel": "Its name",
       "nameRequired": "Enter your animal's name.",
       "ageLabel": "Its age",
@@ -547,5 +550,41 @@
     "searchCommune": "Search a commune",
     "noMatch": "No match",
     "communeListUnavailable": "Nidz does not carry the commune list for this wilaya yet. The wilaya on its own is enough to search."
+  },
+  "auth": {
+    "title": "Sign in to Nidz",
+    "intro": "You only need an account to send a request, write a message or keep animals on your profile. Everything else works without one.",
+    "plannedTitle": "Planned sign-in methods",
+    "provider": {
+      "google": "Continue with Google",
+      "microsoft": "Continue with Microsoft",
+      "phone": "Continue with a phone number"
+    },
+    "noneConnected": "None of these is connected yet. This prototype has no sign-in service behind it, so these buttons do nothing on purpose rather than pretending to work.",
+    "someUnavailable": "Some of these are not connected yet.",
+    "demoNoticeTitle": "Nothing here verifies who you are",
+    "demoNoticeBody": "Creating an account below writes a name into this browser and nothing else. No password, no code, no provider and no check of any kind. Nidz cannot tell you apart from anyone else using this device.",
+    "continueTitle": "Continue in this browser",
+    "continueBody": "Give Nidz a name to put on your requests, or carry on looking without one.",
+    "createAccount": "Create a local account",
+    "explore": "Keep browsing without an account"
+  },
+  "ownerAccount": {
+    "title": "Your account",
+    "intro": "A sitter deciding whether to take your animal should know who is asking. This is the whole of it.",
+    "lastNameHelp": "Only your first name and the initial of your surname are ever shown publicly.",
+    "dobLabel": "Date of birth",
+    "dobHelp": "Private. It is never shown on your profile and never sent to a sitter.",
+    "dobRequired": "Enter your date of birth.",
+    "dobFuture": "That date is in the future.",
+    "wilayaRequired": "Choose your wilaya.",
+    "communeUnspecified": "Prefer not to say",
+    "locationHelp": "Used to show you sitters near you. Nidz never asks for an address, and your commune is the most precise thing it holds.",
+    "speciesLabel": "Which animals do you have?",
+    "speciesHelp": "Optional, and you can choose more than one. It only helps Nidz show relevant sitters first — you describe each animal properly later.",
+    "phoneLabel": "Phone number (optional)",
+    "phoneHelp": "Private. Nidz never gives it to a sitter unless you decide to share it.",
+    "cta": "Create my account",
+    "storageNote": "Everything you type stays in this browser. Nothing is sent anywhere and nothing is verified."
   }
 }

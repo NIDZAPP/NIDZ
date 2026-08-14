@@ -301,7 +301,7 @@ verify the active branch is `nidz-1.2`, commit, push.
 | 3 | Language, routing, persistence foundation | **Completed** — see §6 |
 | 4 | Algerian geography | **Partial** — wilayas complete and verified; commune coverage is 10 of 69 wilayas, with the gap documented rather than filled by unverified data. See §6 |
 | 5 | Map + geolocation | **Deferred** — blocked on verifiable coordinate data, not on the map library. Evaluation and constraints recorded in `NIDZ-1.2-MAP-AND-LOCATION.md`. See §6 |
-| 6 | Auth gateway + fast owner account | **Partial** — provider boundary, domain and the `bird` species landed; the gateway screen and the quick-account form are outstanding. See §6 |
+| 6 | Auth gateway + fast owner account | **Completed** — see §6 |
 | 7 | Multi-pet system | — |
 | 8 | Owner home + marketplace search | — |
 | 9 | Public sitter profile + reviews + portfolio | — |
@@ -722,10 +722,46 @@ the real checker is more permissive than it looks.
   The old name described a fake code step; §92 forbids claiming an SMS was sent,
   and the cleanest way to stop claiming it is to stop having it.
 
-**Outstanding** — the `/auth` gateway screen (provider list rendered honestly
-from the descriptors, plus the guest "explore" path) and the quick owner-account
-form that collects the four new fields. The domain is in place for both; what is
-missing is the UI.
+**The two screens (second pass)**
+
+`/auth` — the gateway. The three providers render from the descriptors as
+`disabled` controls with the reason stated **once, in text**, and wired to each
+button through `aria-describedby` so a screen-reader user hears *why* rather
+than only *that*. They are not buttons that respond to a tap with an apology:
+that is the decorative dead button §71–83 names. Which framing the screen uses
+is decided by `hasWorkingProvider()`, so connecting a real provider changes this
+screen by itself. A `DemoNotice` at full weight states that nothing here
+verifies anyone — this is the single most tempting screen in the product on
+which to imply an identity was proven. Underneath sit the two paths that do
+work: create a local identity, or keep browsing. §15 makes the guest exit
+first-class, not small print.
+
+`/owner/account` — one screen, replacing 1.1's name → phone → **simulated code**
+→ continue. Every field passes the §96 test in a comment beside it. Date of
+birth is private and deliberately **not** used as an age gate: §52 sets an
+adults-only rule for *sitters* and says nothing about owners, so enforcing one
+here would invent a product rule nobody has decided. It is validated as a real
+past date and nothing more. Phone is optional, unverified and private by
+default (§78).
+
+Both `next` parameters are restricted to same-origin paths — the gateway is
+exactly where someone would try an absolute URL as an open redirect.
+
+**Routing.** The request summary *is* the request flow now: `/owner/request/:id`
+renders it, and the three retired addresses redirect there carrying their search
+so the summary still knows which service and dates were asked for. The account
+gate fires at the summary rather than at the door, because everything before it
+— browsing, filtering, reading a profile — genuinely needs no identity.
+
+**Verified end to end in the browser**: sitter profile → "Request care" →
+`/auth?next=…` → create account → back to the summary → on to the pet step
+(correctly, because no animal had been chosen yet). The account lands with all
+fields set, `accountComplete: true` and `capabilities.owner: true`.
+
+**One bug the browser caught that the toolchain could not**: adding `bird` to
+the species enum left `species.bird`, `speciesPlural.bird` and `accepts.bird`
+untranslated, so the chip rendered the raw key `species.bird`. Fixed, along with
+the four strings that enumerated "dog or cat" in prose.
 
 ---
 

@@ -4,20 +4,23 @@ import { useTranslation } from "react-i18next";
 
 import FlowScreen from "@/components/shared/FlowScreen";
 import { FieldShell } from "@/components/shared/fields";
-import { DemoLine, DemoNotice } from "@/components/shared/trust";
+import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PHONE_PREFIX } from "@/data/types";
 import { useDemo } from "@/state/demo/context";
 
 /* ---------------------------------------------------------------------------
-   The identity steps, shared by both sides of the marketplace.
+   The identity steps — now the SITTER side only.
 
-   An owner sending a request and a sitter creating a profile answer the same
-   three questions, and there is one account behind both — §22's "ne pas créer
-   deux applications entièrement séparées" applies to the code as much as to
-   the navigation. Each screen takes its own copy, its own back target and its
-   own destination; nothing else differs.
+   Audit 1.2 gave the owner a single quick-account screen
+   (`pages/owner/OwnerAccount.tsx`, §16) and retired the simulated code step
+   that used to follow these two. What is left here is the sitter's name and
+   phone, which Group 10 replaces when sitter onboarding is rebuilt as a
+   section-based dashboard.
+
+   Nothing in either step verifies anything. `accountComplete` means the steps
+   were completed and nothing more.
    ------------------------------------------------------------------------ */
 
 /** Algerian mobile numbers are 9 digits after the country code. */
@@ -68,9 +71,8 @@ export function NameStep({
         communeId: state.account?.communeId ?? null,
         ownedSpecies: state.account?.ownedSpecies ?? [],
         phoneNumber: state.account?.phoneNumber ?? "",
-        /* Preserved: a confirmation belongs to the phone NUMBER, which is
-           unchanged here. Resetting it would push someone fixing a typo in
-           their surname back through the code step. */
+        /* Preserved: correcting a typo in a surname does not undo the steps
+           that were already completed. */
         accountComplete: state.account?.accountComplete ?? false,
         createdAt: state.account?.createdAt ?? new Date().toISOString(),
       },
@@ -178,9 +180,13 @@ export function PhoneStep({
       account: {
         ...account,
         phoneNumber: digits,
-        /* A confirmation belongs to the number it was given for. Changing the
-           number invalidates it. */
-        accountComplete: account.phoneNumber === digits && account.accountComplete,
+        /* Finishing this step is what "the account steps are done" means, and
+           it is the whole of what the flag claims. It used to be set by a
+           SIMULATED code step, which Audit 1.2 removed: with no OTP provider,
+           §92 forbids claiming a code was sent, and the cleanest way to stop
+           claiming it is to stop staging it. Nothing here verifies the number
+           and no surface may suggest it does. */
+        accountComplete: true,
       },
     });
     onDone();
@@ -244,134 +250,6 @@ export function PhoneStep({
               </div>
             )}
           </FieldShell>
-        </form>
-      </FlowScreen>
-    </>
-  );
-}
-
-/**
- * The code step — SIMULATED, and it says so at full weight.
- *
- * No SMS is sent. There is no provider, no server and no code to check
- * against, so this accepts any six digits, stated as a `DemoNotice` above the
- * field rather than as a footnote: the audit requires an unconnected OTP to be
- * clearly identified as a demonstration (p.241), and a marker quieter than the
- * thing it qualifies is not a marker.
- *
- * Completing it sets `accountComplete`, which means exactly "went through the
- * simulated step". It is NOT phone verification and no surface may present it
- * as one — there is no `verified` flag anywhere in the model (§6 B).
- */
-export function VerifyStep({
-  backTo,
-  onDone,
-  onChangeNumber,
-  progress,
-}: {
-  backTo: string;
-  onDone: () => void;
-  onChangeNumber: () => void;
-  progress?: { current: number; total: number; label: string };
-}) {
-  const { t } = useTranslation();
-  const { state, dispatch } = useDemo();
-  const formId = "account-verify";
-
-  const [code, setCode] = useState("");
-  const [error, setError] = useState<string>();
-  /* A counter, not a flag: a second press of a control that has already fired
-     must still acknowledge, or it reads as broken. */
-  const [resentCount, setResentCount] = useState(0);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const submit = () => {
-    if (!/^\d{6}$/.test(code.trim())) {
-      setError(t("request.verify.invalid"));
-      inputRef.current?.focus();
-      return;
-    }
-    dispatch({ type: "completeAccount" });
-    onDone();
-  };
-
-  return (
-    <>
-      <Helmet>
-        <title>
-          {t("common.appName")} — {t("request.verify.title")}
-        </title>
-      </Helmet>
-      <FlowScreen
-        backTo={backTo}
-        progress={progress}
-        title={t("request.verify.title")}
-        /* Wrapped in bidi isolates: two European-number runs separated by a
-           neutral space resolve right-to-left in Arabic, which would print the
-           country code after the number. */
-        intro={t("request.verify.intro", {
-          phone: `⁦${PHONE_PREFIX} ${state.account?.phoneNumber ?? ""}⁩`,
-        })}
-        action={
-          <Button type="submit" form={formId} size="lg">
-            {t("common.continue")}
-          </Button>
-        }
-      >
-        <DemoNotice className="mb-8" title={t("request.verify.demoTitle")} body={t("request.verify.demoBody")} />
-
-        <form
-          id={formId}
-          noValidate
-          onSubmit={(e) => {
-            e.preventDefault();
-            submit();
-          }}
-        >
-          <FieldShell label={t("request.verify.codeLabel")} error={error}>
-            {({ id, describedBy, invalid }) => (
-              <Input
-                id={id}
-                ref={inputRef}
-                inputMode="numeric"
-                maxLength={6}
-                /* Not `autocomplete="one-time-code"`: no code was sent, so
-                   offering the platform's SMS autofill would be a lie the
-                   operating system tells on Nidz's behalf. */
-                autoComplete="off"
-                placeholder="000000"
-                dir="ltr"
-                className="max-w-[12rem] text-center text-lg tracking-[0.4em]"
-                value={code}
-                aria-describedby={describedBy}
-                aria-invalid={invalid || undefined}
-                onChange={(e) => {
-                  setCode(e.target.value.replace(/\D/g, ""));
-                  setError(undefined);
-                }}
-              />
-            )}
-          </FieldShell>
-
-          <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2">
-            <Button
-              type="button"
-              variant="link"
-              className="text-muted-foreground"
-              onClick={() => setResentCount((n) => n + 1)}
-            >
-              {t("request.verify.resend")}
-            </Button>
-            <Button type="button" variant="link" className="text-muted-foreground" onClick={onChangeNumber}>
-              {t("request.verify.changeNumber")}
-            </Button>
-          </div>
-          {/* Mounted from the start so the live region exists before it has
-              content — a region inserted together with its text is announced
-              unreliably. Says what actually happened, which is nothing. */}
-          <p role="status" aria-live="polite" className="mt-3 text-sm text-muted-foreground">
-            {resentCount > 0 ? t("request.verify.resentNote") : ""}
-          </p>
         </form>
       </FlowScreen>
     </>
