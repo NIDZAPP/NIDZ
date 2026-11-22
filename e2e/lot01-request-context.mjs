@@ -6,7 +6,7 @@ import { ACCOUNT, BASE, check, clean, done, isoIn, loose, open, pickCombobox, se
 
 const FROM = isoIn(3);
 const TO = isoIn(6);
-const Q = `species=dog&care=boarding&wilaya=16&from=${FROM}&to=${TO}`;
+const Q = `species=dog&care=boarding&wilaya=alger&from=${FROM}&to=${TO}`;
 const AMINA_TITLE = "Your request to Amina B.";
 const h1 = async (page) => clean(await page.locator("h1").innerText());
 
@@ -133,12 +133,61 @@ const h1 = async (page) => clean(await page.locator("h1").innerText());
   await context.close();
 }
 
+/* 3b. Review findings: changing the dates leaves no stale summary behind;
+   a walk is judged on its one visible day; crafted `next` values are inert. */
+{
+  const dog = { id: "pet-rex", name: "Rex", age: "", sex: "unknown", notes: "", care: {}, species: "dog", details: { size: "medium" } };
+  const need = { species: "dog", dogSize: null, petId: null, wilayaCode: null, communeCode: null, dates: null, careType: "walk", maxPrice: null };
+  const { page, context } = await open({ state: seedState({ account: ACCOUNT, capabilities: { owner: true, sitter: false }, pets: [dog], need }) });
+  await page.goto(`${BASE}/sitters/amina-b`);
+  await page.goto(`${BASE}/owner/request/amina-b?care=boarding&from=${FROM}&to=${TO}`);
+  await page.waitForSelector("h1");
+  await page.getByRole("link", { name: "Change the service or dates" }).click();
+  await page.waitForURL(/\/when/);
+  await page.getByLabel("End date").fill(isoIn(8));
+  await page.getByRole("button", { name: "See my request" }).click();
+  await page.waitForURL((u) => u.pathname === "/owner/request/amina-b" && u.searchParams.get("to") === isoIn(8));
+  await page.goBack();
+  await page.waitForURL(/\/sitters\/amina-b/);
+  check("after changing dates, Back skips the old summary and the form", page.url().includes("/sitters/amina-b"));
+
+  /* need.careType=walk, URL range overlapping Amina's declared days 18–25:
+     the walk's single visible day (+15) is free and must be accepted. */
+  await page.goto(`${BASE}/owner/request/amina-b/when?from=${isoIn(15)}&to=${isoIn(20)}`);
+  await page.waitForSelector("h1");
+  await page.getByRole("radio", { name: /Walking/ }).click();
+  await page.getByRole("button", { name: "See my request" }).click();
+  await page.waitForURL((u) => u.pathname === "/owner/request/amina-b");
+  check("a walk is judged on its one visible day", new URL(page.url()).searchParams.get("to") === isoIn(15));
+
+  await page.goto(`${BASE}/auth?next=%2Fowner%2Frequest%2F%25E0%25A4%25A`);
+  await page.waitForSelector("h1");
+  check("malformed next does not crash the gateway", !(await page.getByText("Something went wrong").isVisible()));
+  await page.goto(`${BASE}/owner/pets/new?next=%2F.%2F%2Fexample.org`);
+  await page.getByLabel("Its name").fill("Nox");
+  await page.getByRole("button", { name: "Save" }).click();
+  await page.waitForURL(/\/owner\/pets$/);
+  check("'/.//host' next is ignored; save lands on My pets", page.url().endsWith("/owner/pets"));
+  await page.goto(`${BASE}/owner/pets/pet-rex?next=/owner/pets/new`);
+  await page.getByRole("button", { name: "Save" }).click();
+  await page.waitForURL(/\/owner\/pets$/);
+  await page.goto(`${BASE}/owner/pets/new`);
+  check("'add an animal' never opens pre-filled with an existing one", (await page.getByLabel("Its name").inputValue()) === "");
+  check("no page errors", page.errors.length === 0, page.errors.join(" | "));
+  await context.close();
+}
+
 /* 4. Arabic: the title isolates the Latin name. */
 {
   const { page, context } = await open({ lang: "ar", state: seedState({ account: ACCOUNT, capabilities: { owner: true, sitter: false } }) });
   await page.goto(`${BASE}/owner/request/amina-b?care=boarding&from=${FROM}&to=${TO}`);
   await page.waitForSelector("h1");
   check("AR: summary title in Arabic, RTL", (await h1(page)).includes("طلبك إلى") && (await page.evaluate(() => document.documentElement.dir)) === "rtl");
+  /* Guards the Radix bubble-input mirror in src/index.css. */
+  check("AR: summary has no horizontal scroll", await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
+  await page.goto(`${BASE}/owner/request/amina-b/when`);
+  await page.waitForSelector("h1");
+  check("AR: when-step has no horizontal scroll", await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
   await context.close();
 }
 

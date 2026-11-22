@@ -86,8 +86,13 @@ export default function RequestReview() {
      takes cats, but an owner who arrived from a dog search did not ask about
      their cat, and pre-selecting it would send the wrong animal. */
   const preselectable = selectable.filter((c) => !criteria.species || c.pet.species === criteria.species);
+  /* Only an animal this sitter could take may be selected, from ANY source —
+     a hand-off or a URL pointing at a cat for a dogs-only sitter is dropped,
+     and the cat stays visible in the list, disabled, with its reason. A
+     selected-but-impossible row would look chosen while saying it cannot be
+     sent. */
   const exists = (id: string | null | undefined): id is string =>
-    Boolean(id) && candidates.some((c) => c.pet.id === id);
+    Boolean(id) && selectable.some((c) => c.pet.id === id);
 
   const draft = sitter && state.requestDraft?.sitterId === sitter.id ? state.requestDraft : null;
   const urlPetId = searchParams.get("pet");
@@ -341,8 +346,12 @@ export default function RequestReview() {
         <RequestSummary request={{ ...draftRequest, id: "preview", createdAt: "" }} sitterName={sitter.publicName} />
 
         <p className="mt-4">
+          {/* `replace`, and the step replaces itself on submit: changing the
+              dates must not leave the OLD summary behind in history, still
+              sendable one Back away. */}
           <Link
             to={requestWhenPath(sitter.id, search)}
+            replace
             className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
           >
             <Pencil className="size-4" aria-hidden="true" />

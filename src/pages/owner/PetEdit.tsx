@@ -46,7 +46,18 @@ const FORM_ID = "pet-edit";
  * Saving here can never touch another animal: a new animal always gets a new
  * id, and an existing one is only ever saved under its own.
  */
+/**
+ * Keyed by route, so `/owner/pets/:id` and `/owner/pets/new` never share one
+ * instance. React Router reuses the element across those two routes, and with
+ * it the draft held in `useState` — moving from Rex's screen to "add an
+ * animal" opened a form pre-filled with Rex, whose save then overwrote him.
+ */
 export default function PetEdit() {
+  const { id } = useParams();
+  return <PetEditScreen key={id ?? "new"} />;
+}
+
+function PetEditScreen() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -57,10 +68,15 @@ export default function PetEdit() {
   const isNew = !id;
   const existing = id ? (state.pets.find((p) => p.id === id) ?? null) : null;
 
-  /* Where to return. Parsed with the browser's own URL parser (see
-     `sameOriginPath`) — this is a redirect target taken from the URL. */
-  const next = sameOriginPath(searchParams.get("next"));
-  const requestSitter = sitterIdFromRequestPath(next);
+  /* Where to return — honoured ONLY when it is a request summary, the one
+     screen that links here with it. Any other `next` (a hand-made
+     `?next=/owner/pets/new`, say) is ignored: this screen can save an animal,
+     and must not be steerable into a flow where saving lands somewhere it
+     was not built for. Parsed with the browser's own URL parser (see
+     `sameOriginPath`). */
+  const candidateNext = sameOriginPath(searchParams.get("next"));
+  const requestSitter = sitterIdFromRequestPath(candidateNext);
+  const next = requestSitter ? candidateNext : null;
   const startSpecies = searchParams.get("species");
 
   /* Created once, in the initialiser, so a re-render never mints a new id

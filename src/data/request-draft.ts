@@ -83,7 +83,14 @@ export function sitterIdFromRequestPath(path: string | null | undefined): string
   if (!path) return null;
   const { pathname } = splitPath(path);
   const match = /^\/owner\/request\/([^/]+)\/?$/.exec(pathname);
-  return match ? decodeURIComponent(match[1]) : null;
+  if (!match) return null;
+  /* `next` comes from the address bar, and a malformed escape there must not
+     throw during render and take the screen down. */
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return null;
+  }
 }
 
 /** The query of a request path, as a string, minus the animal. */

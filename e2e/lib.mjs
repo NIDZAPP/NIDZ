@@ -8,7 +8,7 @@
 
    Run against a server you started yourself:
      npx vite --host 127.0.0.1 --port 8080      (or: npm run preview)
-     node e2e/run-all.mjs
+     node e2e/run-all.mjs        (or one lot: node e2e/lot01-request-context.mjs)
    NIDZ_URL overrides the address.
    ------------------------------------------------------------------------ */
 import { createRequire } from "node:module";
@@ -39,7 +39,7 @@ export const ACCOUNT = {
   firstName: "Lina",
   lastName: "Kaci",
   dateOfBirth: "1990-04-02",
-  wilayaId: "16",
+  wilayaId: "alger",
   communeId: null,
   ownedSpecies: ["dog"],
   phoneNumber: "",

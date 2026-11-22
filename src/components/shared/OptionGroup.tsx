@@ -69,7 +69,7 @@ export default function OptionGroup<T extends string>({
     >
       {options.map((option) => {
         const Icon = option.icon;
-        const selected = value === option.value;
+        const selected = value === option.value && !option.disabled;
         return (
           <RadioGroupPrimitive.Item
             key={option.value}
@@ -78,13 +78,15 @@ export default function OptionGroup<T extends string>({
             className={cn(
               "group flex min-h-16 w-full items-center gap-4 rounded-md border p-4 text-start transition-colors",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-              selected
-                ? "border-primary bg-accent"
-                : option.disabled
-                  ? /* A dashed hairline, not a faded copy of a live row: lowered
-                       opacity drags the reason text under the contrast floor,
-                       and the reason is the whole point of showing it. */
-                    "cursor-not-allowed border-dashed border-border"
+              /* Disabled wins over selected: an impossible option must never
+                 wear the "you chose this" style, whatever value was passed. */
+              option.disabled
+                ? /* A dashed hairline, not a faded copy of a live row: lowered
+                     opacity drags the reason text under the contrast floor,
+                     and the reason is the whole point of showing it. */
+                  "cursor-not-allowed border-dashed border-border"
+                : selected
+                  ? "border-primary bg-accent"
                   : "border-input hover:bg-secondary",
             )}
           >

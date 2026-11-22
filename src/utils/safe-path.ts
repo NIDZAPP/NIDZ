@@ -25,6 +25,13 @@ export function sameOriginPath(raw: string | null | undefined): string | null {
   try {
     const url = new URL(raw, window.location.origin);
     if (url.origin !== window.location.origin) return null;
+    /* `/.//example.org` resolves to a same-origin URL whose PATH is
+       `//example.org` — which, handed to `history.replaceState`, is a
+       protocol-relative URL to another host. React Router then throws a
+       SecurityError out of the caller (or, on a push, falls back to a real
+       navigation off-site). A path never legitimately starts with two
+       slashes here. */
+    if (url.pathname.startsWith("//")) return null;
     return `${url.pathname}${url.search}${url.hash}`;
   } catch {
     /* Not a URL this browser can make sense of, so not somewhere to send

@@ -51,16 +51,27 @@ export default function RequestWhen() {
   const offers = useMemo(() => (sitter ? offeredServices(sitter) : []), [sitter]);
   const todayISO = toISODate(today());
 
-  const [careType, setCareType] = useState<CareType | null>(() => {
-    if (criteria.care && offers.includes(criteria.care)) return criteria.care;
-    if (state.need.careType && offers.includes(state.need.careType)) return state.need.careType;
-    /* One service on offer is not a choice to make. */
-    return offers.length === 1 ? offers[0] : null;
-  });
-  const [dates, setDates] = useState<DateRange | null>(() => {
+  /* Seeded together, because they constrain each other: a walk is one day,
+     and a range carried in from the URL or the brief must be collapsed BEFORE
+     it is shown — the single-day field displays only the start, and checking
+     a hidden end date against the sitter's declarations would refuse a day
+     the owner never chose. */
+  const [initial] = useState(() => {
+    const care: CareType | null =
+      criteria.care && offers.includes(criteria.care)
+        ? criteria.care
+        : state.need.careType && offers.includes(state.need.careType)
+          ? state.need.careType
+          : /* One service on offer is not a choice to make. */
+            offers.length === 1
+            ? offers[0]
+            : null;
     const fresh = (d: DateRange | null) => (d && d.start >= todayISO ? d : null);
-    return fresh(criteria.dates) ?? fresh(state.need.dates);
+    const raw = fresh(criteria.dates) ?? fresh(state.need.dates);
+    return { care, dates: normalizeCriteria({ ...criteria, care, dates: raw }).dates };
   });
+  const [careType, setCareType] = useState<CareType | null>(initial.care);
+  const [dates, setDates] = useState<DateRange | null>(initial.dates);
   const [errors, setErrors] = useState<{ care?: string; dates?: string }>({});
   const careRef = useRef<HTMLDivElement>(null);
   const datesRef = useRef<HTMLInputElement>(null);
@@ -76,24 +87,25 @@ export default function RequestWhen() {
   const upcoming = sitter.declaredUnavailable.filter((u) => u.end >= todayISO);
 
   const submit = () => {
+    /* Judged on the period that will actually be sent — one day for a walk. */
+    const period = normalizeCriteria({ ...criteria, care: careType, dates }).dates;
     const next: typeof errors = {};
     if (!careType) next.care = t("need.care.careRequired");
-    if (!dates) next.dates = t("need.care.datesRequired");
-    else if (dates.start < todayISO) next.dates = t("need.care.datesPast");
-    else if (overlapsDeclaredUnavailable(sitter, dates)) next.dates = t("request.when.unavailable", { sitter: sitterName });
+    if (!period) next.dates = t("need.care.datesRequired");
+    else if (period.start < todayISO) next.dates = t("need.care.datesPast");
+    else if (overlapsDeclaredUnavailable(sitter, period)) next.dates = t("request.when.unavailable", { sitter: sitterName });
     setErrors(next);
     if (next.care) return careRef.current?.focus();
     if (next.dates) return datesRef.current?.focus();
-    if (!careType || !dates) return;
+    if (!careType || !period) return;
 
-    const normalized = normalizeCriteria({ ...criteria, care: careType, dates });
     const params = new URLSearchParams(search);
     params.set("care", careType);
-    if (normalized.dates) {
-      params.set("from", normalized.dates.start);
-      params.set("to", normalized.dates.end);
-    }
-    navigate(requestPath(sitter.id, params.toString()));
+    params.set("from", period.start);
+    params.set("to", period.end);
+    /* Replaces this step: Back from the summary goes to the profile, not to a
+       form holding the previous answer. */
+    navigate(requestPath(sitter.id, params.toString()), { replace: true });
   };
 
   return (
