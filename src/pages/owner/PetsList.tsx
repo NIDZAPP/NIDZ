@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { ArrowRight, Plus } from "lucide-react";
 
-import BackButton from "@/components/shared/BackButton";
 import EmptyState from "@/components/shared/EmptyState";
 import { REGISTER_ROW } from "@/components/shared/register";
 import { SPECIES_ICON } from "@/components/shared/species";
@@ -12,7 +11,8 @@ import { answeredCount } from "@/data/pets";
 import { useDemo } from "@/state/demo/context";
 
 /**
- * My pets (§17).
+ * My pets (§17). A tab of the owner space since Audit 1.3 LOT 04 — a root
+ * screen, so it carries no Back control.
  *
  * The screen that makes multi-pet real: Nidz no longer assumes one animal, so
  * there has to be somewhere the whole household lives.
@@ -41,7 +41,6 @@ export default function PetsList() {
       </Helmet>
 
       <div className="mx-auto max-w-[720px]">
-        <BackButton variant="labelled" fallback="/" className="mb-6" />
         <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">{t("pets.title")}</h1>
         <p className="mt-4 max-w-[64ch] text-lg leading-relaxed text-muted-foreground">{t("pets.intro")}</p>
 

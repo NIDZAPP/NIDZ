@@ -132,10 +132,13 @@ export default function FlowScreen({
                 selector back on every screen. */}
             <Link
               to="/settings"
+              /* Marks the detour, so the account screen — a tab root that
+                 normally shows no Back — offers the way back into this step. */
+              state={{ fromFlow: true }}
               className="inline-flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <SlidersHorizontal className="size-5" aria-hidden="true" />
-              <span className="sr-only">{t("nav.settings")}</span>
+              <span className="sr-only">{t("nav.account")}</span>
             </Link>
           </div>
         </div>

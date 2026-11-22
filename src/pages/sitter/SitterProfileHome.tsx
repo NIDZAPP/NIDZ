@@ -3,12 +3,11 @@ import { useTranslation } from "react-i18next";
 import { Link, Navigate } from "react-router-dom";
 import { ArrowRight, Check } from "lucide-react";
 
-import FlowScreen from "@/components/shared/FlowScreen";
+import BackButton from "@/components/shared/BackButton";
 import { REGISTER_ROW } from "@/components/shared/register";
 import { DemoNotice } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { SITTER_SECTIONS, answeredSections, canPublish, missingRequired } from "@/data/sitter-sections";
-import { WORKSPACE_ROOT } from "@/data/workspace";
 import { useDemo } from "@/state/demo/context";
 
 /**
@@ -30,6 +29,12 @@ import { useDemo } from "@/state/demo/context";
  *
  * Required sections are marked as required; everything else is genuinely
  * optional, and an unanswered optional section is not shown as a failure.
+ *
+ * A BROWSABLE screen since Audit 1.3 LOT 04: it is the sitter space's
+ * "Mon profil" tab, so it sits in the layout with the bar rather than owning
+ * the viewport. Before the profile is published there is no sitter bar yet,
+ * so it carries a Back control to the owner home; once published it is a tab
+ * root and carries none.
  */
 export default function SitterProfileHome() {
   const { t } = useTranslation();
@@ -46,35 +51,32 @@ export default function SitterProfileHome() {
   const ready = canPublish(profile);
 
   return (
-    <>
+    <div className="container py-10 md:py-14">
       <Helmet>
         <title>
           {t("common.appName")} — {t("sitterSections.title")}
         </title>
         <meta name="robots" content="noindex" />
       </Helmet>
-      <FlowScreen
-        backTo={WORKSPACE_ROOT.sitter}
-        title={t("sitterSections.title")}
-        intro={t("sitterSections.intro")}
-        wide
-        headerExtra={
-          /* A count, and what it is not. Deliberately a sentence rather than a
-             bar: a bar invites a number to be read as a score. */
-          <p className="mt-4 text-sm text-muted-foreground">
-            {t("sitterSections.answered", { count: answered, total })}{" "}
-            {t("sitterSections.answeredNote")}
-          </p>
-        }
-        action={
-          ready ? (
-            <Button asChild size="lg">
+      <div className="mx-auto max-w-[720px]">
+        {!workspace.published && <BackButton variant="labelled" fallback="/" className="mb-6" />}
+        <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">{t("sitterSections.title")}</h1>
+        <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{t("sitterSections.intro")}</p>
+        {/* A count, and what it is not. Deliberately a sentence rather than a
+            bar: a bar invites a number to be read as a score. */}
+        <p className="mt-4 text-sm text-muted-foreground">
+          {t("sitterSections.answered", { count: answered, total })} {t("sitterSections.answeredNote")}
+        </p>
+
+        {ready && (
+          <div className="mt-6">
+            <Button asChild size="lg" className="w-full sm:w-auto">
               <Link to="/sitter/preview">{t("sitterSections.preview")}</Link>
             </Button>
-          ) : undefined
-        }
-      >
-        <div>
+          </div>
+        )}
+
+        <div className="mt-8">
           {SITTER_SECTIONS.map((section) => {
             const done = section.isAnswered(profile);
             return (
@@ -139,7 +141,7 @@ export default function SitterProfileHome() {
           title={t("sitterSections.demoTitle")}
           body={t("sitterSections.demoBody")}
         />
-      </FlowScreen>
-    </>
+      </div>
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-import { Home, Inbox, Search } from "lucide-react";
+import { Home, Inbox, PawPrint, Search, UserRound } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import type { Workspace } from "@/data/workspace";
@@ -24,12 +24,25 @@ import type { Workspace } from "@/data/workspace";
  * those is worse than a shorter bar. Greying a tab out is the same offence
  * with an apology attached.
  *
- * Audit 1.2's target shape is four tabs a side — owner Home · Search ·
- * Messages · Profile, sitter Requests · Calendar · Messages · Profile — and
- * the commented entries below are the ones still to land. Each names the group
- * that brings it, so filling the bar in is a one-line edit rather than an
- * archaeology exercise. Existing entries keep their slot when a new one lands;
- * the single deliberate exception is noted on the owner list.
+ * AUDIT 1.3 LOT 04 — ONE ACCOUNT, TWO SPACES, EVERY TAB REAL.
+ *
+ *   owner   Accueil · Recherche · Demandes · Mes animaux · Compte
+ *   sitter  Demandes · Mon profil · Compte
+ *
+ * "Mes animaux" and the account screen already existed and were hard to find
+ * (a row on Home; an unlabelled sliders icon). They are now in the bar rather
+ * than recreated. "Compte" is the shared `/settings` screen — one account, so
+ * one account screen, whichever space is active — and it is where the switch
+ * between the two spaces lives.
+ *
+ * Not in the bar, and why:
+ *   - Messages: there is no messaging in Nidz. A tab would land on
+ *     `NotAvailable`.
+ *   - Calendar / Disponibilités as a TAB: there is no calendar. What exists is
+ *     a form where the sitter declares the periods they cannot take; it is a
+ *     full-screen step that returns to "Mon profil", where it is listed. A tab
+ *     that drops the visitor out of the tabbed chrome would make the place of
+ *     things unstable, which is what LOT 04 asks to fix.
  */
 export type NavDestination = {
   to: string;
@@ -42,27 +55,27 @@ export type NavDestination = {
   end?: boolean;
 };
 
+/** The account screen, shared by both spaces. */
+export const ACCOUNT_PATH = "/settings";
+
+const ACCOUNT: NavDestination = { to: ACCOUNT_PATH, labelKey: "nav.account", icon: UserRound };
+
 const OWNER: NavDestination[] = [
   { to: "/", labelKey: "nav.home", icon: Home, end: true },
   { to: "/search", labelKey: "nav.search", icon: Search },
-  /* Group 13 inserts Messages here, and Requests leaves the bar for Home,
-     which already surfaces it. That is the one slot change in the plan, and it
-     is what §84-86 asks for: secondary entities live inside Home and Profile
-     rather than competing for the bar. */
   { to: "/owner/requests", labelKey: "nav.myRequests", icon: Inbox },
-  /* Group 15: { to: "/owner/profile", labelKey: "nav.profile", icon: User } */
+  { to: "/owner/pets", labelKey: "nav.petsShort", icon: PawPrint },
+  ACCOUNT,
 ];
 
 const SITTER: NavDestination[] = [
   { to: "/sitter/requests", labelKey: "nav.received", icon: Inbox },
-  /* Group 11: { to: "/sitter/calendar", labelKey: "nav.calendar", icon: Calendar }
-     Until then availability is a step inside the profile builder, not a place.
-     Group 13: Messages. Group 15: Profile.
-
-     So the sitter workspace currently has ONE browsable screen and therefore no
-     bar — see `isNavigable`. Everything else on that side is a flow, which
-     carries its own chrome. It looks unfinished in the demonstration because it
-     is; that is the correct trade against three tabs that go nowhere. */
+  /* The sitter's own profile, as the sections dashboard — what they keep up
+     to date, including the periods they declare unavailable. Exact match, so
+     a section editor under `/sitter/profile/…` is not shown as this tab (those
+     are full-screen steps without the bar anyway). */
+  { to: "/sitter/profile", labelKey: "nav.sitterProfile", icon: PawPrint, end: true },
+  ACCOUNT,
 ];
 
 /**

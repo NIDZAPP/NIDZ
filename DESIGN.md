@@ -256,19 +256,32 @@ inputs, `min-h-14` on nav tabs, `min-h-16` on option rows.
 
 ## 9. Navigation
 
-One bottom bar below `md`, not one per role: a single person may have both uses
-(§22). Destinations are Accueil, Recherche, Demandes, plus Reçues once a sitter
-profile is **published**. The header carries the same destinations with the same
-labels at `md`+ — crossing the breakpoint must not rename anything.
+One account, two spaces (Audit 1.3 LOT 04). The active space decides what the
+bar contains; one bar below `md`, the same destinations in the header at `md`+,
+from one list (`components/layout/workspace-nav.ts`) — crossing the breakpoint
+must not rename anything.
 
-**Only destinations that exist appear.** Messages, Mes animaux, Disponibilités
-and Compte are in the audit's lists and are not in the product, so they are not
-in the navigation.
+| Space | Destinations |
+|---|---|
+| owner | Accueil · Recherche · Demandes · Animaux · Compte |
+| sitter (published) | Reçues · Mon profil · Compte |
 
-Back appears on secondary screens only, never on a root screen, and is
-`inline-start` — top-right in Arabic. `useFlowBack` pops history only when this
-app put something behind us, otherwise it walks to the step that logically
-precedes; a deep-linked step's back control is never inert.
+**Only destinations that exist appear.** No Messages tab (there is no
+messaging) and no Calendar tab (there is no calendar: the sitter declares the
+periods they cannot take in a section of "Mon profil"). A tab that lands on
+`NotAvailable` is a dead button; an honest empty state of a real screen is not.
+
+**Compte** is the shared `/settings` screen — one account, one account screen —
+and it is where the switch between the two spaces lives. Switching changes the
+view only: no animal, request, request draft or sitter profile is touched. The
+header's settings icon appears only where a space has no navigation yet (a
+sitter whose profile is not published).
+
+Back appears on secondary screens only, never on a root screen (the tabs), and
+is `inline-start` — top-right in Arabic. The one exception is Compte opened from
+a full-screen step, where Back is the way into that step again. `useBack` pops
+history only when this app put something behind us, otherwise it walks to the
+step that logically precedes; a deep-linked step's back control is never inert.
 
 ---
 

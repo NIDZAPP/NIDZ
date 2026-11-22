@@ -143,9 +143,10 @@ const App = () => {
             <Route path="/sitter/join/phone" element={<SitterPhone />} />
             <Route path="/sitter/join/verify" element={<SitterVerify />} />
             <Route path="/sitter/join/location" element={<SitterLocation />} />
-            {/* The dashboard (§51) replaced the wizard. Sections are reachable
-                in any order and each returns here. */}
-            <Route path="/sitter/profile" element={<SitterProfileHome />} />
+            {/* The dashboard (§51) moved INSIDE the layout at Audit 1.3 LOT 04
+                (see below): it is the sitter's "Mon profil" tab. Its section
+                editors stay here — each is a full-screen form that returns to
+                it. */}
             <Route path="/sitter/profile/about" element={<StepAbout />} />
             <Route path="/sitter/profile/experience" element={<SectionExperience />} />
             <Route path="/sitter/profile/professional" element={<SectionProfessional />} />
@@ -178,6 +179,9 @@ const App = () => {
                   cannot perform. The flow that replaced it starts here. */}
               <Route path="/sitter/register" element={<Navigate to="/sitter/start" replace />} />
               <Route path="/sitter/requests" element={<SitterRequests />} />
+              {/* "Mon profil": the sitter's sections dashboard, a tab of the
+                  sitter space once published (Audit 1.3 LOT 04). */}
+              <Route path="/sitter/profile" element={<SitterProfileHome />} />
               <Route path="/book/:listingId" element={<NotAvailable />} />
               <Route path="/chat/:bookingId" element={<NotAvailable />} />
               <Route path="/owner/requests" element={<OwnerRequests />} />

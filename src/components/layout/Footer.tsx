@@ -36,7 +36,7 @@ export default function Footer() {
             {t("nav.help")}
           </Link>
           <Link className="hover:underline" to="/settings">
-            {t("nav.settings")}
+            {t("nav.account")}
           </Link>
         </nav>
       </div>

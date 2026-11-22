@@ -25,7 +25,10 @@
     "ownerLabel": "Navigation propriétaire",
     "sitterLabel": "Navigation pet-sitter",
     "settings": "Paramètres",
-    "pets": "Mes animaux"
+    "pets": "Mes animaux",
+    "account": "Compte",
+    "petsShort": "Animaux",
+    "sitterProfile": "Mon profil"
   },
   "home": {
     "title": "Trouver une garde pour votre animal",
@@ -657,7 +660,7 @@
     }
   },
   "settings": {
-    "title": "Paramètres",
+    "title": "Compte",
     "language": {
       "title": "Langue",
       "following": "Nidz suit la langue de votre appareil. Choisissez-en une ci-dessous pour la conserver quel que soit l'appareil.",
@@ -681,6 +684,15 @@
       "title": "Votre compte",
       "edit": "Informations personnelles",
       "editLine": "Votre nom, votre date de naissance, où vous êtes, et les animaux que vous avez."
+    },
+    "spaces": {
+      "title": "Vos deux espaces",
+      "body": "Un seul compte, deux usages de Nidz. Changer d'espace modifie ce que vous voyez ; cela ne supprime rien — ni vos animaux, ni vos demandes, ni une demande en préparation, ni votre profil de pet-sitter.",
+      "owner": "Espace propriétaire",
+      "sitter": "Espace pet-sitter",
+      "current": "L'espace que vous utilisez",
+      "sitterDraft": "Votre profil n'est pas encore publié — continuez-le",
+      "sitterNone": "Garder des animaux : décrivez ce que vous proposez"
     }
   },
   "workspace": {

@@ -44,7 +44,8 @@ export default function Header({
      `isNavigable` is applied to the same list the bar uses, before the filter,
      so the header and the bar can never disagree about whether this workspace
      has navigation at all. */
-  const destinations = isNavigable(all) ? all.filter((d) => d.to !== "/") : [];
+  const navigable = isNavigable(all);
+  const destinations = navigable ? all.filter((d) => d.to !== "/") : [];
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background shadow-chrome-b">
@@ -86,12 +87,13 @@ export default function Header({
             </nav>
           )}
         </div>
-        {/* Where the language chooser used to sit. §89 moves language into
-            Settings so it stops appearing on every screen in the product; this
-            is the affordance that keeps it one tap away at both breakpoints
-            while there is no Profile tab to hold it (Group 15).
-
+        {/* "Compte" is a destination of both spaces now (Audit 1.3 LOT 04), so
+            when this space has navigation the account is in it — at md+ in the
+            row above, below md in the bottom bar. This icon remains only where
+            a space has no navigation yet (a sitter whose profile is not
+            published), so the account and language are never out of reach.
             Icon-only, so it needs its accessible name in text. */}
+        {!navigable && (
         <NavLink
           to="/settings"
           className={({ isActive }) =>
@@ -105,8 +107,9 @@ export default function Header({
           }
         >
           <SlidersHorizontal className="size-5" aria-hidden="true" />
-          <span className="sr-only">{t("nav.settings")}</span>
+          <span className="sr-only">{t("nav.account")}</span>
         </NavLink>
+        )}
       </div>
     </header>
   );

@@ -113,3 +113,29 @@ export function loose(text) {
   const esc = (c) => c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return new RegExp([...text].map(esc).join("[\\u2066-\\u2069]*"));
 }
+
+/** A published local sitter profile — the smallest record the app restores. */
+export function publishedSitter(extra = {}) {
+  const text = (s) => ({ en: s, fr: s, ar: s });
+  return {
+    profile: {
+      id: "sitter-local",
+      publicName: "Lina K.",
+      communeCode: "hydra",
+      headline: text("I look after dogs at home."),
+      about: text(""),
+      services: ["boarding"],
+      rates: { boarding: 900 },
+      acceptedSpecies: ["dog"],
+      acceptedDogSizes: ["small", "medium", "large"],
+      maxAnimals: 1,
+      limits: [],
+      declaredUnavailable: [],
+      housing: { type: "house", outdoor: "yard", residentPets: [], canSeparateAnimals: "unknown", conditions: null },
+      isDemoFixture: false,
+      ...extra,
+    },
+    published: true,
+    idDocument: null,
+  };
+}

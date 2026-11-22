@@ -25,7 +25,10 @@
     "ownerLabel": "Owner navigation",
     "sitterLabel": "Sitter navigation",
     "settings": "Settings",
-    "pets": "My pets"
+    "pets": "My pets",
+    "account": "Account",
+    "petsShort": "Animals",
+    "sitterProfile": "My profile"
   },
   "home": {
     "title": "Find care for your animal",
@@ -641,7 +644,7 @@
     }
   },
   "settings": {
-    "title": "Settings",
+    "title": "Account",
     "language": {
       "title": "Language",
       "following": "Nidz is following your device's language. Choose one below to keep it whichever device you use.",
@@ -665,6 +668,15 @@
       "title": "Your account",
       "edit": "Personal information",
       "editLine": "Your name, date of birth, where you are, and which animals you have."
+    },
+    "spaces": {
+      "title": "Your two spaces",
+      "body": "One account, two ways of using Nidz. Switching changes what you see; it deletes nothing — not your animals, your requests, a request you are preparing, or your sitter profile.",
+      "owner": "Owner space",
+      "sitter": "Sitter space",
+      "current": "The space you are using now",
+      "sitterDraft": "Your profile is not published yet — continue it",
+      "sitterNone": "Look after animals: describe what you offer"
     }
   },
   "workspace": {

@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
-import { ArrowRight } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { ArrowRight, Check } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import BackButton from "@/components/shared/BackButton";
 import OptionGroup from "@/components/shared/OptionGroup";
@@ -20,6 +20,8 @@ import { Button } from "@/components/ui/button";
 import { REGISTER_ROW } from "@/components/shared/register";
 import { SUPPORTED_LOCALES, hasExplicitLocale, setLocale, type AppLocale } from "@/i18n";
 import { useAppLocale } from "@/hooks/use-locale";
+import { useSwitchWorkspace } from "@/hooks/use-workspace";
+import { cn } from "@/lib/utils";
 import { useDemo } from "@/state/demo/context";
 
 
@@ -35,7 +37,18 @@ const LOCALE_LABEL_KEY: Record<AppLocale, string> = {
 const LANGUAGE_OPTIONS: AppLocale[] = [...SUPPORTED_LOCALES];
 
 /**
- * Settings.
+ * Compte — the account screen, shared by both spaces (Audit 1.3 LOT 04).
+ *
+ * One account, so one account screen: it is the last tab of the owner bar and
+ * of the sitter bar alike, and it is where the switch between the two spaces
+ * lives. Switching changes the view only — no request draft, animal or sitter
+ * profile is touched (see `setWorkspace` in the reducer).
+ *
+ * As a tab root it shows no Back control — EXCEPT when it was opened from a
+ * full-screen step (the sliders icon in `FlowScreen`), where Back is the only
+ * way into that step again.
+ *
+ * Settings, as it was:
  *
  * Exists from Group 3 because §89 moves the language chooser out of the rest of
  * the product, and taking it out of the header without giving it somewhere to
@@ -53,6 +66,10 @@ export default function Settings() {
   const locale = useAppLocale();
   const { state, dispatch } = useDemo();
   const navigate = useNavigate();
+  const location = useLocation();
+  const switchWorkspace = useSwitchWorkspace();
+  const fromFlow = (location.state as { fromFlow?: unknown } | null)?.fromFlow === true;
+  const active = state.activeWorkspace;
 
   /* Read once per render rather than held in state: nothing else in the app
      writes it, so there is no second source to fall out of step with. */
@@ -76,10 +93,74 @@ export default function Settings() {
       </Helmet>
 
       <div className="mx-auto max-w-[720px]">
-        <BackButton variant="labelled" fallback="/" className="mb-6" />
+        {fromFlow && <BackButton variant="labelled" fallback="/" className="mb-6" />}
         <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">{t("settings.title")}</h1>
 
-        <section aria-labelledby="settings-language" className="mt-10">
+        {/* The two spaces of ONE account. The current one is stated, not
+            offered; the other is a real switch, or the honest next step when
+            that side does not exist yet. */}
+        <section aria-labelledby="settings-spaces" className="mt-10">
+          <h2 id="settings-spaces" className="text-name font-semibold text-foreground">
+            {t("settings.spaces.title")}
+          </h2>
+          <p className="mt-2 max-w-[64ch] text-sm text-muted-foreground">{t("settings.spaces.body")}</p>
+          <div className="mt-4">
+            {(["owner", "sitter"] as const).map((space) => {
+              const current = active === space && (space === "owner" || state.capabilities.sitter);
+              const label = t(`settings.spaces.${space}`);
+              if (current) {
+                return (
+                  <div key={space} className={cn(REGISTER_ROW, "hover:bg-transparent")} aria-current="true">
+                    <span>
+                      <span className="block font-medium text-foreground">{label}</span>
+                      <span className="mt-0.5 block text-sm text-muted-foreground">
+                        {t("settings.spaces.current")}
+                      </span>
+                    </span>
+                    <Check className="size-5 shrink-0 text-primary" aria-hidden="true" />
+                  </div>
+                );
+              }
+              /* The sitter side before it has anything: offer to build it,
+                 rather than switching to an empty inbox. */
+              if (space === "sitter" && !state.sitter?.published) {
+                return (
+                  <Link
+                    key={space}
+                    to={state.sitter ? "/sitter/profile" : "/sitter/start"}
+                    className={REGISTER_ROW}
+                  >
+                    <span>
+                      <span className="block font-medium text-foreground">{label}</span>
+                      <span className="mt-0.5 block text-sm text-muted-foreground">
+                        {state.sitter ? t("settings.spaces.sitterDraft") : t("settings.spaces.sitterNone")}
+                      </span>
+                    </span>
+                    <ArrowRight className="size-5 shrink-0 text-muted-foreground rtl:-scale-x-100" aria-hidden="true" />
+                  </Link>
+                );
+              }
+              return (
+                <button
+                  key={space}
+                  type="button"
+                  onClick={() => switchWorkspace(space)}
+                  className={cn(REGISTER_ROW, "w-full text-start")}
+                >
+                  <span>
+                    <span className="block font-medium text-foreground">{label}</span>
+                    <span className="mt-0.5 block text-sm text-muted-foreground">
+                      {t(space === "owner" ? "workspace.toOwner" : "workspace.toSitter")}
+                    </span>
+                  </span>
+                  <ArrowRight className="size-5 shrink-0 text-muted-foreground rtl:-scale-x-100" aria-hidden="true" />
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section aria-labelledby="settings-language" className="mt-12">
           <h2 id="settings-language" className="text-name font-semibold text-foreground">
             {t("settings.language.title")}
           </h2>
