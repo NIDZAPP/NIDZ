@@ -224,10 +224,15 @@ declared at home") are rendered as **plain text, one register down** from facts
 a sitter actively declared. Both are equally true of someone who never answered
 the question, and a tick would turn silence into a confirmation.
 
-The profile is six sections in three registers — a lede (identity, why this
-fits), narrative (about, how the animals are kept), and facts (in practice, what
-I cannot accept, declared unavailability). The audit's nine-item content list as
-nine headings would be the grey stack §20 warns against.
+The profile leads with what decides a request (Audit 1.3 LOT 06): photo or
+monogram, name, commune, then — when the visitor searched — why this fits, then
+**at a glance**: the animals taken with the dog sizes folded in ("Chiens :
+petits et moyens") and every service with its price and unit. "Ce que je ne
+peux pas accepter" follows immediately, then about, how animals are hosted
+(home facts and care details under one heading), declared unavailability, and
+the evidence (care moments, reviews — headed "exemples" on a fixture). On a
+fixture the example notice sits right after the key facts, still on the first
+screen. The sitter's preview renders the same component.
 
 "Ce que je ne peux pas accepter" sits next to what the sitter *does* accept, is
 full-strength text, and carries no warning colour: read as a pair, the second is

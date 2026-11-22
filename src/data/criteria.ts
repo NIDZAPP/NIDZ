@@ -214,11 +214,12 @@ export type MatchReason =
 export function reasonsFor(sitter: SitterProfile, c: SearchCriteria): MatchReason[] {
   const reasons: MatchReason[] = [];
 
-  if (c.species && sitter.acceptedSpecies.includes(c.species)) {
-    reasons.push({ kind: "species", species: c.species });
-  }
+  /* "Accepts large dogs" already says "accepts dogs": one reason, not two
+     (Audit 1.3 LOT 06 — one or two concrete reasons, not a token list). */
   if (c.species === "dog" && c.size && sitter.acceptedSpecies.includes("dog") && sitter.acceptedDogSizes.includes(c.size)) {
     reasons.push({ kind: "size", size: c.size });
+  } else if (c.species && sitter.acceptedSpecies.includes(c.species)) {
+    reasons.push({ kind: "species", species: c.species });
   }
   if (c.care && offeredServices(sitter).includes(c.care)) {
     reasons.push({ kind: "care", care: c.care });

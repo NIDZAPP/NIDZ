@@ -443,8 +443,7 @@
       "fit": "Why this sitter fits",
       "fitNamed": "A good fit for {{name}}",
       "about": "About",
-      "care": "How I look after animals",
-      "practical": "In practice",
+      "care": "How I host animals",
       "limits": "What I cannot accept",
       "unavailable": "Periods stated as unavailable"
     },
@@ -462,7 +461,6 @@
     "noPayment": "Nidz handles no payment.",
     "facts": {
       "species": "Animals accepted",
-      "sizes": "Sizes accepted",
       "max": "Maximum number",
       "housing": "Home",
       "outdoor": "Outdoor space",
@@ -552,7 +550,16 @@
       "transport": "Can travel: {{modes}}",
       "canReachVet": "Could get an animal to a vet: {{answer}}"
     },
-    "sizeUnknown": "Your dog's size is not given. This sitter takes dogs: {{sizes}} only."
+    "sizeUnknown": "Your dog's size is not given. This sitter takes dogs: {{sizes}} only.",
+    "glance": {
+      "services": "Services and rates",
+      "dogsAllSizes": "Dogs of every size",
+      "dogsSizes": "Dogs: {{sizes}}"
+    },
+    "demo": {
+      "title": "An example profile",
+      "body": "This person does not exist. Everything on this page, including the care moments and reviews further down, is example content written for this demonstration. Nidz has verified nothing."
+    }
   },
   "ownerRequests": {
     "title": "My requests",
@@ -828,7 +835,8 @@
     "showAll_other": "Show all {{count}} reviews",
     "ratingLabel": "{{value}} out of 5",
     "distributionRow_one": "{{count}} review at {{star}} stars",
-    "distributionRow_other": "{{count}} reviews at {{star}} stars"
+    "distributionRow_other": "{{count}} reviews at {{star}} stars",
+    "titleExample": "Reviews — examples"
   },
   "portfolio": {
     "title": "Moments of care",

@@ -14,11 +14,11 @@ import { reviewsFor } from "@/data/reviews";
 import { isAbsenceReason, type MatchReason } from "@/data/criteria";
 import { offeredServices } from "@/data/demo-sitters";
 import { communeWithWilaya } from "@/data/algeria";
-import { CARE_UNIT_KEY, localized, type SitterProfile } from "@/data/types";
+import { CARE_UNIT_KEY, DOG_SIZES, localized, type SitterProfile } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
 import { cn } from "@/lib/utils";
 import { formatDateRange } from "@/utils/dates";
-import { formatDZD } from "@/utils/format";
+import { formatDZD, formatList } from "@/utils/format";
 
 /**
  * The public sitter profile — ONE component.
@@ -30,13 +30,23 @@ import { formatDZD } from "@/utils/format";
  * those, because the owner page and the preview inside `FlowScreen` supply
  * different ones.
  *
- * Structure (six sections, three registers) rather than the audit's ten-item
- * content inventory, which as headings would be exactly the grey stack §20 and
- * §40 warn against:
+ * AUDIT 1.3 LOT 06 — READABLE IN A FEW SECONDS. The first mobile screen now
+ * answers "for which animal, which service, at what price, and why me" before
+ * anything else:
  *
- *   lede       identity · why this fits
- *   narrative  about (experience folded in) · how the animals are kept
- *   facts      in practice · what I cannot accept · declared unavailability
+ *   lede       photo or monogram · name · commune · why this fits (when the
+ *              visitor searched) · AT A GLANCE: animals and dog sizes taken,
+ *              every service with its price and unit · the sitter's sentence
+ *   limits     what I cannot accept — right after what I do accept, so the
+ *              two read as one answer
+ *   narrative  about (experience folded in) · how animals are hosted (home
+ *              facts, then the care details)
+ *   facts      declared unavailability
+ *   evidence   care moments and reviews — both EXAMPLES on a fixture
+ *
+ * The page's single action ("Demander une garde") is supplied by the caller,
+ * pinned on mobile and in a rail on desktop, so it is visible on the first
+ * screen without a competing second button.
  *
  * Everything here is category A of the trust architecture: declared by the
  * sitter. There is no rating, no review, no verification and no availability
@@ -109,27 +119,22 @@ export default function SitterProfileView({
           .map((p) => t(`profile.residentPets.${p.species}`, { count: p.count }))
           .join(" · ");
 
-  /* The fact list. §14's scale, hairlines only — the brief rail on /search
-     established this pattern and it is the same job here. */
+  /* AT A GLANCE — the animals, with the dog sizes folded in where they
+     belong ("Chiens : petits et moyens"), so the size limit that decides most
+     dog requests is never three sections down. */
+  const dogSizes = DOG_SIZES.filter((size) => sitter.acceptedDogSizes.includes(size));
+  const acceptsLine = sitter.acceptedSpecies
+    .map((sp) => {
+      if (sp !== "dog" || dogSizes.length === 0) return t(`speciesPlural.${sp}`);
+      return dogSizes.length === DOG_SIZES.length
+        ? t("profile.glance.dogsAllSizes")
+        : t("profile.glance.dogsSizes", { sizes: formatList(dogSizes.map((size) => t(`sizeShort.${size}`)), lng) });
+    })
+    .join(" · ");
+
+  /* The home, in facts. §14's scale, hairlines only. Species and sizes moved
+     to the glance above; what remains describes where the animal would be. */
   const facts: { key: string; label: string; value: string }[] = [
-    ...(sitter.acceptedSpecies.length > 0
-      ? [
-          {
-            key: "species",
-            label: t("profile.facts.species"),
-            value: sitter.acceptedSpecies.map((sp) => t(`speciesPlural.${sp}`)).join(" · "),
-          },
-        ]
-      : []),
-    ...(sitter.acceptedSpecies.includes("dog") && sitter.acceptedDogSizes.length > 0
-      ? [
-          {
-            key: "sizes",
-            label: t("profile.facts.sizes"),
-            value: sitter.acceptedDogSizes.map((s) => t(`dogSize.${s}`)).join(" · "),
-          },
-        ]
-      : []),
     { key: "max", label: t("profile.facts.max"), value: t("profile.facts.maxValue", { count: sitter.maxAnimals }) },
     /* Only when answered: an unanswered housing question must not appear as a
        declaration under "informations fournies par le pet-sitter". */
@@ -151,12 +156,10 @@ export default function SitterProfileView({
       {/* ------------------------------------------------------------ lede */}
       <header>
         <div className="flex items-start gap-4">
-          {/* Card scale, deliberately. A 96px letter in a square is
-              unmistakably a placeholder for a missing photograph; at this size
-              it is the recognition mark carried over from the results row. */}
-          {/* The sitter's own photograph when they added one; otherwise a
-              monogram. Never a stock portrait — §21 and §40 both forbid
-              presenting one as a real person. */}
+          {/* The sitter's own photograph when they added one — theirs to
+              publish; otherwise a monogram at card scale, which reads as the
+              recognition mark carried over from the results row. Never a stock
+              portrait (§21, §40). */}
           {sitter.photoUrl ? (
             <img
               src={sitter.photoUrl}
@@ -188,57 +191,101 @@ export default function SitterProfileView({
           </div>
         </div>
 
+        {/* Why this fits — only when the visitor searched, and only what the
+            sitter's own data supports. The heading names what is actually
+            underneath it: a section holding only a mismatch, or only ABSENCES
+            ("has not declared these dates unavailable"), must not be titled
+            "Bien adapté à Milo" (see `isAbsenceReason`). */}
+        {hasCriteria && (reasons.length > 0 || mismatches.length > 0 || uncertain.length > 0) && (
+          <div className="mt-6">
+            <Section className="text-base font-semibold text-foreground">
+              {!reasons.some((r) => !isAbsenceReason(r))
+                ? t("profile.mismatchTitle")
+                : petName
+                  ? t("profile.section.fitNamed", { name: petName })
+                  : t("profile.section.fit")}
+            </Section>
+            <MatchReasonList className="mt-3" reasons={reasons} />
+            {uncertain.map((line) => (
+              <p key={line} className="mt-3 max-w-[64ch] text-sm font-medium text-foreground">
+                {line}
+              </p>
+            ))}
+            {mismatches.length > 0 && (
+              <div className="mt-3">
+                {reasons.some((r) => !isAbsenceReason(r)) && (
+                  <p className="text-sm font-medium text-foreground">{t("profile.mismatchTitle")}</p>
+                )}
+                <MismatchList
+                  className={reasons.some((r) => !isAbsenceReason(r)) ? "mt-2" : ""}
+                  items={mismatches}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* AT A GLANCE: for which animals, which services, at what price. A
+            menu, not a pricing grid — body scale, the unit always beside the
+            amount (§19, Audit 1.3 LOT 03). */}
+        {(acceptsLine || services.length > 0) && (
+          <dl className="mt-6 grid gap-x-8 gap-y-4 border-y border-border py-4 sm:grid-cols-2">
+            {acceptsLine && (
+              <div>
+                <dt className="text-sm text-muted-foreground">{t("profile.facts.species")}</dt>
+                <dd className="mt-1 text-base font-medium text-foreground">{acceptsLine}</dd>
+              </div>
+            )}
+            {services.length > 0 && (
+              <div>
+                <dt className="text-sm text-muted-foreground">{t("profile.glance.services")}</dt>
+                <dd className="mt-1 space-y-1">
+                  {services.map((service) => (
+                    <p key={service} className="text-base text-foreground">
+                      {t(`care.${service}`)}
+                      {" · "}
+                      <span className="font-semibold tabular-nums">{formatDZD(sitter.rates[service] as number, lng)}</span>{" "}
+                      <span className="text-muted-foreground">{t(CARE_UNIT_KEY[service])}</span>
+                    </p>
+                  ))}
+                </dd>
+              </div>
+            )}
+          </dl>
+        )}
+        {/* True today and commits to nothing: §28 says the payment model is
+            explicitly unvalidated, so this must not imply one. */}
+        {services.length > 0 && <p className="mt-2 text-sm text-muted-foreground">{t("profile.noPayment")}</p>}
+
         {headline && (
           <p className="mt-6 max-w-[60ch] text-lg leading-relaxed text-foreground">{headline}</p>
         )}
 
         {/* Scopes the whole page: everything below is what this person says
-            about themselves. Shown here, and again only where a claim needs
-            it most — six copies would be the badge cascade §7 forbids. */}
+            about themselves. Shown here, and again only where a claim needs it
+            most — six copies would be the badge cascade §7 forbids. */}
         <ProvenanceLabel className="mt-4" />
 
         {ledeAside}
       </header>
 
-      {/* ---------------------------------------------------- why this fits.
-          §9.4 ranks compatibility third, before experience. Absent entirely
-          when the visitor arrived with no criteria: a generic "compatible with
-          most animals" would be a manufactured claim. */}
-      {hasCriteria && (reasons.length > 0 || mismatches.length > 0) && (
+      {/* Directly after what the sitter accepts, so the pair reads as one
+          complete answer rather than as a caveat buried at the bottom.
+          Omitted when empty — "aucune limite indiquée" would state that this
+          person accepts everything, which they never said. No red, no warning
+          icon: a sitter declining an animal their home does not suit is the
+          matching working (§12.1). */}
+      {sitter.limits.length > 0 && (
         <section>
-          {/* The heading names what is actually underneath it. A section
-              containing only a mismatch must not be titled "why this sitter
-              fits" — and neither must one containing only ABSENCES. "Has not
-              declared these dates unavailable" is equally true of a sitter who
-              never answered; heading it "Bien adapté à Milo" is exactly the
-              silence-into-confirmation move `isAbsenceReason` exists to
-              prevent. */}
-          <Section className="text-name font-semibold text-foreground">
-            {!reasons.some((r) => !isAbsenceReason(r))
-              ? t("profile.mismatchTitle")
-              : petName
-                ? t("profile.section.fitNamed", { name: petName })
-                : t("profile.section.fit")}
-          </Section>
-          <MatchReasonList className="mt-4" reasons={reasons} />
-          {uncertain.map((line) => (
-            <p key={line} className="mt-3 max-w-[64ch] text-sm font-medium text-foreground">
-              {line}
-            </p>
-          ))}
-          {mismatches.length > 0 && (
-            <div className="mt-4">
-              {/* The sub-label only earns its place when there is a matched
-                  list above it to distinguish this from. */}
-              {reasons.some((r) => !isAbsenceReason(r)) && (
-                <p className="text-sm font-medium text-foreground">{t("profile.mismatchTitle")}</p>
-              )}
-              <MismatchList
-                className={reasons.some((r) => !isAbsenceReason(r)) ? "mt-2" : ""}
-                items={mismatches}
-              />
-            </div>
-          )}
+          <Section className="text-name font-semibold text-foreground">{t("profile.section.limits")}</Section>
+          <p className="mt-2 max-w-[64ch] text-sm text-muted-foreground">{t("profile.limitsIntro")}</p>
+          <ul role="list" className="mt-4 max-w-[64ch] space-y-2">
+            {sitter.limits.map((limit, i) => (
+              <li key={i} className="text-base leading-relaxed text-foreground">
+                {localized(limit, lng)}
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 
@@ -300,19 +347,24 @@ export default function SitterProfileView({
         )}
       </section>
 
-      {(careBlocks.length > 0 || sitter.housing.conditions) && (
-        <section>
-          <Section className="text-name font-semibold text-foreground">{t("profile.section.care")}</Section>
-          {/* Sentences, not chips: §20's question is "can I picture concretely
-              how my animal will be looked after", and four tokens cannot
-              answer it. Grouped, because §57 turned four tokens into around
-              twenty facts and an ungrouped list of twenty is worse than four.
-
-              Only ANSWERED questions are here — `careLines` drops the rest
-              rather than printing "not specified" twenty times, which would
-              read as a failing grade for a sitter who has simply not finished
-              (§118). */}
-          <div className="mt-4 max-w-[64ch] space-y-6">
+      {/* How animals are hosted: the home in facts, then the care details in
+          sentences (§57). Grouped under one heading, so the reader finds
+          "where would my animal be, and how would its day go" in one place
+          rather than across a facts table and a separate narrative. */}
+      <section>
+        <Section className="text-name font-semibold text-foreground">{t("profile.section.care")}</Section>
+        <dl className="mt-4 grid gap-x-8 gap-y-5 sm:grid-cols-2">
+          {facts.map((fact) => (
+            <div key={fact.key}>
+              <dt className="text-sm text-muted-foreground">{fact.label}</dt>
+              <dd className="mt-1 text-base text-foreground">{fact.value}</dd>
+            </div>
+          ))}
+        </dl>
+        {/* Only ANSWERED questions: `careLines` drops the rest rather than
+            printing "not specified" twenty times (§118). */}
+        {careBlocks.length > 0 && (
+          <div className="mt-8 max-w-[64ch] space-y-6">
             {careBlocks.map((block) => (
               <div key={block.id}>
                 <h3 className="text-sm font-semibold text-foreground">{block.title}</h3>
@@ -326,79 +378,15 @@ export default function SitterProfileView({
               </div>
             ))}
           </div>
-          {sitter.housing.conditions && (
-            <p className="mt-6 max-w-[64ch] text-base leading-relaxed text-foreground">
-              {localized(sitter.housing.conditions, lng)}
-            </p>
-          )}
-          {/* One provenance line for the whole section, not one per fact. */}
-          <p className="mt-4 max-w-[64ch] text-sm text-muted-foreground">
-            {t("profile.care.declaredNote")}
+        )}
+        {sitter.housing.conditions && localized(sitter.housing.conditions, lng) && (
+          <p className="mt-6 max-w-[64ch] text-base leading-relaxed text-foreground">
+            {localized(sitter.housing.conditions, lng)}
           </p>
-        </section>
-      )}
-
-      {/* ----------------------------------------------------------- facts */}
-      <section>
-        <Section className="text-name font-semibold text-foreground">{t("profile.section.practical")}</Section>
-
-        {/* A menu, not a pricing grid. The amounts stay at body scale — three
-            24px numerals stacked is what makes a page look like a SaaS pricing
-            table; `text-price` is reserved for the single quoted rate. */}
-        {services.length > 0 && (
-          <dl className="mt-4">
-            {services.map((service) => (
-            <div
-              key={service}
-              className="flex items-baseline justify-between gap-4 border-b border-border py-3 last:border-0"
-            >
-              <dt className="text-base text-foreground">{t(`care.${service}`)}</dt>
-              <dd className="shrink-0 text-base font-semibold tabular-nums text-foreground">
-                {formatDZD(sitter.rates[service] as number, lng)}{" "}
-                <span className="font-normal text-muted-foreground">{t(CARE_UNIT_KEY[service])}</span>
-              </dd>
-            </div>
-          ))}
-          </dl>
         )}
-        {/* True today and commits to nothing: §28 says the payment model is
-            explicitly unvalidated, so this must not imply one. */}
-        {services.length > 0 && (
-          <p className="mt-3 text-sm text-muted-foreground">{t("profile.noPayment")}</p>
-        )}
-
-        <dl className="mt-8 grid gap-x-8 gap-y-5 sm:grid-cols-2">
-          {facts.map((fact) => (
-            <div key={fact.key}>
-              <dt className="text-sm text-muted-foreground">{fact.label}</dt>
-              <dd className="mt-1 text-base text-foreground">{fact.value}</dd>
-            </div>
-          ))}
-        </dl>
+        {/* One provenance line for the whole section, not one per fact. */}
+        <p className="mt-4 max-w-[64ch] text-sm text-muted-foreground">{t("profile.care.declaredNote")}</p>
       </section>
-
-      {/* Directly after what the sitter accepts, so the pair reads as one
-          complete answer rather than as a caveat buried at the bottom.
-          Omitted when empty — "aucune limite indiquée" would state that this
-          person accepts everything, which they never said. */}
-      {sitter.limits.length > 0 && (
-        <section>
-          <Section className="text-name font-semibold text-foreground">{t("profile.section.limits")}</Section>
-          <p className="mt-2 max-w-[64ch] text-sm text-muted-foreground">{t("profile.limitsIntro")}</p>
-          {/* No red, no warning icon, no bordered box: a sitter declining an
-              animal their home does not suit is the matching working, not a
-              danger (§12.1). Full-strength text, because it is substantive
-              content and muting it would read as small print. */}
-          <ul role="list" className="mt-4 max-w-[64ch] space-y-2">
-            {sitter.limits.map((limit, i) => (
-              <li key={i} className="text-base leading-relaxed text-foreground">
-                {localized(limit, lng)}
-              </li>
-            ))}
-          </ul>
-          <ProvenanceLabel className="mt-4" />
-        </section>
-      )}
 
       <section>
         <Section className="text-name font-semibold text-foreground">{t("profile.section.unavailable")}</Section>
@@ -460,7 +448,7 @@ export function QuotedRate({
     <p className={cn("min-w-0", className)}>
       {isFrom && <span className="text-sm text-muted-foreground">{t("search.card.from")} </span>}
       <span className="text-price font-semibold tabular-nums text-foreground">{formatDZD(amount, lng)}</span>{" "}
-      <span className="text-sm text-muted-foreground">{t(CARE_UNIT_KEY[careType])}</span>
+      <span className="whitespace-nowrap text-sm text-muted-foreground">{t(CARE_UNIT_KEY[careType])}</span>
     </p>
   );
 }

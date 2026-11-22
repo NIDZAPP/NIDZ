@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Star } from "lucide-react";
+import { Info, Star } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { RATINGS, summarise, type Rating, type Review } from "@/data/reviews";
@@ -47,9 +47,18 @@ export default function ReviewSection({
 
   return (
     <section aria-labelledby="sitter-reviews" className="border-t border-border pt-8">
+      {/* On an example profile the heading itself says these are examples
+          (Audit 1.3 LOT 06): a reader who skims headings must not file six
+          invented stays under "Avis" as real opinions. */}
       <h2 id="sitter-reviews" className="text-name font-semibold text-foreground">
-        {t("reviews.title")}
+        {isDemoFixture && summary ? t("reviews.titleExample") : t("reviews.title")}
       </h2>
+      {isDemoFixture && summary && (
+        <p className="mt-2 flex max-w-[64ch] items-start gap-2 text-sm font-medium text-foreground">
+          <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          {t("reviews.demoNote")}
+        </p>
+      )}
 
       {!summary ? (
         /* THE COLD START. Stated as a fact about time, not a verdict about the
@@ -98,10 +107,6 @@ export default function ReviewSection({
               );
             })}
           </ul>
-
-          {isDemoFixture && (
-            <p className="mt-4 max-w-[64ch] text-sm text-muted-foreground">{t("reviews.demoNote")}</p>
-          )}
 
           <ul role="list" className="mt-6">
             {shown.map((review) => (

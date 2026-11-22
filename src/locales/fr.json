@@ -447,7 +447,6 @@
       "fitNamed": "Bien adapté à {{name}}",
       "about": "À propos",
       "care": "Comment j'accueille les animaux",
-      "practical": "En pratique",
       "limits": "Ce que je ne peux pas accepter",
       "unavailable": "Périodes indiquées comme indisponibles"
     },
@@ -465,7 +464,6 @@
     "noPayment": "Nidz ne gère aucun paiement.",
     "facts": {
       "species": "Animaux acceptés",
-      "sizes": "Tailles acceptées",
       "max": "Nombre maximum",
       "housing": "Logement",
       "outdoor": "Espace extérieur",
@@ -567,7 +565,16 @@
       "transport": "Peut se déplacer : {{modes}}",
       "canReachVet": "Pourrait emmener un animal chez le vétérinaire : {{answer}}"
     },
-    "sizeUnknown": "La taille de votre chien n'est pas précisée. Ce pet-sitter accepte les chiens : {{sizes}} uniquement."
+    "sizeUnknown": "La taille de votre chien n'est pas précisée. Ce pet-sitter accepte les chiens : {{sizes}} uniquement.",
+    "glance": {
+      "services": "Services et tarifs",
+      "dogsAllSizes": "Chiens de toutes tailles",
+      "dogsSizes": "Chiens : {{sizes}}"
+    },
+    "demo": {
+      "title": "Un profil d'exemple",
+      "body": "Cette personne n'existe pas. Tout ce qui figure sur cette page, y compris les moments de garde et les avis plus bas, est un contenu d'exemple écrit pour cette démonstration. Nidz n'a rien vérifié."
+    }
   },
   "ownerRequests": {
     "title": "Mes demandes",
@@ -847,7 +854,8 @@
     "distributionRow_other": "{{count}} avis à {{star}} étoiles",
     "count_many": "{{count}} avis",
     "showAll_many": "Afficher les {{count}} avis",
-    "distributionRow_many": "{{count}} avis à {{star}} étoiles"
+    "distributionRow_many": "{{count}} avis à {{star}} étoiles",
+    "titleExample": "Avis — exemples"
   },
   "portfolio": {
     "title": "Moments de garde",

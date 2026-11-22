@@ -456,7 +456,6 @@
       "fitNamed": "مناسب لـ {{name}}",
       "about": "نبذة",
       "care": "كيف أستقبل الحيوانات",
-      "practical": "عملياً",
       "limits": "ما لا يمكنني قبوله",
       "unavailable": "فترات مصرّح بعدم التوفر فيها"
     },
@@ -474,7 +473,6 @@
     "noPayment": "نيدز لا تتولى أي عملية دفع.",
     "facts": {
       "species": "الحيوانات المقبولة",
-      "sizes": "الأحجام المقبولة",
       "max": "العدد الأقصى",
       "housing": "المسكن",
       "outdoor": "الفضاء الخارجي",
@@ -611,7 +609,16 @@
       "transport": "يمكنه التنقل: {{modes}}",
       "canReachVet": "يستطيع إيصال حيوان إلى طبيب بيطري: {{answer}}"
     },
-    "sizeUnknown": "حجم كلبك غير محدد. يقبل هذا الحاضن الكلاب: {{sizes}} فقط."
+    "sizeUnknown": "حجم كلبك غير محدد. يقبل هذا الحاضن الكلاب: {{sizes}} فقط.",
+    "glance": {
+      "services": "الخدمات والأسعار",
+      "dogsAllSizes": "كلاب من جميع الأحجام",
+      "dogsSizes": "كلاب: {{sizes}}"
+    },
+    "demo": {
+      "title": "ملف على سبيل المثال",
+      "body": "هذا الشخص غير موجود. كل ما في هذه الصفحة، بما في ذلك لحظات الرعاية والآراء أدناه، محتوى توضيحي كُتب لهذه النسخة التجريبية. لم تتحقق نيدز من أي شيء."
+    }
   },
   "ownerRequests": {
     "title": "طلباتي",
@@ -903,7 +910,8 @@
     "distributionRow_two": "تقييمان بـ{{star}} نجوم",
     "distributionRow_few": "{{count}} تقييمات بـ{{star}} نجوم",
     "distributionRow_many": "{{count}} تقييماً بـ{{star}} نجوم",
-    "distributionRow_other": "{{count}} تقييم بـ{{star}} نجوم"
+    "distributionRow_other": "{{count}} تقييم بـ{{star}} نجوم",
+    "titleExample": "آراء — أمثلة"
   },
   "portfolio": {
     "title": "لحظات من الرعاية",

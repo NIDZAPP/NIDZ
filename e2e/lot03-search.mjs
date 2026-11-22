@@ -15,7 +15,7 @@ const mainText = async (page) => clean(await page.locator("main").innerText());
   check("large dog: Karim (small/medium) is not listed", !n.includes("Karim B."));
   check("large dog: Amina (all sizes) is listed", n.includes("Amina B."));
   const text = await mainText(page);
-  check("large dog: the shared reason names the size", text.includes("Accepts large dogs"));
+  check("large dog: the shared reason names the size", text.includes("Accepts large dogs") && !text.includes("Accepts dogs"));
   check("large dog: no card advertises cats", !/Accepts cats/.test(text));
   check("no distance is claimed", !/\bkm\b/.test(text));
 

@@ -201,13 +201,6 @@ export default function SitterProfile() {
 
           <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
             <div className="min-w-0 xl:pe-12">
-              {/* The honesty layer belongs on this page too, not only on
-                  /search: these links are shareable, so a visitor can land here
-                  first and see a complete, plausible profile of a person who
-                  does not exist. */}
-              {sitter.isDemoFixture && (
-                <DemoNotice className="mb-8" title={t("search.demo.title")} body={t("search.demo.body")} />
-              )}
               {/* Without this, nothing in the interface can address a request to
                   your own profile, so "Demandes reçues" is a tab that can never
                   hold anything. Labelled as the demonstration control it is,
@@ -227,6 +220,17 @@ export default function SitterProfile() {
               )}
 
               <SitterProfileView
+                /* The honesty layer belongs on this page too, not only on
+                   /search: these links are shareable, so a visitor can land
+                   here first and see a complete, plausible profile of a person
+                   who does not exist. Placed right after the key facts (Audit
+                   1.3 LOT 06) — still on the first screen, and no longer
+                   pushing the identity and the offer below it. */
+                ledeAside={
+                  sitter.isDemoFixture ? (
+                    <DemoNotice className="mt-6" title={t("profile.demo.title")} body={t("profile.demo.body")} />
+                  ) : undefined
+                }
                 sitter={sitter}
                 hasCriteria={hasCriteria}
                 reasons={reasons}

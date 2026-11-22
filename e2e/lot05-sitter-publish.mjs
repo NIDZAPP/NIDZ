@@ -60,7 +60,7 @@ const state = seedState({ account: ACCOUNT, capabilities: { owner: true, sitter:
   await page.getByRole("link", { name: /what owners would see/i }).click();
   await page.waitForURL(/\/sitter\/preview/);
   const preview = clean(await page.locator("main").innerText());
-  check("preview shows the declared facts", preview.includes("Lina K.") && /Large dogs/.test(preview) && /per night/.test(preview));
+  check("preview shows the declared facts", preview.includes("Lina K.") && /Dogs: large/.test(preview) && /per night/.test(preview));
   check("preview never calls the profile verified", !/\bverified (profile|sitter)\b|profil vérifié/i.test(preview));
   await page.getByRole("button", { name: "Publish my profile" }).click();
   await page.waitForURL(/\/sitter\/published/);
