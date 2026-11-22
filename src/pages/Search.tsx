@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
-import { Cat, Dog, SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +16,7 @@ import { ChipGroup } from "@/components/shared/Chip";
 import SitterCard from "@/components/sitter/SitterCard";
 import { useReasonLabel } from "@/components/sitter/use-reason-label";
 import EmptyState from "@/components/shared/EmptyState";
+import { SPECIES_ICON } from "@/components/shared/species";
 import { DateRangeField, LocationFields, SelectField } from "@/components/shared/fields";
 import { DemoNotice } from "@/components/shared/trust";
 import {
@@ -29,11 +30,21 @@ import {
   normalizeCriteria,
   parseCriteria,
   partitionReasons,
+  sizeLimitToState,
   type SearchCriteria,
+  type SortOrder,
 } from "@/data/criteria";
 import { DEMO_SITTERS } from "@/data/demo-sitters";
 import { communeName, getWilaya } from "@/data/algeria";
-import { localized, type CareType, type Species } from "@/data/types";
+import {
+  CARE_UNIT_KEY,
+  DOG_SIZES,
+  SPECIES,
+  localized,
+  type CareType,
+  type DogSize,
+  type Species,
+} from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
 import { cn } from "@/lib/utils";
 import { useDemo } from "@/state/demo/context";
@@ -79,17 +90,27 @@ export default function Search() {
   };
 
   const careLabel = (c: CareType) => t(`care.${c}`);
+  /* A budget is a price per unit of the service, so it is never shown without
+     the unit (Audit 1.3 LOT 03). With no service chosen the unit is "per
+     service", which is what the filter actually compares. */
+  const budgetLabel = (price: number, care: CareType | null) =>
+    t("search.filters.upToUnit", {
+      price: formatDZD(price, lng),
+      unit: care ? t(CARE_UNIT_KEY[care]) : t("search.filters.perService"),
+    });
   const zoneLabel = (code: string) => communeName(code, lng) ?? code;
 
   /** The URL is canonical for results; the brief is mirrored back into demo
       state so the request summary later quotes what the owner actually last
       asked for, not a stale earlier answer. */
-  const apply = (raw: SearchCriteria) => {
+  const apply = (raw: SearchCriteria, options?: { replace?: boolean }) => {
     /* Normalised on the way out, so the sheet cannot commit a combination the
        need flow would have refused — a walk carrying a six-day range, for
        instance, whose end date the user can no longer see or clear. */
     const next = normalizeCriteria(raw);
-    setSearchParams(criteriaToParams(next));
+    /* The order is a reading preference, not a place: it replaces the entry,
+       so Back leaves the page instead of toggling the order. */
+    setSearchParams(criteriaToParams(next), options);
     dispatch({ type: "setNeed", patch: needPatchFromCriteria(next) });
   };
 
@@ -106,9 +127,19 @@ export default function Search() {
      commune they are travelling to is a normal case. */
   const homeCommune = state.account?.communeId ?? null;
   const results = useMemo(
-    () => matchSitters(pool, criteria, homeCommune),
-    [pool, criteria, homeCommune],
+    () => matchSitters(pool, criteria, homeCommune, lng),
+    [pool, criteria, homeCommune, lng],
   );
+  /* The order is an option the owner picks, applied straight away: it filters
+     nothing, so there is nothing to stage in the sheet. */
+  const setSort = (sort: SortOrder) => apply({ ...criteria, sort }, { replace: true });
+  /* A price order only means something in one unit, so it is offered only
+     once a service is chosen (see `matchSitters`). */
+  const canSortByPrice = criteria.care !== null;
+  const priceOrder = criteria.sort === "price" && canSortByPrice;
+  /* The size hint is only true when at least one listed sitter actually
+     restricts sizes. */
+  const someSizeLimit = results.some((r) => sizeLimitToState(r.sitter, criteria) !== null);
   /* Narrowed to a value rather than asserted at the call site: the invariant
      that makes `homeCommune!` safe lives in another module. Null when the
      tie-break did not actually change anything. */
@@ -124,6 +155,14 @@ export default function Search() {
   const activeFilters = activeCriteriaCount(criteria);
   const hasCriteria = activeFilters > 0;
 
+  /* "Grands chiens" says both facts at once; "Chien" alone when the size was
+     not given. */
+  function speciesValue(species: Species | null, size: DogSize | null): string {
+    if (!species) return t("search.brief.anySpecies");
+    if (species === "dog" && size) return t(`dogSize.${size}`);
+    return t(`species.${species}`);
+  }
+
   const zoneText = criteria.commune
     ? zoneLabel(criteria.commune)
     : criteria.wilaya
@@ -137,7 +176,7 @@ export default function Search() {
     {
       key: "species",
       label: t("search.brief.species"),
-      value: criteria.species ? t(`species.${criteria.species}`) : t("search.brief.anySpecies"),
+      value: speciesValue(criteria.species, criteria.size),
       brand: true,
     },
     {
@@ -155,9 +194,7 @@ export default function Search() {
       key: "budget",
       label: t("search.brief.budget"),
       value:
-        criteria.maxPrice !== null
-          ? t("search.filters.upTo", { price: formatDZD(criteria.maxPrice, lng) })
-          : t("search.filters.anyPrice"),
+        criteria.maxPrice !== null ? budgetLabel(criteria.maxPrice, criteria.care) : t("search.filters.anyPrice"),
     },
   ];
 
@@ -166,12 +203,29 @@ export default function Search() {
     ...(criteria.care ? [careLabel(criteria.care)] : []),
     ...(criteria.dates ? [formatDateRange(criteria.dates, lng)] : []),
     ...(zoneText ? [zoneText] : []),
-    ...(criteria.maxPrice !== null
-      ? [t("search.filters.upTo", { price: formatDZD(criteria.maxPrice, lng) })]
-      : []),
+    ...(criteria.maxPrice !== null ? [budgetLabel(criteria.maxPrice, criteria.care)] : []),
   ];
 
-  const speciesText = criteria.species ? t(`species.${criteria.species}`) : null;
+  const speciesText = criteria.species ? speciesValue(criteria.species, criteria.size) : null;
+
+  /* The order, said as what it is. Never "best match": Nidz has no basis for
+     that claim. */
+  const orderText =
+    priceOrder
+      ? near
+        ? t("search.results.orderPriceNear", { commune: zoneLabel(near) })
+        : t("search.results.orderPrice")
+      : near
+        ? t("search.results.orderDefaultNear", { commune: zoneLabel(near) })
+        : t("search.results.orderDefault");
+
+  const clearAll = () => {
+    /* Clears what FILTERS the list. The order is a preference about reading
+       it, so it survives. */
+    const cleared = { ...EMPTY_CRITERIA, sort: criteria.sort };
+    setDraft(cleared);
+    apply(cleared);
+  };
 
   const editButton = (
     <Button
@@ -248,19 +302,47 @@ export default function Search() {
             </h1>
             <p className="mt-3 text-sm text-muted-foreground" aria-live="polite">
               {t("search.results.countLabel", { count: results.length })}
-              {/* No ordering claim when there is nothing to order. */}
-              {/* ONE claim, not two. Stating "sorted by lowest price" and then
-                  appending the commune tier put the precedence backwards: the
-                  first row is often not the cheapest, and the sentence said it
-                  was. The combined phrasing names the tier that actually
-                  dominates first. */}
-              {results.length > 0 &&
-                ` · ${
-                  near
-                    ? t("search.results.sortedNearFirst", { commune: zoneLabel(near) })
-                    : t("search.results.sortedByPrice")
-                }`}
+              {/* No ordering claim when there is nothing to order. ONE claim,
+                  naming the tier that actually dominates first. */}
+              {results.length > 1 && ` · ${orderText}`}
             </p>
+
+            {/* The order is the owner's choice, not a verdict. Two options, both
+                statable in one sentence; price is never the silent default. */}
+            {results.length > 1 && canSortByPrice && (
+              <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+                <span id="search-sort" className="text-sm text-muted-foreground">
+                  {t("search.sort.label")}
+                </span>
+                <ChipGroup
+                  labelledBy="search-sort"
+                  value={criteria.sort}
+                  onChange={(v) => setSort(v === "price" ? "price" : "default")}
+                  options={[
+                    { value: "default", label: t("search.sort.default") },
+                    { value: "price", label: t("search.sort.price") },
+                  ]}
+                />
+              </div>
+            )}
+
+            {/* A dog search without a size cannot rule anyone out on size —
+                an absent answer is not a match. Said once, here, and each row
+                states the sitter's own limit. */}
+            {criteria.species === "dog" && !criteria.size && someSizeLimit && (
+              <p className="mt-3 max-w-[70ch] text-sm text-foreground">
+                {t("search.results.sizeHint")}{" "}
+                <button
+                  type="button"
+                  onClick={() => openSheet(true)}
+                  /* 44px target, but `-my-3` keeps its margin box at the text's
+                     line height so the paragraph's last line does not drop. */
+                  className="-my-3 inline-flex min-h-11 items-center font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {t("search.results.sizeHintAction")}
+                </button>
+              </p>
+            )}
 
             {/* What every result has in common, said once. Repeating it as
                 tokens on each row would be four identical chips per entry that
@@ -296,12 +378,20 @@ export default function Search() {
               <EmptyState
                 title={t("search.results.emptyTitle")}
                 body={t("search.results.emptyBody")}
-                /* Opens the editor rather than wiping every criterion — a cat
-                   owner should not be shown dog sitters. */
+                /* Editing comes first — a cat owner should not be shown dog
+                   sitters — and clearing every criterion is offered beside it,
+                   as the honest way to see the whole (example) directory. */
                 action={
-                  <Button type="button" variant="outline" onClick={() => openSheet(true)}>
-                    {t("search.context.editLabel")}
-                  </Button>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <Button type="button" variant="outline" onClick={() => openSheet(true)}>
+                      {t("search.context.editLabel")}
+                    </Button>
+                    {hasCriteria && (
+                      <Button type="button" variant="link" className="text-muted-foreground" onClick={clearAll}>
+                        {t("search.filters.clear")}
+                      </Button>
+                    )}
+                  </div>
                 }
               />
             ) : (
@@ -317,6 +407,7 @@ export default function Search() {
                     rate={rate}
                     reasons={perResult.get(sitter.id) ?? []}
                     askedSpecies={criteria.species}
+                    askedSize={criteria.size}
                     askedCare={criteria.care}
                     search={paramKey}
                     /* Redundant once the species is a criterion: it is then
@@ -374,17 +465,41 @@ export default function Search() {
                 </legend>
                 {/* Named by the visible legend rather than a duplicate
                     aria-label, so the group is announced once. */}
+                {/* All three species. The bird was missing here, so the sheet
+                    could not express a search the need flow could. */}
                 <ChipGroup
                   labelledBy="f-species"
                   value={draft.species ?? ANY}
-                  onChange={(v) => setDraft({ ...draft, species: v === ANY ? null : (v as Species) })}
+                  onChange={(v) =>
+                    setDraft({
+                      ...draft,
+                      species: v === ANY ? null : (v as Species),
+                      size: v === "dog" ? draft.size : null,
+                    })
+                  }
                   options={[
                     { value: ANY, label: t("search.brief.anySpecies") },
-                    { value: "dog", label: t("species.dog"), icon: Dog },
-                    { value: "cat", label: t("species.cat"), icon: Cat },
+                    ...SPECIES.map((sp) => ({ value: sp, label: t(`species.${sp}`), icon: SPECIES_ICON[sp] })),
                   ]}
                 />
               </fieldset>
+
+              {draft.species === "dog" && (
+                <fieldset>
+                  <legend id="f-size" className="mb-3 text-sm font-medium text-foreground">
+                    {t("search.filters.size")}
+                  </legend>
+                  <ChipGroup
+                    labelledBy="f-size"
+                    value={draft.size ?? ANY}
+                    onChange={(v) => setDraft({ ...draft, size: v === ANY ? null : (v as DogSize) })}
+                    options={[
+                      { value: ANY, label: t("search.filters.anySize") },
+                      ...DOG_SIZES.map((size) => ({ value: size, label: t(`dogSize.${size}`) })),
+                    ]}
+                  />
+                </fieldset>
+              )}
 
               <fieldset>
                 <legend id="f-care" className="mb-3 text-sm font-medium text-foreground">
@@ -444,7 +559,7 @@ export default function Search() {
                   { value: ANY, label: t("search.filters.anyPrice") },
                   ...PRICE_STEPS.map((p) => ({
                     value: String(p),
-                    label: t("search.filters.upTo", { price: formatDZD(p, lng) }),
+                    label: budgetLabel(p, draft.care),
                   })),
                 ]}
               />
@@ -471,8 +586,7 @@ export default function Search() {
                 variant="link"
                 className="text-muted-foreground"
                 onClick={() => {
-                  setDraft(EMPTY_CRITERIA);
-                  apply(EMPTY_CRITERIA);
+                  clearAll();
                   setSheetOpen(false);
                 }}
               >

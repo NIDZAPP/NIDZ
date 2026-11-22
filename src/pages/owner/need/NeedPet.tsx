@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 
+import { ChipGroup } from "@/components/shared/Chip";
 import FlowScreen from "@/components/shared/FlowScreen";
 import OptionGroup from "@/components/shared/OptionGroup";
 import { SPECIES_ICON } from "@/components/shared/species";
@@ -12,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { emptyPet, type Pet } from "@/data/pets";
-import { SPECIES, type Species } from "@/data/types";
+import { DOG_SIZES, SPECIES, type DogSize, type Species } from "@/data/types";
 import { useDemo } from "@/state/demo/context";
 
 const FORM_ID = "need-pet";
@@ -54,6 +55,14 @@ export default function NeedPet() {
   );
 
   const [species, setSpecies] = useState<Species | null>(state.need.species);
+  /* Asked here, for a dog only, because it is a hard matching constraint: a
+     sitter who takes only small dogs must not be offered for a large one
+     (Audit 1.3 LOT 03). Optional — "not sure" is an answer, and a dog with no
+     size is still searchable; the results then state each sitter's limit. */
+  /* Starts unanswered, always. Seeding it from the brief handed a NEW dog the
+     size of whichever dog was chosen last — saved silently, then used as a
+     hard filter. */
+  const [dogSize, setDogSize] = useState<DogSize | null>(null);
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [notes, setNotes] = useState("");
@@ -68,7 +77,14 @@ export default function NeedPet() {
     if (!addingNew) {
       const chosen = pets.find((p) => p.id === choice);
       if (!chosen) return;
-      dispatch({ type: "setNeed", patch: { species: chosen.species, petId: chosen.id } });
+      dispatch({
+        type: "setNeed",
+        patch: {
+          species: chosen.species,
+          petId: chosen.id,
+          dogSize: chosen.species === "dog" ? chosen.details.size : null,
+        },
+      });
       navigate("/owner/need/location");
       return;
     }
@@ -86,15 +102,17 @@ export default function NeedPet() {
 
     /* Always a new id. This branch cannot reach an existing animal, which is
        the whole point of separating it from the picker above. */
+    const base = emptyPet(`pet-${Date.now().toString(36)}`, species as Species);
     const pet: Pet = {
-      ...emptyPet(`pet-${Date.now().toString(36)}`, species as Species),
+      ...(base.species === "dog" ? { ...base, details: { ...base.details, size: dogSize } } : base),
       name: name.trim(),
       age: age.trim(),
       notes: notes.trim(),
       photoUrl,
     };
+    const size = pet.species === "dog" ? pet.details.size : null;
     dispatch({ type: "savePet", pet });
-    dispatch({ type: "setNeed", patch: { species: pet.species, petId: pet.id } });
+    dispatch({ type: "setNeed", patch: { species: pet.species, petId: pet.id, dogSize: size } });
     navigate("/owner/need/location");
   };
 
@@ -196,6 +214,27 @@ export default function NeedPet() {
                   />
                 )}
               </FieldShell>
+
+              {species === "dog" && (
+                <div>
+                  <p id="pet-size-label" className="mb-3 text-sm font-medium text-foreground">
+                    {t("need.pet.sizeLabel")}
+                  </p>
+                  <ChipGroup
+                    labelledBy="pet-size-label"
+                    describedBy="pet-size-help"
+                    value={dogSize ?? ""}
+                    onChange={(v) => setDogSize(v ? (v as DogSize) : null)}
+                    options={[
+                      ...DOG_SIZES.map((size) => ({ value: size as string, label: t(`dogSize.${size}`) })),
+                      { value: "", label: t("pets.notSure") },
+                    ]}
+                  />
+                  <p id="pet-size-help" className="mt-2 text-sm text-muted-foreground">
+                    {t("need.pet.sizeHelp")}
+                  </p>
+                </div>
+              )}
 
               <FieldShell label={t("need.pet.ageLabel")} help={t("need.pet.ageHelp")}>
                 {({ id, describedBy }) => (

@@ -47,6 +47,7 @@ export default function SitterProfileView({
   hasCriteria,
   reasons,
   mismatches,
+  uncertain = [],
   petName,
   headingLevel = "h1",
   /** Rendered at the end of the lede — the desktop rate rail lives here on the
@@ -61,6 +62,9 @@ export default function SitterProfileView({
   reasons: MatchReason[];
   /** Things the visitor asked for that this sitter does not offer. */
   mismatches: string[];
+  /** Facts the search could not settle — a dog's size that was never given,
+      against a sitter who restricts sizes. Neither a match nor a mismatch. */
+  uncertain?: string[];
   /** Only pass a name when the criteria still describe THAT animal. */
   petName: string | null;
   headingLevel?: "h1" | "h2";
@@ -217,6 +221,11 @@ export default function SitterProfileView({
                 : t("profile.section.fit")}
           </Section>
           <MatchReasonList className="mt-4" reasons={reasons} />
+          {uncertain.map((line) => (
+            <p key={line} className="mt-3 max-w-[64ch] text-sm font-medium text-foreground">
+              {line}
+            </p>
+          ))}
           {mismatches.length > 0 && (
             <div className="mt-4">
               {/* The sub-label only earns its place when there is a matched

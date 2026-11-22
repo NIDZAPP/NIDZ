@@ -203,6 +203,18 @@ carries: monogram, species eyebrow, name, commune, one-line headline, the
 compatibility facts that **distinguish it from the other results**, a provenance
 byline, one price on its own axis, and one action.
 
+**The animal being searched for comes first** (Audit 1.3 LOT 03). Under the
+name and commune, a dog search shows which dog sizes this sitter takes when the
+owner has not given their dog's size ("Chiens : petits uniquement") — an absent
+answer is never a match. Other species the sitter also accepts are not listed
+on a species search. Dog size is a hard filter when it is known.
+
+**Order is stated, never implied.** The default is the owner's own commune
+first, then alphabetical — neutral and checkable, and it makes no "best match"
+claim. Price order exists only as an option the owner picks ("Prix croissant"),
+only once a service is chosen — prices in different units (a walk, a night) do
+not rank — and the sentence above the list says it was their choice.
+
 Reasons true of *every* result are hoisted into a single line above the list.
 With hard-constraint matching they are true by construction, so repeating them
 per row is three lines of tokens that discriminate nothing.

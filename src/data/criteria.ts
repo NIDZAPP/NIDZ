@@ -31,22 +31,40 @@ import { isISODate } from "@/utils/dates";
 
 export const PRICE_STEPS = [600, 900, 1200] as const;
 
+/**
+ * How results are ordered.
+ *
+ * `default` is the explainable order (see `matchSitters`): the owner's own
+ * commune first, then alphabetical. `price` is an option the owner CHOSE, and
+ * the results screen names it as such — Audit 1.3 LOT 03 forbids letting
+ * "cheapest first" pass itself off as relevance.
+ */
+export type SortOrder = "default" | "price";
+
 export type SearchCriteria = {
   species: Species | null;
+  /** Only meaningful when `species` is "dog" — `normalizeCriteria` clears it
+      otherwise. A hard constraint: a sitter who declared they take only small
+      dogs is not shown for a large one (Audit 1.3 LOT 03). */
+  size: DogSize | null;
   care: CareType | null;
   wilaya: string | null;
   commune: string | null;
   maxPrice: number | null;
   dates: DateRange | null;
+  /** An ordering preference, not a filter: never counted as a criterion. */
+  sort: SortOrder;
 };
 
 export const EMPTY_CRITERIA: SearchCriteria = {
   species: null,
+  size: null,
   care: null,
   wilaya: null,
   commune: null,
   maxPrice: null,
   dates: null,
+  sort: "default",
 };
 
 /**
@@ -60,14 +78,19 @@ export const EMPTY_CRITERIA: SearchCriteria = {
  * Applied wherever criteria are committed, so there is one rule, not two.
  */
 export function normalizeCriteria(c: SearchCriteria): SearchCriteria {
-  if (c.care === "walk" && c.dates && c.dates.start !== c.dates.end) {
-    return { ...c, dates: { start: c.dates.start, end: c.dates.start } };
+  let out = c;
+  if (out.care === "walk" && out.dates && out.dates.start !== out.dates.end) {
+    out = { ...out, dates: { start: out.dates.start, end: out.dates.start } };
   }
-  return c;
+  /* A size is a fact about a dog. Kept with any other species it would filter
+     cat sitters on a dog size nobody can see in the brief. */
+  if (out.size && out.species !== "dog") out = { ...out, size: null };
+  return out;
 }
 
 export function parseCriteria(params: URLSearchParams): SearchCriteria {
   const species = params.get("species");
+  const size = params.get("size");
   const care = params.get("care");
   const max = Number(params.get("max"));
   const from = params.get("from");
@@ -82,17 +105,20 @@ export function parseCriteria(params: URLSearchParams): SearchCriteria {
 
   return normalizeCriteria({
     species: (SPECIES as readonly string[]).includes(species ?? "") ? (species as Species) : null,
+    size: (DOG_SIZES as readonly string[]).includes(size ?? "") ? (size as DogSize) : null,
     care: (CARE_TYPES as readonly string[]).includes(care ?? "") ? (care as CareType) : null,
     wilaya,
     commune,
     maxPrice: (PRICE_STEPS as readonly number[]).includes(max) ? max : null,
     dates: isISODate(from) && isISODate(to) && from <= to ? { start: from, end: to } : null,
+    sort: params.get("sort") === "price" ? "price" : "default",
   });
 }
 
 export function criteriaToParams(c: SearchCriteria): Record<string, string> {
   const out: Record<string, string> = {};
   if (c.species) out.species = c.species;
+  if (c.size) out.size = c.size;
   if (c.care) out.care = c.care;
   if (c.commune) out.commune = c.commune;
   else if (c.wilaya) out.wilaya = c.wilaya;
@@ -101,17 +127,21 @@ export function criteriaToParams(c: SearchCriteria): Record<string, string> {
     out.from = c.dates.start;
     out.to = c.dates.end;
   }
+  if (c.sort === "price") out.sort = "price";
   return out;
 }
 
 export function criteriaFromNeed(need: OwnerNeed): SearchCriteria {
   return normalizeCriteria({
     species: need.species,
+    /* Storage is untrusted: only a size this build knows reaches a filter. */
+    size: (DOG_SIZES as readonly (string | null)[]).includes(need.dogSize) ? need.dogSize : null,
     care: need.careType,
     wilaya: need.wilayaCode,
     commune: need.communeCode,
     maxPrice: need.maxPrice,
     dates: need.dates,
+    sort: "default",
   });
 }
 
@@ -126,6 +156,7 @@ export function criteriaFromNeed(need: OwnerNeed): SearchCriteria {
 export function needPatchFromCriteria(c: SearchCriteria): Partial<OwnerNeed> {
   return {
     species: c.species,
+    dogSize: c.size,
     careType: c.care,
     wilayaCode: c.wilaya,
     communeCode: c.commune,
@@ -135,8 +166,9 @@ export function needPatchFromCriteria(c: SearchCriteria): Partial<OwnerNeed> {
 }
 
 export function activeCriteriaCount(c: SearchCriteria): number {
-  return [c.species, c.care, c.commune ?? c.wilaya, c.maxPrice, c.dates].filter((v) => v !== null && v !== undefined)
-    .length;
+  return [c.species, c.size, c.care, c.commune ?? c.wilaya, c.maxPrice, c.dates].filter(
+    (v) => v !== null && v !== undefined,
+  ).length;
 }
 
 /**
@@ -149,6 +181,9 @@ export function activeCriteriaCount(c: SearchCriteria): number {
  */
 export type MatchReason =
   | { kind: "species"; species: Species }
+  /** The dog size that was asked for, and that this sitter declared they
+      take. Never emitted for an unknown size: silence is not a match. */
+  | { kind: "size"; size: DogSize }
   | { kind: "care"; care: CareType }
   /** `level` records WHAT was matched. A wilaya-wide search matched the
       wilaya, not the commune — naming the commune there would both repeat the
@@ -159,8 +194,12 @@ export type MatchReason =
       unavailable. Nidz holds no reservations. Every surface that renders this
       must keep it in a lower visual register than the facts a sitter actively
       declared, or four check marks in a row read as four confirmations. */
-  | { kind: "dates" }
-  | { kind: "noCat" };
+  | { kind: "dates" };
+/* Audit 1.3 removed `noCat` ("Aucun chat déclaré au domicile"). It was added
+   to every dog search although no owner had said anything about cats — a line
+   about cats on a dog search, which is the pattern the field test flagged —
+   and it was selective: a resident DOG, which matters more to a visiting dog,
+   was never mentioned. Resident animals are stated on the profile, in full. */
 
 /**
  * Why this sitter fits, verified fact by fact against the sitter.
@@ -178,6 +217,9 @@ export function reasonsFor(sitter: SitterProfile, c: SearchCriteria): MatchReaso
   if (c.species && sitter.acceptedSpecies.includes(c.species)) {
     reasons.push({ kind: "species", species: c.species });
   }
+  if (c.species === "dog" && c.size && sitter.acceptedSpecies.includes("dog") && sitter.acceptedDogSizes.includes(c.size)) {
+    reasons.push({ kind: "size", size: c.size });
+  }
   if (c.care && offeredServices(sitter).includes(c.care)) {
     reasons.push({ kind: "care", care: c.care });
   }
@@ -192,12 +234,6 @@ export function reasonsFor(sitter: SitterProfile, c: SearchCriteria): MatchReaso
   if (c.dates && !overlapsDeclaredUnavailable(sitter, c.dates)) {
     reasons.push({ kind: "dates" });
   }
-  /* Only meaningful for a cat-free home when a dog owner asked, and only
-     because the sitter declared their resident animals. */
-  if (c.species === "dog" && !sitter.housing.residentPets.some((p) => p.species === "cat")) {
-    reasons.push({ kind: "noCat" });
-  }
-
   return reasons;
 }
 
@@ -208,16 +244,29 @@ export type SearchResult = {
 };
 
 /**
- * Hard constraints, then one tie-break (§8.1, §116).
+ * Hard constraints, then an order that can be stated in one sentence
+ * (§8.1, §116).
  *
  * WHAT ORDERS THE RESULTS, AND WHAT DELIBERATELY DOES NOT.
  *
- * Filtering is hard compatibility only: species, service, area, budget, and a
- * period the sitter has declared unavailable. Then the order is
+ * Filtering is hard compatibility only: species, dog size, service, area,
+ * budget, and a period the sitter has declared unavailable. A fact the owner
+ * has not given (a dog's size) excludes nobody — it is not a mismatch — but it
+ * is not reported as a match either; the card states the sitter's own limit
+ * instead (Audit 1.3 LOT 03).
+ *
+ * Then the DEFAULT order is
  *
  *   1. sitters in the owner's OWN commune, when Nidz knows it and the search
  *      was not already narrowed to one commune;
- *   2. the price actually displayed, ascending.
+ *   2. alphabetical by public name.
+ *
+ * Alphabetical is deliberate. It is neutral and anyone can check it; it makes
+ * no claim that the first row is the "best match", which Nidz has no basis to
+ * say. Audit 1.2 used price as the second tier, and Audit 1.3 LOT 03 names the
+ * problem with that: cheapest-first quietly passes itself off as relevance.
+ * Price ordering is still available — as an option the owner picks
+ * (`sort: "price"`), and the screen says it was their choice.
  *
  * Proximity is expressed as a shared administrative area, never as a distance.
  * Nidz has no coordinates for anything (see docs/NIDZ-1.2-MAP-AND-LOCATION.md),
@@ -248,6 +297,8 @@ export function reasonKey(reason: MatchReason): string {
   switch (reason.kind) {
     case "species":
       return `species:${reason.species}`;
+    case "size":
+      return `size:${reason.size}`;
     case "care":
       return `care:${reason.care}`;
     case "zone":
@@ -256,7 +307,6 @@ export function reasonKey(reason: MatchReason): string {
        kind that carries a value cannot silently key on its kind alone and
        re-create the bug this docblock describes. */
     case "dates":
-    case "noCat":
       return reason.kind;
   }
 }
@@ -264,14 +314,14 @@ export function reasonKey(reason: MatchReason): string {
 /**
  * Reasons derived from an ABSENCE rather than from something the sitter said.
  *
- * "Has not declared these dates unavailable" and "no cat declared at home" are
- * both true of a sitter who simply never answered the question. Presenting
+ * "Has not declared these dates unavailable" is true of a sitter who simply
+ * never answered the question. Presenting
  * them with the same tick and tint as facts a sitter actively declared would
  * turn silence into confirmation, so every surface renders them one register
  * down (§6.1).
  */
 export function isAbsenceReason(reason: MatchReason): boolean {
-  return reason.kind === "dates" || reason.kind === "noCat";
+  return reason.kind === "dates";
 }
 
 /**
@@ -335,9 +385,13 @@ export function matchSitters(
       ties — never to filter, because someone looking for care in a commune
       they are travelling to is a normal case. */
   homeCommune: string | null = null,
+  /** The interface language, so "alphabetical" means the same thing the
+      sentence above the list says, whatever the browser's own locale. */
+  locale = "en",
 ): SearchResult[] {
   /* A no-op when the search already names a commune: every result is in it. */
   const nearBy = c.commune ? null : homeCommune;
+  const collator = new Intl.Collator(locale, { sensitivity: "base" });
 
   return sitters
     .flatMap<SearchResult>((sitter) => {
@@ -345,6 +399,7 @@ export function matchSitters(
       if (!rate) return [];
 
       if (c.species && !sitter.acceptedSpecies.includes(c.species)) return [];
+      if (c.species === "dog" && c.size && !sitter.acceptedDogSizes.includes(c.size)) return [];
       if (c.care && !offeredServices(sitter).includes(c.care)) return [];
       if (c.commune && sitter.communeCode !== c.commune) return [];
       if (!c.commune && c.wilaya && getWilayaOfCommune(sitter.communeCode)?.id !== c.wilaya) return [];
@@ -362,8 +417,34 @@ export function matchSitters(
         const bNear = b.sitter.communeCode === nearBy ? 0 : 1;
         if (aNear !== bNear) return aNear - bNear;
       }
-      return a.rate.amount - b.rate.amount;
+      /* Prices are only comparable in ONE unit. With no service chosen each
+         sitter is quoted on their cheapest service — a walk against a night —
+         so a price order would rank units, not prices. A stale `sort=price`
+         without a service therefore falls back to the default order. */
+      if (c.sort === "price" && c.care && a.rate.amount !== b.rate.amount) {
+        return a.rate.amount - b.rate.amount;
+      }
+      return collator.compare(a.sitter.publicName, b.sitter.publicName);
     });
+}
+
+/**
+ * The dog sizes a sitter restricts to, when the owner searched for a dog
+ * WITHOUT giving its size. Null when the size was given (the filter already
+ * guarantees it), when the sitter takes every size, or when the search is not
+ * about a dog. The card states this limit so an unknown size is never read as
+ * "this sitter will take my dog".
+ */
+export function sizeLimitToState(
+  sitter: SitterProfile,
+  c: Pick<SearchCriteria, "species" | "size">,
+): DogSize[] | null {
+  if (c.species !== "dog" || c.size) return null;
+  if (!sitter.acceptedSpecies.includes("dog") || acceptsEveryDogSize(sitter)) return null;
+  const sizes = DOG_SIZES.filter((size) => sitter.acceptedDogSizes.includes(size));
+  /* A dog sitter with NO declared size (only possible through hand-edited
+     storage) has nothing statable: "Dogs:  only" is not a sentence. */
+  return sizes.length > 0 ? sizes : null;
 }
 
 /** Whether the home-commune tie-break actually changed anything, so the

@@ -285,30 +285,38 @@
     "filters": {
       "maxPrice": "Maximum price",
       "anyPrice": "Any price",
-      "upTo": "{{price}} or less",
       "apply": "See the results",
       "clear": "Clear all criteria",
       "close": "Close",
       "description": "Choose the animal, the kind of care, the area and the maximum price.",
       "datesHelp": "Sitters who declared themselves unavailable over this period are removed from the results.",
-      "clearDates": "Clear the dates"
+      "clearDates": "Clear the dates",
+      "size": "Your dog's size",
+      "anySize": "Not specified",
+      "upToUnit": "{{price}} or less {{unit}}",
+      "perService": "per service"
     },
     "results": {
       "title": "Sitters that match your search",
       "countLabel": "Results: {{count}}",
-      "sortedByPrice": "Sorted by lowest price",
       "emptyTitle": "No sitter matches these criteria",
       "emptyBody": "Try another kind of care, another area, or raise the maximum price.",
       "titleAll": "Example sitters",
       "allOfThem": "Every result below:",
-      "nearYouFirst": "{{commune}} first",
-      "sortedNearFirst": "{{commune}} first, then by lowest price"
+      "orderDefault": "In alphabetical order — Nidz does not rank sitters by a score.",
+      "orderDefaultNear": "{{commune}} first, then in alphabetical order — Nidz does not rank sitters by a score.",
+      "orderPrice": "By lowest price, as you chose.",
+      "orderPriceNear": "{{commune}} first, then by lowest price, as you chose.",
+      "sizeHint": "Your dog's size is not given, so sitters who only take some sizes are still listed.",
+      "sizeHintAction": "Give the size"
     },
     "card": {
       "matchLabel": "Matches your search: ",
       "viewProfile": "View profile",
       "demoTag": "Example",
-      "from": "from"
+      "from": "from",
+      "sizeLimit": "Dogs: {{sizes}} only",
+      "allSizes": "Dogs of every size"
     },
     "demo": {
       "title": "Demonstration examples",
@@ -327,8 +335,12 @@
       "anyZone": "Anywhere"
     },
     "reason": {
-      "dates": "Has not declared these dates unavailable",
-      "noCat": "No cat declared at home"
+      "dates": "Has not declared these dates unavailable"
+    },
+    "sort": {
+      "label": "Order",
+      "default": "Alphabetical",
+      "price": "Lowest price"
     }
   },
   "entry": {
@@ -378,7 +390,9 @@
       "photoLabel": "A photo (optional)",
       "chooseLabel": "Which animal is this about?",
       "another": "Another animal",
-      "editElsewhere": "Your saved animals are edited in My pets, not here."
+      "editElsewhere": "Your saved animals are edited in My pets, not here.",
+      "sizeLabel": "Its size",
+      "sizeHelp": "Sitters state which sizes they can take, so this shows you only the ones who can take your dog."
     },
     "location": {
       "title": "Where are you looking?",
@@ -437,7 +451,8 @@
       "care": "This sitter does not offer: {{care}}.",
       "dates": "This sitter stated they are unavailable over the requested period.",
       "zone": "This sitter is not in the area you asked for: {{zone}}.",
-      "price": "This sitter's rates are above {{price}}."
+      "price": "This sitter's rates are above {{price}}.",
+      "size": "This sitter does not take: {{size}}."
     },
     "limitsIntro": "The sitter states these limits so that a stay that would not suit your animal does not happen.",
     "unavailableNone": "This sitter has not stated any unavailable period.",
@@ -533,7 +548,8 @@
       },
       "transport": "Can travel: {{modes}}",
       "canReachVet": "Could get an animal to a vet: {{answer}}"
-    }
+    },
+    "sizeUnknown": "Your dog's size is not given. This sitter takes dogs: {{sizes}} only."
   },
   "ownerRequests": {
     "title": "My requests",
@@ -1030,5 +1046,15 @@
       "rejected": "Rejected",
       "expired": "Expired"
     }
+  },
+  "sizeShort": {
+    "small": "small",
+    "medium": "medium",
+    "large": "large"
+  },
+  "acceptsSize": {
+    "small": "Accepts small dogs",
+    "medium": "Accepts medium dogs",
+    "large": "Accepts large dogs"
   }
 }

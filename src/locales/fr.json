@@ -286,30 +286,38 @@
     "filters": {
       "maxPrice": "Prix maximum",
       "anyPrice": "Tous les prix",
-      "upTo": "{{price}} ou moins",
       "apply": "Voir les résultats",
       "clear": "Effacer tous les critères",
       "close": "Fermer",
       "description": "Choisissez l'animal, le type de garde, la commune et le prix maximum.",
       "datesHelp": "Les pet-sitters qui se sont déclarés indisponibles sur cette période sont retirés des résultats.",
-      "clearDates": "Retirer les dates"
+      "clearDates": "Retirer les dates",
+      "size": "Taille de votre chien",
+      "anySize": "Non précisée",
+      "upToUnit": "{{price}} ou moins {{unit}}",
+      "perService": "par prestation"
     },
     "results": {
-      "title": "Pet-sitters adaptés à votre recherche",
+      "title": "Pet-sitters correspondant à votre recherche",
       "countLabel": "Résultats : {{count}}",
-      "sortedByPrice": "Classés par prix croissant",
       "emptyTitle": "Aucun pet-sitter ne correspond à ces critères",
       "emptyBody": "Essayez un autre type de garde, une autre commune, ou augmentez le prix maximum.",
       "titleAll": "Exemples de pet-sitters",
       "allOfThem": "Tous les résultats ci-dessous :",
-      "nearYouFirst": "{{commune}} en premier",
-      "sortedNearFirst": "{{commune}} d’abord, puis par prix croissant"
+      "orderDefault": "Par ordre alphabétique — Nidz ne classe pas les pet-sitters selon une note.",
+      "orderDefaultNear": "{{commune}} d'abord, puis par ordre alphabétique — Nidz ne classe pas les pet-sitters selon une note.",
+      "orderPrice": "Du prix le plus bas au plus élevé, selon votre choix.",
+      "orderPriceNear": "{{commune}} d'abord, puis du prix le plus bas au plus élevé, selon votre choix.",
+      "sizeHint": "La taille de votre chien n'est pas précisée : les pet-sitters qui n'acceptent que certaines tailles restent affichés.",
+      "sizeHintAction": "Préciser la taille"
     },
     "card": {
       "matchLabel": "Correspond à votre recherche : ",
       "viewProfile": "Voir le profil",
       "demoTag": "Exemple",
-      "from": "à partir de"
+      "from": "à partir de",
+      "sizeLimit": "Chiens : {{sizes}} uniquement",
+      "allSizes": "Chiens de toutes tailles"
     },
     "demo": {
       "title": "Exemples de démonstration",
@@ -328,8 +336,12 @@
       "anyZone": "Toutes les zones"
     },
     "reason": {
-      "dates": "Ne s'est pas déclaré indisponible sur cette période",
-      "noCat": "Aucun chat déclaré au domicile"
+      "dates": "Ne s'est pas déclaré indisponible sur cette période"
+    },
+    "sort": {
+      "label": "Ordre",
+      "default": "Alphabétique",
+      "price": "Prix croissant"
     }
   },
   "entry": {
@@ -381,7 +393,9 @@
       "photoLabel": "Une photo (facultatif)",
       "chooseLabel": "De quel animal s’agit-il ?",
       "another": "Un autre animal",
-      "editElsewhere": "Vos animaux enregistrés se modifient dans Mes animaux, pas ici."
+      "editElsewhere": "Vos animaux enregistrés se modifient dans Mes animaux, pas ici.",
+      "sizeLabel": "Sa taille",
+      "sizeHelp": "Les pet-sitters indiquent les tailles qu'ils acceptent : cela vous montre seulement ceux qui peuvent prendre votre chien."
     },
     "location": {
       "title": "Où cherchez-vous ?",
@@ -440,7 +454,8 @@
       "care": "Ce pet-sitter ne propose pas : {{care}}.",
       "dates": "Ce pet-sitter s'est déclaré indisponible sur la période demandée.",
       "zone": "Ce pet-sitter n'est pas dans la zone demandée : {{zone}}.",
-      "price": "Les tarifs de ce pet-sitter dépassent {{price}}."
+      "price": "Les tarifs de ce pet-sitter dépassent {{price}}.",
+      "size": "Ce pet-sitter n'accepte pas : {{size}}."
     },
     "limitsIntro": "Ces limites sont indiquées par le pet-sitter pour éviter une garde qui ne conviendrait pas à votre animal.",
     "unavailableNone": "Ce pet-sitter n'a indiqué aucune période d'indisponibilité.",
@@ -548,7 +563,8 @@
       },
       "transport": "Peut se déplacer : {{modes}}",
       "canReachVet": "Pourrait emmener un animal chez le vétérinaire : {{answer}}"
-    }
+    },
+    "sizeUnknown": "La taille de votre chien n'est pas précisée. Ce pet-sitter accepte les chiens : {{sizes}} uniquement."
   },
   "ownerRequests": {
     "title": "Mes demandes",
@@ -1050,5 +1066,15 @@
       "rejected": "Refusé",
       "expired": "Expiré"
     }
+  },
+  "sizeShort": {
+    "small": "petits",
+    "medium": "moyens",
+    "large": "grands"
+  },
+  "acceptsSize": {
+    "small": "Accepte les petits chiens",
+    "medium": "Accepte les chiens moyens",
+    "large": "Accepte les grands chiens"
   }
 }

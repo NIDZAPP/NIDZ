@@ -84,16 +84,19 @@ export default function Index() {
           : pets.length === 0 && account?.ownedSpecies.length === 1
             ? account.ownedSpecies[0]
             : null,
+      /* The one dog's size, when it is known: a large dog must not be offered
+         a sitter who only takes small ones (Audit 1.3 LOT 03). */
+      size: pets.length === 1 && pets[0].species === "dog" ? pets[0].details.size : null,
     };
   }, [account?.wilayaId, account?.ownedSpecies, pets]);
 
   const suggestions = useMemo(() => {
     if (!suggestionCriteria) return [];
-    return matchSitters(DEMO_SITTERS, suggestionCriteria, account?.communeId ?? null).slice(
+    return matchSitters(DEMO_SITTERS, suggestionCriteria, account?.communeId ?? null, lng).slice(
       0,
       SUGGESTION_LIMIT,
     );
-  }, [suggestionCriteria, account?.communeId]);
+  }, [suggestionCriteria, account?.communeId, lng]);
 
   const { perResult } = useMemo(() => partitionReasons(suggestions), [suggestions]);
 
@@ -210,6 +213,7 @@ export default function Index() {
                   rate={rate}
                   reasons={perResult.get(sitter.id) ?? []}
                   askedSpecies={suggestionCriteria?.species ?? null}
+                  askedSize={suggestionCriteria?.size ?? null}
                   askedCare={null}
                   search={suggestionSearch}
                   actionVariant="outline"

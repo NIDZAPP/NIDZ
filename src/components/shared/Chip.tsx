@@ -61,6 +61,7 @@ export function Chip({
 export function ChipGroup<T extends string>({
   label,
   labelledBy,
+  describedBy,
   value,
   onChange,
   options,
@@ -71,6 +72,8 @@ export function ChipGroup<T extends string>({
       announce the question twice. */
   label?: string;
   labelledBy?: string;
+  /** Help text that belongs to the question, announced with the group. */
+  describedBy?: string;
   /** `null` renders the group with NOTHING selected. Needed wherever the
       absence of an answer is a real state: pre-selecting an option shows the
       user a choice they never made. */
@@ -83,6 +86,7 @@ export function ChipGroup<T extends string>({
     <RadioGroupPrimitive.Root
       aria-label={labelledBy ? undefined : label}
       aria-labelledby={labelledBy}
+      aria-describedby={describedBy}
       value={value ?? ""}
       onValueChange={(v) => onChange(v as T)}
       className={cn("flex flex-wrap gap-2", className)}

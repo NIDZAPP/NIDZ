@@ -8,14 +8,14 @@ import EmptyState from "@/components/shared/EmptyState";
 import { DemoNotice } from "@/components/shared/trust";
 import SitterProfileView, { QuotedRate } from "@/components/sitter/SitterProfileView";
 import { Button } from "@/components/ui/button";
-import { parseCriteria, reasonsFor } from "@/data/criteria";
+import { parseCriteria, petFit, reasonsFor, sizeLimitToState } from "@/data/criteria";
 import { offeredServices, rateFor } from "@/data/demo-sitters";
 import { communeName, getWilaya } from "@/data/algeria";
-import { localized } from "@/data/types";
+import { CARE_UNIT_KEY, localized } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useSitter } from "@/hooks/use-sitter";
 import { useDemo } from "@/state/demo/context";
-import { formatDZD } from "@/utils/format";
+import { formatDZD, formatList } from "@/utils/format";
 
 /**
  * The owner's view of a sitter.
@@ -71,7 +71,7 @@ export default function SitterProfile() {
   }
 
   const hasCriteria = Boolean(
-    criteria.species || criteria.care || criteria.commune || criteria.wilaya || criteria.dates,
+    criteria.species || criteria.size || criteria.care || criteria.commune || criteria.wilaya || criteria.dates,
   );
   /* Recomputed from the sitter's own data rather than trusted from the URL:
      `?species=cat` on a dog-only sitter must not print "Accepte les chats". */
@@ -101,6 +101,12 @@ export default function SitterProfile() {
     ...(criteria.species && !sitter.acceptedSpecies.includes(criteria.species)
       ? [t("profile.mismatch.species", { species: t(`species.${criteria.species}`) })]
       : []),
+    ...(criteria.species === "dog" &&
+    criteria.size &&
+    sitter.acceptedSpecies.includes("dog") &&
+    !sitter.acceptedDogSizes.includes(criteria.size)
+      ? [t("profile.mismatch.size", { size: t(`dogSize.${criteria.size}`).toLocaleLowerCase(lng) })]
+      : []),
     ...(criteria.care && !offeredServices(sitter).includes(criteria.care)
       ? [t("profile.mismatch.care", { care: t(`care.${criteria.care}`) })]
       : []),
@@ -109,15 +115,42 @@ export default function SitterProfile() {
       : []),
     ...(criteria.dates && !reasons.some((r) => r.kind === "dates") ? [t("profile.mismatch.dates")] : []),
     ...(criteria.maxPrice !== null && rate && rate.amount > criteria.maxPrice
-      ? [t("profile.mismatch.price", { price: formatDZD(criteria.maxPrice, lng) })]
+      ? [
+          t("profile.mismatch.price", {
+            /* Never a price without its unit (Audit 1.3 LOT 03). */
+            price: `${formatDZD(criteria.maxPrice, lng)} ${
+              criteria.care ? t(CARE_UNIT_KEY[criteria.care]) : t("search.filters.perService")
+            }`,
+          }),
+        ]
       : []),
   ];
 
-  /* The pet's name is only used when the criteria still describe that animal.
-     An owner who defined a need for their cat and then opened a dog search
-     must not be told a dog sitter is "bien adapté à Mimi". */
+  /* The pet's name is only used when the criteria still describe that animal
+     AND this sitter can verifiably take it. An owner who defined a need for
+     their cat and then opened a dog search must not be told a dog sitter is
+     "bien adapté à Mimi" — and nor must the owner of a large dog be told it
+     about a sitter who takes only small ones, or about one whose size limit
+     cannot be checked because the dog's size was never given (Audit 1.3
+     LOT 03: "Bien adapté à Milo" only when the reasons are in the data). */
   const pet = state.pets.find((p) => p.id === state.need.petId) ?? null;
-  const petName = pet && state.need.species === criteria.species ? pet.name : null;
+  const petName =
+    pet &&
+    pet.species === criteria.species &&
+    petFit(pet, sitter).fits === true &&
+    /* …and the size being searched for is this animal's size, so the fit
+       heading and the size token below it are about the same dog. */
+    (!criteria.size || (pet.species === "dog" && pet.details.size === criteria.size))
+      ? pet.name
+      : null;
+
+  /* A dog search without a size cannot establish a fit on size. The card
+     says so; the profile must too, inside the fit section, rather than
+     leaving "Accepts dogs" to read as "will take your dog". */
+  const sizeLimit = sizeLimitToState(sitter, criteria);
+  const uncertain = sizeLimit
+    ? [t("profile.sizeUnknown", { sizes: formatList(sizeLimit.map((size) => t(`sizeShort.${size}`)), lng) })]
+    : [];
 
   /* Your own profile does not invite you to request care from yourself; it
      offers the thing you would actually want from this page. The demo action
@@ -198,6 +231,7 @@ export default function SitterProfile() {
                 hasCriteria={hasCriteria}
                 reasons={reasons}
                 mismatches={mismatches}
+                uncertain={uncertain}
                 petName={petName}
               />
             </div>

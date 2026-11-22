@@ -25,6 +25,8 @@ export function useReasonLabel() {
     switch (reason.kind) {
       case "species":
         return t(`accepts.${reason.species}`);
+      case "size":
+        return t(`acceptsSize.${reason.size}`);
       case "care":
         return t(`care.${reason.care satisfies CareType}`);
       case "zone": {
@@ -36,8 +38,6 @@ export function useReasonLabel() {
       }
       case "dates":
         return t("search.reason.dates");
-      case "noCat":
-        return t("search.reason.noCat");
     }
   };
 }

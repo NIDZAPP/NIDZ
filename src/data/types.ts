@@ -266,6 +266,9 @@ export type SitterProfile = {
  */
 export type OwnerNeed = {
   species: Species | null;
+  /** The dog's size when the animal is a dog and the owner gave it. A hard
+      matching constraint (Audit 1.3 LOT 03); null when unknown. */
+  dogSize: DogSize | null;
   petId: string | null;
   wilayaCode: string | null;
   communeCode: string | null;
@@ -278,6 +281,7 @@ export type OwnerNeed = {
 
 export const EMPTY_NEED: OwnerNeed = {
   species: null,
+  dogSize: null,
   petId: null,
   wilayaCode: null,
   communeCode: null,

@@ -5,13 +5,20 @@ import { Link } from "react-router-dom";
 import { MatchReasonList } from "@/components/sitter/match";
 import { ProvenanceLabel } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
-import type { MatchReason } from "@/data/criteria";
+import { acceptsEveryDogSize, sizeLimitToState, type MatchReason } from "@/data/criteria";
 import { offeredServices, type rateFor } from "@/data/demo-sitters";
 import { communeName } from "@/data/algeria";
-import { CARE_UNIT_KEY, localized, type CareType, type Species, type SitterProfile } from "@/data/types";
+import {
+  CARE_UNIT_KEY,
+  localized,
+  type CareType,
+  type DogSize,
+  type Species,
+  type SitterProfile,
+} from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
 import { cn } from "@/lib/utils";
-import { formatDZD } from "@/utils/format";
+import { formatDZD, formatList } from "@/utils/format";
 
 /**
  * One entry in the results register.
@@ -22,12 +29,20 @@ import { formatDZD } from "@/utils/format";
  *
  * A result card is not a mini profile (§19) — it carries only what decides
  * whether the profile is worth opening.
+ *
+ * AUDIT 1.3 LOT 03 — THE ANIMAL BEING SEARCHED FOR COMES FIRST. Under the
+ * name and the commune, the first line is about the owner's animal: for a dog
+ * search, which dog sizes this sitter takes. Other species the sitter also
+ * accepts are no longer listed on a dog search — "Accepte les chats" on a
+ * dog owner's result was noise presented as a selling point. The headline
+ * (the sitter's own words) comes after the facts.
  */
 export default function SitterCard({
   sitter,
   rate,
   reasons,
   askedSpecies,
+  askedSize = null,
   askedCare,
   /** Carried onto the profile link so the profile can explain the same match
       and offer a real "back to results" link. */
@@ -39,6 +54,8 @@ export default function SitterCard({
   rate: NonNullable<ReturnType<typeof rateFor>>;
   reasons: MatchReason[];
   askedSpecies: Species | null;
+  /** The dog's size, when the search gave one. */
+  askedSize?: DogSize | null;
   askedCare: CareType | null;
   search: string;
   showSpeciesEyebrow?: boolean;
@@ -51,14 +68,22 @@ export default function SitterCard({
   const { t } = useTranslation();
   const lng = useAppLocale();
 
-  /* Facts the owner did not ask about, as plain text. Anything they did ask
-     about is already a reason token or was hoisted into the preamble. */
-  const rest = [
-    ...sitter.acceptedSpecies.filter((sp) => sp !== askedSpecies).map((sp) => t(`accepts.${sp}`)),
-    ...offeredServices(sitter)
-      .filter((c) => c !== askedCare)
-      .map((c) => t(`care.${c}`)),
-  ];
+  /* Services the owner did not ask about, as plain text. A service they did
+     ask about is already a reason token or was hoisted into the preamble.
+     Other SPECIES are deliberately not listed: with no species asked the
+     eyebrow already names them, and with one asked they are irrelevant. */
+  const rest = offeredServices(sitter)
+    .filter((c) => c !== askedCare)
+    .map((c) => t(`care.${c}`));
+
+  /* A dog search without a size cannot rule anyone out on size, so the row
+     states the sitter's own limit instead of letting silence read as "yes". */
+  const limit = sizeLimitToState(sitter, { species: askedSpecies, size: askedSize });
+  const sizeNote = limit
+    ? t("search.card.sizeLimit", { sizes: formatList(limit.map((size) => t(`sizeShort.${size}`)), lng) })
+    : askedSpecies === "dog" && !askedSize && sitter.acceptedSpecies.includes("dog") && acceptsEveryDogSize(sitter)
+      ? t("search.card.allSizes")
+      : null;
 
   return (
     <li className="border-b border-border">
@@ -109,11 +134,13 @@ export default function SitterCard({
             <bdi className="truncate">{communeName(sitter.communeCode, lng) ?? sitter.communeCode}</bdi>
           </p>
 
-          <p className="mt-3 max-w-[56ch] text-base leading-relaxed text-foreground">
+          {sizeNote && <p className="mt-3 text-sm font-medium text-foreground">{sizeNote}</p>}
+
+          <MatchReasonList className="mt-3" reasons={reasons} trailing={rest} />
+
+          <p className="mt-3 line-clamp-3 max-w-[56ch] text-base leading-relaxed text-foreground">
             {localized(sitter.headline, lng)}
           </p>
-
-          <MatchReasonList className="mt-4" reasons={reasons} trailing={rest} />
 
           {/* One honesty line per entry: where the information came from, and
               whether the person is an example. */}
@@ -122,9 +149,10 @@ export default function SitterCard({
           </ProvenanceLabel>
         </div>
 
-        {/* Price on its own axis: at md+ the amounts line up in one column, so
-            "classés par prix" is visible rather than asserted — and the entry
-            stops reading as a pricing card. */}
+        {/* Price on its own axis, always with its unit: at md+ the amounts line
+            up in one column, so prices compare at a glance without the row
+            reading as a pricing card. (Price is not the default ORDER — see
+            `matchSitters`.) */}
         <div className="col-span-2 mt-4 flex items-end justify-between gap-4 md:col-span-1 md:mt-0 md:block md:text-end">
           <div>
             {rate.isFrom && <p className="text-sm text-muted-foreground">{t("search.card.from")}</p>}
