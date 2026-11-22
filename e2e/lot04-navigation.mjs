@@ -90,6 +90,36 @@ const owner = seedState({
   await context.close();
 }
 
+/* 4b. Review findings: Account keeps the bar you were using; tabs open at the
+   top; an unpublished sitter's Compte is not a dead end. */
+{
+  const { page, context } = await open({ state: owner });
+  await page.goto(`${BASE}/sitter/profile`);
+  await page.waitForSelector("h1");
+  await barLinks(page).filter({ hasText: "Account" }).click();
+  await page.waitForURL(/\/settings/);
+  const labels = (await barLinks(page).allInnerTexts()).map((x) => x.trim());
+  check("Account from the sitter bar keeps the sitter bar", labels.join("|") === "Received|My profile|Account", labels.join("|"));
+  check("…and Compte names the sitter space as current", /Sitter space\s*The space you are using now/.test(clean(await page.locator("main").innerText())));
+
+  await page.goto(`${BASE}/search`);
+  await page.waitForSelector("h1");
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await barLinks(page).filter({ hasText: "Account" }).click();
+  await page.waitForURL(/\/settings/);
+  check("a tab opens its screen at the top", (await page.evaluate(() => window.scrollY)) === 0);
+  await context.close();
+}
+{
+  const draft = publishedSitter();
+  draft.published = false;
+  const { page, context } = await open({ state: seedState({ account: ACCOUNT, capabilities: { owner: true, sitter: true }, activeWorkspace: "sitter", sitter: draft }) });
+  await page.goto(`${BASE}/settings`);
+  await page.waitForSelector("h1");
+  check("unpublished sitter: Compte offers to continue the profile", await page.getByRole("link", { name: /continue it/ }).isVisible());
+  await context.close();
+}
+
 /* 5. Arabic, 320px. */
 {
   const { page, context } = await open({ lang: "ar", viewport: { width: 320, height: 640 }, state: owner });

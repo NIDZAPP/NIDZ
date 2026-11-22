@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router-dom";
 
 import { cn } from "@/lib/utils";
+import { useDemo } from "@/state/demo/context";
 import type { Workspace } from "@/data/workspace";
 import { isNavigable, workspaceDestinations, type NavContext } from "./workspace-nav";
 
@@ -37,7 +38,16 @@ export default function WorkspaceNav({
   context: NavContext;
 }) {
   const { t } = useTranslation();
+  const { state, dispatch } = useDemo();
   const destinations = workspaceDestinations(workspace, context);
+  /* The bar can show a space that is not the active one — a screen whose path
+     belongs to the other side (your own sitter dashboard while the owner space
+     is active). Tapping one of ITS tabs is choosing that space: recorded, so
+     that "Compte" and Home keep the bar you were using instead of flipping to
+     the other one (Audit 1.3 LOT 04 review). */
+  const choose = () => {
+    if (state.activeWorkspace !== workspace) dispatch({ type: "setWorkspace", workspace });
+  };
 
   /* One destination is a link, not a bar. See `isNavigable`. */
   if (!isNavigable(destinations)) return null;
@@ -60,6 +70,7 @@ export default function WorkspaceNav({
             <NavLink
               to={to}
               end={end}
+              onClick={choose}
               className={({ isActive }) =>
                 cn(
                   /* min-h-14 keeps every tab above the ~44px Nidz floor (§17)

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link, Navigate } from "react-router-dom";
@@ -45,6 +46,14 @@ import { useDemo } from "@/state/demo/context";
 export default function SitterProfileHome() {
   const { t } = useTranslation();
   const { state } = useDemo();
+  const heading = useRef<HTMLHeadingElement>(null);
+
+  /* What FlowScreen did when this was one: arriving back from a section
+     editor, focus lands on the heading rather than on <body>. No visible ring
+     on programmatic focus. */
+  useEffect(() => {
+    heading.current?.focus({ preventScroll: true });
+  }, []);
 
   const workspace = state.sitter;
   /* Arriving with no sitter workspace — a deep link, a stale tab, a reset —
@@ -67,7 +76,13 @@ export default function SitterProfileHome() {
       </Helmet>
       <div className="mx-auto max-w-[720px]">
         {!published && <BackButton variant="labelled" fallback="/" className="mb-6" />}
-        <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">{t("sitterSections.title")}</h1>
+        <h1
+          ref={heading}
+          tabIndex={-1}
+          className="text-h1 font-semibold text-foreground focus:outline-none md:text-h1-lg"
+        >
+          {t("sitterSections.title")}
+        </h1>
         <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{t("sitterSections.intro")}</p>
 
         {/* ------------------------------------------------- pour publier */}

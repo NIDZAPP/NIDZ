@@ -261,8 +261,10 @@ inputs, `min-h-14` on nav tabs, `min-h-16` on option rows.
 
 ## 9. Navigation
 
-One account, two spaces (Audit 1.3 LOT 04). The active space decides what the
-bar contains; one bar below `md`, the same destinations in the header at `md`+,
+One account, two spaces (Audit 1.3 LOT 04). A screen that belongs to one space
+(by its path) shows that space's bar; a shared screen (Compte, Aide) shows the
+active space's. Tapping a tab of the bar on screen chooses that space, so
+"Compte" never flips the bar to the other side; one bar below `md`, the same destinations in the header at `md`+,
 from one list (`components/layout/workspace-nav.ts`) — crossing the breakpoint
 must not rename anything.
 

@@ -191,11 +191,9 @@ const App = () => {
               <Route path="/admin" element={<NotAvailable />} />
               <Route path="/policies" element={<Policies />} />
               <Route path="/help" element={<Help />} />
-              {/* Shared by both workspaces — it follows whichever is active
-                  rather than belonging to one. Group 15 folds it under Profile;
-                  it exists from Group 3 because §89 moved the language chooser
-                  here, and a trilingual product needs somewhere to change
-                  language. */}
+              {/* "Compte": shared by both spaces — it follows whichever is active
+                  rather than belonging to one, and holds the switch between
+                  them and the language choice (Audit 1.3 LOT 04). */}
               <Route path="/settings" element={<Settings />} />
               {/* Profiles moved out of the sitter's own namespace; the old
                   path stays reachable so existing links do not break. */}

@@ -27,7 +27,7 @@ import type { Workspace } from "@/data/workspace";
  * AUDIT 1.3 LOT 04 — ONE ACCOUNT, TWO SPACES, EVERY TAB REAL.
  *
  *   owner   Accueil · Recherche · Demandes · Mes animaux · Compte
- *   sitter  Demandes · Mon profil · Compte
+ *   sitter  Reçues · Mon profil · Compte
  *
  * "Mes animaux" and the account screen already existed and were hard to find
  * (a row on Home; an unlabelled sliders icon). They are now in the bar rather

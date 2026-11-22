@@ -106,7 +106,10 @@ export default function Settings() {
           <p className="mt-2 max-w-[64ch] text-sm text-muted-foreground">{t("settings.spaces.body")}</p>
           <div className="mt-4">
             {(["owner", "sitter"] as const).map((space) => {
-              const current = active === space && (space === "owner" || state.capabilities.sitter);
+              /* The sitter side is only "current" once it has something in it;
+                 before publication its row is the way to continue the
+                 profile, never an inert "this is where you are". */
+              const current = active === space && (space === "owner" || Boolean(state.sitter?.published));
               const label = t(`settings.spaces.${space}`);
               if (current) {
                 return (

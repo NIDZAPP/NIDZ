@@ -3,6 +3,7 @@ import { Link, NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
+import { useDemo } from "@/state/demo/context";
 import { WORKSPACE_ROOT, type Workspace } from "@/data/workspace";
 import { isNavigable, workspaceDestinations, type NavContext } from "./workspace-nav";
 
@@ -34,7 +35,15 @@ export default function Header({
   navContext: NavContext;
 }) {
   const { t } = useTranslation();
+  const { state, dispatch } = useDemo();
   const all = workspaceDestinations(workspace, navContext);
+  /* Same rule as the bar: using this space's navigation is choosing it. */
+  const choose = () => {
+    if (state.activeWorkspace !== workspace) dispatch({ type: "setWorkspace", workspace });
+  };
+  /* An unpublished sitter has no inbox worth landing on: the wordmark goes to
+     the owner home instead of an empty "Demandes reçues". */
+  const home = workspace === "sitter" && !navContext.sitterPublished ? "/" : WORKSPACE_ROOT[workspace];
 
   /* Home leaves the DESKTOP nav only. The wordmark to its immediate left is
      already a link to `/` with the accessible name "Nidz — Home", so listing it
@@ -63,7 +72,7 @@ export default function Header({
               visibly did nothing on the sitter side — and left a duplicate
               history entry on every tap. */}
           <Link
-            to={WORKSPACE_ROOT[workspace]}
+            to={home}
             aria-label={`${t("common.appName")} — ${t("nav.home")}`}
             className="flex shrink-0 items-center gap-2 rounded-md text-lg font-semibold tracking-tight text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
@@ -80,7 +89,7 @@ export default function Header({
               className="hidden items-center gap-1 md:flex"
             >
               {destinations.map(({ to, labelKey, end }) => (
-                <NavLink key={to} to={to} className={navLinkCls} end={end}>
+                <NavLink key={to} to={to} className={navLinkCls} end={end} onClick={choose}>
                   {t(labelKey)}
                 </NavLink>
               ))}

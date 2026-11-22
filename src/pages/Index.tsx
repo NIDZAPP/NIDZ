@@ -236,10 +236,8 @@ export default function Index() {
         )}
 
         <div className="mt-12">
-          {/* My pets lives inside Home rather than in the tab bar (§84): four
-              primary destinations, and secondary entities reached from them.
-              Shown once there is an account, because that is when an animal can
-              be saved and reused rather than retyped per request. */}
+          {/* My pets is also a tab since Audit 1.3 LOT 04; this row stays as the
+              summary of the household (the animals' names) on Home. */}
           {/* Shown once there is anything to show. The need flow saves an
               animal with no account at all, so gating on the capability alone
               hid pets that genuinely existed. */}

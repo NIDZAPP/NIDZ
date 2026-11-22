@@ -1,4 +1,5 @@
-import { Outlet, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { Outlet, useLocation, useNavigationType } from "react-router-dom";
 
 import { resolveWorkspace, type Workspace } from "@/data/workspace";
 import { cn } from "@/lib/utils";
@@ -26,7 +27,16 @@ import { isNavigable, workspaceDestinations, type NavContext } from "./workspace
  */
 export default function Layout() {
   const { pathname } = useLocation();
+  const navigationType = useNavigationType();
   const { state } = useDemo();
+
+  /* A new screen starts at its top. React Router resets nothing, so a tab
+     tapped from far down a long list opened its destination part-way down
+     (Audit 1.3 LOT 04 review). Back and Forward (POP) keep the browser's own
+     scroll restoration. */
+  useEffect(() => {
+    if (navigationType !== "POP") window.scrollTo({ top: 0, behavior: "auto" });
+  }, [pathname, navigationType]);
 
   /* Which workspace's chrome to draw. The PATH decides when it belongs to one
      side — so a public sitter profile, an owner-side screen living under
