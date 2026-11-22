@@ -846,9 +846,7 @@
   },
   "sitterSections": {
     "title": "Your sitter profile",
-    "intro": "Answer these in any order, and come back whenever you like — nothing is lost between visits.",
-    "answeredNote": "That is a count of what you have filled in, not a score. A shorter profile answered honestly is worth more than a full one that is not.",
-    "required": "needed to publish",
+    "intro": "Answer in any order and come back whenever you like: nothing is lost between visits.",
     "save": "Save",
     "preview": "See what owners would see",
     "missingTitle": "Before you can publish, these still need an answer:",
@@ -864,7 +862,7 @@
     },
     "animals": {
       "label": "Animals you accept",
-      "hint": "Species, sizes, and how many at once."
+      "hint": "Species and, for dogs, the sizes you take — and how many at once."
     },
     "experience": {
       "label": "What you have done",
@@ -876,7 +874,8 @@
     },
     "housing": {
       "label": "Your home",
-      "hint": "Flat or house, outdoor space, your own animals."
+      "hint": "Flat or house, outdoor space, your own animals.",
+      "requiredWhy": "Needed because you offer boarding: the animal would sleep at your home."
     },
     "limits": {
       "label": "What you cannot accept",
@@ -896,7 +895,26 @@
     "care": {
       "label": "How you look after animals",
       "hint": "Where the animal sleeps, how long it is alone, crate or cage use, walks, emergencies."
-    }
+    },
+    "publish": {
+      "title": "To publish",
+      "body": "What an owner needs in order to judge your offer. Publishing checks these, and only these.",
+      "count_one": "{{count}} of {{total}} done.",
+      "count_other": "{{count}} of {{total}} done."
+    },
+    "enrich": {
+      "title": "Add more to your profile",
+      "body": "Optional. It helps owners picture how you look after animals. A fuller profile is not a verified one, and nothing ranks on it.",
+      "count_one": "{{count}} of {{total}} filled in, if you wish.",
+      "count_other": "{{count}} of {{total}} filled in, if you wish."
+    },
+    "identity": {
+      "label": "Your public name and area",
+      "hint": "First name and initial; your commune — never an address."
+    },
+    "answeredState": "answered",
+    "viewPublished": "See my published profile",
+    "missingPublished": "Your profile is published, but it is now missing the following, so it is not shown in search results until you add it:"
   },
   "sitterExperience": {
     "intro": "Concrete questions rather than a number of years. Leave anything blank that you are not sure about — a blank question shows nowhere on your profile, whereas a “no” you did not mean reads to an owner as a firm limit.",

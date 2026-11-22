@@ -1,9 +1,10 @@
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Clock } from "lucide-react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
 import FlowScreen from "@/components/shared/FlowScreen";
+import { useReturnToDashboard } from "@/hooks/use-return-to-dashboard";
 import { DocumentField } from "@/components/shared/fields";
 import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
@@ -31,7 +32,7 @@ import { useDemo } from "@/state/demo/context";
  */
 export default function SitterTrust() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const returnToDashboard = useReturnToDashboard();
   const { state, dispatch } = useDemo();
 
   /* The profile has to exist as a profile before its trustworthiness is
@@ -63,7 +64,7 @@ export default function SitterTrust() {
              document is stored the moment it is chosen, so this closes the
              section — it does not submit anything, so it does not say "save"
              either. */
-          <Button type="button" variant="outline" size="lg" onClick={() => navigate("/sitter/profile")}>
+          <Button type="button" variant="outline" size="lg" onClick={returnToDashboard}>
             {t("sitterSections.done")}
           </Button>
         }

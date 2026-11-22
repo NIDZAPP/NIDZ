@@ -6,6 +6,7 @@ import FlowScreen from "@/components/shared/FlowScreen";
 import SitterProfileView from "@/components/sitter/SitterProfileView";
 import { DemoNotice } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
+import { canPublish } from "@/data/sitter-sections";
 import { useDemo } from "@/state/demo/context";
 
 /**
@@ -26,15 +27,11 @@ export default function SitterPreview() {
   const { state, dispatch } = useDemo();
 
   const profile = state.sitter?.profile;
-  /* Publishing must not be reachable for a profile that is not one. Without a
-     name, a commune and at least one priced service, `matchSitters` drops it
-     from the results — so "votre profil est publié" would be false the moment
-     it was shown. */
-  const complete =
-    Boolean(state.account?.accountComplete) &&
-    Boolean(profile?.publicName) &&
-    Boolean(profile?.communeCode) &&
-    (profile?.services.length ?? 0) > 0;
+  /* Publishing must not be reachable for a profile that is not one. The rule is
+     the dashboard's own (`canPublish`, Audit 1.3 LOT 05) — one definition, so
+     the "Pour publier" list and this gate can never disagree about what a
+     publishable profile is. */
+  const complete = Boolean(state.account?.accountComplete) && Boolean(profile && canPublish(profile));
   /* Two different situations, two different destinations. No workspace at all
      means the flow was never entered, and the introduction is where that
      starts. A workspace with an unfinished profile means the sitter is

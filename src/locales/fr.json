@@ -865,9 +865,7 @@
   },
   "sitterSections": {
     "title": "Votre profil de pet-sitter",
-    "intro": "Répondez dans l’ordre que vous voulez et revenez quand vous voulez : rien ne se perd entre deux visites.",
-    "answeredNote": "C’est un décompte de ce que vous avez rempli, pas une note. Un profil plus court mais honnête vaut mieux qu’un profil complet qui ne l’est pas.",
-    "required": "nécessaire pour publier",
+    "intro": "Répondez dans l'ordre que vous voulez et revenez quand vous voulez : rien ne se perd entre deux visites.",
     "save": "Enregistrer",
     "preview": "Voir ce que verraient les propriétaires",
     "missingTitle": "Avant de pouvoir publier, il manque encore :",
@@ -883,7 +881,7 @@
     },
     "animals": {
       "label": "Animaux que vous acceptez",
-      "hint": "Espèces, tailles, et combien à la fois."
+      "hint": "Espèces et, pour les chiens, les tailles acceptées — et combien à la fois."
     },
     "experience": {
       "label": "Ce que vous avez déjà fait",
@@ -895,7 +893,8 @@
     },
     "housing": {
       "label": "Votre logement",
-      "hint": "Appartement ou maison, espace extérieur, vos propres animaux."
+      "hint": "Appartement ou maison, espace extérieur, vos propres animaux.",
+      "requiredWhy": "Nécessaire parce que vous proposez la garde chez vous : l'animal y dormirait."
     },
     "limits": {
       "label": "Ce que vous ne pouvez pas accepter",
@@ -916,7 +915,28 @@
     "care": {
       "label": "Comment vous vous occupez des animaux",
       "hint": "Où l’animal dort, combien de temps il reste seul, l’usage d’une caisse ou d’une cage, les sorties, les urgences."
-    }
+    },
+    "publish": {
+      "title": "Pour publier",
+      "body": "Ce dont un propriétaire a besoin pour juger votre offre. La publication vérifie ces informations, et seulement celles-ci.",
+      "count_one": "{{count}} sur {{total}} renseignée.",
+      "count_other": "{{count}} sur {{total}} renseignées.",
+      "count_many": "{{count}} sur {{total}} renseignées."
+    },
+    "enrich": {
+      "title": "Enrichir mon profil",
+      "body": "Facultatif. Cela aide les propriétaires à se représenter votre façon de garder. Un profil plus complet n'est pas un profil vérifié, et rien n'est classé dessus.",
+      "count_one": "{{count}} sur {{total}} renseignée, si vous le souhaitez.",
+      "count_other": "{{count}} sur {{total}} renseignées, si vous le souhaitez.",
+      "count_many": "{{count}} sur {{total}} renseignées, si vous le souhaitez."
+    },
+    "identity": {
+      "label": "Votre nom public et votre zone",
+      "hint": "Prénom et initiale ; votre commune — jamais d'adresse."
+    },
+    "answeredState": "renseignée",
+    "viewPublished": "Voir mon profil publié",
+    "missingPublished": "Votre profil est publié, mais il lui manque désormais ce qui suit ; il n'apparaît plus dans les résultats de recherche tant que ce n'est pas complété :"
   },
   "sitterExperience": {
     "intro": "Des questions concrètes plutôt qu’un nombre d’années. Laissez vide ce dont vous n’êtes pas sûr : une question sans réponse n’apparaît nulle part sur votre profil, alors qu’un « non » que vous ne pensiez pas se lit comme une limite ferme.",

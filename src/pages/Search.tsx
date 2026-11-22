@@ -35,6 +35,7 @@ import {
   type SortOrder,
 } from "@/data/criteria";
 import { DEMO_SITTERS } from "@/data/demo-sitters";
+import { canPublish } from "@/data/sitter-sections";
 import { communeName, getWilaya } from "@/data/algeria";
 import {
   CARE_UNIT_KEY,
@@ -117,7 +118,12 @@ export default function Search() {
   /* The fixtures plus the visitor's own profile, once they have published it.
      Without this, "votre profil est publié" would be a claim the search does
      not honour — and the two-sided loop would have no second side. */
-  const published = state.sitter?.published ? state.sitter.profile : null;
+  /* …and only while it still has what publication requires (Audit 1.3
+     LOT 05). Editing after publication can remove an essential — adding
+     boarding without describing the home — and the dashboard then says what is
+     missing; until it is back, the profile is not offered to owners. */
+  const published =
+    state.sitter?.published && canPublish(state.sitter.profile) ? state.sitter.profile : null;
   const pool = useMemo(
     () => (published ? [...DEMO_SITTERS, published] : DEMO_SITTERS),
     [published],

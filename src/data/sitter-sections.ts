@@ -23,10 +23,32 @@ import type { SitterProfile } from "./types";
    "potential", and nothing may rank on it (§43, §120). A sitter who answered
    six sections honestly is not worse than one who answered eleven.
 
-   `required` marks what a profile needs before it can be published at all —
-   the facts without which an owner cannot make a decision. Everything else
-   genuinely is optional, and the dashboard says so rather than implying that
-   an unfinished section is a failure.
+   TWO GROUPS, COUNTED SEPARATELY (Audit 1.3 LOT 05).
+
+   The 1.2 dashboard said "3 sections sur 9" while publication needed exactly
+   three, so a sitter read the nine as an obligation. The sections are now
+   split:
+
+     POUR PUBLIER — what an owner needs to judge the offer at all, and the
+     only thing publication checks:
+       - who and where: the public name (first name and initial) and the
+         commune — never an address;
+       - the presentation sentence;
+       - services, each with its price and unit;
+       - the species accepted and, for dogs, the sizes;
+       - the HOME — but only for a sitter who offers boarding. An animal that
+         sleeps at the sitter's place is the one case where the housing, the
+         outdoor space and the animals already living there are a hard
+         constraint for the owner ("limites critiques suivant le service").
+         For visits and walks it is optional enrichment.
+
+     ENRICHIR MON PROFIL — genuinely optional, counted on its own line, and
+     never a condition of publication: experience, professional background,
+     how the animals are cared for, limits, declared unavailability, and the
+     verification page (which can be read but never "completed", because
+     Nidz verifies nothing).
+
+   A complete profile is not a verified profile, and no copy may say it is.
    ------------------------------------------------------------------------ */
 
 export type SitterSection = {
@@ -38,20 +60,38 @@ export type SitterSection = {
   hintKey: string;
   /** Answered — see the note above about what this does not mean. */
   isAnswered: (profile: SitterProfile) => boolean;
-  /** Needed before publishing. */
-  required: boolean;
+  /** Whether this section is needed before THIS profile can be published.
+      Absent means never — the section belongs to "Enrichir mon profil". A
+      function, because one section (the home) is required only for some
+      services. */
+  requiredFor?: (profile: SitterProfile) => boolean;
+  /** Excluded from the enrichment count: a section that cannot be answered
+      (verification) must not cap anyone below "all" forever. */
+  uncounted?: boolean;
 };
+
+const ALWAYS = () => true;
 
 /** A section counts as answered when the sitter has given the thing it exists
     to collect — not when every optional field inside it is filled. */
 export const SITTER_SECTIONS: readonly SitterSection[] = [
+  {
+    id: "identity",
+    /* The join step that sets both the public name (from the account) and the
+       commune; it returns here. */
+    path: "/sitter/join/location",
+    labelKey: "sitterSections.identity.label",
+    hintKey: "sitterSections.identity.hint",
+    isAnswered: (p) => p.publicName.trim().length > 0 && p.communeCode.trim().length > 0,
+    requiredFor: ALWAYS,
+  },
   {
     id: "about",
     path: "/sitter/profile/about",
     labelKey: "sitterSections.about.label",
     hintKey: "sitterSections.about.hint",
     isAnswered: (p) => p.headline.en.trim().length > 0,
-    required: true,
+    requiredFor: ALWAYS,
   },
   {
     id: "services",
@@ -60,15 +100,18 @@ export const SITTER_SECTIONS: readonly SitterSection[] = [
     hintKey: "sitterSections.services.hint",
     /* A service with no price is not something an owner can be quoted for. */
     isAnswered: (p) => p.services.length > 0 && p.services.every((c) => typeof p.rates[c] === "number"),
-    required: true,
+    requiredFor: ALWAYS,
   },
   {
     id: "animals",
     path: "/sitter/profile/animals",
     labelKey: "sitterSections.animals.label",
     hintKey: "sitterSections.animals.hint",
-    isAnswered: (p) => p.acceptedSpecies.length > 0,
-    required: true,
+    /* Species, and for dogs the sizes: a dog sitter with no declared size
+       cannot be matched on size at all (Audit 1.3 LOT 03). */
+    isAnswered: (p) =>
+      p.acceptedSpecies.length > 0 && (!p.acceptedSpecies.includes("dog") || p.acceptedDogSizes.length > 0),
+    requiredFor: ALWAYS,
   },
   {
     id: "experience",
@@ -89,7 +132,6 @@ export const SITTER_SECTIONS: readonly SitterSection[] = [
         p.experience.paidBefore,
         p.experience.volunteered,
       ].some((value) => value !== "unknown"),
-    required: false,
   },
   {
     id: "professional",
@@ -98,7 +140,6 @@ export const SITTER_SECTIONS: readonly SitterSection[] = [
     hintKey: "sitterSections.professional.hint",
     /* "No professional background" is an answer. Silence is not. */
     isAnswered: (p) => p.professional.kind !== null,
-    required: false,
   },
   {
     id: "housing",
@@ -106,7 +147,8 @@ export const SITTER_SECTIONS: readonly SitterSection[] = [
     labelKey: "sitterSections.housing.label",
     hintKey: "sitterSections.housing.hint",
     isAnswered: (p) => p.housing.type !== null && p.housing.outdoor !== null,
-    required: false,
+    /* Required only when the animal would sleep at the sitter's home. */
+    requiredFor: (p) => p.services.includes("boarding"),
   },
   {
     id: "care",
@@ -117,7 +159,6 @@ export const SITTER_SECTIONS: readonly SitterSection[] = [
        so it is the one optional section the dashboard puts first among the
        optional ones. */
     isAnswered: (p) => careAnswered(p.care),
-    required: false,
   },
   {
     id: "limits",
@@ -125,7 +166,6 @@ export const SITTER_SECTIONS: readonly SitterSection[] = [
     labelKey: "sitterSections.limits.label",
     hintKey: "sitterSections.limits.hint",
     isAnswered: (p) => p.limits.length > 0,
-    required: false,
   },
   {
     id: "availability",
@@ -137,7 +177,6 @@ export const SITTER_SECTIONS: readonly SitterSection[] = [
        busy week to clear a checklist. It keys on the section having been
        saved instead, which is why `confirmedSections` exists. */
     isAnswered: (p) => p.declaredUnavailable.length > 0 || p.confirmedSections.includes("availability"),
-    required: false,
   },
   {
     id: "verification",
@@ -148,17 +187,23 @@ export const SITTER_SECTIONS: readonly SitterSection[] = [
        be visited and read but cannot be completed — and saying otherwise
        would be the exact claim §66 forbids. */
     isAnswered: () => false,
-    required: false,
+    uncounted: true,
   },
 ];
 
-export function requiredSections(): readonly SitterSection[] {
-  return SITTER_SECTIONS.filter((section) => section.required);
+/** The sections THIS profile must answer before it can be published. */
+export function publishSections(profile: SitterProfile): SitterSection[] {
+  return SITTER_SECTIONS.filter((section) => section.requiredFor?.(profile) === true);
+}
+
+/** Everything else: optional, and never a condition of publication. */
+export function enrichSections(profile: SitterProfile): SitterSection[] {
+  return SITTER_SECTIONS.filter((section) => section.requiredFor?.(profile) !== true);
 }
 
 /** What still has to be answered before this profile could be published. */
 export function missingRequired(profile: SitterProfile): SitterSection[] {
-  return requiredSections().filter((section) => !section.isAnswered(profile));
+  return publishSections(profile).filter((section) => !section.isAnswered(profile));
 }
 
 export function canPublish(profile: SitterProfile): boolean {
@@ -166,16 +211,36 @@ export function canPublish(profile: SitterProfile): boolean {
 }
 
 /**
- * How many sections have been answered.
+ * The two counts, each over its own group only.
  *
- * Verification is excluded from the denominator: it can never be answered, so
- * counting it would cap every sitter below 100% forever and turn an honest
- * absence into a permanent failure on their own dashboard.
+ * Administrative, never a score (§118). The enrichment count leaves out the
+ * verification page, which can never be answered: counting it would cap
+ * every sitter below "all" forever.
  */
-export function answeredSections(profile: SitterProfile): { answered: number; total: number } {
-  const countable = SITTER_SECTIONS.filter((section) => section.id !== "verification");
+export function sectionCounts(profile: SitterProfile): {
+  publish: { answered: number; total: number };
+  enrich: { answered: number; total: number };
+} {
+  const publish = publishSections(profile);
+  const enrich = enrichSections(profile).filter((section) => !section.uncounted);
   return {
-    answered: countable.filter((section) => section.isAnswered(profile)).length,
-    total: countable.length,
+    publish: { answered: publish.filter((s) => s.isAnswered(profile)).length, total: publish.length },
+    enrich: { answered: enrich.filter((s) => s.isAnswered(profile)).length, total: enrich.length },
   };
+}
+
+/** Where every section returns to. */
+export const SITTER_DASHBOARD = "/sitter/profile";
+
+/** Router state on a link from the dashboard into a section editor. It tells
+    the editor that the entry behind it IS the dashboard, so saving can pop
+    history back to it — otherwise each save pushed a second dashboard on top
+    of the form, and Back from the dashboard re-opened the form just saved
+    (Audit 1.3 LOT 05: "retours et reprise corrects"). */
+export const FROM_DASHBOARD = { fromDashboard: true } as const;
+
+export function cameFromDashboard(state: unknown): boolean {
+  return (
+    typeof state === "object" && state !== null && (state as { fromDashboard?: unknown }).fromDashboard === true
+  );
 }

@@ -4,6 +4,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 
 import { NameStep, PhoneStep } from "@/components/account/AccountSteps";
 import FlowScreen from "@/components/shared/FlowScreen";
+import { useReturnToDashboard } from "@/hooks/use-return-to-dashboard";
 import { LocationFields } from "@/components/shared/fields";
 import { getWilayaOfCommune } from "@/data/algeria";
 import { Button } from "@/components/ui/button";
@@ -75,7 +76,7 @@ const FORM_ID = "sitter-location";
 export function SitterLocation() {
   const { t } = useTranslation();
   const locale = useAppLocale();
-  const navigate = useNavigate();
+  const returnToDashboard = useReturnToDashboard();
   const { state, dispatch } = useDemo();
 
   const profile = state.sitter?.profile;
@@ -106,7 +107,9 @@ export function SitterLocation() {
         publicName: `${state.account!.firstName} ${state.account!.lastName.charAt(0).toUpperCase()}.`,
       },
     });
-    navigate("/sitter/profile");
+    /* From the dashboard's "who and where" row this pops back to it; at the
+       end of the first pass through the join flow it lands there. */
+    returnToDashboard();
   };
 
   return (

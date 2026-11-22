@@ -1,12 +1,13 @@
 import { useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import type { ReactNode } from "react";
 
 import { Chip } from "@/components/shared/Chip";
 import DeclaredField from "@/components/shared/DeclaredField";
 import FlowScreen from "@/components/shared/FlowScreen";
+import { useReturnToDashboard } from "@/hooks/use-return-to-dashboard";
 import OptionGroup from "@/components/shared/OptionGroup";
 import { FieldShell } from "@/components/shared/fields";
 import { DemoLine } from "@/components/shared/trust";
@@ -65,7 +66,7 @@ function Section({
   footNote?: ReactNode;
 }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const returnToDashboard = useReturnToDashboard();
   const { state } = useDemo();
   const formId = "sitter-section";
 
@@ -96,7 +97,7 @@ function Section({
           className="space-y-8"
           onSubmit={(e) => {
             e.preventDefault();
-            if (onSave()) navigate(DASHBOARD);
+            if (onSave()) returnToDashboard();
           }}
         >
           {children}

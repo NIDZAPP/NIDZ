@@ -1,12 +1,13 @@
 import { useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { Cat, Dog, Plus, X } from "lucide-react";
 import type { ReactNode } from "react";
 
 import Chip from "@/components/shared/Chip";
 import FlowScreen from "@/components/shared/FlowScreen";
+import { useReturnToDashboard } from "@/hooks/use-return-to-dashboard";
 import OptionGroup from "@/components/shared/OptionGroup";
 import { DateRangeField, FieldShell, PhotoField } from "@/components/shared/fields";
 import { DemoLine } from "@/components/shared/trust";
@@ -80,7 +81,7 @@ function BuilderStep({
   footNote?: ReactNode;
 }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const returnToDashboard = useReturnToDashboard();
   const { state } = useDemo();
   const formId = "builder-section";
 
@@ -112,7 +113,7 @@ function BuilderStep({
           className="space-y-8"
           onSubmit={(e) => {
             e.preventDefault();
-            if (onSubmit()) navigate(DASHBOARD);
+            if (onSubmit()) returnToDashboard();
           }}
         >
           {children}
