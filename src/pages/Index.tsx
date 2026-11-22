@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link, Navigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, X } from "lucide-react";
 
 import { REGISTER_ROW } from "@/components/shared/register";
 import SitterCard from "@/components/sitter/SitterCard";
@@ -17,13 +17,15 @@ import {
   EMPTY_CRITERIA,
   type SearchCriteria,
 } from "@/data/criteria";
-import { DEMO_SITTERS } from "@/data/demo-sitters";
+import { DEMO_SITTERS, getDemoSitter } from "@/data/demo-sitters";
+import { requestPath } from "@/data/request-draft";
 import { localized } from "@/data/types";
 import { WORKSPACE_ROOT } from "@/data/workspace";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useSwitchWorkspace } from "@/hooks/use-workspace";
 import { cn } from "@/lib/utils";
 import { useDemo } from "@/state/demo/context";
+import { isolate } from "@/utils/format";
 
 /** How many suggestions the home page shows before sending people to the full
     results. Enough to be useful, few enough that the page stays a home rather
@@ -57,7 +59,7 @@ const SUGGESTION_LIMIT = 3;
 export default function Index() {
   const { t } = useTranslation();
   const lng = useAppLocale();
-  const { state } = useDemo();
+  const { state, dispatch } = useDemo();
   const switchWorkspace = useSwitchWorkspace();
 
   const account = state.account;
@@ -108,6 +110,14 @@ export default function Index() {
   }
 
   const pending = state.requests.filter((r) => r.status === "pending").length;
+
+  /* The request the owner was preparing, by name. Resolved against the real
+     directory: a bookmark to a sitter that no longer exists is not offered. */
+  const draft = state.requestDraft;
+  const draftSitter = draft
+    ? (getDemoSitter(draft.sitterId) ??
+      (state.sitter?.profile.id === draft.sitterId ? state.sitter.profile : null))
+    : null;
   const criteria = criteriaFromNeed(state.need);
   /* Same definition of "has a brief" the search contract uses, so a saved
      wilaya or a saved date range is not quietly treated as nothing. */
@@ -145,6 +155,39 @@ export default function Index() {
             )}
           </Button>
         </div>
+
+        {/* An unsent request, named after its sitter (Audit 1.3 LOT 01). The
+            row says "not sent yet" in words: a request in preparation must
+            never read as one that was sent. Discarding forgets the bookmark
+            only — no animal and no request is touched. */}
+        {draft && draftSitter && (
+          <div className="mt-8 flex items-center gap-2 border-y border-border">
+            <Link
+              to={requestPath(draft.sitterId, draft.search)}
+              className="flex min-w-0 flex-1 items-center justify-between gap-4 py-4 transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <span className="min-w-0">
+                <span className="block font-medium text-foreground">
+                  {t("request.review.titleFor", { sitter: isolate(draftSitter.publicName) })}
+                </span>
+                <span className="mt-0.5 block text-sm text-muted-foreground">{t("home.draft.body")}</span>
+              </span>
+              <ArrowRight className="size-5 shrink-0 text-muted-foreground rtl:-scale-x-100" aria-hidden="true" />
+            </Link>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-11 shrink-0 text-muted-foreground"
+              onClick={() => dispatch({ type: "discardRequestDraft" })}
+            >
+              <X className="size-5" aria-hidden="true" />
+              <span className="sr-only">
+                {t("home.draft.discard", { sitter: isolate(draftSitter.publicName) })}
+              </span>
+            </Button>
+          </div>
+        )}
 
         {/* Only with a location, and only with real matches. The heading names
             the filter that produced the list — not a verdict about the animal. */}

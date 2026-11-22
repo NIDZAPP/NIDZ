@@ -27,6 +27,7 @@ import OwnerAccount from "@/pages/owner/OwnerAccount";
 import PetsList from "@/pages/owner/PetsList";
 import PetEdit from "@/pages/owner/PetEdit";
 import RequestReview from "@/pages/owner/request/RequestReview";
+import RequestWhen from "@/pages/owner/request/RequestWhen";
 import RequestSent from "@/pages/owner/request/RequestSent";
 import OwnerRequests from "@/pages/owner/OwnerRequests";
 import OwnerRequestDetail from "@/pages/owner/OwnerRequestDetail";
@@ -128,6 +129,10 @@ const App = () => {
                 the quick account's job. The three old addresses redirect here
                 so existing links and Back still resolve. */}
             <Route path="/owner/request/:sitterId" element={<RequestReview />} />
+            {/* Service and dates for ONE sitter (Audit 1.3 LOT 01). It replaced
+                the summary's detour through the generic need flow, which ended
+                on the results list and forgot who the request was for. */}
+            <Route path="/owner/request/:sitterId/when" element={<RequestWhen />} />
             <Route path="/owner/request/:sitterId/phone" element={<LegacyRequestRedirect />} />
             <Route path="/owner/request/:sitterId/verify" element={<LegacyRequestRedirect />} />
             <Route path="/owner/request/:sitterId/review" element={<LegacyRequestRedirect />} />

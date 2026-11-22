@@ -35,6 +35,10 @@
       "title": "Des pet-sitters à {{wilaya}}",
       "titleSpecies": "Des pet-sitters à {{wilaya}} qui acceptent les {{species}}",
       "seeAll": "Voir tout le monde"
+    },
+    "draft": {
+      "body": "Pas encore envoyée — reprenez là où vous en étiez.",
+      "discard": "Abandonner la demande à {{sitter}}"
     }
   },
   "species": {
@@ -113,7 +117,23 @@
     "review": {
       "title": "Votre demande",
       "send": "Envoyer ma demande",
-      "demoNote": "Envoyer n'effectue aucune réservation et aucun paiement. Rien ne quitte ce navigateur."
+      "demoNote": "Envoyer n'effectue aucune réservation et aucun paiement. Rien ne quitte ce navigateur.",
+      "titleFor": "Votre demande à {{sitter}}",
+      "petTitle": "Pour quel animal ?",
+      "petNone": "Ajoutez l'animal que vous souhaitez confier à {{sitter}}. Vous reviendrez directement à cette demande.",
+      "addPet": "Ajouter mon animal",
+      "addAnother": "Ajouter un autre animal",
+      "editPet": "Modifier {{name}}",
+      "specifySize": "Préciser la taille de {{name}}",
+      "petRequired": "Choisissez l'animal concerné par cette demande.",
+      "fitSpecies": {
+        "dog": "{{sitter}} ne garde pas de chiens.",
+        "cat": "{{sitter}} ne garde pas de chats.",
+        "bird": "{{sitter}} ne garde pas d'oiseaux."
+      },
+      "fitSize": "{{sitter}} accepte uniquement : {{sizes}}.",
+      "fitSizeUnknown": "La taille de {{name}} n'est pas précisée, et {{sitter}} accepte uniquement : {{sizes}}.",
+      "changeWhen": "Modifier le service ou les dates"
     },
     "sent": {
       "title": "Demande de démonstration envoyée",
@@ -132,6 +152,13 @@
       "needs": "Besoins importants",
       "ownerZone": "Zone du propriétaire",
       "aboutPet": "À propos de {{name}}"
+    },
+    "when": {
+      "title": "Quelle garde, et quand ?",
+      "intro": "Seuls les services du profil de {{sitter}} sont proposés, avec leur tarif.",
+      "submit": "Voir ma demande",
+      "unavailableHelp": "{{sitter}} a déclaré ces périodes indisponibles : {{periods}}.",
+      "unavailable": "Cette période recoupe une période que {{sitter}} a déclarée indisponible. Choisissez d'autres dates."
     }
   },
   "sitterFlow": {

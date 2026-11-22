@@ -35,6 +35,10 @@
       "title": "Sitters in {{wilaya}}",
       "titleSpecies": "Sitters in {{wilaya}} who accept {{species}}",
       "seeAll": "See all of them"
+    },
+    "draft": {
+      "body": "Not sent yet — pick up where you left off.",
+      "discard": "Discard the request to {{sitter}}"
     }
   },
   "species": {
@@ -113,7 +117,23 @@
     "review": {
       "title": "Your request",
       "send": "Send my request",
-      "demoNote": "Sending books nothing and pays nothing. Nothing leaves this browser."
+      "demoNote": "Sending books nothing and pays nothing. Nothing leaves this browser.",
+      "titleFor": "Your request to {{sitter}}",
+      "petTitle": "Which animal is it for?",
+      "petNone": "Add the animal you would like {{sitter}} to look after. You will come straight back to this request.",
+      "addPet": "Add my animal",
+      "addAnother": "Add another animal",
+      "editPet": "Edit {{name}}",
+      "specifySize": "Give {{name}}'s size",
+      "petRequired": "Choose the animal this request is for.",
+      "fitSpecies": {
+        "dog": "{{sitter}} does not take dogs.",
+        "cat": "{{sitter}} does not take cats.",
+        "bird": "{{sitter}} does not take birds."
+      },
+      "fitSize": "{{sitter}} only takes: {{sizes}}.",
+      "fitSizeUnknown": "{{name}}'s size is not given, and {{sitter}} only takes: {{sizes}}.",
+      "changeWhen": "Change the service or dates"
     },
     "sent": {
       "title": "Demonstration request sent",
@@ -132,6 +152,13 @@
       "needs": "Important needs",
       "ownerZone": "Owner's area",
       "aboutPet": "About {{name}}"
+    },
+    "when": {
+      "title": "Which care, and when?",
+      "intro": "Only the services on {{sitter}}'s profile are listed, with their prices.",
+      "submit": "See my request",
+      "unavailableHelp": "{{sitter}} has declared these periods unavailable: {{periods}}.",
+      "unavailable": "This period overlaps one {{sitter}} has declared unavailable. Choose other dates."
     }
   },
   "sitterFlow": {

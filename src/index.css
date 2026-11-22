@@ -275,3 +275,15 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Radix renders a hidden "bubble" <input> beside every radio and checkbox that
+   sits inside a <form>, so native form events still fire. It is moved out of
+   the way with an inline `transform: translateX(-100%)` — off the left edge.
+   In a left-to-right page that edge is unreachable, so nothing changes; in a
+   right-to-left page the left edge is the END of the line and the browser
+   makes it scrollable, so every Arabic form with a radio group scrolled
+   ~340px sideways at 390px. Mirroring the shift keeps it off the unreachable
+   edge in both directions (Audit 1.3, RTL). */
+[dir="rtl"] input[aria-hidden="true"][style*="translateX(-100%)"] {
+  transform: translateX(100%) !important;
+}

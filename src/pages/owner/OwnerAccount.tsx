@@ -90,7 +90,8 @@ export default function OwnerAccount() {
      — see `sameOriginPath`: a cross-origin value here throws out of the submit
      handler AFTER the account has been created, leaving a dead button and
      half-applied state. */
-  const destination = sameOriginPath(searchParams.get("next")) ?? "/";
+  const next = sameOriginPath(searchParams.get("next"));
+  const destination = next ?? "/";
 
   const toggleSpecies = (value: Species) =>
     setSpecies((current) =>
@@ -150,7 +151,9 @@ export default function OwnerAccount() {
         <meta name="robots" content="noindex" />
       </Helmet>
       <FlowScreen
-        backTo="/auth"
+        /* The gateway, still carrying the return trip — without `next`, Back and
+           then "create an account" again would lose the request it was for. */
+        backTo={next ? `/auth?next=${encodeURIComponent(next)}` : "/auth"}
         title={t("ownerAccount.title")}
         intro={t("ownerAccount.intro")}
         action={

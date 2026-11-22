@@ -17,13 +17,16 @@ import { normalizeCommuneId, getWilaya, getWilayaOfCommune } from "./algeria";
 import { offeredServices, overlapsDeclaredUnavailable, rateFor } from "./demo-sitters";
 import {
   CARE_TYPES,
+  DOG_SIZES,
   SPECIES,
   type CareType,
   type DateRange,
+  type DogSize,
   type OwnerNeed,
   type SitterProfile,
   type Species,
 } from "./types";
+import type { Pet } from "./pets";
 import { isISODate } from "@/utils/dates";
 
 export const PRICE_STEPS = [600, 900, 1200] as const;
@@ -373,4 +376,41 @@ export function usedHomeCommune(
 ): boolean {
   if (!homeCommune || c.commune) return false;
   return results.some((r) => r.sitter.communeCode === homeCommune);
+}
+
+/* ------------------------------------------------------------- pet ↔ sitter */
+
+/**
+ * Whether ONE particular animal can be put in front of ONE particular sitter.
+ *
+ * The request flow's hard constraint, and deliberately three-valued. Species
+ * and declared dog size are facts on both sides, so a mismatch is certain and
+ * the animal cannot be sent. But a dog whose size the owner never gave is not
+ * proven compatible with a sitter who only takes small dogs — an absent answer
+ * is not a match (Audit 1.3, LOT 03) — and it is not proven incompatible
+ * either. That case is `unknown`, and the request screen asks for the missing
+ * fact instead of guessing it.
+ *
+ * A sitter who accepts every size needs no answer, so `unknown` only arises
+ * when the sitter actually restricts sizes.
+ */
+export type PetFit =
+  | { fits: true }
+  | { fits: false; reason: "species" }
+  | { fits: false; reason: "size"; accepted: DogSize[] }
+  | { fits: "unknown"; reason: "sizeUnknown"; accepted: DogSize[] };
+
+/** Every declared size, in the canonical order, for a sitter who restricts. */
+export function acceptsEveryDogSize(sitter: SitterProfile): boolean {
+  return DOG_SIZES.every((size) => sitter.acceptedDogSizes.includes(size));
+}
+
+export function petFit(pet: Pet, sitter: SitterProfile): PetFit {
+  if (!sitter.acceptedSpecies.includes(pet.species)) return { fits: false, reason: "species" };
+  if (pet.species !== "dog" || acceptsEveryDogSize(sitter)) return { fits: true };
+
+  const accepted = DOG_SIZES.filter((size) => sitter.acceptedDogSizes.includes(size));
+  const size = pet.details.size;
+  if (size === null) return { fits: "unknown", reason: "sizeUnknown", accepted };
+  return accepted.includes(size) ? { fits: true } : { fits: false, reason: "size", accepted };
 }

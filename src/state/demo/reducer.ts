@@ -29,6 +29,7 @@ import {
 import type { AppLocale } from "@/i18n";
 import { emptyCareConditions, restoreCareConditions } from "@/data/care-conditions";
 import { restorePet } from "@/data/pets";
+import { restoreRequestDraft, type RequestDraft } from "@/data/request-draft";
 import {
   NO_CAPABILITIES,
   isWorkspace,
@@ -131,6 +132,18 @@ export type DemoState = {
   pets: Pet[];
   requests: CareRequest[];
   sitter: SitterWorkspace | null;
+  /**
+   * The request the owner was last preparing, as a bookmark to its URL.
+   *
+   * Not a request: it has no status and nobody else can see it. It lets an
+   * owner who wandered off mid-request find the same sitter again instead of
+   * starting over (Audit 1.3 LOT 01). See `src/data/request-draft.ts` for why
+   * the URL, not this record, is the source of truth.
+   *
+   * Added without a version bump: it is additive, and a record written before
+   * it simply has none.
+   */
+  requestDraft: RequestDraft | null;
 };
 
 export const INITIAL_STATE: DemoState = {
@@ -145,6 +158,7 @@ export const INITIAL_STATE: DemoState = {
   pets: [],
   requests: [],
   sitter: null,
+  requestDraft: null,
 };
 
 export function emptySitterProfile(id: string): SitterProfile {
@@ -211,6 +225,10 @@ export type DemoAction =
   | { type: "setAccount"; account: DemoAccount }
   | { type: "completeAccount" }
   | { type: "addRequest"; request: CareRequest }
+  | { type: "touchRequestDraft"; sitterId: string; search: string }
+  | { type: "handoffPet"; sitterId: string; search: string; petId: string }
+  | { type: "consumePetHandoff" }
+  | { type: "discardRequestDraft" }
   | { type: "respondToRequest"; id: string; status: Exclude<RequestStatus, "pending"> }
   | { type: "startSitterProfile"; id: string }
   | { type: "patchSitterProfile"; patch: Partial<SitterProfile> }
@@ -268,7 +286,53 @@ export function reducer(state: DemoState, action: DemoAction): DemoState {
       return state.account ? { ...state, account: { ...state.account, accountComplete: true } } : state;
 
     case "addRequest":
-      return { ...state, requests: [action.request, ...state.requests] };
+      return {
+        ...state,
+        requests: [action.request, ...state.requests],
+        /* Sent, so no longer in preparation. A draft for a DIFFERENT sitter is
+           left alone: it is still unsent. */
+        requestDraft:
+          state.requestDraft?.sitterId === action.request.sitterId ? null : state.requestDraft,
+      };
+
+    case "touchRequestDraft": {
+      const current = state.requestDraft;
+      /* Same sitter, same URL: nothing to record. Returning the same object
+         matters — the summary dispatches this from an effect, and a fresh
+         object on every render would be a render loop. */
+      if (current && current.sitterId === action.sitterId && current.search === action.search) return state;
+      return {
+        ...state,
+        requestDraft: {
+          sitterId: action.sitterId,
+          search: action.search,
+          /* A hand-off addressed to this sitter survives a URL change; one for
+             another sitter is meaningless once the owner moved on. */
+          petHandoff: current?.sitterId === action.sitterId ? current.petHandoff : null,
+          updatedAt: new Date().toISOString(),
+        },
+      };
+    }
+
+    case "handoffPet":
+      return {
+        ...state,
+        requestDraft: {
+          sitterId: action.sitterId,
+          search:
+            state.requestDraft?.sitterId === action.sitterId ? state.requestDraft.search : action.search,
+          petHandoff: action.petId,
+          updatedAt: new Date().toISOString(),
+        },
+      };
+
+    case "consumePetHandoff":
+      return state.requestDraft?.petHandoff
+        ? { ...state, requestDraft: { ...state.requestDraft, petHandoff: null } }
+        : state;
+
+    case "discardRequestDraft":
+      return state.requestDraft ? { ...state, requestDraft: null } : state;
 
     case "respondToRequest":
       return {
@@ -519,6 +583,7 @@ function restore(parsed: Record<string, unknown>): DemoState {
       : [],
     requests: (arrayOfObjects(parsed.requests) as CareRequest[] | null) ?? [],
     sitter,
+    requestDraft: restoreRequestDraft(parsed.requestDraft),
   };
 }
 

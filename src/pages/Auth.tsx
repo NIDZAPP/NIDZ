@@ -6,6 +6,7 @@ import FlowScreen from "@/components/shared/FlowScreen";
 import { DemoNotice } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { AUTH_PROVIDERS, hasWorkingProvider } from "@/auth/providers";
+import { profilePathForRequest } from "@/data/request-draft";
 import { sameOriginPath } from "@/utils/safe-path";
 
 /**
@@ -39,6 +40,10 @@ export default function Auth() {
      an absolute URL, and a startsWith check does not survive a backslash. */
   const next = sameOriginPath(searchParams.get("next"));
   const accountHref = next ? `/owner/account?next=${encodeURIComponent(next)}` : "/owner/account";
+  /* Interrupting a request to a sitter, Back goes to that sitter's profile —
+     never to the summary, whose guard would bounce straight back here, and
+     never to Home, which would forget who the request was for. */
+  const backTo = profilePathForRequest(next) ?? "/";
 
   return (
     <>
@@ -48,7 +53,7 @@ export default function Auth() {
         </title>
         <meta name="robots" content="noindex" />
       </Helmet>
-      <FlowScreen backTo="/" title={t("auth.title")} intro={t("auth.intro")}>
+      <FlowScreen backTo={backTo} title={t("auth.title")} intro={t("auth.intro")}>
         <section aria-labelledby="auth-providers">
           <h2 id="auth-providers" className="eyebrow">
             {t("auth.plannedTitle")}
@@ -100,7 +105,14 @@ export default function Auth() {
 
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
             <Button asChild size="lg" className="w-full sm:w-auto">
-              <Link to={accountHref}>{t("auth.createAccount")}</Link>
+              {/* Interrupting a request, the account form REPLACES this
+                  gateway in history: once the account exists the owner is
+                  returned to the summary, and Back from there must reach the
+                  sitter's profile — not this gateway, which would offer to
+                  create an account that now exists (Audit 1.3 LOT 01). */}
+              <Link to={accountHref} replace={Boolean(next)}>
+                {t("auth.createAccount")}
+              </Link>
             </Button>
             {/* §15's guest path. A real exit, not small print: browsing,
                 filtering and reading a profile need no identity at all. */}

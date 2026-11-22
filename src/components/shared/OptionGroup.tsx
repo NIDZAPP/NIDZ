@@ -11,6 +11,11 @@ export type Option<T extends string> = {
       than padding the row with a restatement of the label. */
   description?: string;
   icon?: LucideIcon;
+  /** Shown but not choosable. The description must then say why: an option
+      that is greyed out with no reason reads as a broken control, and an
+      option silently left out hides a fact the person may need — "this
+      sitter does not take cats" is worth seeing next to the cat. */
+  disabled?: boolean;
 };
 
 /**
@@ -69,12 +74,18 @@ export default function OptionGroup<T extends string>({
           <RadioGroupPrimitive.Item
             key={option.value}
             value={option.value}
+            disabled={option.disabled}
             className={cn(
               "group flex min-h-16 w-full items-center gap-4 rounded-md border p-4 text-start transition-colors",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               selected
                 ? "border-primary bg-accent"
-                : "border-input hover:bg-secondary",
+                : option.disabled
+                  ? /* A dashed hairline, not a faded copy of a live row: lowered
+                       opacity drags the reason text under the contrast floor,
+                       and the reason is the whole point of showing it. */
+                    "cursor-not-allowed border-dashed border-border"
+                  : "border-input hover:bg-secondary",
             )}
           >
             {Icon && (

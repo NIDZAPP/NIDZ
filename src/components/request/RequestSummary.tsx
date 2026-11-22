@@ -4,7 +4,7 @@ import { petFacts } from "@/components/request/pet-facts";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { ProvenanceLabel } from "@/components/shared/trust";
 import { communeWithWilaya } from "@/data/algeria";
-import { CARE_UNIT_KEY, type CareRequest } from "@/data/types";
+import { CARE_UNIT_KEY, type CareRequest, type SharedPet } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
 import { cn } from "@/lib/utils";
 import { formatDateRange } from "@/utils/dates";
@@ -31,7 +31,11 @@ export default function RequestSummary({
       fits the page it lands on. */
   headingLevel = "h2",
 }: {
-  request: CareRequest;
+  /** `pet` may be null on the pre-send summary only, while the owner is still
+      choosing or adding the animal: the rest of the request is shown so the
+      sitter, service and dates stay in view (Audit 1.3 LOT 01). A stored
+      request always has one. */
+  request: Omit<CareRequest, "pet"> & { pet: SharedPet | null };
   sitterName: string;
   showStatus?: boolean;
   className?: string;
@@ -49,17 +53,20 @@ export default function RequestSummary({
      are omitted rather than listed as "I don't know": a short list of facts
      tells a sitter something, nine rows of unknown tell them nothing and stop
      them reading. */
-  const facts = petFacts(request.pet, t);
+  const pet = request.pet;
+  const facts = pet ? petFacts(pet, t) : [];
 
   const rows: { key: string; label: string; value: string }[] = [
     { key: "sitter", label: t("request.summary.sitter"), value: sitterName },
-    {
-      key: "pet",
-      label: t("request.summary.pet"),
-      value: `${request.pet.name} · ${t(`species.${request.pet.species}`)}${
-        request.pet.age ? ` · ${request.pet.age}` : ""
-      }`,
-    },
+    ...(pet
+      ? [
+          {
+            key: "pet",
+            label: t("request.summary.pet"),
+            value: `${pet.name} · ${t(`species.${pet.species}`)}${pet.age ? ` · ${pet.age}` : ""}`,
+          },
+        ]
+      : []),
     { key: "care", label: t("request.summary.care"), value: t(`care.${request.careType}`) },
     { key: "dates", label: t("request.summary.dates"), value: formatDateRange(request.dates, lng) },
     ...(ownerZone
@@ -103,10 +110,10 @@ export default function RequestSummary({
       {/* What the owner said about THIS animal. Collected on the pet screen
           under an explicit promise that it helps a sitter judge whether they
           can take it — so it has to arrive. */}
-      {facts.length > 0 && (
+      {pet && facts.length > 0 && (
         <div className="mt-6">
           <Heading className="text-base font-semibold text-foreground">
-            {t("request.summary.aboutPet", { name: request.pet.name })}
+            {t("request.summary.aboutPet", { name: pet.name })}
           </Heading>
           <dl className="mt-2 border-t border-border">
             {facts.map((fact) => (
@@ -126,14 +133,14 @@ export default function RequestSummary({
 
       {/* The needs travel with the request: they are the thing a sitter most
           needs in order to answer honestly. */}
-      {request.pet.notes && (
+      {pet?.notes && (
         <div className="mt-6">
           {/* The most decision-relevant text a sitter reads. `.eyebrow` is a
               filing label; this is a content heading. */}
           <Heading className="text-base font-semibold text-foreground">
             {t("request.summary.needs")}
           </Heading>
-          <p className="mt-2 max-w-[64ch] text-base leading-relaxed text-foreground">{request.pet.notes}</p>
+          <p className="mt-2 max-w-[64ch] text-base leading-relaxed text-foreground">{pet.notes}</p>
         </div>
       )}
 

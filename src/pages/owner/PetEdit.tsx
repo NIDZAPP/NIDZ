@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import PetForm from "@/components/owner/PetForm";
 import FlowScreen from "@/components/shared/FlowScreen";
@@ -18,7 +18,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { emptyPet, type Pet } from "@/data/pets";
+import { cameFromRequest, requestSearchOf, sitterIdFromRequestPath, withPet } from "@/data/request-draft";
+import { SPECIES, type Species } from "@/data/types";
 import { useDemo } from "@/state/demo/context";
+import { sameOriginPath } from "@/utils/safe-path";
 
 const FORM_ID = "pet-edit";
 
@@ -31,21 +34,46 @@ const FORM_ID = "pet-edit";
  *
  * Draft state is local and only committed on submit, so abandoning half an edit
  * leaves the saved animal exactly as it was.
+ *
+ * FROM A REQUEST (Audit 1.3 LOT 01). Opened from "Votre demande à Amina", the
+ * screen carries that request's URL as `next` and goes back to it — to the
+ * same sitter, with the animal just saved selected — instead of to My pets.
+ * When the entry behind this one IS that summary, saving pops history rather
+ * than pushing a second copy, so Back from the summary still means "the
+ * profile", not "the same request with nothing selected". The selection
+ * travels as a one-shot hand-off in the demo state (`handoffPet`).
+ *
+ * Saving here can never touch another animal: a new animal always gets a new
+ * id, and an existing one is only ever saved under its own.
  */
 export default function PetEdit() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { id } = useParams();
   const { state, dispatch } = useDemo();
 
   const isNew = !id;
   const existing = id ? (state.pets.find((p) => p.id === id) ?? null) : null;
 
+  /* Where to return. Parsed with the browser's own URL parser (see
+     `sameOriginPath`) — this is a redirect target taken from the URL. */
+  const next = sameOriginPath(searchParams.get("next"));
+  const requestSitter = sitterIdFromRequestPath(next);
+  const startSpecies = searchParams.get("species");
+
   /* Created once, in the initialiser, so a re-render never mints a new id
-     mid-edit. Dog is the starting species only because the form has to show
-     something; it is a live radio group, not a guess recorded anywhere. */
+     mid-edit. The starting species is the one the request asked for when
+     there is one; otherwise dog, only because the form has to show something.
+     Either way it is a live radio group, not a guess recorded anywhere. */
   const [pet, setPet] = useState<Pet>(
-    () => existing ?? emptyPet(`pet-${Date.now().toString(36)}`, "dog"),
+    () =>
+      existing ??
+      emptyPet(
+        `pet-${Date.now().toString(36)}`,
+        (SPECIES as readonly string[]).includes(startSpecies ?? "") ? (startSpecies as Species) : "dog",
+      ),
   );
   const [nameError, setNameError] = useState<string>();
   const nameRef = useRef<HTMLInputElement>(null);
@@ -53,7 +81,26 @@ export default function PetEdit() {
   /* A pet id that names nothing — a stale bookmark, a deleted animal, a
      hand-edited URL — goes back to the list rather than rendering an empty
      form that would silently create a second animal on save. */
-  if (id && !existing) return <Navigate to="/owner/pets" replace />;
+  if (id && !existing) return <Navigate to={next ?? "/owner/pets"} replace />;
+
+  /* Back to where this screen was opened from. */
+  const leave = (selectPetId: string | null) => {
+    if (next && requestSitter) {
+      if (selectPetId) {
+        dispatch({
+          type: "handoffPet",
+          sitterId: requestSitter,
+          search: requestSearchOf(next),
+          petId: selectPetId,
+        });
+      }
+      const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;
+      if (cameFromRequest(location.state) && idx > 0) navigate(-1);
+      else navigate(withPet(next, selectPetId), { replace: true });
+      return;
+    }
+    navigate(next ?? "/owner/pets", { replace: true });
+  };
 
   const submit = () => {
     if (!pet.name.trim()) {
@@ -62,13 +109,13 @@ export default function PetEdit() {
       return;
     }
     dispatch({ type: "savePet", pet: { ...pet, name: pet.name.trim() } });
-    navigate("/owner/pets", { replace: true });
+    leave(pet.id);
   };
 
   const remove = () => {
     if (!existing) return;
     dispatch({ type: "removePet", id: existing.id });
-    navigate("/owner/pets", { replace: true });
+    leave(null);
   };
 
   return (
@@ -80,7 +127,7 @@ export default function PetEdit() {
         <meta name="robots" content="noindex" />
       </Helmet>
       <FlowScreen
-        backTo="/owner/pets"
+        backTo={next ?? "/owner/pets"}
         wide
         title={isNew ? t("pets.addTitle") : (pet.name || t("pets.editTitle"))}
         intro={isNew ? t("pets.addIntro") : undefined}
