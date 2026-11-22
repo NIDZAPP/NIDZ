@@ -65,7 +65,7 @@ cream ground *and* retuned `--secondary` / `--muted` out of the warm beige ramp
 into the same cool green-grey family as `--border`. That leaves `--brand` and
 `--brand-soft` carrying the entire warm half of the brand, so their placement is
 a decision rather than decoration. They appear in exactly three places: the
-`PawPrint` mark, the entry masthead band (and the splash that settles into it),
+`PawPrint` mark, the entry masthead band,
 and the identity monogram on a sitter card and profile — the warm surface goes
 on the *person*, which is also the one place in the product with no photograph
 to carry them. Never a button, link, hover or selected state.
@@ -267,9 +267,12 @@ Micro-feedback 100–150ms · standard 160–220ms · dialog and sheet 200–300
 rather than `animation: none`, so Radix still receives `animationend` and exit
 transitions do not strand elements in the DOM.
 
-Nothing animates for decoration, and nothing delays an action. The entry
-wordmark is an overlay with `pointer-events-none` over an introduction that is
-already interactive.
+Nothing animates for decoration, and nothing delays an action. Audit 1.3
+removed the entry splash: it was an 850 ms wordmark overlay with
+`pointer-events-none` over an introduction that was already interactive, so for
+most of a second the screen accepted taps on controls nobody could see. The
+entry screen is ready on first paint and shows both of its actions — "Trouver
+une garde" and "Devenir pet-sitter" — within the first 390×844 screen.
 
 ---
 

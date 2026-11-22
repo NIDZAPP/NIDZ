@@ -1,7 +1,6 @@
 import { Component } from "react";
 import type { ErrorInfo, ReactNode } from "react";
 
-import { clearSplash } from "@/state/splash";
 import { clearStoredState } from "@/state/demo/reducer";
 
 /**
@@ -42,7 +41,6 @@ export default class ErrorBoundary extends Component<Props, State> {
      recovery control that does not recover is worse than no control. */
   private reset = () => {
     clearStoredState();
-    clearSplash();
     window.location.assign("/");
   };
 

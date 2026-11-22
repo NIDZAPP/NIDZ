@@ -20,7 +20,6 @@ import { Button } from "@/components/ui/button";
 import { REGISTER_ROW } from "@/components/shared/register";
 import { SUPPORTED_LOCALES, hasExplicitLocale, setLocale, type AppLocale } from "@/i18n";
 import { useAppLocale } from "@/hooks/use-locale";
-import { clearSplash } from "@/state/splash";
 import { useDemo } from "@/state/demo/context";
 
 
@@ -64,7 +63,6 @@ export default function Settings() {
        when the state is back to initial, so calling clearStoredState() here
        would be undone by the persistence effect a tick later. */
     dispatch({ type: "reset" });
-    clearSplash();
     navigate("/welcome", { replace: true });
   };
 

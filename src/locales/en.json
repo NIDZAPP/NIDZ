@@ -346,13 +346,15 @@
     "sitterPublished": "Your profile is published",
     "sitterDraft": "Your profile is not published yet",
     "ownerPrompt": "Which animal needs care?",
-    "sitterCta": "Describe what you offer",
+    "sitterCta": "See what the sitter profile asks",
     "sitterPreview": {
       "home": "Your home and outdoor space",
       "animals": "The animals you accept",
       "limits": "How you care for them, and your limits",
       "rates": "Your rates, service by service"
-    }
+    },
+    "findCare": "Find care",
+    "becomeSitter": "Become a pet-sitter"
   },
   "intent": {
     "owner": "Find someone for my animal",

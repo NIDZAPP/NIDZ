@@ -347,7 +347,7 @@
     "sitterPublished": "Votre profil est publié",
     "sitterDraft": "Votre profil n'est pas encore publié",
     "ownerPrompt": "Quel animal avez-vous à faire garder ?",
-    "sitterCta": "Décrire ce que vous proposez",
+    "sitterCta": "Voir ce que demande le profil de pet-sitter",
     "sitterPreview": {
       "home": "Votre logement et votre espace extérieur",
       "animals": "Les animaux que vous acceptez",
@@ -355,7 +355,9 @@
       "rates": "Vos tarifs, service par service"
     },
     "requestsCount_many": "{{count}} demandes",
-    "requestsPending_many": "{{count}} en attente de réponse"
+    "requestsPending_many": "{{count}} en attente de réponse",
+    "findCare": "Trouver une garde",
+    "becomeSitter": "Devenir pet-sitter"
   },
   "intent": {
     "owner": "Trouver quelqu'un pour mon animal",

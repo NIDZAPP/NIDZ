@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
@@ -10,24 +10,6 @@ import { SPECIES_ICON } from "@/components/shared/species";
 import { Button } from "@/components/ui/button";
 import { SPECIES, type Species } from "@/data/types";
 import { useDemo } from "@/state/demo/context";
-import { SPLASH_KEY } from "@/state/splash";
-
-/* The splash is a state of this screen, not a route of its own: a route would
-   be a back-button trap, a thing a deep link could land on, and a flash of
-   empty page. The key it remembers itself by lives in `src/state/splash.ts` —
-   see the note there. */
-
-function shouldSplash(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    if (window.sessionStorage.getItem(SPLASH_KEY)) return false;
-    /* Never animate at someone who asked not to be animated at (§24). */
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 /* Four of the profile's sections, named. Rates is here because it is the thing
    a prospective sitter most wants to know they control, and leaving it out
@@ -41,58 +23,50 @@ const SITTER_PREVIEW: { key: string; icon: LucideIcon }[] = [
 ];
 
 /**
- * The entry screen — one screen, not two.
+ * The entry screen.
  *
- * Audit 1.1 split this in half: a headline with a "Get started" button, then a
- * separate screen asking which of two things you wanted. The first screen
- * disclosed nothing, so progressive disclosure (§4.5) did not justify it — it
- * was an interstitial standing in front of the real decision. Merged, and
- * `/start` now redirects here so every existing deep link and every `useBack`
- * fallback still resolves.
+ * AUDIT 1.3 LOT 02 — BOTH DOORS ON THE FIRST SCREEN.
  *
- * WHY THE "PREVIEW OF EACH WORLD" (§13) IS NOT A PICTURE.
+ * At 390×844 the 1.2 version put "become a sitter" below the fold: a tall
+ * masthead with a paragraph of introduction stood above the two choices, and
+ * the sitter's choice came after the whole owner section. Now the masthead is
+ * one sentence and the two actions directly under it — "Trouver une garde"
+ * (filled, the more frequent path) and "Devenir pet-sitter" (outline, the same
+ * size and width, so it is equally findable without competing as a second
+ * primary). Everything else on the screen explains the two paths and comes
+ * after them.
  *
- * The audit asks each choice to show a small visual preview of the workflow it
- * leads to, and suggests sitter photographs and avatar clusters. Nidz has no
- * sitter photographs — stock portraits presented as members are an anti-pattern
- * (§21, §40) and there are no real sitters to photograph. It also has no
- * results before a brief exists, no counts, no ratings and no reviews. Any
- * rendered mock of either world would depict data that does not exist. That is
- * not a preview; it is a fabrication with rounded corners.
+ * The two paths are told apart by CONTENT rather than by two equal walls of
+ * text: the owner's section is discovery (pick the animal, or just look
+ * around without an account); the sitter's is the activity (what you will
+ * describe about how you look after animals).
  *
- * So the preview of a world is that world's own first control, live:
+ * THE SPLASH IS GONE. 1.2 showed an 850 ms wordmark overlay with
+ * `pointer-events-none` over an introduction that was already interactive — so
+ * for most of a second the screen took taps on controls nobody could see. An
+ * arbitrary delay that hides a live interface is exactly what the audit rules
+ * out, and there was no loading to cover: the screen is ready on first paint.
+ * The wordmark now simply sits in the top bar.
  *
- *   - The owner world is a question that turns into a list, so it shows the
- *     actual first question, and answering it here removes a tap later rather
- *     than adding one.
- *   - The sitter world is a structured declaration, so it names the actual
- *     sections that will be asked for. It sets the honest expectation that this
- *     path is longer.
+ * WHY THERE IS NO PICTURE OF EACH WORLD. Nidz has no sitter photographs (stock
+ * portraits presented as members are an anti-pattern, §21, §40), no results
+ * before a brief exists, no counts, ratings or reviews. A rendered mock of
+ * either world would depict data that does not exist, so each world is
+ * previewed by its own real first control or by the real list of what it asks.
  *
- * Nothing is depicted. Both are true.
- *
- * The two panels differ in KIND, not in colour: the owner's is lateral (a row
- * of choices, choose and go), the sitter's is vertical (a sequence of things
- * you will describe). That reads as two workflows at a glance and costs no new
- * tokens. Choosing records no role — see `src/data/workspace.ts`; the line at
- * the bottom says so out loud rather than hiding it in a tooltip.
+ * Choosing records no role — see `src/data/workspace.ts`; the line under the
+ * actions says so out loud.
  */
 export default function Welcome() {
   const { t } = useTranslation();
   const { dispatch } = useDemo();
   const navigate = useNavigate();
-  const [splash, setSplash] = useState(shouldSplash);
   const heading = useRef<HTMLHeadingElement>(null);
 
-  /* What `FlowScreen` does for every other screen, and what this one lost by
-     no longer being one. React Router resets neither scroll nor focus, and
-     `/start` — still the back target of `/owner/need/pet` and `/sitter/start` —
-     now redirects here. Without this, going back from either lands a keyboard
-     user on <body>, part-way down a screen that is much taller than the one it
-     replaced, with nothing announced.
-
-     No visible ring: `:focus-visible` also matches programmatic focus, so a
-     ring would box the heading on every arrival including mouse ones. */
+  /* What `FlowScreen` does for every other screen. React Router resets neither
+     scroll nor focus, and `/start` — still the back target of
+     `/owner/need/pet` and `/sitter/start` — redirects here. No visible ring:
+     `:focus-visible` also matches programmatic focus. */
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
     heading.current?.focus({ preventScroll: true });
@@ -102,34 +76,19 @@ export default function Welcome() {
      is the home rather than the introduction again. */
   const enter = () => dispatch({ type: "enter" });
 
-  const chooseSpecies = (species: Species) => {
+  const findCare = () => {
     enter();
-    /* Carried into the need flow so the first step arrives already answered.
-       This is the whole reason the preview is the real control and not a
-       decorative illustration of one.
-
-       `petId: null` is not tidiness. `NeedPet` resolves the saved pet BEFORE
-       the declared species, so leaving a previous selection behind means
-       someone who saved a dog, came back here and tapped Cat would land on a
-       form pre-filled with the dog — name, age, notes, photo — and submitting
-       it would overwrite that dog under its own id. Choosing a species here is
-       the start of describing an animal, not a filter over one already chosen. */
-    dispatch({ type: "setNeed", patch: { species, petId: null } });
     navigate("/owner/need/pet");
   };
 
-  useEffect(() => {
-    if (!splash) return;
-    const timer = window.setTimeout(() => {
-      setSplash(false);
-      try {
-        window.sessionStorage.setItem(SPLASH_KEY, "1");
-      } catch {
-        /* Private mode: the wordmark shows once per navigation instead. */
-      }
-    }, 850);
-    return () => window.clearTimeout(timer);
-  }, [splash]);
+  const chooseSpecies = (species: Species) => {
+    enter();
+    /* Carried into the need flow so the first step arrives already answered.
+       `petId: null` because choosing a species here is the start of describing
+       an animal, not a filter over one already chosen. */
+    dispatch({ type: "setNeed", patch: { species, petId: null } });
+    navigate("/owner/need/pet");
+  };
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
@@ -140,46 +99,26 @@ export default function Welcome() {
         <meta name="description" content={t("entry.intro")} />
       </Helmet>
 
-      {splash && (
-        <div
-          aria-hidden="true"
-          /* `pointer-events-none` because the introduction underneath is
-             already interactive — the wordmark is a cover, not a gate, and an
-             overlay that swallows taps would be the artificial delay the audit
-             rules out.
-
-             It fades into a masthead of the same colour, so the splash settles
-             into place rather than lifting like a curtain off a different
-             screen. Motion with a cause, which is the only kind §24 allows. */
-          className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-brand-soft motion-safe:animate-fade-out motion-safe:[animation-delay:550ms] motion-safe:[animation-fill-mode:forwards]"
-        >
-          <span className="flex items-center gap-3">
-            <PawPrint className="size-8 text-brand" />
-            <span className="text-h1-lg font-semibold tracking-tight text-foreground">
-              {t("common.appName")}
-            </span>
+      {/* No back control: this is a root screen. Language has to be reachable
+          from the very first screen in a trilingual product — detection can
+          land an Algerian visitor in English (§34). The warm band is one of the
+          three places terracotta is spent (see src/index.css). */}
+      <header className="bg-brand-soft">
+        <div className="container flex h-14 items-center justify-between gap-4">
+          <span className="flex items-center gap-2">
+            <PawPrint className="size-6 text-brand" aria-hidden="true" />
+            <span className="text-lg font-semibold tracking-tight text-foreground">{t("common.appName")}</span>
           </span>
-        </div>
-      )}
-
-      {/* No back control: this is a root screen (Audit p.23). Language has to be
-          reachable from the very first screen in a trilingual product — detection
-          can land an Algerian visitor in English (§34). */}
-      <div className="bg-brand-soft">
-        <div className="container flex h-14 items-center justify-end">
           <LanguageSwitcher />
         </div>
-      </div>
+      </header>
 
       <main className="flex-1">
-        {/* The one warm surface on the screen, and one of only three in the
-            product. Removing the cream ground left `brand-soft` carrying the
-            whole warm half of the brand, so where it lands is no longer
-            decoration — see src/index.css. */}
-        <div className="bg-brand-soft pb-10 pt-2">
+        <div className="bg-brand-soft pb-8 pt-4 md:pb-12 md:pt-8">
           <div className="container">
             <div className="mx-auto max-w-[960px]">
-              <PawPrint className="mb-6 size-8 text-brand" aria-hidden="true" />
+              {/* The value, in one sentence — the whole of what stands above the
+                  two actions. */}
               <h1
                 ref={heading}
                 tabIndex={-1}
@@ -187,16 +126,28 @@ export default function Welcome() {
               >
                 {t("entry.title")}
               </h1>
-              <p className="mt-5 max-w-[46ch] text-lg leading-relaxed text-muted-foreground">
-                {t("entry.intro")}
-              </p>
+
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <Button type="button" size="lg" onClick={findCare} className="w-full sm:w-auto sm:min-w-56">
+                  {t("entry.findCare")}
+                </Button>
+                {/* Outline, not a second filled primary — but the same size and
+                    width, so it is as findable as the owner's path. */}
+                <Button asChild size="lg" variant="outline" className="w-full sm:w-auto sm:min-w-56">
+                  <Link to="/sitter/start" onClick={enter}>
+                    {t("entry.becomeSitter")}
+                  </Link>
+                </Button>
+              </div>
+
+              <p className="mt-4 max-w-[60ch] text-sm text-muted-foreground">{t("intent.bothSides")}</p>
             </div>
           </div>
         </div>
 
         <div className="container py-10 md:py-14">
           <div className="mx-auto grid max-w-[960px] gap-10 md:grid-cols-2 md:gap-12">
-            {/* ---------------------------------------------------- owner */}
+            {/* ------------------------------------------- owner: discovery */}
             <section aria-labelledby="entry-owner">
               <h2 id="entry-owner" className="text-name font-semibold text-foreground">
                 {t("intent.owner")}
@@ -208,15 +159,9 @@ export default function Welcome() {
               <p className="mt-6 text-sm font-medium text-foreground" id="entry-species">
                 {t("entry.ownerPrompt")}
               </p>
-              {/* Buttons that navigate, not form controls — nothing is being
-                  submitted, and the choice IS the action. Same silhouette as
-                  `Chip` so the two read as the same level of decision, without
-                  borrowing its radio semantics. */}
-              <div
-                role="group"
-                aria-labelledby="entry-species"
-                className="mt-3 flex flex-wrap gap-2"
-              >
+              {/* Buttons that navigate, not form controls — the choice IS the
+                  action, and it answers the need flow's first question. */}
+              <div role="group" aria-labelledby="entry-species" className="mt-3 flex flex-wrap gap-2">
                 {SPECIES.map((species) => {
                   const Icon = SPECIES_ICON[species];
                   return (
@@ -224,13 +169,7 @@ export default function Welcome() {
                       key={species}
                       type="button"
                       onClick={() => chooseSpecies(species)}
-                      /* The visually dominant interactive group on this screen.
-                         The owner path is the higher-frequency one, so it gets
-                         the weight; the sitter panel's single outline button
-                         sits lower and lighter. Equal structural weight — both
-                         are full sections with a heading and a preview —
-                         unequal visual weight, deliberately. */
-                      className="inline-flex min-h-14 items-center gap-2.5 rounded-md border border-input px-5 text-base font-medium text-foreground transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      className="inline-flex min-h-12 items-center gap-2.5 rounded-md border border-input px-5 text-base font-medium text-foreground transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     >
                       <Icon className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
                       {t(`species.${species}`)}
@@ -241,23 +180,19 @@ export default function Welcome() {
 
               {/* The no-commitment path (§15): browsing needs no account and no
                   brief. Deliberately not "I already have an account" — there is
-                  no sign-in, no session and no server, so an authentication
-                  affordance here would promise something Nidz cannot do. */}
+                  no sign-in to return to. */}
               <p className="mt-5 text-sm">
                 <Link
                   to="/search"
                   onClick={enter}
-                  className="font-medium text-primary underline-offset-4 hover:underline"
+                  className="inline-flex min-h-11 items-center font-medium text-primary underline-offset-4 hover:underline"
                 >
                   {t("entry.browse")}
                 </Link>
               </p>
             </section>
 
-            {/* --------------------------------------------------- sitter */}
-            {/* The rule rotates to the inline start on desktop, which is the
-                idiom /search already uses for its rail — and which gives RTL
-                for free, because `border-s` is logical. */}
+            {/* ------------------------------------------ sitter: the activity */}
             <section
               aria-labelledby="entry-sitter"
               className="border-t border-border pt-10 md:border-s md:border-t-0 md:ps-12 md:pt-0"
@@ -280,23 +215,17 @@ export default function Welcome() {
                 ))}
               </ul>
 
-              <div className="mt-6">
-                {/* Not `size="lg"`, and not full-width: it was the only large
-                    filled-width control on the screen, which made the sitter
-                    path look like the primary one in an owner-first
-                    marketplace. */}
-                <Button asChild variant="outline">
-                  <Link to="/sitter/start" onClick={enter}>
-                    {t("entry.sitterCta")}
-                  </Link>
-                </Button>
-              </div>
+              <p className="mt-5 text-sm">
+                <Link
+                  to="/sitter/start"
+                  onClick={enter}
+                  className="inline-flex min-h-11 items-center font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  {t("entry.sitterCta")}
+                </Link>
+              </p>
             </section>
           </div>
-
-          <p className="mx-auto mt-10 max-w-[960px] text-sm text-muted-foreground">
-            {t("intent.bothSides")}
-          </p>
         </div>
       </main>
     </div>
