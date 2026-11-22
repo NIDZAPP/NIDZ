@@ -11,6 +11,7 @@
 
 import type { AppLocale } from "@/i18n";
 import type { CareConditions } from "./care-conditions";
+import type { ClarificationMessage } from "./clarification";
 import type { Declared, SharedPet } from "./pets";
 
 /** Demo content that has to read naturally in all three product languages.
@@ -328,6 +329,11 @@ export type CareRequest = {
   displayedRate: { amount: number; careType: CareType } | null;
   status: RequestStatus;
   respondedAt: string | null;
+  /** Questions exchanged BEFORE a decision (Audit 1.3 LOT 07). Local to this
+      browser; never a delivered message. Absent on requests stored before it
+      existed, which read as an empty thread. Changing it never changes
+      `status`. */
+  thread?: ClarificationMessage[];
 };
 
 /** The one country code this demonstration handles. Not a selector: nothing

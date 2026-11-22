@@ -486,9 +486,6 @@
     "experienceLine_other": "{{count}} years of stated experience, mostly with: {{species}}.",
     "experienceYears_one": "{{count}} year of stated experience.",
     "experienceYears_other": "{{count}} years of stated experience.",
-    "selfTestTitle": "Try the sitter side",
-    "selfTestBody": "This demonstration has no other users. Send yourself a request to see what a sitter receives, and answer it.",
-    "selfTestCta": "Send myself a test request",
     "professionalYears_one": "{{count}} year",
     "professionalYears_other": "{{count}} years",
     "professionalUnverified": "Declared by this person. Nidz does not verify qualifications.",
@@ -684,6 +681,11 @@
       "current": "The space you are using now",
       "sitterDraft": "Your profile is not published yet — continue it",
       "sitterNone": "Look after animals: describe what you offer"
+    },
+    "tools": {
+      "title": "Test tools for this demonstration",
+      "body": "This demonstration has no other users. To see what a sitter receives, and to try a question before deciding, you can address a test request to your own published profile. It stays in this browser.",
+      "selfRequest": "Address a test request to my profile"
     }
   },
   "workspace": {
@@ -1094,5 +1096,29 @@
     "small": "Accepts small dogs",
     "medium": "Accepts medium dogs",
     "large": "Accepts large dogs"
+  },
+  "clarify": {
+    "title": "Questions before deciding",
+    "localNote": "Kept in this browser only. Nobody was notified and no message was sent.",
+    "ask": "Ask a question",
+    "reply": "Answer the question",
+    "labelSitter": "Your question to the owner",
+    "labelOwner": "Your message to the sitter",
+    "suggestLabel": "To start from:",
+    "suggest": {
+      "meet": "Could we meet before the stay, so I can get to know your animal?",
+      "otherAnimals": "How does your animal get on with other animals?",
+      "routine": "What does a normal day look like for your animal (meals, walks, sleep)?"
+    },
+    "add": "Add to the request",
+    "cancel": "Cancel",
+    "notSent": "This is not sent: it is added to this request in this browser, where the other side of this demonstration can read it. The request stays awaiting a reply.",
+    "required": "Write your question first.",
+    "you": "You",
+    "fromSitter": "The sitter",
+    "fromOwner": "The owner",
+    "waitingOwner": "Your question is on the request. It is still awaiting your decision: asking accepts nothing.",
+    "questionForYou": "The sitter has a question before deciding. The request is still awaiting a reply.",
+    "questionForYouShort": "A question for you"
   }
 }

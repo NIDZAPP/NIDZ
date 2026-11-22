@@ -1,12 +1,15 @@
+import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 
+import ClarificationThread from "@/components/request/ClarificationThread";
 import RequestSummary from "@/components/request/RequestSummary";
 import BackButton from "@/components/shared/BackButton";
 import EmptyState from "@/components/shared/EmptyState";
 import { Button } from "@/components/ui/button";
 import { DemoNotice } from "@/components/shared/trust";
+import { awaitingReplyFrom, canClarify } from "@/data/clarification";
 import { sitterNameFor } from "@/data/sitter-name";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useDemo } from "@/state/demo/context";
@@ -26,8 +29,11 @@ export default function OwnerRequestDetail() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const { state } = useDemo();
+  const [asking, setAsking] = useState(false);
 
   const request = state.requests.find((r) => r.id === id) ?? null;
+  /* A question from the sitter, waiting for the owner (Audit 1.3 LOT 07). */
+  const questionForYou = request ? awaitingReplyFrom(request) === "owner" : false;
   const sitterName = request ? sitterNameFor(state, request.sitterId) : "";
   /* Set when the owner tried to send a request identical to one already
      waiting — otherwise arriving here after tapping "Envoyer" looks like
@@ -89,6 +95,26 @@ export default function OwnerRequestDetail() {
             <div className="mt-8">
               <RequestSummary request={request} sitterName={sitterName} showStatus headingLevel="h2" />
             </div>
+
+            {/* Questions on this request, before a decision. The status above
+                stays "En attente" while they are exchanged. */}
+            {questionForYou && !asking && (
+              <p className="mt-6 text-base font-medium text-foreground">{t("clarify.questionForYou")}</p>
+            )}
+            <ClarificationThread
+              request={request}
+              side="owner"
+              composerOpen={asking}
+              onComposerOpenChange={setAsking}
+              headingLevel="h2"
+            />
+            {canClarify(request) && !asking && (
+              <div className="mt-4">
+                <Button type="button" variant="outline" onClick={() => setAsking(true)}>
+                  {questionForYou ? t("clarify.reply") : t("clarify.ask")}
+                </Button>
+              </div>
+            )}
 
             {/* What the status actually means. "Acceptée" is a person saying
                 yes, not a booking Nidz holds. */}

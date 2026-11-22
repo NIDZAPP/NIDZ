@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 
 import EmptyState from "@/components/shared/EmptyState";
 import StatusBadge from "@/components/shared/StatusBadge";
+import { awaitingReplyFrom } from "@/data/clarification";
 import { Button } from "@/components/ui/button";
 import { DemoLine } from "@/components/shared/trust";
 import { sitterNameFor } from "@/data/sitter-name";
@@ -80,6 +81,13 @@ export default function OwnerRequests() {
                         <span aria-hidden="true"> · </span>
                         <bdi>{formatDateRange(request.dates, lng)}</bdi>
                       </span>
+                      {/* A question waiting for this owner — said in words, and
+                          still "En attente": a question is not a decision. */}
+                      {awaitingReplyFrom(request) === "owner" && (
+                        <span className="mt-1 block text-sm font-medium text-foreground">
+                          {t("clarify.questionForYouShort")}
+                        </span>
+                      )}
                     </span>
                     <span className="shrink-0 pt-0.5">
                       <StatusBadge status={request.status} />

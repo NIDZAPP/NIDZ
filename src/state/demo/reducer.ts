@@ -19,6 +19,7 @@ import {
   EMPTY_NEED,
   asLocalized,
   type CareRequest,
+  type DateRange,
   type Localized,
   type OwnerNeed,
   type Pet,
@@ -28,8 +29,9 @@ import {
 } from "@/data/types";
 import type { AppLocale } from "@/i18n";
 import { emptyCareConditions, restoreCareConditions } from "@/data/care-conditions";
-import { restorePet } from "@/data/pets";
+import { forSharing, restorePet } from "@/data/pets";
 import { restoreRequestDraft, type RequestDraft } from "@/data/request-draft";
+import { canClarify, restoreThread, type ClarificationMessage } from "@/data/clarification";
 import {
   NO_CAPABILITIES,
   isWorkspace,
@@ -230,6 +232,7 @@ export type DemoAction =
   | { type: "consumePetHandoff" }
   | { type: "discardRequestDraft" }
   | { type: "respondToRequest"; id: string; status: Exclude<RequestStatus, "pending"> }
+  | { type: "addClarification"; id: string; message: ClarificationMessage }
   | { type: "startSitterProfile"; id: string }
   | { type: "patchSitterProfile"; patch: Partial<SitterProfile> }
   | { type: "setIdDocument"; fileName: string }
@@ -333,6 +336,19 @@ export function reducer(state: DemoState, action: DemoAction): DemoState {
 
     case "discardRequestDraft":
       return state.requestDraft ? { ...state, requestDraft: null } : state;
+
+    case "addClarification":
+      /* A question is added to a PENDING request and touches nothing else —
+         not the status, the animal, the dates or the sitter. On a decided
+         request it is refused: there is nothing left to clarify. */
+      return {
+        ...state,
+        requests: state.requests.map((r) =>
+          r.id === action.id && canClarify(r) && action.message.text
+            ? { ...r, thread: [...(r.thread ?? []), action.message] }
+            : r,
+        ),
+      };
 
     case "respondToRequest":
       return {
@@ -545,6 +561,35 @@ function restoreAccount(value: unknown): DemoAccount | null {
   };
 }
 
+/**
+ * One stored request, validated (Audit 1.3).
+ *
+ * Requests were the one slice still restored by a container check alone, so a
+ * request whose animal lacked a detail field — hand-edited, or written by an
+ * older build — reached `petFacts` and took the sitter's whole inbox down.
+ * The animal now goes through `restorePet`, which fills every unanswered
+ * question with `unknown`, and is then re-shared without the private care
+ * plan. A request with no usable animal, sitter, dates or status is dropped.
+ */
+function restoreRequest(raw: Record<string, unknown>): CareRequest[] {
+  const pet = restorePet(isObject(raw.pet) ? { care: {}, ...raw.pet } : null);
+  const dates = raw.dates as Partial<DateRange> | undefined;
+  const status = raw.status;
+  if (!pet || typeof raw.id !== "string" || typeof raw.sitterId !== "string") return [];
+  if (!isObject(dates) || typeof dates.start !== "string" || typeof dates.end !== "string") return [];
+  if (status !== "pending" && status !== "accepted" && status !== "declined") return [];
+  if (typeof raw.careType !== "string") return [];
+  return [
+    {
+      ...(raw as unknown as CareRequest),
+      pet: forSharing(pet),
+      dates: { start: dates.start, end: dates.end },
+      status,
+      thread: restoreThread(raw.thread),
+    },
+  ];
+}
+
 /** Only the two flags, only when they are actually booleans. A hand-edited
     `{"owner":"yes"}` grants nothing. */
 function restoreCapabilities(value: unknown): AccountCapabilities {
@@ -581,7 +626,7 @@ function restore(parsed: Record<string, unknown>): DemoState {
     pets: Array.isArray(parsed.pets)
       ? parsed.pets.map(restorePet).filter((pet): pet is Pet => pet !== null)
       : [],
-    requests: (arrayOfObjects(parsed.requests) as CareRequest[] | null) ?? [],
+    requests: ((arrayOfObjects(parsed.requests) as Record<string, unknown>[] | null) ?? []).flatMap(restoreRequest),
     sitter,
     requestDraft: restoreRequestDraft(parsed.requestDraft),
   };

@@ -243,6 +243,27 @@ export default function Settings() {
           </div>
         </section>
 
+        {/* TEST TOOLING, explicitly separate from the product (Audit 1.3
+            LOT 07). This demonstration has no other users, so the only way to
+            see the sitter side receive a request — and to try a question
+            before deciding — is to address one to your own profile. That is
+            an instruction for testing, not something a real sitter would do,
+            so it lives here and nowhere in the owner's or the sitter's
+            screens. */}
+        {state.sitter?.published && (
+          <section aria-labelledby="settings-tools" className="mt-12 border-t border-border pt-8">
+            <h2 id="settings-tools" className="text-name font-semibold text-foreground">
+              {t("settings.tools.title")}
+            </h2>
+            <p className="mt-2 max-w-[64ch] text-base leading-relaxed text-muted-foreground">
+              {t("settings.tools.body")}
+            </p>
+            <Button asChild variant="outline" className="mt-4">
+              <Link to={`/owner/request/${state.sitter.profile.id}`}>{t("settings.tools.selfRequest")}</Link>
+            </Button>
+          </section>
+        )}
+
         <section aria-labelledby="settings-reset" className="mt-12 border-t border-border pt-8">
           <h2 id="settings-reset" className="text-name font-semibold text-foreground">
             {t("settings.reset.title")}

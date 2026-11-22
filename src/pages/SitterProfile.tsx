@@ -201,24 +201,10 @@ export default function SitterProfile() {
 
           <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
             <div className="min-w-0 xl:pe-12">
-              {/* Without this, nothing in the interface can address a request to
-                  your own profile, so "Demandes reçues" is a tab that can never
-                  hold anything. Labelled as the demonstration control it is,
-                  not dressed up as an owner action. */}
-              {isOwnProfile && state.sitter?.published && (
-                <div className="mb-8 border-y border-border py-4">
-                  <p className="text-sm font-medium text-foreground">{t("profile.selfTestTitle")}</p>
-                  <p className="mt-1 max-w-[64ch] text-sm text-muted-foreground">
-                    {t("profile.selfTestBody")}
-                  </p>
-                  <Button asChild variant="outline" className="mt-4">
-                    <Link to={{ pathname: `/owner/request/${sitter.id}`, search: paramKey }}>
-                      {t("profile.selfTestCta")}
-                    </Link>
-                  </Button>
-                </div>
-              )}
-
+              {/* The "send yourself a test request" control left this page at
+                  Audit 1.3 LOT 07: test instructions do not belong in the
+                  product's own screens. It lives in Compte, under "Outils de
+                  test", explicitly separate. */}
               <SitterProfileView
                 /* The honesty layer belongs on this page too, not only on
                    /search: these links are shareable, so a visitor can land

@@ -1,14 +1,17 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
+import ClarificationThread from "@/components/request/ClarificationThread";
 import RequestSummary from "@/components/request/RequestSummary";
 import EmptyState from "@/components/shared/EmptyState";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { DemoNotice } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
+import { awaitingReplyFrom } from "@/data/clarification";
 import { sitterNameFor } from "@/data/sitter-name";
+import type { CareRequest } from "@/data/types";
 import { useSwitchWorkspace } from "@/hooks/use-workspace";
 import { useDemo } from "@/state/demo/context";
 
@@ -26,6 +29,12 @@ import { useDemo } from "@/state/demo/context";
  * "Refuser" is a normal outcome, not a destructive one: a sitter whose home
  * has a cat declining a cat-intolerant dog is the matching working correctly.
  * It is therefore not a red button (§12.1).
+ *
+ * AUDIT 1.3 LOT 07 — A QUESTION BEFORE A DECISION. Beside Accepter and
+ * Refuser, "Poser une question" adds a question to the request (see
+ * `src/data/clarification.ts`). The request stays "En attente" while questions
+ * go back and forth; only the two decisions change its status. Nothing is
+ * transmitted, and the thread says so.
  */
 export default function SitterRequests() {
   const { t } = useTranslation();
@@ -107,76 +116,7 @@ export default function SitterRequests() {
           <>
             <ul role="list" className="mt-8 space-y-10">
               {requests.map((request) => (
-                <li key={request.id} className="border-b border-border pb-10 last:border-0">
-                  <div className="flex flex-wrap items-baseline justify-between gap-3">
-                    <h2 className="text-name font-semibold text-foreground">
-                      <bdi>{request.pet.name}</bdi>
-                      <span className="font-normal text-muted-foreground">
-                        {" · "}
-                        <bdi>{request.ownerName}</bdi>
-                      </span>
-                    </h2>
-                    <StatusBadge status={request.status} />
-                  </div>
-
-                  {/* The same summary the owner confirmed — everything the
-                      sitter needs in order to answer honestly, including the
-                      animal's important needs. */}
-                  <RequestSummary
-                    className="mt-4"
-                    request={request}
-                    sitterName={sitterNameFor(state, request.sitterId)}
-                    headingLevel="h3"
-                  />
-
-                  {/* Announced and focusable: answering removes the buttons
-                      from the DOM, which would otherwise drop focus to the
-                      body with nothing said. */}
-                  {request.status === "pending" ? (
-                    <>
-                      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-                        <Button
-                          type="button"
-                          size="lg"
-                          onClick={() => {
-                            answeredRef.current = request.id;
-                            dispatch({ type: "respondToRequest", id: request.id, status: "accepted" });
-                          }}
-                        >
-                          {t("sitterRequests.accept")}
-                        </Button>
-                        {/* Secondary, and deliberately not destructive. */}
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => {
-                            answeredRef.current = request.id;
-                            dispatch({ type: "respondToRequest", id: request.id, status: "declined" });
-                          }}
-                        >
-                          {t("sitterRequests.decline")}
-                        </Button>
-                      </div>
-                      <p className="mt-3 max-w-[64ch] text-sm text-muted-foreground">
-                        {t("sitterRequests.acceptNote")}
-                      </p>
-                    </>
-                  ) : (
-                    <p
-                      role="status"
-                      tabIndex={-1}
-                      ref={(node) => {
-                        if (node && answeredRef.current === request.id) {
-                          node.focus();
-                          answeredRef.current = null;
-                        }
-                      }}
-                      className="mt-6 max-w-[64ch] text-base leading-relaxed text-muted-foreground focus:outline-none"
-                    >
-                      {t(`sitterRequests.answered.${request.status}`)}
-                    </p>
-                  )}
-                </li>
+                <IncomingRequest key={request.id} request={request} answeredRef={answeredRef} />
               ))}
             </ul>
           </>
@@ -196,5 +136,98 @@ export default function SitterRequests() {
         </p>
       </div>
     </div>
+  );
+}
+
+function IncomingRequest({
+  request,
+  answeredRef,
+}: {
+  request: CareRequest;
+  answeredRef: React.MutableRefObject<string | null>;
+}) {
+  const { t } = useTranslation();
+  const { state, dispatch } = useDemo();
+  const [asking, setAsking] = useState(false);
+  const waitingForOwner = awaitingReplyFrom(request) === "owner";
+
+  return (
+    <li className="border-b border-border pb-10 last:border-0">
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <h2 className="text-name font-semibold text-foreground">
+          <bdi>{request.pet.name}</bdi>
+          <span className="font-normal text-muted-foreground">
+            {" · "}
+            <bdi>{request.ownerName}</bdi>
+          </span>
+        </h2>
+        <StatusBadge status={request.status} />
+      </div>
+
+      {/* The same summary the owner confirmed — everything the sitter needs in
+          order to answer honestly, including the animal's important needs. */}
+      <RequestSummary
+        className="mt-4"
+        request={request}
+        sitterName={sitterNameFor(state, request.sitterId)}
+        headingLevel="h3"
+      />
+
+      <ClarificationThread request={request} side="sitter" composerOpen={asking} onComposerOpenChange={setAsking} />
+
+      {/* Announced and focusable: answering removes the buttons from the DOM,
+          which would otherwise drop focus to the body with nothing said. */}
+      {request.status === "pending" ? (
+        <>
+          {waitingForOwner && (
+            <p className="mt-4 text-sm font-medium text-foreground">{t("clarify.waitingOwner")}</p>
+          )}
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <Button
+              type="button"
+              size="lg"
+              onClick={() => {
+                answeredRef.current = request.id;
+                dispatch({ type: "respondToRequest", id: request.id, status: "accepted" });
+              }}
+            >
+              {t("sitterRequests.accept")}
+            </Button>
+            {/* Before deciding: a question, not a third verdict. */}
+            {!asking && (
+              <Button type="button" variant="outline" onClick={() => setAsking(true)}>
+                {t("clarify.ask")}
+              </Button>
+            )}
+            {/* Secondary, and deliberately not destructive. */}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                answeredRef.current = request.id;
+                dispatch({ type: "respondToRequest", id: request.id, status: "declined" });
+              }}
+            >
+              {t("sitterRequests.decline")}
+            </Button>
+          </div>
+          <p className="mt-3 max-w-[64ch] text-sm text-muted-foreground">{t("sitterRequests.acceptNote")}</p>
+        </>
+      ) : (
+        <p
+          role="status"
+          tabIndex={-1}
+          ref={(node) => {
+            if (node && answeredRef.current === request.id) {
+              node.focus();
+              answeredRef.current = null;
+            }
+          }}
+          className="mt-6 max-w-[64ch] text-base leading-relaxed text-muted-foreground focus:outline-none"
+        >
+          {t(`sitterRequests.answered.${request.status}`)}
+        </p>
+      )}
+    </li>
   );
 }

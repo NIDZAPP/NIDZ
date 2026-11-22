@@ -493,9 +493,6 @@
     "experienceLine_other": "{{count}} ans d'expérience déclarée, surtout avec : {{species}}.",
     "experienceYears_one": "{{count}} an d'expérience déclarée.",
     "experienceYears_other": "{{count}} ans d'expérience déclarée.",
-    "selfTestTitle": "Tester le côté pet-sitter",
-    "selfTestBody": "Cette démonstration n'a pas d'autres utilisateurs. Envoyez-vous une demande à vous-même pour voir ce qu'un pet-sitter reçoit, et pouvoir y répondre.",
-    "selfTestCta": "M'envoyer une demande de test",
     "professionalYears_one": "{{count}} an",
     "professionalYears_other": "{{count}} ans",
     "professionalUnverified": "Déclaré par cette personne. Nidz ne vérifie aucun diplôme.",
@@ -700,6 +697,11 @@
       "current": "L'espace que vous utilisez",
       "sitterDraft": "Votre profil n'est pas encore publié — continuez-le",
       "sitterNone": "Garder des animaux : décrivez ce que vous proposez"
+    },
+    "tools": {
+      "title": "Outils de test de la démonstration",
+      "body": "Cette démonstration n'a pas d'autres utilisateurs. Pour voir ce que reçoit un pet-sitter, et essayer une question avant de décider, vous pouvez adresser une demande d'essai à votre propre profil publié. Elle reste dans ce navigateur.",
+      "selfRequest": "M'adresser une demande d'essai"
     }
   },
   "workspace": {
@@ -1116,5 +1118,29 @@
     "small": "Accepte les petits chiens",
     "medium": "Accepte les chiens moyens",
     "large": "Accepte les grands chiens"
+  },
+  "clarify": {
+    "title": "Questions avant de décider",
+    "localNote": "Conservées dans ce navigateur uniquement. Personne n'a été prévenu et aucun message n'a été envoyé.",
+    "ask": "Poser une question",
+    "reply": "Répondre à la question",
+    "labelSitter": "Votre question au propriétaire",
+    "labelOwner": "Votre message au pet-sitter",
+    "suggestLabel": "Pour commencer :",
+    "suggest": {
+      "meet": "Pourrions-nous nous rencontrer avant la garde, pour que je fasse connaissance avec votre animal ?",
+      "otherAnimals": "Comment votre animal se comporte-t-il avec d'autres animaux ?",
+      "routine": "À quoi ressemble une journée normale pour votre animal (repas, sorties, sommeil) ?"
+    },
+    "add": "Ajouter à la demande",
+    "cancel": "Annuler",
+    "notSent": "Rien n'est envoyé : la question est ajoutée à cette demande dans ce navigateur, où l'autre côté de la démonstration peut la lire. La demande reste en attente.",
+    "required": "Écrivez d'abord votre question.",
+    "you": "Vous",
+    "fromSitter": "Le pet-sitter",
+    "fromOwner": "Le propriétaire",
+    "waitingOwner": "Votre question figure sur la demande. Celle-ci attend toujours votre décision : poser une question n'accepte rien.",
+    "questionForYou": "Le pet-sitter a une question avant de décider. La demande est toujours en attente.",
+    "questionForYouShort": "Une question pour vous"
   }
 }
