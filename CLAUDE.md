@@ -23,15 +23,15 @@ There is **no test framework dependency**. Audit 1.3 added two harnesses that ne
 
 **Run `npm run check:locales` after touching any user-facing copy.** Nothing else in the toolchain can see inside `src/locales/*.json`, so a missing string reaches the browser as a raw key in whichever language nobody opened. It checks three-locale parity, that every `t()` literal resolves, and that plural families are complete for each locale — i18next does **not** fall back from a missing `_one` to `_other`, it prints the key. French needs `_many` as well as `_one`/`_other`; Arabic needs all six categories.
 
-## Design system is the source of truth
+## Nidz design rules — v1.4
 
-This is the **Nidz** product (a pet-care marketplace for Algeria). Before creating, modifying, reviewing, or refactoring any user-facing screen or component, read the design system:
+**Read `.claude/skills/nidz-design/NIDZ_DESIGN_SYSTEM.md` §0.1 first** and use the `nidz-design` skill for UI tasks. `PRODUCT.md` is authoritative for product truth.
 
-`.claude/skills/nidz-design/NIDZ_DESIGN_SYSTEM.md`
+**Preserve:** Nidz's logo/name, brand anchors **teal `#0F766E` + terracotta `#A84F32`**, real marketplace journeys, accessibility, privacy, safety, trust provenance, i18n (fr/en/ar) and RTL. Never imply an unimplemented feature (verification, payment, insurance, booking, availability, reviews or real messaging) is functional.
 
-It is the authoritative spec for UX, UI, colors, typography, spacing, trust signals, and product behavior. When it conflicts with generic design advice, shadcn/Tailwind examples, or existing legacy UI, **the Nidz design system wins**. The `/nidz-design` skill (`.claude/skills/nidz-design/SKILL.md`) enforces this. Key product rule: **never make a simulated/demo feature look genuinely functional**, and never invent verification, reviews, availability, payment protection, booking confirmation, insurance, or trust metrics that don't exist.
+**Visual redesign is explicitly authorized:** old layouts, rigid radius scales, mandatory Inter, card prohibitions, the all-white visual composition and other historical aesthetic prescriptions are **not binding for Nidz 1.4**. The current styles in `src/index.css` and `DESIGN.md` describe what exists, not what must be preserved. The approved direction includes **pill-shaped action buttons** and an appealing, contemporary, warm, mobile-first experience. Use Impeccable / Emil skills and the HaHo Figma reference when genuinely accessible; do not copy template assets without rights.
 
-**Read the `## 0.0 Amendements actifs` block at the top of that document first.** Audit 1.2 deliberately superseded two of its Level-2 visual decisions (§42 ranks its own decisions; Level 2 is "may evolve consciously"). Where the body of the document still contradicts that block, the block wins. No Level-1 principle — product truth, trust provenance, accessibility, privacy — was touched.
+**Process:** propose a coherent new visual system for approval, then update tokens/components and screens in small validated steps. Preserve functional behavior and measure accessibility; do not claim visual tests without screenshots/testing. Consult `nidz-color-guardian` when changing brand color roles. New visual decisions should be documented rather than silently contradicting the old references.
 
 ## Audit 1.2 (branch `nidz-1.2`)
 
@@ -86,18 +86,11 @@ Stack: **Vite 5 + React 18 + TypeScript** (SWC), **shadcn/ui** (Radix) component
 - **Namespacing**: public profiles are `/sitters/:id`; `/sitter/*` is the sitter's own area. Keeping them apart means no static sitter route can be shadowed by a profile id.
 - **Path alias**: `@/` → `src/` (configured in both `vite.config.ts` and `tsconfig`). shadcn aliases live in `components.json`.
 
-### Design tokens
-All colors are **HSL CSS variables** defined in `src/index.css` (`:root`), mapped to Tailwind semantic classes in `tailwind.config.ts`. Brand palette is **deep-teal primary** (`#0F766E`) on a **white** background (`#FFFFFF` — Audit 1.2 replaced the warm off-white canvas). Use the semantic tokens (`bg-primary`, `text-muted-foreground`, `border-input`, …) — never hard-code hex/HSL in components.
+### Existing design tokens (implementation baseline, not a v1.4 constraint)
 
-**On white, `bg-card` no longer groups anything** — it is the same colour as the ground. It now means only "an opaque surface that has to cover something": a dialog or popover, or a control sitting on a soft semantic surface. Page structure comes from spacing → typography → a `border-border` hairline → a soft semantic surface → real elevation, in that order of preference. **No white card on a white ground.** Row hovers use `bg-secondary`, which is the single hover surface; `--muted` is 1.08:1 on white and is a shadcn-primitive-only token. The warm terracotta pair (`--brand` / `--brand-soft`) is now the entire warm half of the system, so its placement is deliberate and rare — read the token comments in `src/index.css` before spending it.
+`src/index.css` currently defines HSL CSS variables mapped to Tailwind classes in `tailwind.config.ts`. Preserve brand anchors and semantic meanings while evolving the visual system deliberately. Distinguish shadcn's UI `--accent` (highlight/hover) from Nidz's terracotta `--brand`; evaluate any changed role for contrast and hierarchy.
 
-**Two different things are called "accent" — read the comment block at the top of `src/index.css` before touching colors.** CSS `--accent` is shadcn's *hover / keyboard-highlight / selection surface* (44 usages across 13 primitives); it is a neutral UI role. The design system's warm terracotta accent (`#A84F32`) lives on a separate `--brand` token and is reserved for **non-interactive** brand surfaces — never a button, link, hover, or selected state. `--secondary` is likewise a neutral surface (it backs the Slider and Progress tracks), not a brand color.
-
-Radius scale is sm 8 / md 12 / lg 16 / xl 24; `rounded-2xl` and `rounded-3xl` are not part of it. Motion durations follow design system §24 and `prefers-reduced-motion` is honored globally. Dark mode is **not** part of V1: there is deliberately no `.dark` block in `index.css` (Audit 1.2 removed the stale one).
-
-Fonts: **`Inter` only** (`Noto Sans Arabic` sits behind it in the stack to carry Arabic; Latin never reaches it). Audit 1.2 withdrew `Playfair Display` and there is no `font-display` key — hierarchy comes from size, weight, spacing and layout, never from mixing families. Do not reintroduce a display face; that would be a deliberate multilingual brand decision, not a UI tweak. Icons: **lucide-react** only, never emoji.
-
-`DESIGN.md` documents the visual system as actually built. Read it before adding a screen.
+The pre-1.4 code currently uses a white canvas, Inter (with Noto Sans Arabic fallback), a restricted radius scale and specific card/terracotta-placement rules. **These are historical design choices, not requirements for the new art direction.** They remain in the code until the approved redesign is implemented. `DESIGN.md` describes the current UI, not a veto on improvements. Reduced-motion support and RTL remain mandatory.
 
 ### Internationalization + RTL (critical for every UI change)
 `src/i18n.ts` configures i18next for three locales — **`en`, `fr`, `ar`** (strings in `src/locales/*.json`), default `en`, detected from localStorage → querystring → navigator.
