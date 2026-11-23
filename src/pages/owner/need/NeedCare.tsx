@@ -5,15 +5,20 @@ import { Navigate, useNavigate } from "react-router-dom";
 
 import FlowScreen from "@/components/shared/FlowScreen";
 import OptionGroup from "@/components/shared/OptionGroup";
+import { DraftNotice, SaveFeedback } from "@/components/shared/SaveFeedback";
 import { DateRangeField } from "@/components/shared/fields";
 import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { criteriaFromNeed, criteriaToParams } from "@/data/criteria";
 import { CARE_TYPES, type CareType, type DateRange } from "@/data/types";
+import { dateRangeOrNull, oneOf } from "@/hooks/draft-validators";
+import { useDraftField } from "@/hooks/use-form-draft";
+import { useSave } from "@/hooks/use-save";
 import { toISODate, today } from "@/utils/dates";
 import { useDemo } from "@/state/demo/context";
 
 const FORM_ID = "need-care";
+const SCOPE = "need-care";
 
 /**
  * Step 3 of 3 — which care, and when.
@@ -27,10 +32,16 @@ const FORM_ID = "need-care";
 export default function NeedCare() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { state, dispatch } = useDemo();
+  const { state } = useDemo();
+  const save = useSave({ scope: SCOPE });
 
-  const [careType, setCareType] = useState<CareType | null>(state.need.careType);
-  const [dates, setDates] = useState<DateRange | null>(state.need.dates);
+  /* Kept as a draft until submitted (Audit 1.3.1 A-01). */
+  const [careType, setCareType] = useDraftField<CareType | null>(SCOPE, "careType", () => state.need.careType, {
+    validate: oneOf(CARE_TYPES),
+  });
+  const [dates, setDates] = useDraftField<DateRange | null>(SCOPE, "dates", () => state.need.dates, {
+    validate: dateRangeOrNull,
+  });
   const [errors, setErrors] = useState<{ care?: string; dates?: string }>({});
   const careRef = useRef<HTMLDivElement>(null);
   const datesRef = useRef<HTMLInputElement>(null);
@@ -51,11 +62,15 @@ export default function NeedCare() {
     if (next.care) return careRef.current?.focus();
     if (next.dates) return datesRef.current?.focus();
 
-    const need = { ...state.need, careType, dates };
-    dispatch({ type: "setNeed", patch: { careType, dates } });
+    const saved = save.save({ type: "setNeed", patch: { careType, dates } });
+    /* Nothing moves on until the brief is really kept (A-02). */
+    if (!saved) return;
     /* The brief becomes the results URL, so it stays linkable and Back from a
        sitter profile returns to exactly these results. */
-    navigate({ pathname: "/search", search: new URLSearchParams(criteriaToParams(criteriaFromNeed(need))).toString() });
+    navigate({
+      pathname: "/search",
+      search: new URLSearchParams(criteriaToParams(criteriaFromNeed(saved.need))).toString(),
+    });
   };
 
   return (
@@ -68,6 +83,7 @@ export default function NeedCare() {
       <FlowScreen
         backTo="/owner/need/location"
         title={t("need.care.title")}
+        headerExtra={<DraftNotice save={save} />}
         action={
           <Button type="submit" form={FORM_ID} size="lg">
             {t("need.care.submit")}
@@ -132,6 +148,7 @@ export default function NeedCare() {
               startRef={datesRef}
             />
           </div>
+          <SaveFeedback save={save} onRetry={submit} />
         </form>
       </FlowScreen>
     </>

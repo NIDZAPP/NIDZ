@@ -1,4 +1,5 @@
 import { careAnswered } from "./care-conditions";
+import { wilayaOfPlace } from "./algeria";
 import type { SitterProfile } from "./types";
 
 /* ---------------------------------------------------------------------------
@@ -78,11 +79,13 @@ export const SITTER_SECTIONS: readonly SitterSection[] = [
   {
     id: "identity",
     /* The join step that sets both the public name (from the account) and the
-       commune; it returns here. */
+       area; it returns here. The wilaya is what is required — the commune is
+       optional for every wilaya (Audit 1.3.1), so a profile with a wilaya and
+       no commune is complete. */
     path: "/sitter/join/location",
     labelKey: "sitterSections.identity.label",
     hintKey: "sitterSections.identity.hint",
-    isAnswered: (p) => p.publicName.trim().length > 0 && p.communeCode.trim().length > 0,
+    isAnswered: (p) => p.publicName.trim().length > 0 && wilayaOfPlace(p) !== null,
     requiredFor: ALWAYS,
   },
   {

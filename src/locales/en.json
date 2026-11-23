@@ -198,10 +198,10 @@
     },
     "location": {
       "title": "Where do you offer your services?",
-      "intro": "Your commune is how nearby owners find you.",
-      "chooseCommune": "Choose a commune",
-      "communeRequired": "Choose the commune where you offer your services.",
-      "privacy": "Only your commune is shown. Your exact address is never public — Nidz does not ask for it."
+      "intro": "Your wilaya — and your commune, if you give it — is how nearby owners find you.",
+      "noCommune": "Don't specify a commune",
+      "wilayaRequired": "Choose the wilaya where you offer your services.",
+      "privacy": "The public sees your commune and its wilaya — or only your wilaya, if you don't give a commune. Your exact address is never public: Nidz does not ask for it."
     },
     "about": {
       "title": "You and your experience",
@@ -403,10 +403,10 @@
       "intro": "Nidz starts with the sitters in your area.",
       "wilayaLabel": "Wilaya",
       "wilayaRequired": "Choose a wilaya.",
-      "communeLabel": "Commune",
+      "communeLabel": "Commune (optional)",
       "anyCommune": "All communes",
       "privacy": "Your exact address is never shown publicly.",
-      "coverage": "All 69 wilayas are listed. Commune lists are carried for ten of them so far — everywhere else, the wilaya on its own is enough.",
+      "coverage": "All 69 wilayas and their 1,541 communes are listed. The commune is optional — the wilaya on its own is enough.",
       "wilayaPlaceholder": "Choose a wilaya"
     },
     "care": {
@@ -626,7 +626,7 @@
       },
       "coverage": {
         "q": "Which areas are covered?",
-        "a": "Nidz lists all 69 wilayas of Algeria, and carries the full commune list for ten of them (Algiers, Oran, Blida, Constantine, Annaba, Sétif, Tizi Ouzou, Béjaïa, Boumerdès, Tipaza). That is a description of the DATA, not of the marketplace: the sitters in this demonstration are examples, and there is no real supply anywhere. Algeria's territorial division also changes — it went from 48 wilayas to 58 in 2019 and to 69 in 2026 — so this list is reference data to keep up to date, never a constant."
+        "a": "Nidz lists all 69 wilayas of Algeria and their 1,541 communes. For the wilayas redrawn in 2019 and 2026, communes are assigned as laws 19-12 and 26-06, published in the Journal Officiel, set out; elsewhere the 1984 division is taken from an open dataset, and not every name has been checked against the Journal Officiel yet. That is a description of the DATA, not of the marketplace: the sitters in this demonstration are examples, and there is no real supply anywhere. Algeria's territorial division also changes — it went from 48 wilayas to 58 in 2019 and to 69 in 2026 — so this list is reference data to keep up to date, never a constant."
       }
     },
     "reset": {
@@ -639,7 +639,7 @@
     "title": "Data and privacy",
     "intro": "This page describes what the prototype actually does with what you type. It is not a privacy policy: there is no service behind it to have one.",
     "points": {
-      "storage": "Everything you type is kept in this browser's local storage, under a single key. Nothing is kept anywhere else.",
+      "storage": "What you save is kept in this browser's local storage, under a single key; a form you started but have not saved yet is kept there separately, as a draft, until you save or discard it — or it no longer applies (an animal deleted, a request decided). Nothing is kept anywhere else.",
       "transmit": "No data is transmitted: Nidz has no server, no database and no third-party service in this prototype.",
       "location": "The location asked for is a commune, never an address. Nidz collects no exact address and does not use your device's geolocation.",
       "documents": "An identity document is never uploaded: only the file name is kept, locally, and it produces no verification.",
@@ -666,7 +666,9 @@
       "confirmTitle": "Erase all your data?",
       "confirmBody": "Your name, your number, your animal, your requests and your sitter profile will be deleted from this browser. This cannot be undone.",
       "cancel": "Cancel",
-      "confirm": "Erase everything"
+      "confirm": "Erase everything",
+      "failedTitle": "Erasing didn't work.",
+      "failedBody": "This browser refused to delete the data — nothing was erased. You can try again."
     },
     "account": {
       "title": "Your account",
@@ -696,7 +698,9 @@
     "searchWilaya": "Search a wilaya",
     "searchCommune": "Search a commune",
     "noMatch": "No match",
-    "communeListUnavailable": "Nidz does not carry the commune list for this wilaya yet. The wilaya on its own is enough to search."
+    "communeListUnavailable": "Nidz does not carry the commune list for this wilaya yet. The wilaya on its own is enough to search.",
+    "invalid": "That place isn't in the list. Choose the wilaya again, then a commune if you want to.",
+    "wilayaOnly": "{{name}} (wilaya)"
   },
   "auth": {
     "title": "Sign in to Nidz",
@@ -817,7 +821,9 @@
       "vet": "Vet",
       "emergency": "Emergency contact"
     },
-    "notSure": "Not sure"
+    "notSure": "Not sure",
+    "deleteFailedTitle": "Couldn't delete {{name}} — nothing changed.",
+    "deleteFailedBody": "This browser couldn't save the deletion (storage full or blocked). The animal is still in your list, so you can try again."
   },
   "reviews": {
     "title": "Reviews",
@@ -916,7 +922,7 @@
     },
     "identity": {
       "label": "Your public name and area",
-      "hint": "First name and initial; your commune — never an address."
+      "hint": "First name and initial; your wilaya and, if you like, your commune — never an address."
     },
     "answeredState": "answered",
     "viewPublished": "See my published profile",
@@ -1117,5 +1123,17 @@
     "questionForYou": "The sitter has a question before deciding. The request is still awaiting a reply.",
     "questionForYouShort": "A question for you",
     "exampleNoInbox": "This sitter is an example: nobody can read or answer a question addressed to them, so none is offered here."
+  },
+  "save": {
+    "failedTitle": "Couldn't save this information.",
+    "failedBody": "Nothing was saved: this browser couldn't keep it (storage full or blocked, in a private window for example). What you typed is still here, so you can try again.",
+    "retry": "Try again",
+    "conflictTitle": "This information changed in the meantime.",
+    "conflictBody": "It was edited elsewhere — in another tab or on another screen — since you started this form, and nothing has been saved here. Saving your version will replace the other one; using the saved version will discard what you typed here.",
+    "keepMine": "Save my version",
+    "useSaved": "Use the saved version",
+    "draftRestored": "We found what you had started typing. It isn't saved yet.",
+    "discardDraft": "Discard this draft",
+    "conflictBodySingle": "It changed elsewhere — in another tab or on another screen — since you opened this screen, and nothing has been saved here. Show the saved version to carry on."
   }
 }

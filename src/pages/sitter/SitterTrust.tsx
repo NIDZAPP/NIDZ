@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Clock } from "lucide-react";
@@ -6,6 +7,7 @@ import { Navigate } from "react-router-dom";
 import FlowScreen from "@/components/shared/FlowScreen";
 import { useReturnToDashboard } from "@/hooks/use-return-to-dashboard";
 import { DocumentField } from "@/components/shared/fields";
+import { SaveFeedback } from "@/components/shared/SaveFeedback";
 import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +15,7 @@ import {
   VERIFICATION_STATES,
   VERIFICATION_STATUS,
 } from "@/data/trust";
+import { useSave } from "@/hooks/use-save";
 import { useDemo } from "@/state/demo/context";
 
 /**
@@ -33,7 +36,15 @@ import { useDemo } from "@/state/demo/context";
 export default function SitterTrust() {
   const { t } = useTranslation();
   const returnToDashboard = useReturnToDashboard();
-  const { state, dispatch } = useDemo();
+  const { state } = useDemo();
+  /* The file name is stored the moment it is chosen — and shown as chosen only
+     once storage confirms it (A-02). */
+  const save = useSave();
+  const lastChange = useRef<() => void>(() => {});
+  const change = (run: () => void) => {
+    lastChange.current = run;
+    run();
+  };
 
   /* The profile has to exist as a profile before its trustworthiness is
      discussed: no name, no commune, no account means the flow was entered
@@ -74,9 +85,10 @@ export default function SitterTrust() {
           label={t("sitterFlow.trust.docLabel")}
           help={t("sitterFlow.trust.docHelp")}
           fileName={idDocument?.fileName}
-          onSelect={(fileName) => dispatch({ type: "setIdDocument", fileName })}
-          onClear={() => dispatch({ type: "clearIdDocument" })}
+          onSelect={(fileName) => change(() => save.save({ type: "setIdDocument", fileName }))}
+          onClear={() => change(() => save.save({ type: "clearIdDocument" }))}
         />
+        <SaveFeedback save={save} onRetry={() => lastChange.current()} />
 
         {/* The ONLY state a document can produce. It is not a badge, it is not
             teal, and it never becomes "Identité vérifiée". It does not say

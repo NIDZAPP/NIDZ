@@ -3,11 +3,14 @@ import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 
 import FlowScreen from "@/components/shared/FlowScreen";
+import { DraftNotice, SaveFeedback } from "@/components/shared/SaveFeedback";
 import { FieldShell } from "@/components/shared/fields";
 import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PHONE_PREFIX } from "@/data/types";
+import { useDraftField } from "@/hooks/use-form-draft";
+import { useSave } from "@/hooks/use-save";
 import { useDemo } from "@/state/demo/context";
 
 /* ---------------------------------------------------------------------------
@@ -40,16 +43,22 @@ export function NameStep({
   progress?: { current: number; total: number; label: string };
 }) {
   const { t } = useTranslation();
-  const { state, dispatch } = useDemo();
+  const { state } = useDemo();
   const formId = "account-name";
+  const scope = "account-name";
+  const save = useSave({
+    scope,
+    watch: (s) => s.account && { firstName: s.account.firstName, lastName: s.account.lastName },
+  });
 
-  const [firstName, setFirstName] = useState(state.account?.firstName ?? "");
-  const [lastName, setLastName] = useState(state.account?.lastName ?? "");
+  /* Kept as a draft until "Continuer" (Audit 1.3.1 A-01). */
+  const [firstName, setFirstName] = useDraftField(scope, "firstName", () => state.account?.firstName ?? "");
+  const [lastName, setLastName] = useDraftField(scope, "lastName", () => state.account?.lastName ?? "");
   const [errors, setErrors] = useState<{ firstName?: string; lastName?: string }>({});
   const firstRef = useRef<HTMLInputElement>(null);
   const lastRef = useRef<HTMLInputElement>(null);
 
-  const submit = () => {
+  const submit = (force = false) => {
     const next: typeof errors = {};
     if (!firstName.trim()) next.firstName = t("request.name.firstRequired");
     if (!lastName.trim()) next.lastName = t("request.name.lastRequired");
@@ -57,27 +66,32 @@ export function NameStep({
     if (next.firstName) return firstRef.current?.focus();
     if (next.lastName) return lastRef.current?.focus();
 
-    dispatch({
-      type: "setAccount",
-      account: {
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        /* Not asked on this step, and therefore genuinely unknown rather than
-           defaulted to something that would read as an answer. The quick owner
-           account (§16) collects them; until it does, they stay null and no
-           screen may present an empty value as a declaration. */
-        dateOfBirth: state.account?.dateOfBirth ?? null,
-        wilayaId: state.account?.wilayaId ?? null,
-        communeId: state.account?.communeId ?? null,
-        ownedSpecies: state.account?.ownedSpecies ?? [],
-        phoneNumber: state.account?.phoneNumber ?? "",
-        /* Preserved: correcting a typo in a surname does not undo the steps
-           that were already completed. */
-        accountComplete: state.account?.accountComplete ?? false,
-        createdAt: state.account?.createdAt ?? new Date().toISOString(),
-      },
-    });
-    onDone();
+    /* Built from the account as stored NOW, so a field another tab saved
+       meanwhile is kept rather than written back stale (A-19). */
+    const saved = save.save(
+      (base) => ({
+        type: "setAccount",
+        account: {
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          /* Not asked on this step, and therefore genuinely unknown rather than
+             defaulted to something that would read as an answer. The quick
+             owner account (§16) collects them; until it does, they stay null
+             and no screen may present an empty value as a declaration. */
+          dateOfBirth: base.account?.dateOfBirth ?? null,
+          wilayaId: base.account?.wilayaId ?? null,
+          communeId: base.account?.communeId ?? null,
+          ownedSpecies: base.account?.ownedSpecies ?? [],
+          phoneNumber: base.account?.phoneNumber ?? "",
+          /* Preserved: correcting a typo in a surname does not undo the
+             steps that were already completed. */
+          accountComplete: base.account?.accountComplete ?? false,
+          createdAt: base.account?.createdAt ?? new Date().toISOString(),
+        },
+      }),
+      { force },
+    );
+    if (saved) onDone();
   };
 
   return (
@@ -92,6 +106,7 @@ export function NameStep({
         progress={progress}
         title={title}
         intro={intro}
+        headerExtra={<DraftNotice save={save} />}
         action={
           <Button type="submit" form={formId} size="lg">
             {t("common.continue")}
@@ -141,6 +156,7 @@ export function NameStep({
               />
             )}
           </FieldShell>
+          <SaveFeedback save={save} onRetry={() => submit()} onKeepMine={() => submit(true)} />
         </form>
       </FlowScreen>
     </>
@@ -159,15 +175,17 @@ export function PhoneStep({
   progress?: { current: number; total: number; label: string };
 }) {
   const { t } = useTranslation();
-  const { state, dispatch } = useDemo();
+  const { state } = useDemo();
   const formId = "account-phone";
+  const scope = "account-phone";
   const account = state.account;
+  const save = useSave({ scope, watch: (s) => s.account?.phoneNumber ?? null });
 
-  const [number, setNumber] = useState(account?.phoneNumber ?? "");
+  const [number, setNumber] = useDraftField(scope, "number", () => account?.phoneNumber ?? "");
   const [error, setError] = useState<string>();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const submit = () => {
+  const submit = (force = false) => {
     if (!account) return;
     const digits = number.replace(/\s/g, "");
     if (!DIGITS.test(digits)) {
@@ -175,21 +193,30 @@ export function PhoneStep({
       inputRef.current?.focus();
       return;
     }
-    dispatch({
-      type: "setAccount",
-      account: {
-        ...account,
-        phoneNumber: digits,
-        /* Finishing this step is what "the account steps are done" means, and
-           it is the whole of what the flag claims. It used to be set by a
-           SIMULATED code step, which Audit 1.2 removed: with no OTP provider,
-           §92 forbids claiming a code was sent, and the cleanest way to stop
-           claiming it is to stop staging it. Nothing here verifies the number
-           and no surface may suggest it does. */
-        accountComplete: true,
-      },
-    });
-    onDone();
+    /* Built on the account as stored NOW, so the name another tab may have
+       corrected is kept (A-19). */
+    const saved = save.save(
+      (base) =>
+        base.account
+          ? {
+              type: "setAccount",
+              account: {
+                ...base.account,
+                phoneNumber: digits,
+                /* Finishing this step is what "the account steps are done"
+                   means, and it is the whole of what the flag claims. It used
+                   to be set by a SIMULATED code step, which Audit 1.2 removed:
+                   with no OTP provider, §92 forbids claiming a code was sent,
+                   and the cleanest way to stop claiming it is to stop staging
+                   it. Nothing here verifies the number and no surface may
+                   suggest it does. */
+                accountComplete: true,
+              },
+            }
+          : null,
+      { force },
+    );
+    if (saved) onDone();
   };
 
   return (
@@ -204,6 +231,7 @@ export function PhoneStep({
         progress={progress}
         title={t("request.phone.title")}
         intro={intro}
+        headerExtra={<DraftNotice save={save} />}
         action={
           <Button type="submit" form={formId} size="lg">
             {t("common.continue")}
@@ -250,6 +278,7 @@ export function PhoneStep({
               </div>
             )}
           </FieldShell>
+          <SaveFeedback className="mt-6" save={save} onRetry={() => submit()} onKeepMine={() => submit(true)} />
         </form>
       </FlowScreen>
     </>

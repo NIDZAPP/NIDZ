@@ -203,6 +203,12 @@ export type SitterProfile = {
   /** Public identity is a first name plus an initial (§27). Nidz never shows
       a full legal name or an exact address on a public profile. */
   publicName: string;
+  /** Where the sitter offers care, at wilaya granularity. Required to publish;
+      "" until answered. Audit 1.3.1 made the commune optional, so this is the
+      one location every published profile is guaranteed to carry. */
+  wilayaCode: string;
+  /** The commune within `wilayaCode`, when the sitter gave one; "" otherwise.
+      Optional: a wilaya alone is a complete answer. */
   communeCode: string;
   headline: Localized;
   about: Localized;

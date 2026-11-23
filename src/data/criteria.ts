@@ -13,7 +13,7 @@
    and what it needs.
    ------------------------------------------------------------------------ */
 
-import { normalizeCommuneId, getWilaya, getWilayaOfCommune } from "./algeria";
+import { normalizeCommuneId, getWilaya, getWilayaOfCommune, wilayaOfPlace } from "./algeria";
 import { offeredServices, overlapsDeclaredUnavailable, rateFor } from "./offer";
 import {
   CARE_TYPES,
@@ -229,7 +229,7 @@ export function reasonsFor(sitter: SitterProfile, c: SearchCriteria): MatchReaso
      one thing never explained. */
   if (c.commune && sitter.communeCode === c.commune) {
     reasons.push({ kind: "zone", zone: sitter.communeCode, level: "commune" });
-  } else if (!c.commune && c.wilaya && getWilayaOfCommune(sitter.communeCode)?.id === c.wilaya) {
+  } else if (!c.commune && c.wilaya && wilayaOfPlace(sitter) === c.wilaya) {
     reasons.push({ kind: "zone", zone: c.wilaya, level: "wilaya" });
   }
   if (c.dates && !overlapsDeclaredUnavailable(sitter, c.dates)) {
@@ -402,8 +402,11 @@ export function matchSitters(
       if (c.species && !sitter.acceptedSpecies.includes(c.species)) return [];
       if (c.species === "dog" && c.size && !sitter.acceptedDogSizes.includes(c.size)) return [];
       if (c.care && !offeredServices(sitter).includes(c.care)) return [];
+      /* A commune search keeps only sitters who named that commune; a sitter
+         who gave only their wilaya is found by a search of that wilaya, never
+         presented as being in a commune they did not state. */
       if (c.commune && sitter.communeCode !== c.commune) return [];
-      if (!c.commune && c.wilaya && getWilayaOfCommune(sitter.communeCode)?.id !== c.wilaya) return [];
+      if (!c.commune && c.wilaya && wilayaOfPlace(sitter) !== c.wilaya) return [];
       if (c.maxPrice !== null && rate.amount > c.maxPrice) return [];
       /* A period the sitter has DECLARED unavailable is a statement by them,
          and excluding it is honest. The reverse is not: not-declared-busy is

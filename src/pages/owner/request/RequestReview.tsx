@@ -8,6 +8,7 @@ import RequestSummary from "@/components/request/RequestSummary";
 import FlowScreen from "@/components/shared/FlowScreen";
 import OptionGroup from "@/components/shared/OptionGroup";
 import { SPECIES_ICON } from "@/components/shared/species";
+import { SaveFeedback } from "@/components/shared/SaveFeedback";
 import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { parseCriteria, petFit, type PetFit } from "@/data/criteria";
@@ -17,6 +18,7 @@ import { FROM_REQUEST, profilePathForRequest, requestPath, requestWhenPath } fro
 import { isPubliclyListed } from "@/data/repository";
 import type { CareRequest, Species } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
+import { useSave } from "@/hooks/use-save";
 import { useSitter } from "@/hooks/use-sitter";
 import { useDemo } from "@/state/demo/context";
 import { toISODate, today } from "@/utils/dates";
@@ -70,6 +72,9 @@ export default function RequestReview() {
   /* Guards a same-tick double event; the duplicate check below guards the
      round trip. */
   const sending = useRef(false);
+  /* No draft and no other-tab check: the request is a new record. What is
+     checked is that it really reached storage before "envoyée" is shown. */
+  const save = useSave();
   const petGroupRef = useRef<HTMLDivElement>(null);
   const [petError, setPetError] = useState<string>();
 
@@ -221,15 +226,14 @@ export default function RequestReview() {
 
     /* The same animal, the same sitter, the same service, the same dates,
        still unanswered — a second copy tells the sitter nothing new. */
-    const existing = state.requests.find(
-      (r) =>
-        r.status === "pending" &&
-        r.sitterId === sitter.id &&
-        r.pet.id === pet.id &&
-        r.careType === careType &&
-        r.dates.start === dates.start &&
-        r.dates.end === dates.end,
-    );
+    const isSame = (r: CareRequest) =>
+      r.status === "pending" &&
+      r.sitterId === sitter.id &&
+      r.pet.id === pet.id &&
+      r.careType === careType &&
+      r.dates.start === dates.start &&
+      r.dates.end === dates.end;
+    const existing = state.requests.find(isSame);
     if (existing) {
       navigate(`/owner/requests/${existing.id}?again=1`, { replace: true });
       return;
@@ -242,8 +246,19 @@ export default function RequestReview() {
       id: `req-${Date.now().toString(36)}`,
       createdAt: new Date().toISOString(),
     };
-    dispatch({ type: "addRequest", request });
-    navigate(`/owner/request/${sitter.id}/sent?id=${request.id}`, { replace: true });
+    /* Checked again against storage as it is now: the same request sent from
+       another tab a moment ago is not sent twice (A-19). */
+    const saved = save.save((base) => (base.requests.some(isSame) ? [] : { type: "addRequest", request }));
+    if (!saved) {
+      /* Not sent, and not reported as sent (A-02): the summary stays, and
+         "Réessayer" sends the same request again. */
+      sending.current = false;
+      return;
+    }
+    const sent = saved.requests.some((r) => r.id === request.id);
+    const twin = sent ? null : saved.requests.find(isSame);
+    if (twin) navigate(`/owner/requests/${twin.id}?again=1`, { replace: true });
+    else navigate(`/owner/request/${sitter.id}/sent?id=${request.id}`, { replace: true });
   };
 
   const noPets = candidates.length === 0;
@@ -350,6 +365,8 @@ export default function RequestReview() {
         </section>
 
         <RequestSummary request={{ ...draftRequest, id: "preview", createdAt: "" }} sitterName={sitter.publicName} />
+
+        <SaveFeedback className="mt-8" save={save} onRetry={send} />
 
         <p className="mt-4">
           {/* `replace`, and the step replaces itself on submit: changing the

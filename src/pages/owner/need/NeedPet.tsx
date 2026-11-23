@@ -9,12 +9,14 @@ import FlowScreen from "@/components/shared/FlowScreen";
 import OptionGroup from "@/components/shared/OptionGroup";
 import { SPECIES_ICON } from "@/components/shared/species";
 import { FieldShell } from "@/components/shared/fields";
+import { DraftNotice, SaveFeedback } from "@/components/shared/SaveFeedback";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { emptyPet, type Pet } from "@/data/pets";
 import { DOG_SIZES, SPECIES, type DogSize, type Species } from "@/data/types";
-import { useFormDraft } from "@/hooks/use-form-draft";
+import { useDraftField, useFormDraft } from "@/hooks/use-form-draft";
+import { useSave } from "@/hooks/use-save";
 import { useDemo } from "@/state/demo/context";
 
 const FORM_ID = "need-pet";
@@ -52,14 +54,19 @@ const NEW_PET = "__new__";
 export default function NeedPet() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { state, dispatch } = useDemo();
+  const { state } = useDemo();
+  /* A new animal always gets a new id, so there is nothing another tab could
+     have changed under this form: no conflict check, only a confirmed save. */
+  const save = useSave({ scope: "need-pet" });
 
   const pets = state.pets;
   /* Pre-selects the animal the brief already names, so returning to this step
-     does not silently change which one the request is about. */
-  const [choice, setChoice] = useState<string>(() =>
+     does not silently change which one the request is about. Kept with the
+     draft, and only while it still names an animal that exists. */
+  const [storedChoice, setChoice] = useDraftField<string>("need-pet", "choice", () =>
     state.need.petId && pets.some((p) => p.id === state.need.petId) ? state.need.petId : NEW_PET,
   );
+  const choice = storedChoice === NEW_PET || pets.some((p) => p.id === storedChoice) ? storedChoice : NEW_PET;
 
   /* The dog's size is asked here, for a dog only, because it is a hard
      matching constraint (Audit 1.3 LOT 03); "not sure" is an answer. It starts
@@ -93,7 +100,7 @@ export default function NeedPet() {
     if (!addingNew) {
       const chosen = pets.find((p) => p.id === choice);
       if (!chosen) return;
-      dispatch({
+      const saved = save.save({
         type: "setNeed",
         patch: {
           species: chosen.species,
@@ -101,7 +108,7 @@ export default function NeedPet() {
           dogSize: chosen.species === "dog" ? chosen.details.size : null,
         },
       });
-      navigate("/owner/need/location");
+      if (saved) navigate("/owner/need/location");
       return;
     }
 
@@ -126,8 +133,13 @@ export default function NeedPet() {
       notes: notes.trim(),
     };
     const size = pet.species === "dog" ? pet.details.size : null;
-    dispatch({ type: "savePet", pet });
-    dispatch({ type: "setNeed", patch: { species: pet.species, petId: pet.id, dogSize: size } });
+    /* One write: the animal and the brief that names it are kept together or
+       not at all (A-02). Only then does the step move on. */
+    const saved = save.save([
+      { type: "savePet", pet },
+      { type: "setNeed", patch: { species: pet.species, petId: pet.id, dogSize: size } },
+    ]);
+    if (!saved) return;
     clearDraft();
     navigate("/owner/need/location");
   };
@@ -143,6 +155,7 @@ export default function NeedPet() {
         backTo="/start"
         title={t("need.pet.title")}
         intro={t("need.pet.intro")}
+        headerExtra={<DraftNotice save={save} />}
         action={
           /* Submits the form rather than handling a click, so Enter and the
              mobile keyboard's Go key work on a screen shaped like a form. */
@@ -280,6 +293,7 @@ export default function NeedPet() {
               )}
             </>
           )}
+          <SaveFeedback save={save} onRetry={submit} />
         </form>
       </FlowScreen>
     </>

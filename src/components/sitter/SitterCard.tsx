@@ -7,7 +7,7 @@ import { ProvenanceLabel } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { acceptsEveryDogSize, sizeLimitToState, type MatchReason } from "@/data/criteria";
 import { offeredServices, type rateFor } from "@/data/offer";
-import { communeName } from "@/data/algeria";
+import { communeName, wilayaName, wilayaOfPlace } from "@/data/algeria";
 import {
   CARE_UNIT_KEY,
   localized,
@@ -131,7 +131,12 @@ export default function SitterCard({
           </h2>
           <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
             <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
-            <bdi className="truncate">{communeName(sitter.communeCode, lng) ?? sitter.communeCode}</bdi>
+            {/* The commune when the sitter gave one, else their wilaya — never
+                a raw id, and never a commune they did not state. */}
+            <bdi className="truncate">
+              {communeName(sitter.communeCode, lng) ??
+                t("location.wilayaOnly", { name: wilayaName(wilayaOfPlace(sitter), lng) ?? "" })}
+            </bdi>
           </p>
 
           {sizeNote && <p className="mt-3 text-sm font-medium text-foreground">{sizeNote}</p>}

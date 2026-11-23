@@ -12,7 +12,11 @@ import { normalizeCriteria, parseCriteria } from "@/data/criteria";
 import { offeredServices, overlapsDeclaredUnavailable } from "@/data/offer";
 import { profilePathForRequest, requestPath } from "@/data/request-draft";
 import { isPubliclyListed } from "@/data/repository";
-import { CARE_UNIT_KEY, type CareType, type DateRange } from "@/data/types";
+import { CARE_TYPES, CARE_UNIT_KEY, type CareType, type DateRange } from "@/data/types";
+import { dateRangeOrNull, oneOf } from "@/hooks/draft-validators";
+import { useDraftField } from "@/hooks/use-form-draft";
+import { useSave } from "@/hooks/use-save";
+import { DraftNotice } from "@/components/shared/SaveFeedback";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useSitter } from "@/hooks/use-sitter";
 import { useDemo } from "@/state/demo/context";
@@ -76,8 +80,20 @@ export default function RequestWhen() {
     const raw = fresh(criteria.dates) ?? fresh(state.need.dates);
     return { care, dates: normalizeCriteria({ ...criteria, care, dates: raw }).dates };
   });
-  const [careType, setCareType] = useState<CareType | null>(initial.care);
-  const [dates, setDates] = useState<DateRange | null>(initial.dates);
+  /* Unsaved answers survive a reload or closing the app (A-01). Keyed by the
+     request URL as well as the sitter: the URL is the source of truth for a
+     request in preparation, so a draft only ever resumes the same request —
+     it never overrides different dates arriving from a new search. */
+  const draftScope = `request-when-${sitterId ?? ""}-${search}`;
+  /* Nothing is committed here — the answers go into the URL — but a resumed
+     draft is still announced, and can still be thrown away. */
+  const draftState = useSave({ scope: draftScope });
+  const [careType, setCareType] = useDraftField<CareType | null>(draftScope, "careType", () => initial.care, {
+    validate: oneOf(CARE_TYPES),
+  });
+  const [dates, setDates] = useDraftField<DateRange | null>(draftScope, "dates", () => initial.dates, {
+    validate: dateRangeOrNull,
+  });
   const [errors, setErrors] = useState<{ care?: string; dates?: string }>({});
   const careRef = useRef<HTMLDivElement>(null);
   const datesRef = useRef<HTMLInputElement>(null);
@@ -109,6 +125,8 @@ export default function RequestWhen() {
     params.set("care", careType);
     params.set("from", period.start);
     params.set("to", period.end);
+    /* The answers now live in the request URL — the draft has done its job. */
+    draftState.discard();
     /* Replaces this step: Back from the summary goes to the profile, not to a
        form holding the previous answer. */
     navigate(requestPath(sitter.id, params.toString()), { replace: true });
@@ -126,6 +144,7 @@ export default function RequestWhen() {
         eyebrow={t("request.review.titleFor", { sitter: sitterName })}
         title={t("request.when.title")}
         intro={t("request.when.intro", { sitter: sitterName })}
+        headerExtra={<DraftNotice save={draftState} />}
         action={
           <Button type="submit" form={FORM_ID} size="lg">
             {t("request.when.submit")}

@@ -7,11 +7,14 @@ import { Chip } from "@/components/shared/Chip";
 import { SPECIES_ICON } from "@/components/shared/species";
 import FlowScreen from "@/components/shared/FlowScreen";
 import { FieldShell, LocationFields } from "@/components/shared/fields";
+import { DraftNotice, SaveFeedback } from "@/components/shared/SaveFeedback";
 import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { checkLocation } from "@/data/algeria";
 import { PHONE_PREFIX, SPECIES, type Species } from "@/data/types";
 import { useFormDraft } from "@/hooks/use-form-draft";
+import { useSave } from "@/hooks/use-save";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useDemo } from "@/state/demo/context";
 import { sameOriginPath } from "@/utils/safe-path";
@@ -56,18 +59,32 @@ const DIGITS = /^\d{9}$/;
  * when an eligibility rule exists, at the point it applies. The area is
  * optional and says what it is for; the phone and the animals already were.
  *
- * The answers are kept as an unsaved draft for this tab (`useFormDraft`), so
- * stepping out to Compte to change the language, or reloading, does not empty
- * the form.
+ * The answers are kept as an unsaved draft (`useFormDraft`, in localStorage
+ * since Audit 1.3.1), so stepping out to Compte to change the language,
+ * reloading, or closing the app and coming back does not empty the form. The
+ * account is written only once storage confirms it, and a change made to the
+ * same account in another tab meanwhile is never silently overwritten.
  */
 export default function OwnerAccount() {
   const { t } = useTranslation();
   const locale = useAppLocale();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { state, dispatch } = useDemo();
+  const { state } = useDemo();
 
   const account = state.account;
+  const save = useSave({
+    scope: "owner-account",
+    watch: (s) =>
+      s.account && {
+        firstName: s.account.firstName,
+        lastName: s.account.lastName,
+        wilayaId: s.account.wilayaId,
+        communeId: s.account.communeId,
+        ownedSpecies: s.account.ownedSpecies,
+        phoneNumber: s.account.phoneNumber,
+      },
+  });
   const [form, setForm, clearDraft] = useFormDraft("owner-account", () => ({
     firstName: account?.firstName ?? "",
     lastName: account?.lastName ?? "",
@@ -84,6 +101,7 @@ export default function OwnerAccount() {
   const [errors, setErrors] = useState<{
     firstName?: string;
     lastName?: string;
+    location?: string;
     phone?: string;
   }>({});
 
@@ -104,10 +122,15 @@ export default function OwnerAccount() {
   const toggleSpecies = (value: Species) =>
     set({ species: species.includes(value) ? species.filter((s) => s !== value) : [...species, value] });
 
-  const submit = () => {
+  const submit = (force = false) => {
     const nextErrors: typeof errors = {};
     if (!firstName.trim()) nextErrors.firstName = t("request.name.firstRequired");
     if (!lastName.trim()) nextErrors.lastName = t("request.name.lastRequired");
+    /* The area stays optional here (LOT 08) — but what IS given follows the
+       same rule as every location form: a commune only within its wilaya. */
+    if (checkLocation({ wilayaCode: wilayaId, communeCode: communeId }, { wilayaRequired: false })) {
+      nextErrors.location = t("location.invalid");
+    }
 
     /* Optional — but if something was typed, it has to be a number, because a
        half-typed one is worse than none. */
@@ -117,23 +140,30 @@ export default function OwnerAccount() {
     setErrors(nextErrors);
     if (nextErrors.firstName) return firstRef.current?.focus();
     if (nextErrors.lastName) return lastRef.current?.focus();
+    if (nextErrors.location) return wilayaRef.current?.focus();
     if (nextErrors.phone) return phoneRef.current?.focus();
 
-    dispatch({
-      type: "setAccount",
-      account: {
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        /* Kept if an earlier build collected it; never asked any more. */
-        dateOfBirth: account?.dateOfBirth ?? null,
-        wilayaId,
-        communeId,
-        ownedSpecies: species,
-        phoneNumber: digits,
-        accountComplete: true,
-        createdAt: account?.createdAt ?? new Date().toISOString(),
-      },
-    });
+    const saved = save.save(
+      (base) => ({
+        type: "setAccount",
+        account: {
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          /* Kept if an earlier build collected it; never asked any more. */
+          dateOfBirth: base.account?.dateOfBirth ?? null,
+          wilayaId,
+          communeId,
+          ownedSpecies: species,
+          phoneNumber: digits,
+          accountComplete: true,
+          createdAt: base.account?.createdAt ?? new Date().toISOString(),
+        },
+      }),
+      { force },
+    );
+    /* No account on disk, no "account created" journey (Audit 1.3.1 A-02):
+       the form stays, filled in, with the reason and a retry. */
+    if (!saved) return;
     clearDraft();
     navigate(destination, { replace: true });
   };
@@ -152,6 +182,7 @@ export default function OwnerAccount() {
         backTo={next ? `/auth?next=${encodeURIComponent(next)}` : "/auth"}
         title={t("ownerAccount.title")}
         intro={t("ownerAccount.intro")}
+        headerExtra={<DraftNotice save={save} />}
         action={
           <Button type="submit" form={FORM_ID} size="lg">
             {t("ownerAccount.cta")}
@@ -211,12 +242,16 @@ export default function OwnerAccount() {
             wilayaCode={wilayaId}
             communeCode={communeId}
             wilayaRef={wilayaRef}
-            onChange={(nextLocation) => set({ wilayaId: nextLocation.wilayaCode, communeId: nextLocation.communeCode })}
+            onChange={(nextLocation) => {
+              set({ wilayaId: nextLocation.wilayaCode, communeId: nextLocation.communeCode });
+              setErrors((prev) => ({ ...prev, location: undefined }));
+            }}
             wilayaLabel={t("ownerAccount.wilayaLabel")}
             wilayaPlaceholder={t("need.location.wilayaPlaceholder")}
             communeLabel={t("need.location.communeLabel")}
             anyCommuneLabel={t("ownerAccount.communeUnspecified")}
             help={t("ownerAccount.locationHelp")}
+            error={errors.location}
           />
 
           <div>
@@ -281,6 +316,7 @@ export default function OwnerAccount() {
               </div>
             )}
           </FieldShell>
+          <SaveFeedback save={save} onRetry={() => submit()} onKeepMine={() => submit(true)} />
         </form>
       </FlowScreen>
     </>

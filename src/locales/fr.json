@@ -198,10 +198,10 @@
     },
     "location": {
       "title": "Où proposez-vous vos services ?",
-      "intro": "Votre commune permet aux propriétaires proches de vous trouver.",
-      "chooseCommune": "Choisissez une commune",
-      "communeRequired": "Choisissez la commune où vous proposez vos services.",
-      "privacy": "Seule votre commune sera affichée. Votre adresse exacte ne sera jamais visible publiquement — Nidz ne la demande pas."
+      "intro": "Votre wilaya — et votre commune, si vous la précisez — permet aux propriétaires proches de vous trouver.",
+      "noCommune": "Ne pas préciser de commune",
+      "wilayaRequired": "Choisissez la wilaya où vous proposez vos services.",
+      "privacy": "Le public voit votre commune et sa wilaya — ou seulement votre wilaya, si vous ne précisez pas de commune. Votre adresse exacte ne sera jamais visible publiquement : Nidz ne la demande pas."
     },
     "about": {
       "title": "Vous et votre expérience",
@@ -406,10 +406,10 @@
       "intro": "Nidz affiche d'abord les pet-sitters de votre zone.",
       "wilayaLabel": "Wilaya",
       "wilayaRequired": "Choisissez une wilaya.",
-      "communeLabel": "Commune",
+      "communeLabel": "Commune (facultatif)",
       "anyCommune": "Toutes les communes",
       "privacy": "Votre adresse exacte ne sera pas affichée publiquement.",
-      "coverage": "Les 69 wilayas sont listées. Les listes de communes existent pour dix d'entre elles pour l'instant : ailleurs, la wilaya seule suffit.",
+      "coverage": "Les 69 wilayas et leurs 1 541 communes sont listées. La commune est facultative : la wilaya seule suffit.",
       "wilayaPlaceholder": "Choisissez une wilaya"
     },
     "care": {
@@ -642,7 +642,7 @@
       },
       "coverage": {
         "q": "Quelles régions sont couvertes ?",
-        "a": "Nidz liste les 69 wilayas d'Algérie et dispose de la liste complète des communes pour dix d'entre elles (Alger, Oran, Blida, Constantine, Annaba, Sétif, Tizi Ouzou, Béjaïa, Boumerdès, Tipaza). C'est une description des DONNÉES, pas du marché : les pet-sitters de cette démonstration sont des exemples et il n'y a de véritable offre nulle part. Le découpage territorial algérien évolue aussi — 48 wilayas, puis 58 en 2019, puis 69 en 2026 — donc cette liste est une donnée de référence à tenir à jour, jamais une constante."
+        "a": "Nidz liste les 69 wilayas d'Algérie et leurs 1 541 communes. Pour les wilayas redécoupées en 2019 et en 2026, le rattachement des communes suit les lois 19-12 et 26-06 publiées au Journal officiel ; ailleurs, il reprend le découpage de 1984 d'un jeu de données ouvert, et tous les noms n'ont pas encore été vérifiés au Journal officiel. C'est une description des DONNÉES, pas du marché : les pet-sitters de cette démonstration sont des exemples et il n'y a de véritable offre nulle part. Le découpage territorial algérien évolue aussi — 48 wilayas, puis 58 en 2019, puis 69 en 2026 — donc cette liste est une donnée de référence à tenir à jour, jamais une constante."
       }
     },
     "reset": {
@@ -655,7 +655,7 @@
     "title": "Données et confidentialité",
     "intro": "Cette page décrit ce que le prototype fait réellement de ce que vous saisissez. Ce n'est pas une politique de confidentialité : il n'y a pas de service derrière pour en avoir une.",
     "points": {
-      "storage": "Tout ce que vous saisissez est conservé dans le stockage local de ce navigateur, sous une seule clé. Rien n'est conservé ailleurs.",
+      "storage": "Ce que vous enregistrez est conservé dans le stockage local de ce navigateur, sous une seule clé ; un formulaire commencé mais pas encore enregistré y est gardé à part, comme brouillon, jusqu'à ce que vous l'enregistriez ou l'effaciez — ou qu'il ne serve plus (animal supprimé, demande tranchée). Rien n'est conservé ailleurs.",
       "transmit": "Aucune donnée n'est transmise : Nidz n'a pas de serveur, pas de base de données et aucun service tiers dans ce prototype.",
       "location": "La localisation demandée est une commune, jamais une adresse. Nidz ne collecte aucune adresse exacte et n'utilise pas la géolocalisation de votre appareil.",
       "documents": "Une pièce d'identité n'est jamais téléversée : seul le nom du fichier est retenu, localement, et cela ne produit aucune vérification.",
@@ -682,7 +682,9 @@
       "confirmTitle": "Effacer toutes vos données ?",
       "confirmBody": "Votre nom, votre numéro, votre animal, vos demandes et votre profil de pet-sitter seront supprimés de ce navigateur. Cette action ne peut pas être annulée.",
       "cancel": "Annuler",
-      "confirm": "Tout effacer"
+      "confirm": "Tout effacer",
+      "failedTitle": "L'effacement n'a pas abouti.",
+      "failedBody": "Ce navigateur a refusé de supprimer les données : rien n'a été effacé. Vous pouvez réessayer."
     },
     "account": {
       "title": "Votre compte",
@@ -712,7 +714,9 @@
     "searchWilaya": "Rechercher une wilaya",
     "searchCommune": "Rechercher une commune",
     "noMatch": "Aucun résultat",
-    "communeListUnavailable": "Nidz ne dispose pas encore de la liste des communes de cette wilaya. La wilaya seule suffit pour chercher."
+    "communeListUnavailable": "Nidz ne dispose pas encore de la liste des communes de cette wilaya. La wilaya seule suffit pour chercher.",
+    "invalid": "Ce lieu n'existe pas dans la liste. Choisissez à nouveau la wilaya, puis la commune si vous le souhaitez.",
+    "wilayaOnly": "{{name}} (wilaya)"
   },
   "auth": {
     "title": "Se connecter à Nidz",
@@ -833,7 +837,9 @@
       "vet": "Vétérinaire",
       "emergency": "Contact d’urgence"
     },
-    "notSure": "Je ne sais pas"
+    "notSure": "Je ne sais pas",
+    "deleteFailedTitle": "Impossible de supprimer {{name}} : rien n'a changé.",
+    "deleteFailedBody": "Ce navigateur n'a pas pu enregistrer la suppression (stockage plein ou bloqué). L'animal est toujours dans votre liste : vous pouvez réessayer."
   },
   "reviews": {
     "title": "Avis",
@@ -938,7 +944,7 @@
     },
     "identity": {
       "label": "Votre nom public et votre zone",
-      "hint": "Prénom et initiale ; votre commune — jamais d'adresse."
+      "hint": "Prénom et initiale ; votre wilaya et, si vous le souhaitez, votre commune — jamais d'adresse."
     },
     "answeredState": "renseignée",
     "viewPublished": "Voir mon profil publié",
@@ -1139,5 +1145,17 @@
     "questionForYou": "Le pet-sitter a une question avant de décider. La demande est toujours en attente.",
     "questionForYouShort": "Une question pour vous",
     "exampleNoInbox": "Ce pet-sitter est un exemple : personne ne peut lire ni répondre à une question qui lui serait adressée, donc aucune n'est proposée ici."
+  },
+  "save": {
+    "failedTitle": "Impossible d'enregistrer ces informations.",
+    "failedBody": "Rien n'a été enregistré : ce navigateur n'a pas pu les conserver (stockage plein ou bloqué, par exemple en navigation privée). Ce que vous avez saisi est toujours là : vous pouvez réessayer.",
+    "retry": "Réessayer",
+    "conflictTitle": "Ces informations ont changé entre-temps.",
+    "conflictBody": "Elles ont été modifiées ailleurs — dans un autre onglet ou un autre écran — depuis que vous avez commencé ce formulaire, et rien n'a été enregistré ici. Enregistrer votre version remplacera l'autre ; reprendre la version enregistrée effacera ce que vous avez saisi ici.",
+    "keepMine": "Enregistrer ma version",
+    "useSaved": "Reprendre la version enregistrée",
+    "draftRestored": "Nous avons retrouvé ce que vous aviez commencé à saisir. Ce n'est pas encore enregistré.",
+    "discardDraft": "Effacer ce brouillon",
+    "conflictBodySingle": "Elles ont changé ailleurs — dans un autre onglet ou un autre écran — depuis que vous avez ouvert cet écran, et rien n'a été enregistré ici. Affichez la version enregistrée pour continuer."
   }
 }

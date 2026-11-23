@@ -6,7 +6,7 @@
    application talks to, so replacing or completing the dataset never touches a
    screen.
 
-   Everything here is derived once at module load. 69 wilayas and 371 communes
+   Everything here is derived once at module load. 69 wilayas and 1 541 communes
    is small enough that the indexes cost nothing and large enough that a linear
    `.find()` per keystroke in a combobox would not be free.
    ------------------------------------------------------------------------ */
@@ -94,6 +94,47 @@ export function normalizeCommuneId(id: string | null | undefined): string | null
 export function normalizeWilayaId(id: string | null | undefined): string | null {
   if (!id) return null;
   return WILAYA_BY_ID.has(id) ? id : null;
+}
+
+/** The wilaya a place is in, from an explicit wilaya or — for records written
+    before the commune became optional — from its commune. */
+export function wilayaOfPlace(place: { wilayaCode?: string | null; communeCode?: string | null }): string | null {
+  return normalizeWilayaId(place.wilayaCode) ?? getWilayaOfCommune(place.communeCode)?.id ?? null;
+}
+
+/* --------------------------------------------------------------- validation */
+
+export type LocationProblem = "wilayaRequired" | "unknownWilaya" | "communeOutsideWilaya";
+
+/**
+ * The ONE rule every location form applies (Audit 1.3.1).
+ *
+ * The wilaya is required where the form says so; the commune is optional
+ * everywhere, for every wilaya — a wilaya alone is always a complete answer.
+ * What is never accepted is a value that names nothing, or a commune filed
+ * under a wilaya it does not belong to: both would be shown publicly as a
+ * place that is not where the person said.
+ */
+export function checkLocation(
+  value: { wilayaCode: string | null; communeCode: string | null },
+  { wilayaRequired }: { wilayaRequired: boolean },
+): LocationProblem | null {
+  if (!value.wilayaCode) {
+    if (value.communeCode) return "communeOutsideWilaya";
+    return wilayaRequired ? "wilayaRequired" : null;
+  }
+  if (!getWilaya(value.wilayaCode)) return "unknownWilaya";
+  if (value.communeCode && getCommune(value.communeCode)?.wilayaId !== value.wilayaCode) return "communeOutsideWilaya";
+  return null;
+}
+
+/** "Hydra, Alger" when there is a commune; "Alger" when there is only the
+    wilaya — the public line for a place, at the precision it was given. */
+export function placeName(
+  place: { wilayaCode?: string | null; communeCode?: string | null },
+  locale: AppLocale,
+): string | null {
+  return communeWithWilaya(place.communeCode, locale) ?? wilayaName(wilayaOfPlace(place), locale);
 }
 
 /* ---------------------------------------------------------------- rendering */

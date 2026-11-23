@@ -116,7 +116,10 @@ export default function OwnerRequestDetail() {
             {questionForYou && !asking && (
               <p className="mt-6 text-base font-medium text-foreground">{t("clarify.questionForYou")}</p>
             )}
+            {/* Keyed by request: moving from one request's page to another's
+                must not carry the question being typed across. */}
             <ClarificationThread
+              key={request.id}
               request={request}
               side="owner"
               composerOpen={asking}

@@ -4,9 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { PawPrint } from "lucide-react";
 
 import FlowScreen from "@/components/shared/FlowScreen";
+import { SaveFeedback } from "@/components/shared/SaveFeedback";
 import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
-import { useDemo } from "@/state/demo/context";
+import { useSave } from "@/hooks/use-save";
 
 /**
  * The sitter's entry point.
@@ -20,14 +21,19 @@ import { useDemo } from "@/state/demo/context";
 export default function SitterStart() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { state, dispatch } = useDemo();
+  const save = useSave();
 
   const start = () => {
-    dispatch({ type: "enter" });
     /* Idempotent in the reducer — re-entering must not wipe a profile that is
-       already in progress. */
-    dispatch({ type: "startSitterProfile", id: state.sitter?.profile.id ?? "my-profile" });
-    navigate("/sitter/join/name");
+       already in progress. Built on the stored state, so a profile another
+       tab started keeps its id. One write, confirmed before the flow opens:
+       the next steps write into this profile, and must not open on one that
+       was never kept (A-02). */
+    const saved = save.save((base) => [
+      { type: "enter" },
+      { type: "startSitterProfile", id: base.sitter?.profile.id ?? "my-profile" },
+    ]);
+    if (saved) navigate("/sitter/join/name");
   };
 
   return (
@@ -57,6 +63,7 @@ export default function SitterStart() {
             </li>
           ))}
         </ul>
+        <SaveFeedback className="mt-8" save={save} onRetry={start} />
       </FlowScreen>
     </>
   );

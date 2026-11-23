@@ -23,9 +23,9 @@ export type ReferenceLayer = {
 
 export const GEOGRAPHY_METADATA = {
   /** Bump when the shape or the contents change materially. */
-  datasetVersion: "1.2.0",
+  datasetVersion: "1.3.1",
   /** When this file was assembled and checked. */
-  compiledOn: "2026-08-14",
+  compiledOn: "2026-11-23",
 
   /**
    * The territorial division this reference is built against.
@@ -63,12 +63,11 @@ export const GEOGRAPHY_METADATA = {
     } satisfies ReferenceLayer,
 
     communes: {
-      scope:
-        "Complete commune lists for ten wilayas only: Alger, Oran, Blida, Constantine, Annaba, Sétif, Tizi Ouzou, Béjaïa, Boumerdès, Tipaza. 371 communes.",
+      scope: "All 1 541 communes, under all 69 wilayas.",
       source:
-        "Transcribed from a community dataset (othmanus/algeria-cities) that cites the Ministry of the Interior, reflecting the 58-wilaya division of loi 19-12.",
+        "Membership — which wilaya each commune belongs to — is read from the Journal Officiel wherever a law re-drew the map: loi 19-12 (JO n° 78, 18 December 2019) for the ten 2019 wilayas and their seven parents, loi 26-06 (JO n° 25, 5 April 2026) for the eleven 2026 wilayas and their ten parents. Everywhere else it is the 1984 division, which those laws left untouched. Names: the Journal Officiel's French spelling for the 539 communes those two laws list, and the MIT-licensed dzcode-io/leblad dataset (v1.0.3, data v1.1) for the others. Arabic names: leblad. The six El Bayadh communes leblad omits are named in loi 26-06 itself; their Arabic names are the usual spellings, checked against othmanus/algeria-cities for those six rows only. The ten wilayas Nidz already carried keep their rows exactly as they were.",
       verification:
-        "The commune COUNT for each of the ten wilayas was checked against independently published figures and matched in every case (Alger 57, Oran 26, Blida 25, Constantine 12, Annaba 12, Sétif 60, Tizi Ouzou 67, Béjaïa 52, Boumerdès 32, Tipaza 28). Individual names were not checked line by line against a primary source.",
+        "Every commune count was checked against the count the law states: 21/21 wilayas named by loi 26-06 and 17/17 still-current wilayas named by loi 19-12 match their article, and the total is the 1 541 that both laws state in their article 3. Each Journal Officiel name was paired with a leblad commune of the same parent wilaya; every pair that was not an exact spelling match was reviewed by hand, and the Arabic name was used to confirm the four leblad abbreviations corrected here (B. B. Arreridj, M Chedallah, Ben M Hidi, El Fedjoudj Boughrara Sa). Names outside the two laws, and the membership of the 31 wilayas neither law touched (taken from leblad's 1984 division; their per-wilaya counts agree with othmanus/algeria-cities, and with the JO counts they sum to the law's 1 541), were not checked line by line against a primary source — so this layer is PARTLY, not wholly, verified against the Journal Officiel.",
       verifiedAgainstPrimarySource: false,
     } satisfies ReferenceLayer,
   },
@@ -98,32 +97,31 @@ export const KNOWN_GAPS = {
   newWilayaCodes: true,
 
   /**
-   * COMMUNE COVERAGE IS PARTIAL, AND THAT IS A DELIBERATE STOP, NOT AN
-   * OVERSIGHT.
+   * COMMUNE COVERAGE IS COMPLETE; WHAT IS NOT GUARANTEED IS THE SPELLING.
    *
-   * Algeria has 1 541 communes. A complete, internally consistent list exists
-   * in more than one community dataset, and the counts spot-checked here match
-   * published figures — but none of the candidates was usable as committed
-   * reference data:
+   * Audit 1.3.1 closed the old gap (ten wilayas out of 69) with sources that
+   * can be committed: the Journal Officiel for membership — public law — and
+   * dzcode-io/leblad (MIT) for names and Arabic names. Two datasets were
+   * consulted and NOT copied: othmanus/algeria-cities declares no licence, and
+   * oussamidat/algerie-decoupage-administratif is ODbL, whose share-alike
+   * terms this repository does not take on. They were used only to locate the
+   * Journal Officiel texts and to cross-check counts — and the Journal
+   * Officiel disagrees with othmanus on two communes (Tabelbala belongs to
+   * Béni Abbès and El Borma to Touggourt), so the law was followed.
    *
-   *   - othmanus/algeria-cities — 58 wilayas, 1 541 communes, consistent, and
-   *     it cites the Ministry of the Interior. It declares NO LICENCE, so it
-   *     cannot be redistributed inside this repository. It was used here only
-   *     to cross-check the ten wilayas Nidz actually covers.
-   *   - ihahachi/Algeria-Cities — claims all 69 wilayas, but states no source,
-   *     no method and no date, and invites contributors to correct its data.
-   *   - dzcode-io/leblad — MIT licensed, but still on the 48-wilaya division
-   *     abolished in 2019.
+   * What remains open:
    *
-   * On top of the licensing problem, none of them reflects the commune-level
-   * consequences of loi 26-06, whose transition runs to 31 December 2026.
+   *   - Names outside loi 19-12 and loi 26-06 are leblad's transliteration,
+   *     not the Journal Officiel's. A commune may be spelled differently in a
+   *     later decree (some were renamed after 1991).
+   *   - Arabic names are leblad's, not the Arabic edition of the JO.
+   *   - The 2026 wilayas are administered by their parent wilayas until
+   *     31 December 2026 (loi 26-06, art. 54). Nidz lists each commune under
+   *     the wilaya the law assigns it to, not the one still running it.
    *
-   * To close this: obtain the commune list from a primary Algerian source, or
-   * confirm redistribution terms with the maintainer of a complete dataset.
-   * The architecture takes it as a data edit — `communes.ts` and the
-   * `communeCoverage` flag on each wilaya are the only things that change.
+   * None of this is a claim about where Nidz operates: see COVERAGE_IS_NOT_SUPPLY.
    */
-  completeCommuneList: true,
+  completeCommuneList: false,
 
   /**
    * ARABIC NAMES FOR THE ELEVEN NEW WILAYAS were written from the standard

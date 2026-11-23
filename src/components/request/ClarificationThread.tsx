@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { MessageCircleQuestion } from "lucide-react";
 
+import { DraftNotice, SaveFeedback } from "@/components/shared/SaveFeedback";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -13,8 +14,9 @@ import {
   type ClarificationAuthor,
 } from "@/data/clarification";
 import type { CareRequest } from "@/data/types";
+import { useDraftField } from "@/hooks/use-form-draft";
 import { useAppLocale } from "@/hooks/use-locale";
-import { useDemo } from "@/state/demo/context";
+import { useSave } from "@/hooks/use-save";
 import { formatDate, toISODate } from "@/utils/dates";
 
 /**
@@ -50,8 +52,16 @@ export default function ClarificationThread({
 }) {
   const { t } = useTranslation();
   const lng = useAppLocale();
-  const { dispatch } = useDemo();
-  const [text, setText] = useState("");
+  /* A question being typed is a draft like any other form (A-01), per
+     request and per side. It can only be added while the request is still
+     pending: decided in another tab meanwhile, it is refused as a conflict
+     rather than reported as added and silently dropped (A-19). */
+  const scope = `clarify-${request.id}-${side}`;
+  const save = useSave({
+    scope,
+    watch: (s) => s.requests.find((r) => r.id === request.id)?.status ?? null,
+  });
+  const [text, setText] = useDraftField(scope, "text", () => "");
   const [error, setError] = useState<string>();
   const fieldRef = useRef<HTMLTextAreaElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -84,9 +94,10 @@ export default function ClarificationThread({
       fieldRef.current?.focus();
       return;
     }
+    if (!save.save({ type: "addClarification", id: request.id, message: newMessage(side, text) })) return;
     focusHeading.current = true;
-    dispatch({ type: "addClarification", id: request.id, message: newMessage(side, text) });
-    setText("");
+    /* Saved: the composer starts empty again, without writing an empty draft. */
+    save.discard();
     setError(undefined);
     onComposerOpenChange(false, "added");
   };
@@ -163,6 +174,7 @@ export default function ClarificationThread({
               </div>
             </div>
           )}
+          <DraftNotice className="mb-3 mt-0" save={save} />
           <label htmlFor={`${ids}-field`} className="text-sm font-medium text-foreground">
             {side === "sitter" ? t("clarify.labelSitter") : t("clarify.labelOwner")}
           </label>
@@ -199,6 +211,7 @@ export default function ClarificationThread({
           <p id={`${ids}-note`} className="mt-2 max-w-[64ch] text-sm text-foreground">
             {t("clarify.notSent")}
           </p>
+          <SaveFeedback className="mt-4" save={save} onRetry={submit} />
         </form>
       )}
     </section>

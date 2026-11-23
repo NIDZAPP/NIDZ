@@ -5,6 +5,7 @@ import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from "
 
 import PetForm from "@/components/owner/PetForm";
 import FlowScreen from "@/components/shared/FlowScreen";
+import { DraftNotice, SaveFeedback } from "@/components/shared/SaveFeedback";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { emptyPet, restorePet, type Pet } from "@/data/pets";
 import { useFormDraft } from "@/hooks/use-form-draft";
+import { useSave } from "@/hooks/use-save";
 import { cameFromRequest, requestSearchOf, sitterIdFromRequestPath, withPet } from "@/data/request-draft";
 import { SPECIES, type Species } from "@/data/types";
 import { useDemo } from "@/state/demo/context";
@@ -67,7 +69,13 @@ function PetEditScreen() {
   const { state, dispatch } = useDemo();
 
   const isNew = !id;
-  const existing = id ? (state.pets.find((p) => p.id === id) ?? null) : null;
+  const current = id ? (state.pets.find((p) => p.id === id) ?? null) : null;
+  /* The animal as it was when this screen opened. Another tab can delete or
+     change it while this one is being edited (Audit 1.3.1 A-19); the form
+     stays on what the visitor was editing, and saving then asks instead of
+     silently resurrecting or overwriting it. */
+  const [openedWith] = useState(current);
+  const existing = current ?? openedWith;
 
   /* Where to return — honoured ONLY when it is a request summary, the one
      screen that links here with it. Any other `next` (a hand-made
@@ -110,13 +118,25 @@ function PetEditScreen() {
     },
   );
   const setPet = (next: Pet) => setPetDraft(next as Draft);
+  /* What another tab could have changed under this form: this animal, as
+     stored. Never the photo, which is not stored. */
+  const save = useSave({
+    scope: draftKey,
+    watch: (s) => {
+      const stored = s.pets.find((p) => p.id === pet.id);
+      if (!stored) return null;
+      const { photoUrl: _photo, ...rest } = stored;
+      return rest;
+    },
+  });
+  const lastAttempt = useRef<"save" | "remove">("save");
   const [nameError, setNameError] = useState<string>();
   const nameRef = useRef<HTMLInputElement>(null);
 
   /* A pet id that names nothing — a stale bookmark, a deleted animal, a
      hand-edited URL — goes back to the list rather than rendering an empty
      form that would silently create a second animal on save. */
-  if (id && !existing) return <Navigate to={next ?? "/owner/pets"} replace />;
+  if (id && !openedWith) return <Navigate to={next ?? "/owner/pets"} replace />;
 
   /* Back to where this screen was opened from. */
   const leave = (selectPetId: string | null) => {
@@ -137,22 +157,37 @@ function PetEditScreen() {
     navigate(next ?? "/owner/pets", { replace: true });
   };
 
-  const submit = () => {
+  const submit = (force = false) => {
+    lastAttempt.current = "save";
     if (!pet.name.trim()) {
       setNameError(t("need.pet.nameRequired"));
       nameRef.current?.focus();
       return;
     }
-    dispatch({ type: "savePet", pet: { ...pet, name: pet.name.trim() } });
+    /* Leaves ONLY once the animal is on disk (A-02); otherwise the form
+       stays filled in, with the reason and a retry. */
+    if (!save.save({ type: "savePet", pet: { ...pet, name: pet.name.trim() } }, { force })) return;
     clearDraft();
     leave(pet.id);
   };
 
   const remove = () => {
+    lastAttempt.current = "remove";
     if (!existing) return;
-    dispatch({ type: "removePet", id: existing.id });
+    /* Confirmed by the dialog, so not checked against another tab's edit —
+       but still only reported done once storage agrees. */
+    if (!save.save({ type: "removePet", id: existing.id }, { force: true })) return;
     clearDraft();
     leave(null);
+  };
+  const retry = () => (lastAttempt.current === "remove" ? remove() : submit());
+  /* "Use the saved version" of an animal another tab deleted: there is no
+     saved version left to show, so it goes back to the list. */
+  const takeSaved = () => {
+    if (id && !current) {
+      clearDraft();
+      navigate(next ?? "/owner/pets", { replace: true });
+    } else save.discard();
   };
 
   return (
@@ -168,6 +203,7 @@ function PetEditScreen() {
         wide
         title={isNew ? t("pets.addTitle") : (pet.name || t("pets.editTitle"))}
         intro={isNew ? t("pets.addIntro") : undefined}
+        headerExtra={<DraftNotice save={save} />}
         action={
           <Button type="submit" form={FORM_ID} size="lg">
             {t("pets.save")}
@@ -221,6 +257,20 @@ function PetEditScreen() {
                species-specific answer, which is right while creating and
                destructive afterwards. */
             speciesLocked={Boolean(existing)}
+          />
+          <SaveFeedback
+            className="mt-8"
+            save={{ failure: save.failure, attempt: save.attempt, discard: takeSaved }}
+            onRetry={retry}
+            onKeepMine={() => submit(true)}
+            /* A refused delete is not a refused save: it says what did not
+               happen, about the animal as stored. */
+            failedTitle={
+              lastAttempt.current === "remove" && existing
+                ? t("pets.deleteFailedTitle", { name: existing.name })
+                : undefined
+            }
+            failedBody={lastAttempt.current === "remove" ? t("pets.deleteFailedBody") : undefined}
           />
         </form>
       </FlowScreen>

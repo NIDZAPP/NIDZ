@@ -10,7 +10,7 @@ import ReviewSection from "@/components/sitter/ReviewSection";
 import { sitterPortfolio, sitterReviews } from "@/data/repository";
 import { isAbsenceReason, type MatchReason } from "@/data/criteria";
 import { offeredServices } from "@/data/offer";
-import { communeWithWilaya } from "@/data/algeria";
+import { placeName } from "@/data/algeria";
 import { CARE_UNIT_KEY, DOG_SIZES, localized, type SitterProfile } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
 import { cn } from "@/lib/utils";
@@ -108,7 +108,14 @@ export default function SitterProfileView({
   const BlockHeading = Section === "h2" ? "h3" : "h4";
   const services = offeredServices(sitter);
 
-  const location = communeWithWilaya(sitter.communeCode, lng);
+  /* "Hydra, Alger" — or "Aflou (wilaya)" for a sitter who gave only the
+     wilaya, so a large wilaya is not read as its chef-lieu commune. */
+  const location = sitter.communeCode
+    ? placeName(sitter, lng)
+    : (() => {
+        const name = placeName(sitter, lng);
+        return name ? t("location.wilayaOnly", { name }) : null;
+      })();
   const headline = localized(sitter.headline, lng);
   const about = localized(sitter.about, lng);
   const residentPets =

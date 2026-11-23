@@ -44,6 +44,7 @@ const SEEDS: DemoSitterSeed[] = [
   {
     id: "amina-b",
     publicName: "Amina B.",
+    wilayaCode: "alger",
     communeCode: "hydra",
     headline: {
       fr: "Je garde les chiens chez moi, dans une maison avec cour clôturée.",
@@ -134,6 +135,7 @@ const SEEDS: DemoSitterSeed[] = [
   {
     id: "karim-b",
     publicName: "Karim B.",
+    wilayaCode: "alger",
     communeCode: "el-biar",
     headline: {
       fr: "Promenades quotidiennes et gardes courtes, sept jours sur sept.",
@@ -220,6 +222,7 @@ const SEEDS: DemoSitterSeed[] = [
   {
     id: "sarah-m",
     publicName: "Sarah M.",
+    wilayaCode: "alger",
     communeCode: "kouba",
     headline: {
       fr: "Je m'occupe des chats chez leurs propriétaires, matin et soir.",
@@ -308,6 +311,7 @@ const SEEDS: DemoSitterSeed[] = [
   {
     id: "youcef-h",
     publicName: "Youcef H.",
+    wilayaCode: "alger",
     communeCode: "bab-ezzouar",
     headline: {
       fr: "Appartement calme, sans autre animal. J'accueille un chat ou un petit chien.",
@@ -389,6 +393,7 @@ const SEEDS: DemoSitterSeed[] = [
   {
     id: "nadia-l",
     publicName: "Nadia L.",
+    wilayaCode: "alger",
     communeCode: "cheraga",
     headline: {
       fr: "Maison avec jardin, habituée aux chats comme aux chiens.",
@@ -486,6 +491,7 @@ const SEEDS: DemoSitterSeed[] = [
        which is not a commune of the wilaya — the reference dataset that
        replaced the hand-written subset does not contain it. The old id still
        resolves for saved briefs and bookmarks, via `LEGACY_COMMUNE_IDS`. */
+    wilayaCode: "oran",
     communeCode: "oran",
     headline: {
       fr: "Visites et promenades à Oran, matin et fin de journée.",

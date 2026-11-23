@@ -43,7 +43,9 @@ import { ACCOUNT, BASE, check, clean, done, open, pickCombobox, seedState, store
   await page.waitForURL((u) => !u.pathname.startsWith("/owner/account"));
   const st = await storedState(page);
   check("account created with only the name", st.account?.firstName === "Samir" && st.account?.wilayaId === null);
-  check("draft cleared once saved", await page.evaluate(() => sessionStorage.getItem("nidz.draft.owner-account") === null));
+  /* Drafts moved to localStorage at Audit 1.3.1 (A-01); both are checked so
+     a draft left behind in either is caught. */
+  check("draft cleared once saved", await page.evaluate(() => sessionStorage.getItem("nidz.draft.owner-account") === null && localStorage.getItem("nidz.draft.owner-account") === null));
   await context.close();
 }
 

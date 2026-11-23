@@ -6,7 +6,10 @@ import { NameStep, PhoneStep } from "@/components/account/AccountSteps";
 import FlowScreen from "@/components/shared/FlowScreen";
 import { useReturnToDashboard } from "@/hooks/use-return-to-dashboard";
 import { LocationFields } from "@/components/shared/fields";
-import { getWilayaOfCommune } from "@/data/algeria";
+import { DraftNotice, SaveFeedback } from "@/components/shared/SaveFeedback";
+import { checkLocation, normalizeCommuneId, normalizeWilayaId, wilayaOfPlace } from "@/data/algeria";
+import { useDraftField } from "@/hooks/use-form-draft";
+import { useSave } from "@/hooks/use-save";
 import { Button } from "@/components/ui/button";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useDemo } from "@/state/demo/context";
@@ -64,52 +67,94 @@ export function SitterVerify() {
 }
 
 const FORM_ID = "sitter-location";
+const SCOPE = "sitter-location";
 
 /**
  * Where the sitter offers their services.
  *
+ * AUDIT 1.3.1: THE WILAYA IS REQUIRED, THE COMMUNE IS NOT. The commune used
+ * to be mandatory, which blocked registration outright in every wilaya whose
+ * commune list Nidz did not carry — the picker had nothing to choose and the
+ * form would not continue. Every wilaya now has its communes, and choosing
+ * one is still optional: a wilaya alone is a complete answer, shown publicly
+ * as the wilaya. `checkLocation` is the rule, shared with every other
+ * location form.
+ *
  * The privacy line is the field's own help text: §27 requires explaining why
  * location is asked, and the explanation belongs next to the thing it
- * explains. What a profile shows publicly is the commune, never an address —
- * Nidz never collects one.
+ * explains. What a profile shows publicly is the commune — or the wilaya —
+ * never an address: Nidz never collects one.
  */
 export function SitterLocation() {
   const { t } = useTranslation();
   const locale = useAppLocale();
   const returnToDashboard = useReturnToDashboard();
-  const { state, dispatch } = useDemo();
+  const { state } = useDemo();
 
   const profile = state.sitter?.profile;
-  /* Derived from the saved commune, so a returning sitter does not see an
-     empty, disabled commune field while the profile still holds one — and
-     does not lose it the moment they touch the wilaya select. */
-  const [wilayaCode, setWilayaCode] = useState<string | null>(
-    getWilayaOfCommune(profile?.communeCode)?.id ?? null,
+  const save = useSave({
+    scope: SCOPE,
+    watch: (s) => {
+      const p = s.sitter?.profile;
+      return p && { wilayaCode: p.wilayaCode, communeCode: p.communeCode };
+    },
+  });
+  /* Derived from the saved profile, so a returning sitter does not see an
+     empty field while the profile still holds an answer — and does not lose
+     the commune the moment they touch the wilaya. Kept as a draft until
+     saved (A-01). */
+  const [location, setLocation] = useDraftField<{ wilayaCode: string | null; communeCode: string | null }>(
+    SCOPE,
+    "location",
+    () => ({
+      wilayaCode: profile ? wilayaOfPlace(profile) : null,
+      communeCode: profile?.communeCode || null,
+    }),
+    {
+      validate: (raw) => {
+        if (typeof raw !== "object" || raw === null) return null;
+        const r = raw as { wilayaCode?: unknown; communeCode?: unknown };
+        const value = {
+          wilayaCode: normalizeWilayaId(typeof r.wilayaCode === "string" ? r.wilayaCode : null),
+          communeCode: normalizeCommuneId(typeof r.communeCode === "string" ? r.communeCode : null),
+        };
+        return checkLocation(value, { wilayaRequired: false }) ? null : value;
+      },
+    },
   );
-  const [communeCode, setCommuneCode] = useState<string | null>(profile?.communeCode || null);
   const [error, setError] = useState<string>();
   const wilayaRef = useRef<HTMLButtonElement>(null);
 
   if (!state.account?.accountComplete) return <Navigate to="/sitter/join/name" replace />;
 
-  const submit = () => {
-    if (!communeCode) {
-      setError(t("sitterFlow.location.communeRequired"));
+  const submit = (force = false) => {
+    const problem = checkLocation(location, { wilayaRequired: true });
+    if (problem) {
+      setError(t(problem === "wilayaRequired" ? "sitterFlow.location.wilayaRequired" : "location.invalid"));
       wilayaRef.current?.focus();
       return;
     }
-    dispatch({
-      type: "patchSitterProfile",
-      patch: {
-        communeCode,
-        /* The public identity convention, the same one owners get on their
-           requests: first name and an initial (§27). */
-        publicName: `${state.account!.firstName} ${state.account!.lastName.charAt(0).toUpperCase()}.`,
-      },
-    });
+    const saved = save.save(
+      (base) =>
+        base.account && base.sitter
+          ? {
+              type: "patchSitterProfile",
+              patch: {
+                wilayaCode: location.wilayaCode!,
+                /* Empty when no commune was chosen: absent is honest. */
+                communeCode: location.communeCode ?? "",
+                /* The public identity convention, the same one owners get on
+                   their requests: first name and an initial (§27). */
+                publicName: `${base.account.firstName} ${base.account.lastName.charAt(0).toUpperCase()}.`,
+              },
+            }
+          : null,
+      { force },
+    );
     /* From the dashboard's "who and where" row this pops back to it; at the
-       end of the first pass through the join flow it lands there. */
-    returnToDashboard();
+       end of the first pass through the join flow it lands there. Only once
+       the profile really holds the answer (A-02). */
+    if (saved) returnToDashboard();
   };
 
   return (
@@ -123,6 +168,7 @@ export function SitterLocation() {
         backTo="/sitter/join/phone"
         title={t("sitterFlow.location.title")}
         intro={t("sitterFlow.location.intro")}
+        headerExtra={<DraftNotice save={save} />}
         action={
           <Button type="submit" form={FORM_ID} size="lg">
             {t("common.continue")}
@@ -139,22 +185,22 @@ export function SitterLocation() {
         >
           <LocationFields
             locale={locale}
-            wilayaCode={wilayaCode}
-            communeCode={communeCode}
+            wilayaCode={location.wilayaCode}
+            communeCode={location.communeCode}
             wilayaRef={wilayaRef}
             onChange={(next) => {
-              setWilayaCode(next.wilayaCode);
-              setCommuneCode(next.communeCode);
+              setLocation(next);
               setError(undefined);
             }}
             wilayaLabel={t("need.location.wilayaLabel")}
             wilayaPlaceholder={t("need.location.wilayaPlaceholder")}
             communeLabel={t("need.location.communeLabel")}
-            anyCommuneLabel={t("sitterFlow.location.chooseCommune")}
+            anyCommuneLabel={t("sitterFlow.location.noCommune")}
             help={t("sitterFlow.location.privacy")}
             error={error}
           />
           <p className="mt-6 text-sm text-muted-foreground">{t("need.location.coverage")}</p>
+          <SaveFeedback className="mt-6" save={save} onRetry={() => submit()} onKeepMine={() => submit(true)} />
         </form>
       </FlowScreen>
     </>

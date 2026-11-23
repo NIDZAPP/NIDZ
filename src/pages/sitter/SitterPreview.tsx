@@ -4,10 +4,12 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 
 import FlowScreen from "@/components/shared/FlowScreen";
 import SitterProfileView from "@/components/sitter/SitterProfileView";
+import { SaveFeedback } from "@/components/shared/SaveFeedback";
 import { DemoNotice } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { canPublish } from "@/data/sitter-sections";
 import { useReturnToDashboard } from "@/hooks/use-return-to-dashboard";
+import { useSave } from "@/hooks/use-save";
 import { useDemo } from "@/state/demo/context";
 
 /**
@@ -25,8 +27,14 @@ import { useDemo } from "@/state/demo/context";
 export default function SitterPreview() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { state, dispatch } = useDemo();
+  const { state } = useDemo();
   const returnToDashboard = useReturnToDashboard();
+  /* "Votre profil est publié" is shown only for a publication that is on
+     disk (A-02). */
+  const save = useSave();
+  const publish = () => {
+    if (save.save({ type: "publishSitterProfile" })) navigate("/sitter/published");
+  };
 
   const profile = state.sitter?.profile;
   /* Publishing must not be reachable for a profile that is not one. The rule is
@@ -71,10 +79,7 @@ export default function SitterPreview() {
             <Button
               type="button"
               size="lg"
-              onClick={() => {
-                dispatch({ type: "publishSitterProfile" });
-                navigate("/sitter/published");
-              }}
+              onClick={publish}
             >
               {t("sitterFlow.preview.publish")}
             </Button>
@@ -103,6 +108,7 @@ export default function SitterPreview() {
         {published && (
           <p className="mb-8 text-sm text-muted-foreground">{t("sitterFlow.preview.liveNote")}</p>
         )}
+        <SaveFeedback className="mb-8" save={save} onRetry={publish} />
 
         {/* `headingLevel="h2"`: the screen's own h1 belongs to FlowScreen. */}
         <SitterProfileView

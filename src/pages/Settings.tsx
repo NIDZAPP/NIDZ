@@ -18,10 +18,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { REGISTER_ROW } from "@/components/shared/register";
+import { SaveFeedback } from "@/components/shared/SaveFeedback";
 import { SUPPORTED_LOCALES, hasExplicitLocale, setLocale, type AppLocale } from "@/i18n";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useSwitchWorkspace } from "@/hooks/use-workspace";
 import { clearFormDrafts } from "@/hooks/use-form-draft";
+import { useSave } from "@/hooks/use-save";
 import { cn } from "@/lib/utils";
 import { isPubliclyListed } from "@/data/repository";
 import { useDemo } from "@/state/demo/context";
@@ -66,7 +68,7 @@ const LANGUAGE_OPTIONS: AppLocale[] = [...SUPPORTED_LOCALES];
 export default function Settings() {
   const { t } = useTranslation();
   const locale = useAppLocale();
-  const { state, dispatch } = useDemo();
+  const { state } = useDemo();
   const navigate = useNavigate();
   const location = useLocation();
   const switchWorkspace = useSwitchWorkspace();
@@ -77,11 +79,12 @@ export default function Settings() {
      writes it, so there is no second source to fall out of step with. */
   const explicit = hasExplicitLocale();
 
+  const erase = useSave();
   const reset = () => {
-    /* The reducer reset is what clears storage: DemoProvider removes the key
-       when the state is back to initial, so calling clearStoredState() here
-       would be undone by the persistence effect a tick later. */
-    dispatch({ type: "reset" });
+    /* The reducer reset is what clears storage: back to the initial state,
+       the store removes the record — and confirms it is gone. "Tout est
+       effacé" is not shown while the data is still there (A-02). */
+    if (!erase.save({ type: "reset" })) return;
     /* Unsaved form drafts too: "erase everything" includes what was typed
        and never saved. */
     clearFormDrafts();
@@ -295,6 +298,13 @@ export default function Settings() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+          <SaveFeedback
+            className="mt-6"
+            save={erase}
+            onRetry={reset}
+            failedTitle={t("settings.reset.failedTitle")}
+            failedBody={t("settings.reset.failedBody")}
+          />
         </section>
       </div>
     </div>

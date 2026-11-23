@@ -34,6 +34,7 @@ import { forSharing, restorePet } from "@/data/pets";
 import { restoreRequestDraft, type RequestDraft } from "@/data/request-draft";
 import { canClarify, restoreThread, type ClarificationMessage } from "@/data/clarification";
 import { isISODate } from "@/utils/dates";
+import { getWilayaOfCommune, normalizeCommuneId, normalizeWilayaId } from "@/data/algeria";
 import {
   NO_CAPABILITIES,
   isWorkspace,
@@ -169,6 +170,7 @@ export function emptySitterProfile(id: string): SitterProfile {
   return {
     id,
     publicName: "",
+    wilayaCode: "",
     communeCode: "",
     headline: { fr: "", en: "", ar: "" },
     about: { fr: "", en: "", ar: "" },
@@ -353,6 +355,10 @@ export function reducer(state: DemoState, action: DemoAction): DemoState {
       };
 
     case "respondToRequest":
+      /* Only a PENDING request can be decided. The screen never offered a
+         second decision, but a second tab still showing the buttons could
+         have flipped an acceptance into a refusal (Audit 1.3.1 A-19). */
+      if (!state.requests.some((r) => r.id === action.id && r.status === "pending")) return state;
       return {
         ...state,
         requests: state.requests.map((r) =>
@@ -470,6 +476,21 @@ function normaliseLocalized(value: unknown, fallback: Localized): Localized {
   return { en: pick("en"), fr: pick("fr"), ar: pick("ar") };
 }
 
+/**
+ * The sitter's wilaya and commune, out of storage (Audit 1.3.1).
+ *
+ * Profiles saved before the commune became optional have no `wilayaCode` — it
+ * is DERIVED from their commune, which is reading a fact, not inventing one
+ * (B3). A commune that names nothing, or that does not belong to the stored
+ * wilaya, is dropped rather than shown under the wrong place; the commune
+ * wins over a contradicting wilaya because it was the more precise answer.
+ */
+function restoreSitterLocation(wilaya: unknown, commune: unknown): { wilayaCode: string; communeCode: string } {
+  const communeCode = normalizeCommuneId(typeof commune === "string" ? commune : null);
+  if (communeCode) return { wilayaCode: getWilayaOfCommune(communeCode)?.id ?? "", communeCode };
+  return { wilayaCode: normalizeWilayaId(typeof wilaya === "string" ? wilaya : null) ?? "", communeCode: "" };
+}
+
 function restoreSitter(value: unknown): SitterWorkspace | null {
   if (typeof value !== "object" || value === null) return null;
   const workspace = value as Record<string, unknown>;
@@ -501,7 +522,7 @@ function restoreSitter(value: unknown): SitterWorkspace | null {
     /* Read by `canPublish` (now on /search, through `publicSitters`) with
        `.trim()`: a stored null or a pre-Localized string here took the
        results page down. */
-    communeCode: typeof profile.communeCode === "string" ? profile.communeCode : "",
+    ...restoreSitterLocation(profile.wilayaCode, profile.communeCode),
     headline: normaliseLocalized(profile.headline, empty.headline),
     about: normaliseLocalized(profile.about, empty.about),
     limits: (profile.limits as unknown[]).map((limit) => normaliseLocalized(limit, asLocalized(""))).filter((l) => l.en.trim() || l.fr.trim() || l.ar.trim()),
@@ -684,37 +705,39 @@ function readRecord(key: string): Record<string, unknown> | null {
   return isObject(parsed) ? parsed : null;
 }
 
+/** The record as this build reads it — the one place that decides which
+    stored versions are understood. Shared by the first load and by every
+    later re-read (another tab's write, a commit that rebases). */
+function stateFromRecord(current: Record<string, unknown>): DemoState {
+  /* v2 and v3 are both readable, and that distinction matters.
+     The ONLY shape that changed between them is the pet, and `restorePet`
+     already reads the v2 flat pet — so discarding a v2 record would throw
+     away an account, its pets, its requests and its sitter workspace to
+     avoid a migration this code has already written. Version mismatch
+     discards in order to prevent a CRASH (checklist B4); it is not a
+     licence to delete a version this build can understand.
+
+     A version this build does not know — a record written by a NEWER build,
+     after the visitor moved back — is still discarded rather than read
+     field by field and half-understood. */
+  return READABLE_VERSIONS.includes(current.version as number) ? restore(current) : INITIAL_STATE;
+}
+
 export function loadState(): DemoState {
   if (typeof window === "undefined") return INITIAL_STATE;
   try {
     const current = readRecord(STORAGE_KEY);
-    if (current) {
-      /* v2 and v3 are both readable, and that distinction matters.
-         The ONLY shape that changed between them is the pet, and `restorePet`
-         already reads the v2 flat pet — so discarding a v2 record would throw
-         away an account, its pets, its requests and its sitter workspace to
-         avoid a migration this code has already written. Version mismatch
-         discards in order to prevent a CRASH (checklist B4); it is not a
-         licence to delete a version this build can understand.
-
-         A version this build does not know — a record written by a NEWER build,
-         after the visitor moved back — is still discarded rather than read
-         field by field and half-understood. */
-      return READABLE_VERSIONS.includes(current.version as number)
-        ? restore(current)
-        : INITIAL_STATE;
-    }
+    if (current) return stateFromRecord(current);
 
     const legacy = readRecord(LEGACY_STORAGE_KEY);
     if (legacy && legacy.version === 1) {
       const migrated = migrateFromV1(legacy);
       /* The old record is removed ONLY once the new one is known to be on
-         disk. Ordering alone is not enough: `saveState` swallows its own
-         exception, so on a full quota or in Safari private mode it returns
-         normally having written nothing — and `removeItem` succeeds in exactly
-         those cases. That combination would destroy the visitor's account,
-         pets, requests and sitter profile silently. If the write failed, the
-         v1 record stays and migration is retried on the next load. */
+         disk. Ordering alone is not enough: on a full quota or in Safari
+         private mode the write can fail while `removeItem` succeeds, and that
+         combination would destroy the visitor's account, pets, requests and
+         sitter profile silently. If the write failed, the v1 record stays and
+         migration is retried on the next load. */
       if (saveState(migrated)) window.localStorage.removeItem(LEGACY_STORAGE_KEY);
       return migrated;
     }
@@ -728,28 +751,118 @@ export function loadState(): DemoState {
   }
 }
 
-/** Returns whether the record actually reached storage. The migration depends
-    on the answer before it deletes anything. */
-export function saveState(state: DemoState): boolean {
-  if (typeof window === "undefined") return false;
+/* ------------------------------------------------- reading and writing raw */
+
+/** Storage could not be read at all — distinct from "nothing stored". */
+export const UNREADABLE = Symbol("unreadable");
+
+/** The stored record exactly as it sits in localStorage, so a tab can tell
+    whether ANOTHER tab wrote since it last looked by comparing strings —
+    no revision counter to keep in step, and nothing to migrate. */
+export function readStoredRaw(): string | null | typeof UNREADABLE {
+  if (typeof window === "undefined") return UNREADABLE;
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stripTransientFields(state)));
-    return true;
+    return window.localStorage.getItem(STORAGE_KEY);
   } catch {
-    /* Storage unavailable — the demo keeps working in memory for this tab. */
-    return false;
+    return UNREADABLE;
   }
 }
 
-export function clearStoredState(): void {
-  if (typeof window === "undefined") return;
+/** A raw record back into state. Same rules as the first load: untrusted
+    input, validated per slice, and an unknown version is not half-read. */
+export function stateFromRaw(raw: string | null): DemoState {
+  if (raw === null) return INITIAL_STATE;
   try {
-    window.localStorage.removeItem(STORAGE_KEY);
-    /* The 1.1 key too. "You can erase everything" has to be true even for a
-       visitor whose migration had not run yet, and a leftover record under the
-       old key would come back on the next load. */
-    window.localStorage.removeItem(LEGACY_STORAGE_KEY);
+    const parsed: unknown = JSON.parse(raw);
+    return isObject(parsed) ? stateFromRecord(parsed) : INITIAL_STATE;
   } catch {
-    /* ignore */
+    return INITIAL_STATE;
   }
 }
+
+export type WriteResult = { ok: true; raw: string | null } | { ok: false };
+
+/**
+ * Persist a state and CONFIRM it — Audit 1.3.1 A-02.
+ *
+ * `setItem` throwing (quota, blocked storage) is one way a save fails; a write
+ * that returns normally but does not read back is the other, and both used to
+ * be swallowed while the screen went on as if the data were kept. The answer
+ * is now a fact the caller must act on: `ok` only when the record read back is
+ * byte for byte the one written.
+ *
+ * Back to the initial state means the visitor asked to be forgotten, so the
+ * record is removed rather than rewritten with empty values — and a removal is
+ * confirmed the same way.
+ */
+export function writeState(state: DemoState): WriteResult {
+  if (typeof window === "undefined") return { ok: false };
+  try {
+    if (state === INITIAL_STATE) {
+      window.localStorage.removeItem(STORAGE_KEY);
+      /* The 1.1 key too. "You can erase everything" has to be true even for
+         a visitor whose migration had not run yet. */
+      window.localStorage.removeItem(LEGACY_STORAGE_KEY);
+      return window.localStorage.getItem(STORAGE_KEY) === null ? { ok: true, raw: null } : { ok: false };
+    }
+    const json = JSON.stringify(stripTransientFields(state));
+    const previous = window.localStorage.getItem(STORAGE_KEY);
+    window.localStorage.setItem(STORAGE_KEY, json);
+    if (window.localStorage.getItem(STORAGE_KEY) === json) return { ok: true, raw: json };
+    /* Written but not as written: put back what was there, so the next read
+       does not build on a damaged record. */
+    try {
+      if (previous === null) window.localStorage.removeItem(STORAGE_KEY);
+      else window.localStorage.setItem(STORAGE_KEY, previous);
+    } catch {
+      /* nothing more this can do */
+    }
+    return { ok: false };
+  } catch {
+    return { ok: false };
+  }
+}
+
+/** Returns whether the record actually reached storage. The migration depends
+    on the answer before it deletes anything. */
+export function saveState(state: DemoState): boolean {
+  return writeState(state).ok;
+}
+
+export function clearStoredState(): void {
+  writeState(INITIAL_STATE);
+}
+
+/**
+ * Re-attach what storage never holds.
+ *
+ * A photo is an object URL, valid only in the document that made it, so it is
+ * stripped on write. When this tab re-reads the record — another tab saved,
+ * or a commit rebased on fresh storage — the animals and the profile it
+ * already shows must not lose their photo for it. Matched by id: a photo is
+ * never moved onto a different animal.
+ */
+export function carryTransientFields(fresh: DemoState, current: DemoState): DemoState {
+  const photos = new Map(current.pets.flatMap((p) => (p.photoUrl ? [[p.id, p.photoUrl] as const] : [])));
+  const requestPhotos = new Map(
+    current.requests.flatMap((r) => (r.pet.photoUrl ? [[r.id, r.pet.photoUrl] as const] : [])),
+  );
+  const sitterPhoto =
+    current.sitter?.profile.photoUrl && current.sitter.profile.id === fresh.sitter?.profile.id
+      ? current.sitter.profile.photoUrl
+      : undefined;
+  if (!photos.size && !requestPhotos.size && !sitterPhoto) return fresh;
+  return {
+    ...fresh,
+    pets: fresh.pets.map((p) => (!p.photoUrl && photos.has(p.id) ? { ...p, photoUrl: photos.get(p.id) } : p)),
+    requests: fresh.requests.map((r) =>
+      !r.pet.photoUrl && requestPhotos.has(r.id) ? { ...r, pet: { ...r.pet, photoUrl: requestPhotos.get(r.id) } } : r,
+    ),
+    sitter:
+      fresh.sitter && sitterPhoto && !fresh.sitter.profile.photoUrl
+        ? { ...fresh.sitter, profile: { ...fresh.sitter.profile, photoUrl: sitterPhoto } }
+        : fresh.sitter,
+  };
+}
+
+export { STORAGE_KEY };

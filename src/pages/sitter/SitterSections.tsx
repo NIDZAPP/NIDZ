@@ -10,6 +10,7 @@ import FlowScreen from "@/components/shared/FlowScreen";
 import { useReturnToDashboard } from "@/hooks/use-return-to-dashboard";
 import OptionGroup from "@/components/shared/OptionGroup";
 import { FieldShell } from "@/components/shared/fields";
+import { DraftNotice, SaveFeedback } from "@/components/shared/SaveFeedback";
 import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,10 +23,11 @@ import {
   SLEEPING_PLACES,
   TRANSPORT_MODES,
   emptyCareConditions,
+  restoreCareConditions,
   speciesBlocksFor,
   type TransportMode,
 } from "@/data/care-conditions";
-import type { Declared } from "@/data/pets";
+import { DECLARED_OPTIONS, type Declared } from "@/data/pets";
 import {
   PROFESSION_KINDS,
   asLocalized,
@@ -33,8 +35,12 @@ import {
   type ProfessionalBackground,
   type SitterExperience,
 } from "@/data/types";
+import { answersKeyedBy, listOf, oneOf } from "@/hooks/draft-validators";
+import { useDraftField } from "@/hooks/use-form-draft";
 import { useAppLocale } from "@/hooks/use-locale";
+import { useSave, type SaveController } from "@/hooks/use-save";
 import { useDemo } from "@/state/demo/context";
+import { patchProfile, watchProfile } from "@/state/demo/profile-commit";
 
 const DASHBOARD = "/sitter/profile";
 
@@ -52,6 +58,7 @@ function Section({
   intro,
   children,
   onSave,
+  save,
   error,
   footNote,
 }: {
@@ -60,8 +67,11 @@ function Section({
   children: ReactNode;
   /** Returns false to stay on the section. A section that refuses to save
       focuses its own offending control first: the action bar is pinned to the
-      bottom, so an error rendered above the fold is invisible on a phone. */
-  onSave: () => boolean;
+      bottom, so an error rendered above the fold is invisible on a phone. A
+      save the browser refused, or one another tab overtook, returns false
+      too (Audit 1.3.1 A-02 / A-19) and `SaveFeedback` says which. */
+  onSave: (options: { force: boolean }) => unknown;
+  save: SaveController;
   error?: string;
   footNote?: ReactNode;
 }) {
@@ -71,6 +81,10 @@ function Section({
   const formId = "sitter-section";
 
   if (!state.sitter) return <Navigate to="/sitter/start" replace />;
+
+  const run = (force = false) => {
+    if (onSave({ force })) returnToDashboard();
+  };
 
   return (
     <>
@@ -84,6 +98,7 @@ function Section({
         backTo={DASHBOARD}
         title={title}
         intro={intro}
+        headerExtra={<DraftNotice save={save} />}
         action={
           <Button type="submit" form={formId} size="lg">
             {t("sitterSections.save")}
@@ -97,7 +112,7 @@ function Section({
           className="space-y-8"
           onSubmit={(e) => {
             e.preventDefault();
-            if (onSave()) returnToDashboard();
+            run();
           }}
         >
           {children}
@@ -106,6 +121,7 @@ function Section({
               {error}
             </p>
           )}
+          <SaveFeedback save={save} onRetry={() => run()} onKeepMine={() => run(true)} />
         </form>
       </FlowScreen>
     </>
@@ -138,25 +154,39 @@ const CAPABILITIES = [
  */
 export function SectionExperience() {
   const { t } = useTranslation();
-  const { state, dispatch } = useDemo();
+  const { state } = useDemo();
   const profile = state.sitter?.profile;
+  const scope = "sitter-experience";
+  const saver = useSave({
+    scope,
+    watch: (s) => {
+      const e = s.sitter?.profile.experience;
+      return e && Object.fromEntries(CAPABILITIES.map((key) => [key, e[key]]));
+    },
+  });
 
-  const [answers, setAnswers] = useState<Record<string, Declared>>(() =>
-    Object.fromEntries(CAPABILITIES.map((key) => [key, profile?.experience[key] ?? "unknown"])),
+  const [answers, setAnswers] = useDraftField<Record<(typeof CAPABILITIES)[number], Declared>>(
+    scope,
+    "answers",
+    () =>
+      Object.fromEntries(CAPABILITIES.map((key) => [key, profile?.experience[key] ?? "unknown"])) as Record<
+        (typeof CAPABILITIES)[number],
+        Declared
+      >,
+    { validate: answersKeyedBy(CAPABILITIES, DECLARED_OPTIONS) },
   );
 
-  const save = () => {
+  const save = ({ force }: { force: boolean }) => {
     if (!profile) return false;
-    dispatch({
-      type: "patchSitterProfile",
-      patch: {
+    return saver.save(
+      patchProfile((current) => ({
         /* Spread first: this section owns the capability answers and nothing
            else, and rebuilding the record would reset the years and species
            the "about" section collects. */
-        experience: { ...profile.experience, ...(answers as Partial<SitterExperience>) },
-      },
-    });
-    return true;
+        experience: { ...current.experience, ...(answers as Partial<SitterExperience>) },
+      })),
+      { force },
+    );
   };
 
   return (
@@ -164,6 +194,7 @@ export function SectionExperience() {
       title={t("sitterSections.experience.label")}
       intro={t("sitterExperience.intro")}
       onSave={save}
+      save={saver}
       footNote={<DemoLine>{t("sitterExperience.demoNote")}</DemoLine>}
     >
       {CAPABILITIES.map((key) => (
@@ -198,20 +229,30 @@ export function SectionExperience() {
 export function SectionProfessional() {
   const { t } = useTranslation();
   const lng = useAppLocale();
-  const { state, dispatch } = useDemo();
+  const { state } = useDemo();
   const profile = state.sitter?.profile;
+  const scope = "sitter-professional";
+  const saver = useSave({ scope, watch: watchProfile(["professional"]) });
 
-  const [kind, setKind] = useState<ProfessionalBackground["kind"]>(profile?.professional.kind ?? null);
-  const [detail, setDetail] = useState(
+  const [kind, setKind] = useDraftField<ProfessionalBackground["kind"]>(
+    scope,
+    "kind",
+    () => profile?.professional.kind ?? null,
+    { validate: oneOf<NonNullable<ProfessionalBackground["kind"]>>([...PROFESSION_KINDS, "none"]) },
+  );
+  const [detail, setDetail] = useDraftField(scope, "detail", () =>
     profile ? localized(profile.professional.detail, lng) : "",
   );
-  const [years, setYears] = useState(
+  const [years, setYears] = useDraftField(scope, "years", () =>
     profile?.professional.years === null || profile?.professional.years === undefined
       ? ""
       : String(profile.professional.years),
   );
-  const [canEvidence, setCanEvidence] = useState<Declared>(
-    profile?.professional.canEvidence ?? "unknown",
+  const [canEvidence, setCanEvidence] = useDraftField<Declared>(
+    scope,
+    "canEvidence",
+    () => profile?.professional.canEvidence ?? "unknown",
+    { validate: oneOf(DECLARED_OPTIONS) },
   );
 
   /* The follow-up questions only exist once there is something to follow up.
@@ -219,11 +260,10 @@ export function SectionProfessional() {
      is the kind of dead field §50 warns about. */
   const hasBackground = kind !== null && kind !== "none";
 
-  const save = () => {
+  const save = ({ force }: { force: boolean }) => {
     const parsed = Number(years);
-    dispatch({
-      type: "patchSitterProfile",
-      patch: {
+    return saver.save(
+      patchProfile(() => ({
         professional: {
           kind,
           detail: asLocalized(hasBackground ? detail.trim() : ""),
@@ -233,9 +273,9 @@ export function SectionProfessional() {
               : null,
           canEvidence: hasBackground ? canEvidence : "unknown",
         },
-      },
-    });
-    return true;
+      })),
+      { force },
+    );
   };
 
   return (
@@ -243,6 +283,7 @@ export function SectionProfessional() {
       title={t("sitterSections.professional.label")}
       intro={t("sitterProfessional.intro")}
       onSave={save}
+      save={saver}
       footNote={<DemoLine>{t("sitterProfessional.demoNote")}</DemoLine>}
     >
       <div>
@@ -413,32 +454,57 @@ const fromCount = (value: number | null) => (value === null ? "" : String(value)
 export function SectionCare() {
   const { t } = useTranslation();
   const lng = useAppLocale();
-  const { state, dispatch } = useDemo();
+  const { state } = useDemo();
   const profile = state.sitter?.profile;
   const care = profile?.care ?? emptyCareConditions();
+  const scope = "sitter-care";
+  const saver = useSave({ scope, watch: watchProfile(["care"]) });
+  /* Each species block is checked by the same reader that checks a stored
+     profile, so a draft can never carry an answer the profile could not. */
+  const dogCare = (raw: unknown) => restoreCareConditions({ dog: raw }, null).dog;
+  const catCare = (raw: unknown) => restoreCareConditions({ cat: raw }, null).cat;
+  const birdCare = (raw: unknown) => restoreCareConditions({ bird: raw }, null).bird;
 
-  const [movement, setMovement] = useState(care.movement);
-  const [restrictedRooms, setRestrictedRooms] = useState(localized(care.restrictedRooms, lng));
-  const [containmentUse, setContainmentUse] = useState(care.containment.use);
-  const [containmentReason, setContainmentReason] = useState(
+  const [movement, setMovement] = useDraftField(scope, "movement", () => care.movement, {
+    validate: oneOf(MOVEMENT_SCOPES),
+  });
+  const [restrictedRooms, setRestrictedRooms] = useDraftField(scope, "restrictedRooms", () =>
+    localized(care.restrictedRooms, lng),
+  );
+  const [containmentUse, setContainmentUse] = useDraftField(scope, "containmentUse", () => care.containment.use, {
+    validate: oneOf(CONTAINMENT_USES),
+  });
+  const [containmentReason, setContainmentReason] = useDraftField(scope, "containmentReason", () =>
     localized(care.containment.reason, lng),
   );
-  const [maxHoursAlone, setMaxHoursAlone] = useState(fromCount(care.maxHoursAlone));
-  const [presence, setPresence] = useState(care.presence);
-  const [sleeping, setSleeping] = useState(care.sleeping);
-  const [feeding, setFeeding] = useState(care.feeding);
-  const [enrichment, setEnrichment] = useState(localized(care.enrichment, lng));
-  const [transport, setTransport] = useState<TransportMode[]>(care.transport);
-  const [canReachVet, setCanReachVet] = useState<Declared>(care.emergency.canReachVet);
-  const [emergencyPlan, setEmergencyPlan] = useState(localized(care.emergency.plan, lng));
+  const [maxHoursAlone, setMaxHoursAlone] = useDraftField(scope, "maxHoursAlone", () => fromCount(care.maxHoursAlone));
+  const [presence, setPresence] = useDraftField(scope, "presence", () => care.presence, {
+    validate: oneOf(DAYTIME_PRESENCE),
+  });
+  const [sleeping, setSleeping] = useDraftField(scope, "sleeping", () => care.sleeping, {
+    validate: oneOf(SLEEPING_PLACES),
+  });
+  const [feeding, setFeeding] = useDraftField(scope, "feeding", () => care.feeding, {
+    validate: oneOf(FEEDING_PLANS),
+  });
+  const [enrichment, setEnrichment] = useDraftField(scope, "enrichment", () => localized(care.enrichment, lng));
+  const [transport, setTransport] = useDraftField<TransportMode[]>(scope, "transport", () => care.transport, {
+    validate: listOf(TRANSPORT_MODES),
+  });
+  const [canReachVet, setCanReachVet] = useDraftField<Declared>(scope, "canReachVet", () => care.emergency.canReachVet, {
+    validate: oneOf(DECLARED_OPTIONS),
+  });
+  const [emergencyPlan, setEmergencyPlan] = useDraftField(scope, "emergencyPlan", () =>
+    localized(care.emergency.plan, lng),
+  );
 
-  const [dog, setDog] = useState(care.dog);
-  const [cat, setCat] = useState(care.cat);
-  const [bird, setBird] = useState(care.bird);
-  const [dogWalks, setDogWalks] = useState(fromCount(care.dog.walksPerDay));
-  const [dogMinutes, setDogMinutes] = useState(fromCount(care.dog.walkMinutes));
-  const [litterBoxes, setLitterBoxes] = useState(fromCount(care.cat.litterBoxes));
-  const [outOfCage, setOutOfCage] = useState(fromCount(care.bird.outOfCageHours));
+  const [dog, setDog] = useDraftField(scope, "dog", () => care.dog, { validate: dogCare });
+  const [cat, setCat] = useDraftField(scope, "cat", () => care.cat, { validate: catCare });
+  const [bird, setBird] = useDraftField(scope, "bird", () => care.bird, { validate: birdCare });
+  const [dogWalks, setDogWalks] = useDraftField(scope, "dogWalks", () => fromCount(care.dog.walksPerDay));
+  const [dogMinutes, setDogMinutes] = useDraftField(scope, "dogMinutes", () => fromCount(care.dog.walkMinutes));
+  const [litterBoxes, setLitterBoxes] = useDraftField(scope, "litterBoxes", () => fromCount(care.cat.litterBoxes));
+  const [outOfCage, setOutOfCage] = useDraftField(scope, "outOfCage", () => fromCount(care.bird.outOfCageHours));
 
   const [error, setError] = useState<string>();
   const reasonRef = useRef<HTMLTextAreaElement>(null);
@@ -447,15 +513,14 @@ export function SectionCare() {
   /* The reason only exists once containment does. */
   const contains = containmentUse !== null && containmentUse !== "never";
 
-  const save = () => {
+  const save = ({ force }: { force: boolean }) => {
     if (contains && containmentReason.trim() === "") {
       setError(t("sitterCare.containmentReasonRequired"));
       reasonRef.current?.focus();
       return false;
     }
-    dispatch({
-      type: "patchSitterProfile",
-      patch: {
+    return saver.save(
+      patchProfile(() => ({
         care: {
           movement,
           restrictedRooms: asLocalized(restrictedRooms.trim()),
@@ -480,9 +545,9 @@ export function SectionCare() {
           cat: { ...cat, litterBoxes: toCount(litterBoxes, 10) },
           bird: { ...bird, outOfCageHours: toCount(outOfCage, 24) },
         },
-      },
-    });
-    return true;
+      })),
+      { force },
+    );
   };
 
   return (
@@ -490,6 +555,7 @@ export function SectionCare() {
       title={t("sitterSections.care.label")}
       intro={t("sitterCare.intro")}
       onSave={save}
+      save={saver}
       error={error}
       footNote={<DemoLine>{t("sitterCare.demoNote")}</DemoLine>}
     >

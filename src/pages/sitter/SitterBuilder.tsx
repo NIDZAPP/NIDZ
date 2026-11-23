@@ -10,6 +10,7 @@ import FlowScreen from "@/components/shared/FlowScreen";
 import { useReturnToDashboard } from "@/hooks/use-return-to-dashboard";
 import OptionGroup from "@/components/shared/OptionGroup";
 import { DateRangeField, FieldShell, PhotoField } from "@/components/shared/fields";
+import { DraftNotice, SaveFeedback } from "@/components/shared/SaveFeedback";
 import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,8 +30,12 @@ import {
   type SitterProfile,
   type Species,
 } from "@/data/types";
+import { dateRangeOrNull, dateRanges, listOf, oneOf, stringsKeyedBy } from "@/hooks/draft-validators";
+import { useDraftField } from "@/hooks/use-form-draft";
 import { useAppLocale } from "@/hooks/use-locale";
+import { useSave, type SaveController } from "@/hooks/use-save";
 import { useDemo } from "@/state/demo/context";
+import { patchProfile, watchProfile } from "@/state/demo/profile-commit";
 import { formatDateRange } from "@/utils/dates";
 import { formatDZD } from "@/utils/format";
 
@@ -66,6 +71,7 @@ function BuilderStep({
   title,
   intro,
   onSubmit,
+  save,
   error,
   children,
   footNote,
@@ -74,8 +80,12 @@ function BuilderStep({
   intro?: string;
   /** Returns false to stay on the step. Each step focuses its own offending
       control before returning — the action bar is pinned to the bottom, so an
-      error rendered above the fold is invisible on a phone. */
-  onSubmit: () => boolean;
+      error rendered above the fold is invisible on a phone. Returns false too
+      when the save itself did not happen (Audit 1.3.1 A-02): the step stays,
+      with what was typed, and `SaveFeedback` says why. `force` is the
+      visitor's explicit choice to overwrite another tab's change. */
+  onSubmit: (options: { force: boolean }) => unknown;
+  save: SaveController;
   error?: string;
   children: ReactNode;
   footNote?: ReactNode;
@@ -89,6 +99,10 @@ function BuilderStep({
      to write into. */
   if (!state.sitter) return <Navigate to="/sitter/start" replace />;
 
+  const run = (force = false) => {
+    if (onSubmit({ force })) returnToDashboard();
+  };
+
   return (
     <>
       <Helmet>
@@ -100,6 +114,7 @@ function BuilderStep({
         backTo={DASHBOARD}
         title={title}
         intro={intro}
+        headerExtra={<DraftNotice save={save} />}
         action={
           <Button type="submit" form={formId} size="lg">
             {t("sitterSections.save")}
@@ -113,7 +128,7 @@ function BuilderStep({
           className="space-y-8"
           onSubmit={(e) => {
             e.preventDefault();
-            if (onSubmit()) returnToDashboard();
+            run();
           }}
         >
           {children}
@@ -122,18 +137,15 @@ function BuilderStep({
               {error}
             </p>
           )}
+          <SaveFeedback save={save} onRetry={() => run()} onKeepMine={() => run(true)} />
         </form>
       </FlowScreen>
     </>
   );
 }
 
-function useProfile(): [SitterProfile | null, (patch: Partial<SitterProfile>) => void] {
-  const { state, dispatch } = useDemo();
-  return [
-    state.sitter?.profile ?? null,
-    (patch) => dispatch({ type: "patchSitterProfile", patch }),
-  ];
+function useProfile(): SitterProfile | null {
+  return useDemo().state.sitter?.profile ?? null;
 }
 
 /* ------------------------------------------------------------------ 1. you */
@@ -141,13 +153,29 @@ function useProfile(): [SitterProfile | null, (patch: Partial<SitterProfile>) =>
 export function StepAbout() {
   const { t } = useTranslation();
   const lng = useAppLocale();
-  const [profile, patch] = useProfile();
+  const profile = useProfile();
+  const scope = "sitter-about";
+  const save = useSave({
+    scope,
+    watch: (s) => {
+      const p = s.sitter?.profile;
+      return p && { headline: p.headline, about: p.about, years: p.experience.years, species: p.experience.species };
+    },
+  });
 
-  const [photoUrl, setPhotoUrl] = useState<string | undefined>(profile?.photoUrl);
-  const [headline, setHeadline] = useState(profile ? localized(profile.headline, lng) : "");
-  const [about, setAbout] = useState(profile ? localized(profile.about, lng) : "");
-  const [years, setYears] = useState(profile?.experience.years ? String(profile.experience.years) : "");
-  const [species, setSpecies] = useState<Species[]>(profile?.experience.species ?? []);
+  /* The photo is an object URL: kept while moving between screens, never
+     across a reload, where it would point at nothing. */
+  const [photoUrl, setPhotoUrl] = useDraftField<string | undefined>(scope, "photoUrl", () => profile?.photoUrl, {
+    transient: true,
+  });
+  const [headline, setHeadline] = useDraftField(scope, "headline", () => (profile ? localized(profile.headline, lng) : ""));
+  const [about, setAbout] = useDraftField(scope, "about", () => (profile ? localized(profile.about, lng) : ""));
+  const [years, setYears] = useDraftField(scope, "years", () =>
+    profile?.experience.years ? String(profile.experience.years) : "",
+  );
+  const [species, setSpecies] = useDraftField<Species[]>(scope, "species", () => profile?.experience.species ?? [], {
+    validate: listOf(SPECIES),
+  });
   const [error, setError] = useState<string>();
   const headlineRef = useRef<HTMLInputElement>(null);
 
@@ -156,29 +184,33 @@ export function StepAbout() {
       title={t("sitterFlow.about.title")}
       intro={t("sitterFlow.about.intro")}
       error={error}
+      save={save}
       footNote={<DemoLine>{t("sitterFlow.about.demoNote")}</DemoLine>}
-      onSubmit={() => {
+      onSubmit={({ force }) => {
         if (!headline.trim()) {
           setError(t("sitterFlow.about.headlineRequired"));
           headlineRef.current?.focus();
           return false;
         }
-        patch({
-          photoUrl,
-          /* One typed string in every locale slot: this is the sitter's own
-             words, and Nidz does not translate what people write. */
-          headline: asLocalized(headline.trim()),
-          about: asLocalized(about.trim()),
-          /* Spread the existing record: this step owns only the years and the
-             species, and rebuilding the object from those two would silently
-             reset the eight capability answers the experience section collects. */
-          experience: {
-            ...profile!.experience,
-            years: Number(years) || 0,
-            species,
-          },
-        });
-        return true;
+        return save.save(
+          patchProfile((current) => ({
+            photoUrl,
+            /* One typed string in every locale slot: this is the sitter's own
+               words, and Nidz does not translate what people write. */
+            headline: asLocalized(headline.trim()),
+            about: asLocalized(about.trim()),
+            /* Spread the existing record: this step owns only the years and
+               the species, and rebuilding the object from those two would
+               silently reset the eight capability answers the experience
+               section collects. */
+            experience: {
+              ...current.experience,
+              years: Number(years) || 0,
+              species,
+            },
+          })),
+          { force },
+        );
       }}
     >
       <PhotoField label={t("sitterFlow.about.photoLabel")} value={photoUrl} onChange={setPhotoUrl} />
@@ -255,13 +287,21 @@ export function StepAbout() {
 export function StepServices() {
   const { t } = useTranslation();
   const lng = useAppLocale();
-  const [profile, patch] = useProfile();
+  const profile = useProfile();
+  const scope = "sitter-services";
+  const save = useSave({ scope, watch: watchProfile(["services", "rates"]) });
 
-  const [services, setServices] = useState<CareType[]>(profile?.services ?? []);
-  const [rates, setRates] = useState<Partial<Record<CareType, string>>>(() =>
-    Object.fromEntries(
-      (Object.entries(profile?.rates ?? {}) as [CareType, number][]).map(([k, v]) => [k, String(v)]),
-    ),
+  const [services, setServices] = useDraftField<CareType[]>(scope, "services", () => profile?.services ?? [], {
+    validate: listOf(CARE_TYPES),
+  });
+  const [rates, setRates] = useDraftField<Partial<Record<CareType, string>>>(
+    scope,
+    "rates",
+    () =>
+      Object.fromEntries(
+        (Object.entries(profile?.rates ?? {}) as [CareType, number][]).map(([k, v]) => [k, String(v)]),
+      ),
+    { validate: stringsKeyedBy(CARE_TYPES) },
   );
   const [error, setError] = useState<string>();
   const servicesRef = useRef<HTMLFieldSetElement>(null);
@@ -272,7 +312,8 @@ export function StepServices() {
       title={t("sitterFlow.services.title")}
       intro={t("sitterFlow.services.intro")}
       error={error}
-      onSubmit={() => {
+      save={save}
+      onSubmit={({ force }) => {
         if (services.length === 0) {
           setError(t("sitterFlow.services.required"));
           servicesRef.current?.focus();
@@ -290,13 +331,15 @@ export function StepServices() {
           rateRefs.current[invalid]?.focus();
           return false;
         }
-        patch({
-          services,
-          rates: Object.fromEntries(
-            services.map((s): [CareType, number] => [s, Number(rates[s])]),
-          ),
-        });
-        return true;
+        return save.save(
+          patchProfile(() => ({
+            services,
+            rates: Object.fromEntries(
+              services.map((s): [CareType, number] => [s, Number(rates[s])]),
+            ),
+          })),
+          { force },
+        );
       }}
     >
       <fieldset ref={servicesRef} tabIndex={-1} className="focus:outline-none">
@@ -361,11 +404,17 @@ export function StepServices() {
 
 export function StepAnimals() {
   const { t } = useTranslation();
-  const [profile, patch] = useProfile();
+  const profile = useProfile();
+  const scope = "sitter-animals";
+  const save = useSave({ scope, watch: watchProfile(["acceptedSpecies", "acceptedDogSizes", "maxAnimals"]) });
 
-  const [accepted, setAccepted] = useState<Species[]>(profile?.acceptedSpecies ?? []);
-  const [sizes, setSizes] = useState<DogSize[]>(profile?.acceptedDogSizes ?? []);
-  const [max, setMax] = useState(String(profile?.maxAnimals ?? 1));
+  const [accepted, setAccepted] = useDraftField<Species[]>(scope, "accepted", () => profile?.acceptedSpecies ?? [], {
+    validate: listOf(SPECIES),
+  });
+  const [sizes, setSizes] = useDraftField<DogSize[]>(scope, "sizes", () => profile?.acceptedDogSizes ?? [], {
+    validate: listOf(DOG_SIZES),
+  });
+  const [max, setMax] = useDraftField(scope, "max", () => String(profile?.maxAnimals ?? 1));
   const [error, setError] = useState<string>();
   const speciesRef = useRef<HTMLFieldSetElement>(null);
   const sizesRef = useRef<HTMLFieldSetElement>(null);
@@ -374,7 +423,8 @@ export function StepAnimals() {
     <BuilderStep
       title={t("sitterFlow.animals.title")}
       error={error}
-      onSubmit={() => {
+      save={save}
+      onSubmit={({ force }) => {
         if (accepted.length === 0) {
           setError(t("sitterFlow.animals.required"));
           speciesRef.current?.focus();
@@ -385,12 +435,14 @@ export function StepAnimals() {
           sizesRef.current?.focus();
           return false;
         }
-        patch({
-          acceptedSpecies: accepted,
-          acceptedDogSizes: accepted.includes("dog") ? sizes : [],
-          maxAnimals: Math.max(1, Number(max) || 1),
-        });
-        return true;
+        return save.save(
+          patchProfile(() => ({
+            acceptedSpecies: accepted,
+            acceptedDogSizes: accepted.includes("dog") ? sizes : [],
+            maxAnimals: Math.max(1, Number(max) || 1),
+          })),
+          { force },
+        );
       }}
     >
       <fieldset ref={speciesRef} tabIndex={-1} className="focus:outline-none">
@@ -457,16 +509,35 @@ export function StepAnimals() {
 export function StepHousing() {
   const { t } = useTranslation();
   const lng = useAppLocale();
-  const [profile, patch] = useProfile();
+  const profile = useProfile();
+  const scope = "sitter-housing";
+  const save = useSave({
+    scope,
+    watch: (s) => {
+      const h = s.sitter?.profile.housing;
+      return h && { type: h.type, outdoor: h.outdoor, residentPets: h.residentPets, conditions: h.conditions };
+    },
+  });
 
   /* Null until answered. Seeding "appartement / aucun espace extérieur" and
      letting Continue through would publish two declarations the sitter never
      made, under a line reading "informations fournies par le pet-sitter". */
-  const [type, setType] = useState<HousingType | null>(profile?.housing.type ?? null);
-  const [outdoor, setOutdoor] = useState<OutdoorSpace | null>(profile?.housing.outdoor ?? null);
-  const [dogs, setDogs] = useState(String(profile?.housing.residentPets.find((p) => p.species === "dog")?.count ?? 0));
-  const [cats, setCats] = useState(String(profile?.housing.residentPets.find((p) => p.species === "cat")?.count ?? 0));
-  const [conditions, setConditions] = useState(
+  const [type, setType] = useDraftField<HousingType | null>(scope, "type", () => profile?.housing.type ?? null, {
+    validate: oneOf<HousingType>(["apartment", "house"]),
+  });
+  const [outdoor, setOutdoor] = useDraftField<OutdoorSpace | null>(
+    scope,
+    "outdoor",
+    () => profile?.housing.outdoor ?? null,
+    { validate: oneOf<OutdoorSpace>(["none", "balcony", "yard", "garden"]) },
+  );
+  const [dogs, setDogs] = useDraftField(scope, "dogs", () =>
+    String(profile?.housing.residentPets.find((p) => p.species === "dog")?.count ?? 0),
+  );
+  const [cats, setCats] = useDraftField(scope, "cats", () =>
+    String(profile?.housing.residentPets.find((p) => p.species === "cat")?.count ?? 0),
+  );
+  const [conditions, setConditions] = useDraftField(scope, "conditions", () =>
     profile?.housing.conditions ? localized(profile.housing.conditions, lng) : "",
   );
   const [error, setError] = useState<string>();
@@ -478,7 +549,8 @@ export function StepHousing() {
       error={error}
       title={t("sitterFlow.housing.title")}
       intro={t("sitterFlow.housing.intro")}
-      onSubmit={() => {
+      save={save}
+      onSubmit={({ force }) => {
         if (!type) {
           setError(t("sitterFlow.housing.typeRequired"));
           typeRef.current?.focus();
@@ -493,16 +565,18 @@ export function StepHousing() {
           ...(Number(dogs) > 0 ? [{ species: "dog" as Species, count: Number(dogs) }] : []),
           ...(Number(cats) > 0 ? [{ species: "cat" as Species, count: Number(cats) }] : []),
         ];
-        patch({
-          housing: {
-            ...profile!.housing,
-            type,
-            outdoor,
-            residentPets,
-            conditions: conditions.trim() ? asLocalized(conditions.trim()) : null,
-          },
-        });
-        return true;
+        return save.save(
+          patchProfile((current) => ({
+            housing: {
+              ...current.housing,
+              type,
+              outdoor,
+              residentPets,
+              conditions: conditions.trim() ? asLocalized(conditions.trim()) : null,
+            },
+          })),
+          { force },
+        );
       }}
     >
       <div>
@@ -578,10 +652,14 @@ export function StepHousing() {
 export function StepLimits() {
   const { t } = useTranslation();
   const lng = useAppLocale();
-  const [profile, patch] = useProfile();
+  const profile = useProfile();
+  const scope = "sitter-limits";
+  const save = useSave({ scope, watch: watchProfile(["limits"]) });
 
-  const [items, setItems] = useState<string[]>(profile?.limits.map((l) => localized(l, lng)) ?? []);
-  const [draft, setDraft] = useState("");
+  const [items, setItems] = useDraftField<string[]>(scope, "items", () => profile?.limits.map((l) => localized(l, lng)) ?? [], {
+    validate: (raw) => (Array.isArray(raw) ? raw.filter((x): x is string => typeof x === "string") : null),
+  });
+  const [draft, setDraft] = useDraftField(scope, "draft", () => "");
 
   const add = () => {
     const value = draft.trim();
@@ -594,11 +672,11 @@ export function StepLimits() {
     <BuilderStep
       title={t("sitterFlow.limits.title")}
       intro={t("sitterFlow.limits.intro")}
-      onSubmit={() => {
+      save={save}
+      onSubmit={({ force }) => {
         /* Anything typed but not yet added would otherwise be silently lost. */
         const all = draft.trim() ? [...items, draft.trim()] : items;
-        patch({ limits: all.map(asLocalized) });
-        return true;
+        return save.save(patchProfile(() => ({ limits: all.map(asLocalized) })), { force });
       }}
     >
       {items.length > 0 && (
@@ -646,28 +724,40 @@ export function StepLimits() {
 export function StepAvailability() {
   const { t } = useTranslation();
   const lng = useAppLocale();
-  const [profile, patch] = useProfile();
+  const profile = useProfile();
+  const scope = "sitter-availability";
+  const save = useSave({
+    scope,
+    watch: (s) => s.sitter?.profile.declaredUnavailable,
+  });
 
-  const [ranges, setRanges] = useState<DateRange[]>(profile?.declaredUnavailable ?? []);
-  const [draft, setDraft] = useState<DateRange | null>(null);
+  const [ranges, setRanges] = useDraftField<DateRange[]>(scope, "ranges", () => profile?.declaredUnavailable ?? [], {
+    validate: dateRanges,
+  });
+  const [draft, setDraft] = useDraftField<DateRange | null>(scope, "draft", () => null, {
+    validate: dateRangeOrNull,
+  });
 
   return (
     <BuilderStep
       title={t("sitterFlow.availability.title")}
       intro={t("sitterFlow.availability.intro")}
       footNote={<DemoLine>{t("sitterFlow.availability.demoNote")}</DemoLine>}
-      onSubmit={() => {
+      save={save}
+      onSubmit={({ force }) => {
         const all = draft ? [...ranges, draft] : ranges;
         /* Declaring nothing is a complete answer here, and an empty array is
            indistinguishable from an unopened section — so saving records that
            the question was actually answered. */
-        patch({
-          declaredUnavailable: all,
-          confirmedSections: profile?.confirmedSections.includes("availability")
-            ? profile.confirmedSections
-            : [...(profile?.confirmedSections ?? []), "availability"],
-        });
-        return true;
+        return save.save(
+          patchProfile((current) => ({
+            declaredUnavailable: all,
+            confirmedSections: current.confirmedSections.includes("availability")
+              ? current.confirmedSections
+              : [...current.confirmedSections, "availability"],
+          })),
+          { force },
+        );
       }}
     >
       {ranges.length > 0 && (

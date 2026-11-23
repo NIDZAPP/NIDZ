@@ -5,11 +5,16 @@ import { Navigate, useNavigate } from "react-router-dom";
 
 import FlowScreen from "@/components/shared/FlowScreen";
 import { LocationFields } from "@/components/shared/fields";
+import { DraftNotice, SaveFeedback } from "@/components/shared/SaveFeedback";
 import { Button } from "@/components/ui/button";
+import { checkLocation, normalizeCommuneId, normalizeWilayaId } from "@/data/algeria";
+import { useDraftField } from "@/hooks/use-form-draft";
 import { useAppLocale } from "@/hooks/use-locale";
+import { useSave } from "@/hooks/use-save";
 import { useDemo } from "@/state/demo/context";
 
 const FORM_ID = "need-location";
+const SCOPE = "need-location";
 
 /**
  * Step 2 of 3 — where.
@@ -26,10 +31,29 @@ export default function NeedLocation() {
   const { t } = useTranslation();
   const locale = useAppLocale();
   const navigate = useNavigate();
-  const { state, dispatch } = useDemo();
+  const { state } = useDemo();
+  /* The brief is this browser's own working copy, so no other-tab check:
+     the last "Continuer" is the brief. The save itself is still confirmed. */
+  const save = useSave({ scope: SCOPE });
 
-  const [wilayaCode, setWilayaCode] = useState(state.need.wilayaCode);
-  const [communeCode, setCommuneCode] = useState(state.need.communeCode);
+  /* Kept as a draft until "Continuer" (Audit 1.3.1 A-01). */
+  const [location, setLocation] = useDraftField<{ wilayaCode: string | null; communeCode: string | null }>(
+    SCOPE,
+    "location",
+    () => ({ wilayaCode: state.need.wilayaCode, communeCode: state.need.communeCode }),
+    {
+      validate: (raw) => {
+        if (typeof raw !== "object" || raw === null) return null;
+        const r = raw as { wilayaCode?: unknown; communeCode?: unknown };
+        const value = {
+          wilayaCode: normalizeWilayaId(typeof r.wilayaCode === "string" ? r.wilayaCode : null),
+          communeCode: normalizeCommuneId(typeof r.communeCode === "string" ? r.communeCode : null),
+        };
+        return checkLocation(value, { wilayaRequired: false }) ? null : value;
+      },
+    },
+  );
+  const { wilayaCode, communeCode } = location;
   const [error, setError] = useState<string>();
   const wilayaRef = useRef<HTMLButtonElement>(null);
 
@@ -39,15 +63,17 @@ export default function NeedLocation() {
   if (!state.need.petId) return <Navigate to="/owner/need/pet" replace />;
 
   const submit = () => {
-    if (!wilayaCode) {
-      setError(t("need.location.wilayaRequired"));
+    /* The same rule as every location form: wilaya required here, commune
+       optional for every wilaya (Audit 1.3.1). */
+    const problem = checkLocation(location, { wilayaRequired: true });
+    if (problem) {
+      setError(t(problem === "wilayaRequired" ? "need.location.wilayaRequired" : "location.invalid"));
       /* The action bar is pinned to the bottom and the field is above the
          fold; without moving focus the error is invisible at 320×640. */
       wilayaRef.current?.focus();
       return;
     }
-    dispatch({ type: "setNeed", patch: { wilayaCode, communeCode } });
-    navigate("/owner/need/care");
+    if (save.save({ type: "setNeed", patch: { wilayaCode, communeCode } })) navigate("/owner/need/care");
   };
 
   return (
@@ -61,6 +87,7 @@ export default function NeedLocation() {
         backTo="/owner/need/pet"
         title={t("need.location.title")}
         intro={t("need.location.intro")}
+        headerExtra={<DraftNotice save={save} />}
         action={
           <Button type="submit" form={FORM_ID} size="lg">
             {t("common.continue")}
@@ -81,8 +108,7 @@ export default function NeedLocation() {
             communeCode={communeCode}
             wilayaRef={wilayaRef}
             onChange={(next) => {
-              setWilayaCode(next.wilayaCode);
-              setCommuneCode(next.communeCode);
+              setLocation(next);
               setError(undefined);
             }}
             wilayaLabel={t("need.location.wilayaLabel")}
@@ -93,6 +119,7 @@ export default function NeedLocation() {
             error={error}
           />
           <p className="mt-6 text-sm text-muted-foreground">{t("need.location.coverage")}</p>
+          <SaveFeedback className="mt-6" save={save} onRetry={submit} />
         </form>
       </FlowScreen>
     </>

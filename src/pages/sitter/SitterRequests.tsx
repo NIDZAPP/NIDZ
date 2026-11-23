@@ -13,6 +13,8 @@ import { awaitingReplyFrom } from "@/data/clarification";
 import { findRequest, requestsReceived, requestsSent, sitterNameFor } from "@/data/repository";
 import type { CareRequest } from "@/data/types";
 import { useSwitchWorkspace } from "@/hooks/use-workspace";
+import { SaveFeedback } from "@/components/shared/SaveFeedback";
+import { useSave } from "@/hooks/use-save";
 import { useDemo } from "@/state/demo/context";
 
 /**
@@ -147,7 +149,16 @@ function IncomingRequest({
   answeredRef: React.MutableRefObject<string | null>;
 }) {
   const { t } = useTranslation();
-  const { state, dispatch } = useDemo();
+  const { state } = useDemo();
+  /* A decision is recorded only once storage confirms it, and only on a
+     request that is still pending as stored — a second tab that still shows
+     the buttons cannot turn an acceptance into a refusal (A-02 / A-19). */
+  const save = useSave({ watch: (s) => s.requests.find((r) => r.id === request.id)?.status ?? null });
+  const decide = (status: "accepted" | "declined") => {
+    answeredRef.current = request.id;
+    if (!save.save({ type: "respondToRequest", id: request.id, status })) answeredRef.current = null;
+  };
+  const lastDecision = useRef<"accepted" | "declined">("accepted");
   const [asking, setAsking] = useState(false);
   const askRef = useRef<HTMLButtonElement>(null);
   const restoreAsk = useRef(false);
@@ -203,8 +214,8 @@ function IncomingRequest({
               type="button"
               size="lg"
               onClick={() => {
-                answeredRef.current = request.id;
-                dispatch({ type: "respondToRequest", id: request.id, status: "accepted" });
+                lastDecision.current = "accepted";
+                decide("accepted");
               }}
             >
               {t("sitterRequests.accept")}
@@ -220,14 +231,15 @@ function IncomingRequest({
               type="button"
               variant="outline"
               onClick={() => {
-                answeredRef.current = request.id;
-                dispatch({ type: "respondToRequest", id: request.id, status: "declined" });
+                lastDecision.current = "declined";
+                decide("declined");
               }}
             >
               {t("sitterRequests.decline")}
             </Button>
           </div>
           <p className="mt-3 max-w-[64ch] text-sm text-muted-foreground">{t("sitterRequests.acceptNote")}</p>
+          <SaveFeedback className="mt-4" save={save} onRetry={() => decide(lastDecision.current)} />
         </>
       ) : (
         <p
