@@ -11,9 +11,9 @@ import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PHONE_PREFIX, SPECIES, type Species } from "@/data/types";
+import { useFormDraft } from "@/hooks/use-form-draft";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useDemo } from "@/state/demo/context";
-import { toISODate, today } from "@/utils/dates";
 import { sameOriginPath } from "@/utils/safe-path";
 
 const FORM_ID = "owner-account";
@@ -36,14 +36,8 @@ const DIGITS = /^\d{9}$/;
  *   - First and last name. A sitter deciding whether to take your animal is
  *     entitled to know who is asking. Only the first name and an initial ever
  *     become public (§27).
- *   - Date of birth. Required by §16, and PRIVATE: never rendered on any
- *     surface and never sent to a sitter. It is held against a future
- *     eligibility rule and is NOT one today — §52 sets an adults-only rule for
- *     sitters and says nothing about owners, so enforcing one here would invent
- *     a product decision nobody has made. Until that decision exists the field
- *     is validated as a real past date and used for nothing else, and this is
- *     the whole of what it does.
- *   - Wilaya and commune. This is how Nidz makes the first search relevant. It
+ *   - Date of birth: withdrawn at Audit 1.3 LOT 08 — see below.
+ *   - Wilaya and commune — OPTIONAL. How Nidz makes the first search relevant. It
  *     is administrative granularity on purpose — Nidz holds no exact address
  *     for anyone, so there is nothing more precise to leak (§29).
  *   - Which animals you have. Multi-select, because a household is often not
@@ -53,6 +47,18 @@ const DIGITS = /^\d{9}$/;
  *     exchanged with another user without explicit consent (§78).
  *
  * Nothing here is checked by anybody, and the note under the action says so.
+ *
+ * AUDIT 1.3 LOT 08 — ONLY WHAT THE ACTION NEEDS. The one thing a request
+ * needs from its sender is a name, so the name is the only required answer.
+ * The date of birth is no longer asked at all: nothing read it, and the rule
+ * it was "held against" does not exist — asking for private data with no use
+ * is the friction (and the privacy cost) the audit names. It will be asked
+ * when an eligibility rule exists, at the point it applies. The area is
+ * optional and says what it is for; the phone and the animals already were.
+ *
+ * The answers are kept as an unsaved draft for this tab (`useFormDraft`), so
+ * stepping out to Compte to change the language, or reloading, does not empty
+ * the form.
  */
 export default function OwnerAccount() {
   const { t } = useTranslation();
@@ -62,25 +68,27 @@ export default function OwnerAccount() {
   const { state, dispatch } = useDemo();
 
   const account = state.account;
-  const [firstName, setFirstName] = useState(account?.firstName ?? "");
-  const [lastName, setLastName] = useState(account?.lastName ?? "");
-  const [dateOfBirth, setDateOfBirth] = useState(account?.dateOfBirth ?? "");
-  const [wilayaId, setWilayaId] = useState(account?.wilayaId ?? null);
-  const [communeId, setCommuneId] = useState(account?.communeId ?? null);
-  const [species, setSpecies] = useState<Species[]>(account?.ownedSpecies ?? []);
-  const [phone, setPhone] = useState(account?.phoneNumber ?? "");
+  const [form, setForm, clearDraft] = useFormDraft("owner-account", () => ({
+    firstName: account?.firstName ?? "",
+    lastName: account?.lastName ?? "",
+    wilayaId: (account?.wilayaId ?? null) as string | null,
+    communeId: (account?.communeId ?? null) as string | null,
+    species: (account?.ownedSpecies ?? []) as Species[],
+    phone: account?.phoneNumber ?? "",
+  }));
+  const { firstName, lastName, wilayaId, communeId, phone } = form;
+  /* Narrowed to species this build knows: the draft came out of storage. */
+  const species = form.species.filter((s): s is Species => (SPECIES as readonly string[]).includes(s));
+  const set = (patch: Partial<typeof form>) => setForm((f) => ({ ...f, ...patch }));
 
   const [errors, setErrors] = useState<{
     firstName?: string;
     lastName?: string;
-    dateOfBirth?: string;
-    wilaya?: string;
     phone?: string;
   }>({});
 
   const firstRef = useRef<HTMLInputElement>(null);
   const lastRef = useRef<HTMLInputElement>(null);
-  const dobRef = useRef<HTMLInputElement>(null);
   const wilayaRef = useRef<HTMLButtonElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
 
@@ -94,24 +102,12 @@ export default function OwnerAccount() {
   const destination = next ?? "/";
 
   const toggleSpecies = (value: Species) =>
-    setSpecies((current) =>
-      current.includes(value) ? current.filter((s) => s !== value) : [...current, value],
-    );
+    set({ species: species.includes(value) ? species.filter((s) => s !== value) : [...species, value] });
 
   const submit = () => {
     const nextErrors: typeof errors = {};
     if (!firstName.trim()) nextErrors.firstName = t("request.name.firstRequired");
     if (!lastName.trim()) nextErrors.lastName = t("request.name.lastRequired");
-
-    if (!dateOfBirth) {
-      nextErrors.dateOfBirth = t("ownerAccount.dobRequired");
-    } else if (dateOfBirth > toISODate(today())) {
-      /* A birth date in the future is a typo, not a person. Caught here rather
-         than accepted and rendered back as a fact. */
-      nextErrors.dateOfBirth = t("ownerAccount.dobFuture");
-    }
-
-    if (!wilayaId) nextErrors.wilaya = t("ownerAccount.wilayaRequired");
 
     /* Optional — but if something was typed, it has to be a number, because a
        half-typed one is worse than none. */
@@ -121,8 +117,6 @@ export default function OwnerAccount() {
     setErrors(nextErrors);
     if (nextErrors.firstName) return firstRef.current?.focus();
     if (nextErrors.lastName) return lastRef.current?.focus();
-    if (nextErrors.dateOfBirth) return dobRef.current?.focus();
-    if (nextErrors.wilaya) return wilayaRef.current?.focus();
     if (nextErrors.phone) return phoneRef.current?.focus();
 
     dispatch({
@@ -130,7 +124,8 @@ export default function OwnerAccount() {
       account: {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
-        dateOfBirth,
+        /* Kept if an earlier build collected it; never asked any more. */
+        dateOfBirth: account?.dateOfBirth ?? null,
         wilayaId,
         communeId,
         ownedSpecies: species,
@@ -139,6 +134,7 @@ export default function OwnerAccount() {
         createdAt: account?.createdAt ?? new Date().toISOString(),
       },
     });
+    clearDraft();
     navigate(destination, { replace: true });
   };
 
@@ -182,7 +178,7 @@ export default function OwnerAccount() {
                 aria-describedby={describedBy}
                 aria-invalid={invalid || undefined}
                 onChange={(e) => {
-                  setFirstName(e.target.value);
+                  set({ firstName: e.target.value });
                   setErrors((prev) => ({ ...prev, firstName: undefined }));
                 }}
               />
@@ -203,34 +199,8 @@ export default function OwnerAccount() {
                 aria-describedby={describedBy}
                 aria-invalid={invalid || undefined}
                 onChange={(e) => {
-                  setLastName(e.target.value);
+                  set({ lastName: e.target.value });
                   setErrors((prev) => ({ ...prev, lastName: undefined }));
-                }}
-              />
-            )}
-          </FieldShell>
-
-          <FieldShell
-            label={t("ownerAccount.dobLabel")}
-            help={t("ownerAccount.dobHelp")}
-            error={errors.dateOfBirth}
-          >
-            {({ id, describedBy, invalid }) => (
-              <Input
-                id={id}
-                ref={dobRef}
-                type="date"
-                value={dateOfBirth}
-                /* The platform's own picker, keyboard support and localisation,
-                   and `max` prevents a future date rather than flagging it red
-                   afterwards (§18 — prevention over error). */
-                max={toISODate(today())}
-                autoComplete="bday"
-                aria-describedby={describedBy}
-                aria-invalid={invalid || undefined}
-                onChange={(e) => {
-                  setDateOfBirth(e.target.value);
-                  setErrors((prev) => ({ ...prev, dateOfBirth: undefined }));
                 }}
               />
             )}
@@ -241,17 +211,12 @@ export default function OwnerAccount() {
             wilayaCode={wilayaId}
             communeCode={communeId}
             wilayaRef={wilayaRef}
-            onChange={(nextLocation) => {
-              setWilayaId(nextLocation.wilayaCode);
-              setCommuneId(nextLocation.communeCode);
-              setErrors((prev) => ({ ...prev, wilaya: undefined }));
-            }}
-            wilayaLabel={t("need.location.wilayaLabel")}
+            onChange={(nextLocation) => set({ wilayaId: nextLocation.wilayaCode, communeId: nextLocation.communeCode })}
+            wilayaLabel={t("ownerAccount.wilayaLabel")}
             wilayaPlaceholder={t("need.location.wilayaPlaceholder")}
             communeLabel={t("need.location.communeLabel")}
             anyCommuneLabel={t("ownerAccount.communeUnspecified")}
             help={t("ownerAccount.locationHelp")}
-            error={errors.wilaya}
           />
 
           <div>
@@ -309,7 +274,7 @@ export default function OwnerAccount() {
                   aria-describedby={describedBy}
                   aria-invalid={invalid || undefined}
                   onChange={(e) => {
-                    setPhone(e.target.value);
+                    set({ phone: e.target.value });
                     setErrors((prev) => ({ ...prev, phone: undefined }));
                   }}
                 />

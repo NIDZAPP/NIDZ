@@ -393,12 +393,12 @@
       "ageHelp": "Par exemple : 8 mois, 3 ans.",
       "notesLabel": "Besoins ou contraintes importantes",
       "notesHelp": "Traitement en cours, peur des autres chiens, ne peut pas rester seul longtemps…",
-      "photoLabel": "Une photo (facultatif)",
       "chooseLabel": "De quel animal s’agit-il ?",
       "another": "Un autre animal",
       "editElsewhere": "Vos animaux enregistrés se modifient dans Mes animaux, pas ici.",
       "sizeLabel": "Sa taille",
-      "sizeHelp": "Les pet-sitters indiquent les tailles qu'ils acceptent : cela vous montre seulement ceux qui peuvent prendre votre chien."
+      "sizeHelp": "Les pet-sitters indiquent les tailles qu'ils acceptent : cela vous montre seulement ceux qui peuvent prendre votre chien.",
+      "photoLabel": "Une photo (facultatif)"
     },
     "location": {
       "title": "Où cherchez-vous ?",
@@ -734,13 +734,8 @@
   },
   "ownerAccount": {
     "title": "Votre compte",
-    "intro": "Un pet-sitter qui décide s’il peut accueillir votre animal doit savoir qui le lui demande. C’est tout ce qui est demandé ici.",
+    "intro": "Un pet-sitter qui décide d'accueillir votre animal doit savoir qui le demande. Seul votre nom est obligatoire.",
     "lastNameHelp": "Seuls votre prénom et l’initiale de votre nom sont affichés publiquement.",
-    "dobLabel": "Date de naissance",
-    "dobHelp": "Privée. Elle n’apparaît jamais sur votre profil et n’est jamais transmise à un pet-sitter.",
-    "dobRequired": "Indiquez votre date de naissance.",
-    "dobFuture": "Cette date est dans le futur.",
-    "wilayaRequired": "Choisissez votre wilaya.",
     "communeUnspecified": "Je préfère ne pas le préciser",
     "locationHelp": "Sert à vous montrer des pet-sitters près de chez vous. Nidz ne demande jamais d’adresse : votre commune est l’information la plus précise qu’il conserve.",
     "speciesLabel": "Quels animaux avez-vous ?",
@@ -748,7 +743,8 @@
     "phoneLabel": "Numéro de téléphone (facultatif)",
     "phoneHelp": "Privé. Nidz ne le communique jamais à un pet-sitter sans que vous le décidiez.",
     "cta": "Créer mon compte",
-    "storageNote": "Tout ce que vous saisissez reste dans ce navigateur. Rien n’est envoyé nulle part et rien n’est vérifié."
+    "storageNote": "Tout ce que vous saisissez reste dans ce navigateur. Rien n’est envoyé nulle part et rien n’est vérifié.",
+    "wilayaLabel": "Votre wilaya (facultatif)"
   },
   "pets": {
     "title": "Mes animaux",

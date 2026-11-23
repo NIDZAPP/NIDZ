@@ -17,7 +17,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { emptyPet, type Pet } from "@/data/pets";
+import { emptyPet, restorePet, type Pet } from "@/data/pets";
+import { useFormDraft } from "@/hooks/use-form-draft";
 import { cameFromRequest, requestSearchOf, sitterIdFromRequestPath, withPet } from "@/data/request-draft";
 import { SPECIES, type Species } from "@/data/types";
 import { useDemo } from "@/state/demo/context";
@@ -83,14 +84,32 @@ function PetEditScreen() {
      mid-edit. The starting species is the one the request asked for when
      there is one; otherwise dog, only because the form has to show something.
      Either way it is a live radio group, not a guess recorded anywhere. */
-  const [pet, setPet] = useState<Pet>(
+  /* An unsaved draft for this tab (Audit 1.3 LOT 08): leaving for Compte to
+     change the language, or reloading, no longer empties the form. Keyed by
+     the animal, and for a new one by the request it is for, so two drafts
+     never mix. What comes back is validated through `restorePet` and must
+     still be the same animal; the photo (an object URL) is never kept. */
+  type Draft = Pet & Record<string, unknown>;
+  const draftKey = id ? `pet-${id}` : `pet-new-${requestSitter ?? ""}`;
+  const [pet, setPetDraft, clearDraft] = useFormDraft<Draft>(
+    draftKey,
     () =>
-      existing ??
-      emptyPet(
-        `pet-${Date.now().toString(36)}`,
-        (SPECIES as readonly string[]).includes(startSpecies ?? "") ? (startSpecies as Species) : "dog",
-      ),
+      (existing ??
+        emptyPet(
+          `pet-${Date.now().toString(36)}`,
+          (SPECIES as readonly string[]).includes(startSpecies ?? "") ? (startSpecies as Species) : "dog",
+        )) as Draft,
+    {
+      restore: (raw, fallback) => {
+        const restored = restorePet(raw);
+        if (!restored) return null;
+        if (existing && restored.id !== existing.id) return null;
+        return { ...restored, photoUrl: fallback.photoUrl } as Draft;
+      },
+      transient: ["photoUrl"],
+    },
   );
+  const setPet = (next: Pet) => setPetDraft(next as Draft);
   const [nameError, setNameError] = useState<string>();
   const nameRef = useRef<HTMLInputElement>(null);
 
@@ -125,12 +144,14 @@ function PetEditScreen() {
       return;
     }
     dispatch({ type: "savePet", pet: { ...pet, name: pet.name.trim() } });
+    clearDraft();
     leave(pet.id);
   };
 
   const remove = () => {
     if (!existing) return;
     dispatch({ type: "removePet", id: existing.id });
+    clearDraft();
     leave(null);
   };
 

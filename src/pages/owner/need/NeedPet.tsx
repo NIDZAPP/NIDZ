@@ -8,12 +8,13 @@ import { ChipGroup } from "@/components/shared/Chip";
 import FlowScreen from "@/components/shared/FlowScreen";
 import OptionGroup from "@/components/shared/OptionGroup";
 import { SPECIES_ICON } from "@/components/shared/species";
-import { FieldShell, PhotoField } from "@/components/shared/fields";
+import { FieldShell } from "@/components/shared/fields";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { emptyPet, type Pet } from "@/data/pets";
 import { DOG_SIZES, SPECIES, type DogSize, type Species } from "@/data/types";
+import { useFormDraft } from "@/hooks/use-form-draft";
 import { useDemo } from "@/state/demo/context";
 
 const FORM_ID = "need-pet";
@@ -39,8 +40,14 @@ const NEW_PET = "__new__";
  * where there is room for the species-specific questions. Adding a new one
  * always mints a NEW id, so nothing can be overwritten from here at all.
  *
- * The form stays deliberately short (§4.5): a name, an age, anything important
- * and a photo.
+ * The form stays deliberately short (§4.5): a name, a dog's size, an age and
+ * anything important.
+ *
+ * NO PHOTO HERE (Audit 1.3 LOT 08). This step comes BEFORE the owner has seen
+ * a single sitter; a photo field here looked expected and helped no match. It
+ * stays optional on the animal's own screen in My pets. The answers are an
+ * unsaved draft for this tab, so leaving for Compte (to change the language)
+ * or reloading keeps them.
  */
 export default function NeedPet() {
   const { t } = useTranslation();
@@ -54,19 +61,28 @@ export default function NeedPet() {
     state.need.petId && pets.some((p) => p.id === state.need.petId) ? state.need.petId : NEW_PET,
   );
 
-  const [species, setSpecies] = useState<Species | null>(state.need.species);
-  /* Asked here, for a dog only, because it is a hard matching constraint: a
-     sitter who takes only small dogs must not be offered for a large one
-     (Audit 1.3 LOT 03). Optional — "not sure" is an answer, and a dog with no
-     size is still searchable; the results then state each sitter's limit. */
-  /* Starts unanswered, always. Seeding it from the brief handed a NEW dog the
-     size of whichever dog was chosen last — saved silently, then used as a
-     hard filter. */
-  const [dogSize, setDogSize] = useState<DogSize | null>(null);
-  const [name, setName] = useState("");
-  const [age, setAge] = useState("");
-  const [notes, setNotes] = useState("");
-  const [photoUrl, setPhotoUrl] = useState<string | undefined>(undefined);
+  /* The dog's size is asked here, for a dog only, because it is a hard
+     matching constraint (Audit 1.3 LOT 03); "not sure" is an answer. It starts
+     unanswered, always: seeding it from the brief handed a NEW dog the size of
+     whichever dog was chosen last — saved silently, then used as a filter. */
+  const [draft, setDraft, clearDraft] = useFormDraft("need-pet", () => ({
+    species: state.need.species as Species | null,
+    dogSize: null as DogSize | null,
+    name: "",
+    age: "",
+    notes: "",
+  }));
+  /* Narrowed: the draft can come out of storage. */
+  const species =
+    draft.species && (SPECIES as readonly string[]).includes(draft.species) ? draft.species : null;
+  const dogSize =
+    draft.dogSize && (DOG_SIZES as readonly string[]).includes(draft.dogSize) ? draft.dogSize : null;
+  const { name, age, notes } = draft;
+  const setSpecies = (value: Species | null) => setDraft((d) => ({ ...d, species: value }));
+  const setDogSize = (value: DogSize | null) => setDraft((d) => ({ ...d, dogSize: value }));
+  const setName = (value: string) => setDraft((d) => ({ ...d, name: value }));
+  const setAge = (value: string) => setDraft((d) => ({ ...d, age: value }));
+  const setNotes = (value: string) => setDraft((d) => ({ ...d, notes: value }));
   const [errors, setErrors] = useState<{ species?: string; name?: string }>({});
   const speciesRef = useRef<HTMLDivElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
@@ -108,11 +124,11 @@ export default function NeedPet() {
       name: name.trim(),
       age: age.trim(),
       notes: notes.trim(),
-      photoUrl,
     };
     const size = pet.species === "dog" ? pet.details.size : null;
     dispatch({ type: "savePet", pet });
     dispatch({ type: "setNeed", patch: { species: pet.species, petId: pet.id, dogSize: size } });
+    clearDraft();
     navigate("/owner/need/location");
   };
 
@@ -258,8 +274,6 @@ export default function NeedPet() {
                   />
                 )}
               </FieldShell>
-
-              <PhotoField label={t("need.pet.photoLabel")} value={photoUrl} onChange={setPhotoUrl} />
 
               {pets.length > 0 && (
                 <p className="text-sm text-muted-foreground">{t("need.pet.editElsewhere")}</p>

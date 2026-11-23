@@ -21,7 +21,6 @@ const h1 = async (page) => clean(await page.locator("h1").innerText());
   await page.getByRole("link", { name: "Create a local account" }).click();
   await page.getByLabel("First name").fill("Lina");
   await page.getByLabel("Last name").fill("Kaci");
-  await page.getByLabel("Date of birth").fill("1990-04-02");
   await pickCombobox(page, "Wilaya", "Algiers");
   await page.getByRole("button", { name: "Create my account" }).click();
   await page.waitForURL(/\/owner\/request\/amina-b/);

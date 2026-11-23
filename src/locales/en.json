@@ -390,12 +390,12 @@
       "ageHelp": "For example: 8 months, 3 years.",
       "notesLabel": "Important needs or constraints",
       "notesHelp": "Ongoing medication, afraid of other dogs, cannot be left alone for long…",
-      "photoLabel": "A photo (optional)",
       "chooseLabel": "Which animal is this about?",
       "another": "Another animal",
       "editElsewhere": "Your saved animals are edited in My pets, not here.",
       "sizeLabel": "Its size",
-      "sizeHelp": "Sitters state which sizes they can take, so this shows you only the ones who can take your dog."
+      "sizeHelp": "Sitters state which sizes they can take, so this shows you only the ones who can take your dog.",
+      "photoLabel": "A photo (optional)"
     },
     "location": {
       "title": "Where are you looking?",
@@ -718,13 +718,8 @@
   },
   "ownerAccount": {
     "title": "Your account",
-    "intro": "A sitter deciding whether to take your animal should know who is asking. This is the whole of it.",
+    "intro": "A sitter deciding whether to take your animal should know who is asking. Only your name is required.",
     "lastNameHelp": "Only your first name and the initial of your surname are ever shown publicly.",
-    "dobLabel": "Date of birth",
-    "dobHelp": "Private. It is never shown on your profile and never sent to a sitter.",
-    "dobRequired": "Enter your date of birth.",
-    "dobFuture": "That date is in the future.",
-    "wilayaRequired": "Choose your wilaya.",
     "communeUnspecified": "Prefer not to say",
     "locationHelp": "Used to show you sitters near you. Nidz never asks for an address, and your commune is the most precise thing it holds.",
     "speciesLabel": "Which animals do you have?",
@@ -732,7 +727,8 @@
     "phoneLabel": "Phone number (optional)",
     "phoneHelp": "Private. Nidz never gives it to a sitter unless you decide to share it.",
     "cta": "Create my account",
-    "storageNote": "Everything you type stays in this browser. Nothing is sent anywhere and nothing is verified."
+    "storageNote": "Everything you type stays in this browser. Nothing is sent anywhere and nothing is verified.",
+    "wilayaLabel": "Your wilaya (optional)"
   },
   "pets": {
     "title": "My pets",
