@@ -264,7 +264,9 @@ export default function Search() {
             {/* The species leads the line because it is the first thing every
                 row answers to. It was terracotta here and plain everywhere else
                 the same fact appears — a private convention for one screen. */}
-            {speciesText && <bdi className="font-medium text-foreground">{speciesText}</bdi>}
+            {/* Never wraps: "Grands chiens" broke onto two lines in the 56px
+                bar (Audit 1.3 QA). The rest of the line truncates instead. */}
+            {speciesText && <bdi className="shrink-0 whitespace-nowrap font-medium text-foreground">{speciesText}</bdi>}
             {/* Each part is isolated: a commune name may be Latin text inside
                 an Arabic sentence, and the separators are neutral. */}
             <span className="truncate text-muted-foreground">
