@@ -18,7 +18,8 @@
 | `npm run build` | PASS | avertissement de taille de chunk **ancien mais réduit** : bundle principal 841 KB → 523 KB (gzip 261 → 174 KB) grâce au découpage par écran |
 | `git diff --check` | PASS | |
 | `npm run test:unit` | PASS 28/28 | `node:test` via Vite (aucune dépendance ajoutée) |
-| `npm run test:e2e` | PASS 237/237 | 10 fichiers, un par lot + le parcours final |
+| `npm run test:e2e` | PASS 237/237 | 10 fichiers, un par lot + le parcours final, contre le serveur de dev |
+| Build de production (`vite preview`) | PASS 104/104 | `lot11`, `lot01`, `lot04`, `lot09` rejoués contre le build (chunks différés, service worker) |
 
 ## Parcours réels dans le navigateur (`e2e/lot11-final-qa.mjs`, français, 390×844, navigateur vierge)
 
