@@ -13,7 +13,8 @@
     "photoLocalOnly": "The photo stays on your device: this demonstration does not upload or store any file.",
     "progress": "Progress",
     "backToRequests": "Back to my requests",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "moreInfoAbout": "More information: {{topic}}"
   },
   "nav": {
     "home": "Home",

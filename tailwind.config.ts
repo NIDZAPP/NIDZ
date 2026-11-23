@@ -27,29 +27,25 @@ export default {
 		},
 			extend: {
 				fontFamily: {
-					/* ONE family. Audit 1.2 withdrew Playfair Display (design system
-					   amendment 0.0-B): hierarchy comes from size, weight, spacing and
-					   layout, never from mixing families. The `display` key that used to
-					   sit below was already dead — index.html never requested the font,
-					   so `font-display` resolved to an arbitrary system serif — and it
-					   could not have been used honestly anyway, because Playfair has no
-					   Arabic face and Nidz ships in three languages.
-
-					   "Noto Sans Arabic" carries ar; Inter has no Arabic glyphs, so
-					   without it Arabic fell back to an arbitrary system face (§21).
-					   Latin text never reaches it — Inter resolves first. Loaded from
-					   the same Google Fonts request as Inter: no new dependency. */
-					sans: ["Inter", "Noto Sans Arabic", "ui-sans-serif", "system-ui", "sans-serif"]
+					/* ONE family, both scripts (Nidz 1.4, design system amendment
+					   0.1-B). Readex Pro was drawn for Arabic and Latin together, so
+					   the two scripts share weight, x-height and rhythm instead of
+					   Inter beside a Noto fallback that never matched it. Self-hosted
+					   through @fontsource (imported in main.tsx): no request to a
+					   third-party font host, and the PWA has it offline. */
+					sans: ["Readex Pro Variable", "ui-sans-serif", "system-ui", "sans-serif"]
 				},
-				/* Design system §13.3 made real, so screens stop reaching for
-				   arbitrary bracket values. Inter needs negative tracking above
-				   ~24px; the eyebrow is the only positive-tracking role. */
+				/* Type scale. Readex Pro is wide, so sizes sit a step below where
+				   Inter's were; display roles tighten their tracking. */
 				fontSize: {
-					h1: ['2rem', { lineHeight: '1.15', letterSpacing: '-0.02em' }],
-					'h1-lg': ['2.5rem', { lineHeight: '1.1', letterSpacing: '-0.025em' }],
-					price: ['1.5rem', { lineHeight: '1.2', letterSpacing: '-0.02em' }],
-					name: ['1.25rem', { lineHeight: '1.3', letterSpacing: '-0.01em' }],
-					eyebrow: ['0.75rem', { lineHeight: '1.2', letterSpacing: '0.08em' }]
+					display: ['2.125rem', { lineHeight: '1.08', letterSpacing: '-0.03em' }],
+					'display-lg': ['3.25rem', { lineHeight: '1.04', letterSpacing: '-0.035em' }],
+					h1: ['1.75rem', { lineHeight: '1.14', letterSpacing: '-0.025em' }],
+					'h1-lg': ['2.25rem', { lineHeight: '1.1', letterSpacing: '-0.03em' }],
+					title: ['1.25rem', { lineHeight: '1.25', letterSpacing: '-0.015em' }],
+					price: ['1.375rem', { lineHeight: '1.2', letterSpacing: '-0.02em' }],
+					name: ['1.125rem', { lineHeight: '1.3', letterSpacing: '-0.01em' }],
+					eyebrow: ['0.75rem', { lineHeight: '1.2', letterSpacing: '0.04em' }]
 				},
 				colors: {
 				border: 'hsl(var(--border))',
@@ -61,7 +57,9 @@ export default {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))',
 					hover: 'hsl(var(--primary-hover))',
-					soft: 'hsl(var(--primary-soft))'
+					soft: 'hsl(var(--primary-soft))',
+					deep: 'hsl(var(--primary-deep))',
+					'on-deep': 'hsl(var(--primary-on-deep))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -77,6 +75,13 @@ export default {
 					foreground: 'hsl(var(--brand-foreground))',
 					soft: 'hsl(var(--brand-soft))'
 				},
+				/* Warm supporting surfaces for animals and people (illustration
+				   tiles). Non-interactive, like --brand. */
+				sand: {
+					DEFAULT: 'hsl(var(--sand))',
+					strong: 'hsl(var(--sand-strong))'
+				},
+				sky: 'hsl(var(--sky))',
 				success: {
 					DEFAULT: 'hsl(var(--success))',
 					foreground: 'hsl(var(--success-foreground))'
@@ -120,29 +125,34 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				}
 			},
-			/* Nidz radius scale (design system §16): sm 8 · md 12 · lg 16 · xl 24.
-			   `rounded-2xl` / `rounded-3xl` are not part of the scale. */
+			/* Nidz 1.4 radius scale: sm 10 · md 14 · lg 18 · xl 22 · 2xl 28 ·
+			   3xl 36 · full. Cards are xl, sheets and hero panels 2xl, every
+			   button and chip full (the pill). */
 			borderRadius: {
-				xl: 'calc(var(--radius) + 12px)',
+				'3xl': 'calc(var(--radius) + 22px)',
+				'2xl': 'calc(var(--radius) + 14px)',
+				xl: 'calc(var(--radius) + 8px)',
 				lg: 'calc(var(--radius) + 4px)',
 				md: 'var(--radius)',
 				sm: 'calc(var(--radius) - 4px)'
 			},
-			/* Sticky chrome separation.
-
-			   On the cream ground a white sticky bar separated itself from the page.
-			   On white it does not, and a 1.30:1 hairline alone is a very thin claim
-			   for a plane that content scrolls UNDER. A sticky bar is the one thing in
-			   Nidz that is genuinely elevated, which is the only case §16 permits a
-			   shadow at all.
-
-			   Deliberately at the lightest possible weight and permanently on: no
-			   scroll listener, because a plane that is elevated only once you scroll
-			   is lying about its position the rest of the time. `-t` is the same
-			   shadow cast upward, for bars pinned to the bottom edge. */
+			/* One light source, above and slightly in front: every shadow has a
+			   y offset and a soft blur, tinted from the ink rather than black.
+			   `card` is a resting white surface on the mist ground; `pill` a white
+			   control on it; `raised` something that genuinely floats (the tab
+			   bar, popovers, sheets). */
 			boxShadow: {
-				'chrome-b': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-				'chrome-t': '0 -1px 2px 0 rgb(0 0 0 / 0.05)'
+				card: '0 1px 2px hsl(var(--shadow) / 0.05), 0 8px 24px -6px hsl(var(--shadow) / 0.08)',
+				pill: '0 1px 2px hsl(var(--shadow) / 0.06), 0 4px 12px -3px hsl(var(--shadow) / 0.10)',
+				raised: '0 2px 6px hsl(var(--shadow) / 0.06), 0 18px 40px -10px hsl(var(--shadow) / 0.22)',
+				'chrome-b': '0 1px 0 0 hsl(var(--border))',
+				'chrome-t': '0 -10px 24px -14px hsl(var(--shadow) / 0.18)'
+			},
+			transitionTimingFunction: {
+				/* Emil Kowalski's ease-out family: fast start, long settle. */
+				out: 'cubic-bezier(0.23, 1, 0.32, 1)',
+				'in-out': 'cubic-bezier(0.77, 0, 0.175, 1)',
+				drawer: 'cubic-bezier(0.32, 0.72, 0, 1)'
 			},
 			keyframes: {
 				'accordion-down': {
@@ -154,20 +164,32 @@ export default {
 					to: { height: '0', opacity: '0' }
 				},
 				'fade-in': {
-					'0%': { opacity: '0', transform: 'translateY(10px)' },
+					'0%': { opacity: '0', transform: 'translateY(6px)' },
 					'100%': { opacity: '1', transform: 'translateY(0)' }
 				},
 				'fade-out': {
 					'0%': { opacity: '1', transform: 'translateY(0)' },
-					'100%': { opacity: '0', transform: 'translateY(10px)' }
+					'100%': { opacity: '0', transform: 'translateY(6px)' }
 				},
 				'scale-in': {
-					'0%': { transform: 'scale(0.95)', opacity: '0' },
+					'0%': { transform: 'scale(0.96)', opacity: '0' },
 					'100%': { transform: 'scale(1)', opacity: '1' }
 				},
 				'scale-out': {
 					from: { transform: 'scale(1)', opacity: '1' },
-					to: { transform: 'scale(0.95)', opacity: '0' }
+					to: { transform: 'scale(0.96)', opacity: '0' }
+				},
+				/* A screen arriving: content rises 8px into place. Starts from
+				   opacity 0.01 rather than 0 so the first frame is never a blank
+				   page if the animation is skipped. */
+				'page-in': {
+					'0%': { opacity: '0.01', transform: 'translateY(8px)' },
+					'100%': { opacity: '1', transform: 'translateY(0)' }
+				},
+				/* A check or a count appearing inside a control. */
+				pop: {
+					'0%': { opacity: '0', transform: 'scale(0.6)' },
+					'100%': { opacity: '1', transform: 'scale(1)' }
 				},
 				'slide-in-right': {
 					'0%': { transform: 'translateX(100%)' },
@@ -178,19 +200,21 @@ export default {
 					'100%': { transform: 'translateX(100%)' }
 				}
 			},
-			/* Durations follow design system §24: micro-feedback 100-150ms,
-			   standard transition 160-220ms, dialog/sheet 200-300ms. */
+			/* Durations (design system §24, retuned 1.4): press 120-160ms,
+			   standard 180-240ms, arrival 280ms, sheet 300ms. */
 			animation: {
-				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out',
-				'fade-in': 'fade-in 0.2s ease-out',
-				'fade-out': 'fade-out 0.2s ease-out',
-				'scale-in': 'scale-in 0.15s ease-out',
-				'scale-out': 'scale-out 0.15s ease-out',
-				'slide-in-right': 'slide-in-right 0.25s ease-out',
-				'slide-out-right': 'slide-out-right 0.25s ease-out',
-				enter: 'fade-in 0.2s ease-out, scale-in 0.15s ease-out',
-				exit: 'fade-out 0.2s ease-out, scale-out 0.15s ease-out'
+				'accordion-down': 'accordion-down 0.22s cubic-bezier(0.23, 1, 0.32, 1)',
+				'accordion-up': 'accordion-up 0.18s cubic-bezier(0.23, 1, 0.32, 1)',
+				'fade-in': 'fade-in 0.22s cubic-bezier(0.23, 1, 0.32, 1)',
+				'fade-out': 'fade-out 0.18s cubic-bezier(0.23, 1, 0.32, 1)',
+				'scale-in': 'scale-in 0.18s cubic-bezier(0.23, 1, 0.32, 1)',
+				'scale-out': 'scale-out 0.15s cubic-bezier(0.23, 1, 0.32, 1)',
+				'page-in': 'page-in 0.28s cubic-bezier(0.23, 1, 0.32, 1) both',
+				pop: 'pop 0.2s cubic-bezier(0.23, 1, 0.32, 1) both',
+				'slide-in-right': 'slide-in-right 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
+				'slide-out-right': 'slide-out-right 0.25s cubic-bezier(0.32, 0.72, 0, 1)',
+				enter: 'fade-in 0.22s cubic-bezier(0.23, 1, 0.32, 1), scale-in 0.18s cubic-bezier(0.23, 1, 0.32, 1)',
+				exit: 'fade-out 0.18s cubic-bezier(0.23, 1, 0.32, 1), scale-out 0.15s cubic-bezier(0.23, 1, 0.32, 1)'
 			}
 		}
 	},

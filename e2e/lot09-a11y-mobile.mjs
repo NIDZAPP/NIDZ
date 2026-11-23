@@ -82,13 +82,14 @@ for (const [lang, width] of [["fr", 320], ["ar", 390], ["fr", 768], ["ar", 1280]
   await context.close();
 }
 
-/* Identity of 1.2 kept: white ground, Inter, no Playfair. Reduced motion honoured. */
+/* Identity of 1.4 (design system amendments 0.1-A/B): the mist ground, Readex
+   Pro for both scripts, no Playfair. Reduced motion honoured. */
 {
   const { page, context } = await open({ state, reducedMotion: "reduce" });
   await page.goto(`${BASE}/`);
   const look = await page.evaluate(() => ({ bg: getComputedStyle(document.body).backgroundColor, font: getComputedStyle(document.body).fontFamily }));
-  check("white application ground", look.bg === "rgb(255, 255, 255)", look.bg);
-  check("Inter first, no Playfair", /^"?Inter/.test(look.font) && !/Playfair/i.test(look.font), look.font);
+  check("mist application ground", look.bg === "rgb(237, 242, 240)", look.bg);
+  check("Readex Pro first, no Playfair", /^"?Readex Pro/.test(look.font) && !/Playfair/i.test(look.font), look.font);
   const dur = await page.evaluate(() => {
     const el = document.createElement("div");
     el.className = "animate-fade-in";

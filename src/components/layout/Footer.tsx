@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 const FOOTER_LINK =
-  "inline-flex min-h-11 items-center rounded-md px-1 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+  "inline-flex min-h-11 items-center rounded-full px-3 transition-colors hover:bg-card hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 /**
  * The links, at every width. The copyright line, only where there is room.
@@ -32,8 +32,8 @@ export default function Footer({ hideOnMobile = false }: { hideOnMobile?: boolea
   const { t } = useTranslation();
 
   return (
-    <footer className={cn("mt-16 border-t border-border md:mt-24", hideOnMobile && "hidden md:block")}>
-      <div className="container flex flex-col items-center justify-between gap-4 py-8 text-sm text-muted-foreground md:flex-row">
+    <footer className={cn("mt-16 md:mt-24", hideOnMobile && "hidden md:block")}>
+      <div className="container flex flex-col items-center justify-between gap-3 py-8 text-sm text-muted-foreground md:flex-row">
         <p className="hidden md:block">
           © {new Date().getFullYear()} {t("common.appName")}
         </p>

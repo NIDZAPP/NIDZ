@@ -65,7 +65,7 @@ export default function OptionGroup<T extends string>({
       aria-invalid={invalid || undefined}
       value={value ?? ""}
       onValueChange={(v) => onChange(v as T)}
-      className={cn("grid gap-3", className)}
+      className={cn("grid gap-2.5", className)}
     >
       {options.map((option) => {
         const Icon = option.icon;
@@ -76,43 +76,57 @@ export default function OptionGroup<T extends string>({
             value={option.value}
             disabled={option.disabled}
             className={cn(
-              "group flex min-h-16 w-full items-center gap-4 rounded-md border p-4 text-start transition-colors",
+              "group flex min-h-[4.25rem] w-full items-center gap-3.5 rounded-xl p-3.5 text-start",
+              "transition-[transform,box-shadow,background-color] duration-150 ease-out",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               /* Disabled wins over selected: an impossible option must never
                  wear the "you chose this" style, whatever value was passed. */
               option.disabled
-                ? /* A dashed hairline, not a faded copy of a live row: lowered
-                     opacity drags the reason text under the contrast floor,
-                     and the reason is the whole point of showing it. */
-                  "cursor-not-allowed border-dashed border-border"
+                ? /* A dashed outline on the ground, not a faded copy of a live
+                     row: lowered opacity drags the reason text under the
+                     contrast floor, and the reason is the point of showing it. */
+                  "cursor-not-allowed border border-dashed border-input/60"
                 : selected
-                  ? "border-primary bg-accent"
-                  : "border-input hover:bg-secondary",
+                  ? "bg-card shadow-[inset_0_0_0_2px_hsl(var(--primary)),0_8px_24px_-8px_hsl(var(--shadow)/0.14)]"
+                  : "bg-card shadow-card hover:shadow-raised active:scale-[0.99]",
             )}
           >
             {Icon && (
-              <Icon
+              <span
                 aria-hidden="true"
-                className={cn("size-6 shrink-0", selected ? "text-primary" : "text-muted-foreground")}
-              />
+                className={cn(
+                  "flex size-11 shrink-0 items-center justify-center rounded-full transition-colors duration-150",
+                  selected ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground",
+                )}
+              >
+                <Icon className="size-[1.375rem]" />
+              </span>
             )}
             <span className="min-w-0 flex-1">
-              <span
-                className={cn("block font-medium", selected ? "text-accent-foreground" : "text-foreground")}
-              >
+              <span className={cn("block text-[0.9375rem]", selected ? "font-semibold text-foreground" : "font-medium text-foreground")}>
                 {option.label}
               </span>
               {/* Kept inside the item so it is part of the option's own
-                  content; keep descriptions to one short line so the
-                  accessible name does not become a paragraph. */}
+                  content; one short line, so the accessible name does not
+                  become a paragraph. */}
               {option.description && (
-                <span className="mt-1 block text-sm text-muted-foreground">{option.description}</span>
+                <span className="mt-0.5 block text-sm leading-snug text-muted-foreground">{option.description}</span>
               )}
             </span>
-            {/* Slot always reserved, so choosing an option never reflows the
-                list under the user's finger. */}
-            <span aria-hidden="true" className="flex size-5 shrink-0 items-center justify-center">
-              {selected && <Check className="size-5 text-primary" />}
+            {/* The radio itself: an empty ring that fills teal with a check.
+                Slot always reserved, so choosing never reflows the list. */}
+            <span
+              aria-hidden="true"
+              className={cn(
+                "flex size-6 shrink-0 items-center justify-center rounded-full transition-colors duration-150",
+                option.disabled
+                  ? "border-2 border-dashed border-input/60"
+                  : selected
+                    ? "bg-primary text-primary-foreground"
+                    : "border-2 border-input",
+              )}
+            >
+              {selected && <Check className="size-4 animate-pop" strokeWidth={3} />}
             </span>
           </RadioGroupPrimitive.Item>
         );

@@ -1,8 +1,9 @@
 import { useId, useRef } from "react";
-import { ImagePlus, Paperclip, X } from "lucide-react";
+import { CircleAlert, ImagePlus, Paperclip, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import Combobox, { type ComboboxOption } from "@/components/shared/Combobox";
+import InfoTip from "@/components/shared/InfoTip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -55,12 +56,16 @@ export type FieldWiring = {
 export function FieldShell({
   label,
   help,
+  info,
   error,
   children,
   className,
 }: {
   label: string;
   help?: string;
+  /** A secondary explanation behind the grey "!" beside the label (see
+      `InfoTip` for what may and may not go there). */
+  info?: string;
   error?: string;
   children: (wiring: FieldWiring) => React.ReactNode;
   className?: string;
@@ -72,9 +77,12 @@ export function FieldShell({
 
   return (
     <div className={className}>
-      <Label id={`${id}-label`} htmlFor={id} className="mb-2 block text-sm font-medium">
-        {label}
-      </Label>
+      <div className="mb-2 flex items-center gap-1.5">
+        <Label id={`${id}-label`} htmlFor={id} className="text-[0.9375rem] font-medium text-foreground">
+          {label}
+        </Label>
+        {info && <InfoTip topic={label}>{info}</InfoTip>}
+      </div>
       {children({ id, describedBy, labelId: `${id}-label`, invalid: Boolean(error) })}
       {helpId && (
         <p id={helpId} className="mt-2 text-sm text-muted-foreground">
@@ -85,8 +93,9 @@ export function FieldShell({
       {errorId && (
         /* Announced as it appears: a validation message the user only finds by
            reading the screen is not an accessible error (§25). */
-        <p id={errorId} role="alert" className="mt-2 text-sm font-medium text-destructive">
-          {error}
+        <p id={errorId} role="alert" className="mt-2 flex items-start gap-1.5 text-sm font-medium text-destructive">
+          <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <span>{error}</span>
         </p>
       )}
     </div>

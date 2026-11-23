@@ -91,23 +91,26 @@ export function DemoNotice({
   className?: string;
 }) {
   return (
-    <div className={cn("border-y border-border py-4", className)}>
-      <p className="flex items-center gap-2 text-sm font-medium text-foreground">
-        <Info className="size-4 shrink-0" aria-hidden="true" />
-        {title}
-      </p>
-      <p className="mt-1 max-w-[70ch] text-sm text-muted-foreground">{body}</p>
+    /* 1.4: a notification card. Same shape as an iOS banner — an icon tile,
+       a bold line, the explanation — at the same visual weight as the content
+       it qualifies, never a footnote (CLAUDE.md, "Simulated behaviour carries
+       a DemoNotice at full weight"). Sand, not the action teal: it informs,
+       it is not something to press. */
+    <div className={cn("flex gap-3 rounded-xl bg-card p-4 shadow-card", className)}>
+      <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-sand text-foreground">
+        <Info className="size-5" />
+      </span>
+      <div className="min-w-0">
+        <p className="text-[0.9375rem] font-semibold text-foreground">{title}</p>
+        <p className="mt-0.5 max-w-[70ch] text-sm leading-relaxed text-muted-foreground">{body}</p>
+      </div>
     </div>
   );
 }
 
-/**
- * The same marker at the density of a single line — for a summary row or a
- * card footer where a full notice would outweigh the content it qualifies.
- */
 export function DemoLine({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <p className={cn("flex items-start gap-1.5 text-xs text-muted-foreground", className)}>
+    <p className={cn("flex items-start gap-1.5 text-xs leading-relaxed text-muted-foreground", className)}>
       <Info className="mt-px size-3.5 shrink-0" aria-hidden="true" />
       <span>{children}</span>
     </p>

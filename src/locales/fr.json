@@ -13,7 +13,8 @@
     "photoLocalOnly": "La photo reste sur votre appareil : cette démonstration n'envoie et n'enregistre aucun fichier.",
     "progress": "Progression",
     "backToRequests": "Retour à mes demandes",
-    "loading": "Chargement…"
+    "loading": "Chargement…",
+    "moreInfoAbout": "Plus d'informations : {{topic}}"
   },
   "nav": {
     "home": "Accueil",

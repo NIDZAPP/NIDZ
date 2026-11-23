@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
  * table: an unfinished state, not a warning.
  */
 const STYLES: Record<RequestStatus, { className: string; icon: typeof Check }> = {
-  pending: { className: "bg-primary-soft text-primary", icon: Clock },
+  pending: { className: "bg-sand text-foreground", icon: Clock },
   accepted: { className: "bg-success/10 text-success", icon: Check },
   declined: { className: "bg-secondary text-muted-foreground", icon: X },
 };
@@ -37,7 +37,7 @@ export default function StatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
+        "inline-flex h-7 items-center gap-1.5 rounded-full px-3 text-xs font-semibold",
         tone,
         className,
       )}

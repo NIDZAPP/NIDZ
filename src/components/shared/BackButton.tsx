@@ -53,7 +53,9 @@ export default function BackButton({
    * Nidz needs: someone who arrived on a shared profile link learns where the
    * screen sits from the control that takes them there.
    */
-  variant?: "bare" | "labelled";
+  /** `round` — icon only, on a white round pill. The 1.4 top-bar form: a
+      floating control on the mist ground, like every other bar button. */
+  variant?: "bare" | "labelled" | "round";
   className?: string;
 }) {
   const { t } = useTranslation();
@@ -65,14 +67,16 @@ export default function BackButton({
       type="button"
       onClick={goBack}
       className={cn(
-        /* The negative inline-start margin pulls the glyph out to the container
-           edge, so the target grows inward and the icon stays optically aligned
-           with the heading below it rather than pushing the column off-grid. */
-        "-ms-2 inline-flex shrink-0 items-center rounded-md transition-colors hover:bg-secondary",
+        "inline-flex shrink-0 items-center transition-[transform,background-color,color] duration-150 ease-out active:scale-[0.96]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        variant === "labelled"
-          ? "min-h-11 gap-2 px-2 text-sm font-medium text-muted-foreground hover:text-foreground"
-          : "size-11 justify-center text-foreground",
+        variant === "round"
+          ? "size-11 justify-center rounded-full bg-card text-foreground shadow-pill hover:bg-secondary"
+          : variant === "labelled"
+            ? /* A pill whose glyph aligns with the column's edge. */
+              "-ms-1 min-h-11 gap-1.5 rounded-full pe-4 ps-2.5 text-sm font-medium text-muted-foreground hover:bg-card hover:text-foreground"
+            : /* The negative inline-start margin pulls the glyph out to the
+                 container edge, so the target grows inward. */
+              "-ms-2 size-11 justify-center rounded-full text-foreground hover:bg-secondary",
         className,
       )}
     >

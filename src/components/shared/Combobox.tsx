@@ -91,14 +91,14 @@ export default function Combobox({
           aria-invalid={invalid || undefined}
           disabled={disabled}
           className={cn(
-            "flex h-11 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-3 py-2 text-start text-sm",
-            "transition-colors hover:bg-secondary",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-            "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-background",
+            "flex h-12 w-full items-center justify-between gap-2 rounded-md border border-input bg-card px-4 py-2 text-start text-base",
+            "transition-[box-shadow,border-color,background-color] duration-150 hover:bg-muted",
+            "focus-visible:border-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15",
+            "aria-[invalid=true]:border-destructive disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-card",
             className,
           )}
         >
-          <span className={cn("truncate", !selected && "text-muted-foreground")}>
+          <span className={cn("truncate", !selected && "font-light text-muted-foreground")}>
             {selected ? selected.label : placeholder}
           </span>
           <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
@@ -106,7 +106,7 @@ export default function Combobox({
       </PopoverTrigger>
       {/* Matched to the trigger's width so the list never opens narrower than
           the longest place name it contains. */}
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+      <PopoverContent className="w-[--radix-popover-trigger-width] overflow-hidden p-0" align="start">
         <Command
           filter={(candidate, search, keywords) => {
             const needle = fold(search);

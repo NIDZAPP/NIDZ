@@ -1,38 +1,36 @@
-import { PawPrint, SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 import { useDemo } from "@/state/demo/context";
 import { WORKSPACE_ROOT, type Workspace } from "@/data/workspace";
+import BrandMark from "@/components/shared/BrandMark";
 import { isNavigable, workspaceDestinations, type NavContext } from "./workspace-nav";
 
-const navLinkCls = ({ isActive }: { isActive: boolean }) =>
-  cn(
-    /* h-11 keeps the nav links on the Nidz touch floor even on a tablet. */
-    "inline-flex h-11 items-center rounded-md px-3 text-sm font-medium transition-colors",
-    isActive ? "bg-accent font-semibold text-accent-foreground" : "hover:bg-secondary",
-  );
-
 /**
- * Desktop chrome.
+ * The browsable shell's top bar.
  *
  * Carries the same destinations as the mobile bar, from the same list, so
  * crossing 768px cannot rename a place or offer a different set of them.
+ * Help and Policies stay out of it: they are not tasks (§84-86).
  *
- * Help and Policies left the header at Audit 1.2. They are not tasks — nobody
- * opens Nidz to read a policy — and they were competing for width with the
- * places people actually go. They live in the footer and in Settings (§84-86).
- *
- * The header CTA was a second, competing "find a sitter" beside a nav link to
- * the same place; the nav link is enough (§4.2).
+ * 1.4 shape: the bar is the mist ground itself — no rule, no fill — so the
+ * first card below it is the first object on the page. At md+ the
+ * destinations sit in one white segmented pill; the current one is a soft
+ * teal capsule with a heavier label and `aria-current` (never colour alone).
  */
 export default function Header({
   workspace,
   navContext,
+  actions,
 }: {
   workspace: Workspace;
   navContext: NavContext;
+  /** Extra controls at the inline end, before the account (messages, the
+      language chooser on the entry screen). */
+  actions?: ReactNode;
 }) {
   const { t } = useTranslation();
   const { state, dispatch } = useDemo();
@@ -45,80 +43,77 @@ export default function Header({
      the owner home instead of an empty "Demandes reçues". */
   const home = workspace === "sitter" && !navContext.sitterPublished ? "/" : WORKSPACE_ROOT[workspace];
 
-  /* Home leaves the DESKTOP nav only. The wordmark to its immediate left is
-     already a link to `/` with the accessible name "Nidz — Home", so listing it
-     again put two controls to the same place side by side (§4.2). It stays in
-     the mobile bar, which has no wordmark to carry it.
-
-     `isNavigable` is applied to the same list the bar uses, before the filter,
-     so the header and the bar can never disagree about whether this workspace
-     has navigation at all. */
+  /* Home leaves the DESKTOP nav only: the wordmark beside it is already a link
+     to the same place (§4.2). It stays in the mobile bar, which has no
+     wordmark. */
   const navigable = isNavigable(all);
   const destinations = navigable ? all.filter((d) => d.to !== "/") : [];
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-background shadow-chrome-b">
-      <div className="container flex h-16 items-center justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-4">
-          {/* The same lockup the entry screen uses: the terracotta mark plus
-              the name in Inter. Audit 1.2 withdrew Playfair entirely — it had
-              no Arabic face, so in Arabic the wordmark fell back to an
-              arbitrary system serif and the header and the splash rendered the
-              brand in two different faces. The mark carries the brand now, and
-              it works in all three languages. */}
-          {/* Home means the ACTIVE workspace's root, not `/`. `/` belongs to
-              whichever workspace is active and bounces a sitter straight back
-              here, so a wordmark hard-wired to `/` was a "Home" control that
-              visibly did nothing on the sitter side — and left a duplicate
-              history entry on every tap. */}
-          <Link
-            to={home}
-            aria-label={`${t("common.appName")} — ${t("nav.home")}`}
-            className="flex min-h-11 shrink-0 items-center gap-2 rounded-md text-lg font-semibold tracking-tight text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            <PawPrint className="size-5 text-brand" aria-hidden="true" />
-            {t("common.appName")}
-          </Link>
+    <header className="sticky top-0 z-40 w-full bg-background/95 supports-[backdrop-filter]:bg-background/85 supports-[backdrop-filter]:backdrop-blur-md">
+      <div className="container flex h-14 items-center justify-between gap-3 md:h-[4.5rem]">
+        {/* Home means the ACTIVE workspace's root, not `/` (see `home`). */}
+        <Link
+          to={home}
+          aria-label={`${t("common.appName")} — ${t("nav.home")}`}
+          className="-ms-1 flex min-h-11 shrink-0 items-center gap-2 rounded-full pe-2 ps-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          <BrandMark />
+        </Link>
 
-          {destinations.length > 0 && (
-            <nav
-              /* Named per workspace, matching the mobile bar: two identically
-                 named navigations are indistinguishable in a screen reader's
-                 landmark list. */
-              aria-label={t(workspace === "sitter" ? "nav.sitterLabel" : "nav.ownerLabel")}
-              className="hidden items-center gap-1 md:flex"
-            >
-              {destinations.map(({ to, labelKey, end }) => (
-                <NavLink key={to} to={to} className={navLinkCls} end={end} onClick={choose}>
-                  {t(labelKey)}
-                </NavLink>
+        {destinations.length > 0 && (
+          <nav
+            /* Named per workspace, matching the mobile bar. */
+            aria-label={t(workspace === "sitter" ? "nav.sitterLabel" : "nav.ownerLabel")}
+            className="hidden md:block"
+          >
+            <ul role="list" className="flex items-center gap-1 rounded-full bg-card p-1 shadow-pill">
+              {destinations.map(({ to, labelKey, icon: Icon, end }) => (
+                <li key={to}>
+                  <NavLink
+                    to={to}
+                    end={end}
+                    onClick={choose}
+                    className={({ isActive }) =>
+                      cn(
+                        "inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm transition-colors duration-150",
+                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                        isActive
+                          ? "bg-primary-soft font-semibold text-primary"
+                          : "font-normal text-muted-foreground hover:bg-secondary hover:text-foreground",
+                      )
+                    }
+                  >
+                    <Icon className="size-4" aria-hidden="true" />
+                    {t(labelKey)}
+                  </NavLink>
+                </li>
               ))}
-            </nav>
+            </ul>
+          </nav>
+        )}
+
+        <div className="flex items-center gap-2">
+          {actions}
+          {/* Where a space has no navigation yet (a sitter whose profile is
+              not published), the account stays one tap away. Icon-only, so
+              the name is carried in text. */}
+          {!navigable && (
+            <NavLink
+              to="/settings"
+              className={({ isActive }) =>
+                cn(
+                  "inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-card shadow-pill transition-colors",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  isActive ? "text-primary" : "text-foreground hover:bg-secondary",
+                )
+              }
+            >
+              <SlidersHorizontal className="size-5" aria-hidden="true" />
+              <span className="sr-only">{t("nav.account")}</span>
+            </NavLink>
           )}
         </div>
-        {/* "Compte" is a destination of both spaces now (Audit 1.3 LOT 04), so
-            when this space has navigation the account is in it — at md+ in the
-            row above, below md in the bottom bar. This icon remains only where
-            a space has no navigation yet (a sitter whose profile is not
-            published), so the account and language are never out of reach.
-            Icon-only, so it needs its accessible name in text. */}
-        {!navigable && (
-        <NavLink
-          to="/settings"
-          className={({ isActive }) =>
-            cn(
-              "inline-flex size-11 shrink-0 items-center justify-center rounded-md transition-colors",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-              isActive
-                ? "bg-accent text-accent-foreground"
-                : "text-muted-foreground hover:bg-secondary hover:text-foreground",
-            )
-          }
-        >
-          <SlidersHorizontal className="size-5" aria-hidden="true" />
-          <span className="sr-only">{t("nav.account")}</span>
-        </NavLink>
-        )}
       </div>
     </header>
   );

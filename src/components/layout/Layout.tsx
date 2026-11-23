@@ -89,12 +89,18 @@ export default function Layout() {
        where a pinned action bar stacked with it. */
     <div className={cn("flex min-h-dvh flex-col", hasBar && "has-bottom-nav")}>
       <Header workspace={workspace} navContext={navContext} />
-      <main className="flex-1">
+      {/* `pb-28` below md keeps the last content clear of the floating tab
+          bar, which overlays the page rather than taking a row of its own. */}
+      <main className={cn("flex-1", hasBar && "pb-28 md:pb-0")}>
         {/* Inside the shell, so the header and the bar stay put while a
-            screen's code loads — only the page area waits. */}
-        <Suspense fallback={<RouteLoading />}>
-          <Outlet />
-        </Suspense>
+            screen's code loads — only the page area waits. Keyed on the path
+            so each arrival plays the one entrance (`page-in`: 8px rise, 280ms
+            ease-out, from an almost-visible first frame). */}
+        <div key={pathname} className="page-in">
+          <Suspense fallback={<RouteLoading />}>
+            <Outlet />
+          </Suspense>
+        </div>
       </main>
       {/* Below md, when the bottom bar is there, the footer would be a second
           navigation under the first (Audit 1.3 LOT 09). Help and Policies

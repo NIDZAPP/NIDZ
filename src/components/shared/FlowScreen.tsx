@@ -31,7 +31,6 @@ export default function FlowScreen({
   backTo,
   backLabel,
   progress,
-  eyebrow,
   title,
   intro,
   children,
@@ -57,7 +56,6 @@ export default function FlowScreen({
       Deliberately no "Étape 4 sur 7" text (Audit p.363) — the position is
       exposed to assistive technology, not printed on the screen. */
   progress?: { current: number; total: number; label: string };
-  eyebrow?: string;
   title: string;
   intro?: string;
   children?: ReactNode;
@@ -93,10 +91,10 @@ export default function FlowScreen({
        pinned action bar needs the room under it. */
     <div className="has-pinned-action flex min-h-dvh flex-col bg-background">
       {hasTopBar && (
-        <div className="sticky top-0 z-30 border-b border-border bg-background shadow-chrome-b">
-          <div className="container flex h-14 items-center gap-4">
+        <div className="sticky top-0 z-30 bg-background/95 supports-[backdrop-filter]:bg-background/85 supports-[backdrop-filter]:backdrop-blur-md">
+          <div className="container flex h-16 items-center gap-3">
             {backTo ? (
-              <BackButton fallback={backTo} label={backLabel} />
+              <BackButton fallback={backTo} label={backLabel} variant="round" />
             ) : (
               <span className="size-11 shrink-0" aria-hidden="true" />
             )}
@@ -110,12 +108,11 @@ export default function FlowScreen({
                 aria-valuenow={progress.current}
                 aria-valuetext={progress.label}
                 /* `--track` exists for exactly this (see src/index.css): a
-                   light neutral would be invisible against the page ground,
-                   and `--border` would not separate from the primary fill. */
-                className="h-1 flex-1 overflow-hidden rounded-full bg-track"
+                   light neutral would vanish against the mist ground. */
+                className="mx-auto h-1.5 w-full max-w-[280px] flex-1 overflow-hidden rounded-full bg-track/60"
               >
                 <div
-                  className="h-full rounded-full bg-primary transition-[width] duration-200"
+                  className="h-full rounded-full bg-primary transition-[width] duration-300 ease-out"
                   style={{ width: `${pct}%` }}
                 />
               </div>
@@ -123,19 +120,13 @@ export default function FlowScreen({
               <span className="flex-1" />
             )}
 
-            {/* Flow screens are registered outside `Layout`, so they carry no
-                header and no footer — which meant that after §89 moved the
-                language chooser into Settings, someone mid-way through the
-                sitter builder whose device language was detected wrong had to
-                press Back six times to reach the one screen that still has a
-                chooser. This is the route out, without putting a language
-                selector back on every screen. */}
+            {/* Flow screens carry no header, so this is the route to the
+                account (and the language) without leaving the step for good.
+                It marks the detour, so Compte offers the way back. */}
             <Link
               to="/settings"
-              /* Marks the detour, so the account screen — a tab root that
-                 normally shows no Back — offers the way back into this step. */
               state={{ fromFlow: true }}
-              className="inline-flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-card text-foreground shadow-pill transition-[transform,background-color] duration-150 ease-out hover:bg-secondary active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <SlidersHorizontal className="size-5" aria-hidden="true" />
               <span className="sr-only">{t("nav.account")}</span>
@@ -145,11 +136,8 @@ export default function FlowScreen({
       )}
 
       <main className="flex-1">
-        <div className="container pb-10 pt-6 md:pb-16 md:pt-10">
-          <div className={cn("mx-auto", measure)}>
-            {eyebrow && (
-              <p className="eyebrow mb-3">{eyebrow}</p>
-            )}
+        <div className={cn("container pb-10 md:pb-16", hasTopBar ? "pt-2 md:pt-6" : "pt-8 md:pt-12")}>
+          <div key={stepKey ?? title} className={cn("page-in mx-auto", measure)}>
             <h1
               ref={heading}
               tabIndex={-1}
@@ -157,32 +145,30 @@ export default function FlowScreen({
             >
               {title}
             </h1>
-            {intro && <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{intro}</p>}
+            {intro && <p className="mt-3 text-base leading-relaxed text-muted-foreground md:text-lg">{intro}</p>}
             {headerExtra}
-            {children && <div className="mt-8 md:mt-10">{children}</div>}
+            {children && <div className="mt-7 md:mt-9">{children}</div>}
           </div>
         </div>
       </main>
 
       {(action || secondaryAction || footNote) && (
         <div
-          className="sticky bottom-0 z-30 border-t border-border bg-background shadow-chrome-t"
+          className="sticky bottom-0 z-30 bg-background shadow-chrome-t"
           /* The iOS home indicator overlaps a bottom-pinned bar and erodes the
              44px target underneath it. */
           style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
         >
-          <div className="container py-4">
+          <div className="container py-3 md:py-4">
             <div className={cn("mx-auto", measure)}>
               {footNote && <div className="mb-3 text-sm text-muted-foreground">{footNote}</div>}
               {/* DOM order is primary then secondary, so assistive technology
                   and the tab order reach the dominant action first. Reversed
-                  on mobile so it is also the one closest to the thumb; on
-                  desktop it sits at the inline start, matching /search. */}
+                  on mobile so it is also the one closest to the thumb. */}
               <div
                 className={cn(
-                  "flex flex-col-reverse gap-3 sm:flex-row sm:items-center",
-                  /* Full width on mobile, intrinsic on desktop — enforced here
-                     rather than asked of every screen (§17). */
+                  "flex flex-col-reverse gap-2.5 sm:flex-row sm:items-center",
+                  /* Full width on mobile, intrinsic on desktop (§17). */
                   "[&>*]:w-full sm:[&>*]:w-auto",
                 )}
               >

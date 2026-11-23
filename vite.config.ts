@@ -22,8 +22,8 @@ export default defineConfig(({ mode }) => ({
         /* Must track --background in src/index.css. These paint the installed
            PWA's chrome and its launch screen, so a stale value here is a flash
            of the old colour before the app renders. Audit 1.2: white. */
-        theme_color: '#FFFFFF',
-        background_color: '#FFFFFF',
+        theme_color: '#EDF2F0',
+        background_color: '#EDF2F0',
         icons: [
           { src: '/favicon.ico', sizes: '64x64 32x32 16x16', type: 'image/x-icon' }
         ]

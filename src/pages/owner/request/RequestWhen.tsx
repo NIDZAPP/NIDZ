@@ -141,7 +141,6 @@ export default function RequestWhen() {
       </Helmet>
       <FlowScreen
         backTo={profilePathForRequest(summary) ?? "/search"}
-        eyebrow={t("request.review.titleFor", { sitter: sitterName })}
         title={t("request.when.title")}
         intro={t("request.when.intro", { sitter: sitterName })}
         headerExtra={<DraftNotice save={draftState} />}
