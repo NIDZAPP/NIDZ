@@ -9,7 +9,7 @@ import { DateRangeField } from "@/components/shared/fields";
 import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { normalizeCriteria, parseCriteria } from "@/data/criteria";
-import { offeredServices, overlapsDeclaredUnavailable } from "@/data/demo-sitters";
+import { offeredServices, overlapsDeclaredUnavailable } from "@/data/offer";
 import { profilePathForRequest, requestPath } from "@/data/request-draft";
 import { CARE_UNIT_KEY, type CareType, type DateRange } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";

@@ -1,5 +1,4 @@
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { DirectionProvider } from "@radix-ui/react-direction";
@@ -139,8 +138,14 @@ const App = () => {
   <QueryClientProvider client={queryClient}>
     <DirectionProvider dir={dir}>
     <TooltipProvider>
+      {/* ONE toast system (Audit 1.3 LOT 10). Neither was ever called; both
+          were mounted. The shadcn/Radix toaster stays: it is built on the
+          Nidz tokens. Sonner was unmounted because it follows `next-themes`
+          with a "system" default, so on a phone in dark mode it would have
+          drawn dark toasts in a product with no dark mode. Its component file
+          and dependency are left in place — removing a dependency is a
+          separate decision, not a side effect of a cleanup. */}
       <Toaster />
-      <Sonner />
       <BrowserRouter>
         <DemoProvider>
           <Suspense fallback={<RouteLoading />}>

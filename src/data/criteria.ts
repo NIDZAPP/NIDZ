@@ -14,7 +14,7 @@
    ------------------------------------------------------------------------ */
 
 import { normalizeCommuneId, getWilaya, getWilayaOfCommune } from "./algeria";
-import { offeredServices, overlapsDeclaredUnavailable, rateFor } from "./demo-sitters";
+import { offeredServices, overlapsDeclaredUnavailable, rateFor } from "./offer";
 import {
   CARE_TYPES,
   DOG_SIZES,

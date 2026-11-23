@@ -11,7 +11,7 @@ import { SPECIES_ICON } from "@/components/shared/species";
 import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { parseCriteria, petFit, type PetFit } from "@/data/criteria";
-import { offeredServices, overlapsDeclaredUnavailable } from "@/data/demo-sitters";
+import { offeredServices, overlapsDeclaredUnavailable } from "@/data/offer";
 import { forSharing, type Pet } from "@/data/pets";
 import { FROM_REQUEST, profilePathForRequest, requestPath, requestWhenPath } from "@/data/request-draft";
 import type { CareRequest, Species } from "@/data/types";

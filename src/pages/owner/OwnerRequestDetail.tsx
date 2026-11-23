@@ -10,7 +10,7 @@ import BackButton from "@/components/shared/BackButton";
 import EmptyState from "@/components/shared/EmptyState";
 import { Button } from "@/components/ui/button";
 import { awaitingReplyFrom, canClarify } from "@/data/clarification";
-import { sitterNameFor } from "@/data/sitter-name";
+import { findRequest, requestsReceived, requestsSent, sitterNameFor } from "@/data/repository";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useDemo } from "@/state/demo/context";
 import { formatDate, toISODate } from "@/utils/dates";
@@ -31,7 +31,7 @@ export default function OwnerRequestDetail() {
   const { state } = useDemo();
   const [asking, setAsking] = useState(false);
 
-  const request = state.requests.find((r) => r.id === id) ?? null;
+  const request = findRequest(state, id);
   /* A question from the sitter, waiting for the owner (Audit 1.3 LOT 07). */
   const questionForYou = request ? awaitingReplyFrom(request) === "owner" : false;
   const sitterName = request ? sitterNameFor(state, request.sitterId) : "";

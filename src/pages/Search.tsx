@@ -34,8 +34,7 @@ import {
   type SearchCriteria,
   type SortOrder,
 } from "@/data/criteria";
-import { DEMO_SITTERS } from "@/data/demo-sitters";
-import { canPublish } from "@/data/sitter-sections";
+import { publicSitters } from "@/data/repository";
 import { communeName, getWilaya } from "@/data/algeria";
 import {
   CARE_UNIT_KEY,
@@ -115,19 +114,10 @@ export default function Search() {
     dispatch({ type: "setNeed", patch: needPatchFromCriteria(next) });
   };
 
-  /* The fixtures plus the visitor's own profile, once they have published it.
-     Without this, "votre profil est publié" would be a claim the search does
-     not honour — and the two-sided loop would have no second side. */
-  /* …and only while it still has what publication requires (Audit 1.3
-     LOT 05). Editing after publication can remove an essential — adding
-     boarding without describing the home — and the dashboard then says what is
-     missing; until it is back, the profile is not offered to owners. */
-  const published =
-    state.sitter?.published && canPublish(state.sitter.profile) ? state.sitter.profile : null;
-  const pool = useMemo(
-    () => (published ? [...DEMO_SITTERS, published] : DEMO_SITTERS),
-    [published],
-  );
+  /* The fixtures plus the visitor's own profile while it is published and
+     publishable — the rule lives in the repository (`publicSitters`), the one
+     place a server query will replace. */
+  const pool = useMemo(() => publicSitters(state), [state]);
   /* The owner's own commune breaks ties, so a wilaya-wide search puts the
      people nearest them first. It never filters: someone arranging care in a
      commune they are travelling to is a normal case. */

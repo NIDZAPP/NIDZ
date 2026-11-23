@@ -9,7 +9,7 @@ import { DemoNotice } from "@/components/shared/trust";
 import SitterProfileView, { QuotedRate } from "@/components/sitter/SitterProfileView";
 import { Button } from "@/components/ui/button";
 import { parseCriteria, petFit, reasonsFor, sizeLimitToState } from "@/data/criteria";
-import { offeredServices, rateFor } from "@/data/demo-sitters";
+import { offeredServices, rateFor } from "@/data/offer";
 import { communeName, getWilaya } from "@/data/algeria";
 import { CARE_UNIT_KEY, localized } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";

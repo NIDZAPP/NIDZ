@@ -7,12 +7,9 @@ import { MatchReasonList, MismatchList } from "@/components/sitter/match";
 import { ProvenanceLabel } from "@/components/shared/trust";
 import PortfolioSection from "@/components/sitter/PortfolioSection";
 import ReviewSection from "@/components/sitter/ReviewSection";
-import { DEMO_PORTFOLIO } from "@/data/demo-portfolio";
-import { DEMO_REVIEWS } from "@/data/demo-reviews";
-import { publicItemsFor } from "@/data/portfolio";
-import { reviewsFor } from "@/data/reviews";
+import { sitterPortfolio, sitterReviews } from "@/data/repository";
 import { isAbsenceReason, type MatchReason } from "@/data/criteria";
-import { offeredServices } from "@/data/demo-sitters";
+import { offeredServices } from "@/data/offer";
 import { communeWithWilaya } from "@/data/algeria";
 import { CARE_UNIT_KEY, DOG_SIZES, localized, type SitterProfile } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
@@ -99,8 +96,8 @@ export default function SitterProfileView({
   )
     .filter(([, value]) => value === "yes")
     .map(([key]) => t(`sitterExperience.${key}.fact`));
-  const reviews = reviewsFor(DEMO_REVIEWS, sitter.id);
-  const portfolio = publicItemsFor(DEMO_PORTFOLIO, sitter.id);
+  const reviews = sitterReviews(sitter.id);
+  const portfolio = sitterPortfolio(sitter.id);
 
   const Heading = headingLevel;
   /* Sections sit one level below the name, whatever level that is. Fixed at

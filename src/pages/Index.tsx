@@ -17,7 +17,7 @@ import {
   EMPTY_CRITERIA,
   type SearchCriteria,
 } from "@/data/criteria";
-import { DEMO_SITTERS, getDemoSitter } from "@/data/demo-sitters";
+import { findSitter, publicSitters, requestsSent } from "@/data/repository";
 import { requestPath } from "@/data/request-draft";
 import { localized } from "@/data/types";
 import { WORKSPACE_ROOT } from "@/data/workspace";
@@ -92,11 +92,12 @@ export default function Index() {
 
   const suggestions = useMemo(() => {
     if (!suggestionCriteria) return [];
-    return matchSitters(DEMO_SITTERS, suggestionCriteria, account?.communeId ?? null, lng).slice(
+    /* Suggestions to an owner never include their own sitter profile. */
+    return matchSitters(publicSitters(state, { excludeOwn: true }), suggestionCriteria, account?.communeId ?? null, lng).slice(
       0,
       SUGGESTION_LIMIT,
     );
-  }, [suggestionCriteria, account?.communeId, lng]);
+  }, [suggestionCriteria, account?.communeId, lng, state]);
 
   const { perResult } = useMemo(() => partitionReasons(suggestions), [suggestions]);
 
@@ -112,15 +113,13 @@ export default function Index() {
     return <Navigate to={WORKSPACE_ROOT.sitter} replace />;
   }
 
-  const pending = state.requests.filter((r) => r.status === "pending").length;
+  const sent = requestsSent(state);
+  const pending = sent.filter((r) => r.status === "pending").length;
 
   /* The request the owner was preparing, by name. Resolved against the real
      directory: a bookmark to a sitter that no longer exists is not offered. */
   const draft = state.requestDraft;
-  const draftSitter = draft
-    ? (getDemoSitter(draft.sitterId) ??
-      (state.sitter?.profile.id === draft.sitterId ? state.sitter.profile : null))
-    : null;
+  const draftSitter = draft ? findSitter(state, draft.sitterId).sitter : null;
   const criteria = criteriaFromNeed(state.need);
   /* Same definition of "has a brief" the search contract uses, so a saved
      wilaya or a saved date range is not quietly treated as nothing. */
@@ -257,14 +256,14 @@ export default function Index() {
 
           {/* The person's own data, so it is the one thing that can honestly be
               counted. Absent entirely when there is nothing to count. */}
-          {state.requests.length > 0 && (
+          {sent.length > 0 && (
             <Link to="/owner/requests" className={REGISTER_ROW}>
               <span>
                 <span className="block font-medium text-foreground">{t("entry.myRequests")}</span>
                 <span className="mt-0.5 block text-sm text-muted-foreground">
                   {pending > 0
                     ? t("entry.requestsPending", { count: pending })
-                    : t("entry.requestsCount", { count: state.requests.length })}
+                    : t("entry.requestsCount", { count: sent.length })}
                 </span>
               </span>
               <ArrowRight className="size-5 shrink-0 text-muted-foreground rtl:-scale-x-100" aria-hidden="true" />

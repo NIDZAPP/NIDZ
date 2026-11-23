@@ -1,4 +1,4 @@
-import { getDemoSitter } from "@/data/demo-sitters";
+import { findSitter } from "@/data/repository";
 import type { SitterProfile } from "@/data/types";
 import { useDemo } from "@/state/demo/context";
 
@@ -15,12 +15,5 @@ import { useDemo } from "@/state/demo/context";
  */
 export function useSitter(id: string | undefined): { sitter: SitterProfile | null; isOwnProfile: boolean } {
   const { state } = useDemo();
-
-  const fixture = getDemoSitter(id);
-  if (fixture) return { sitter: fixture, isOwnProfile: false };
-
-  const own = state.sitter;
-  if (id && own && own.profile.id === id) return { sitter: own.profile, isOwnProfile: true };
-
-  return { sitter: null, isOwnProfile: false };
+  return findSitter(state, id);
 }

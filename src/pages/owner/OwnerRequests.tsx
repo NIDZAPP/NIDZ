@@ -7,7 +7,7 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import { awaitingReplyFrom } from "@/data/clarification";
 import { Button } from "@/components/ui/button";
 import { DemoLine } from "@/components/shared/trust";
-import { sitterNameFor } from "@/data/sitter-name";
+import { findRequest, requestsReceived, requestsSent, sitterNameFor } from "@/data/repository";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useDemo } from "@/state/demo/context";
 import { formatDateRange } from "@/utils/dates";
@@ -41,7 +41,7 @@ export default function OwnerRequests() {
       <div className="mx-auto max-w-[720px]">
         <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">{t("ownerRequests.title")}</h1>
 
-        {state.requests.length === 0 ? (
+        {requestsSent(state).length === 0 ? (
           <EmptyState
             className="mt-8"
             title={t("ownerRequests.emptyTitle")}
@@ -55,14 +55,14 @@ export default function OwnerRequests() {
         ) : (
           <>
             <p className="mt-3 text-sm text-muted-foreground">
-              {t("ownerRequests.count", { count: state.requests.length })}
+              {t("ownerRequests.count", { count: requestsSent(state).length })}
             </p>
             {/* This list is deep-linkable and is where an owner returns, so it
                 carries the marker rather than relying on the success screen
                 they passed through once. */}
             <DemoLine className="mt-4">{t("ownerRequests.demoNote")}</DemoLine>
             <ul role="list" className="mt-6">
-              {state.requests.map((request) => (
+              {requestsSent(state).map((request) => (
                 <li key={request.id} className="border-b border-border first:border-t">
                   <Link
                     to={`/owner/requests/${request.id}`}

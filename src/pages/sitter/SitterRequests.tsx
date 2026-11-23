@@ -10,7 +10,7 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import { DemoNotice } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { awaitingReplyFrom } from "@/data/clarification";
-import { sitterNameFor } from "@/data/sitter-name";
+import { findRequest, requestsReceived, requestsSent, sitterNameFor } from "@/data/repository";
 import type { CareRequest } from "@/data/types";
 import { useSwitchWorkspace } from "@/hooks/use-workspace";
 import { useDemo } from "@/state/demo/context";
@@ -47,7 +47,7 @@ export default function SitterRequests() {
      demo sitters under a heading meaning "requests you received" would offer
      Accept and Decline on somebody else's behalf. */
   const myId = state.sitter?.profile.id;
-  const requests = myId ? state.requests.filter((r) => r.sitterId === myId) : [];
+  const requests = requestsReceived(state);
 
   return (
     <div className="container py-10 md:py-14">

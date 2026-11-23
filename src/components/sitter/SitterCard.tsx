@@ -6,7 +6,7 @@ import { MatchReasonList } from "@/components/sitter/match";
 import { ProvenanceLabel } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { acceptsEveryDogSize, sizeLimitToState, type MatchReason } from "@/data/criteria";
-import { offeredServices, type rateFor } from "@/data/demo-sitters";
+import { offeredServices, type rateFor } from "@/data/offer";
 import { communeName } from "@/data/algeria";
 import {
   CARE_UNIT_KEY,

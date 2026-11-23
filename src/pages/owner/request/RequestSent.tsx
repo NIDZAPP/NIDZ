@@ -7,7 +7,7 @@ import RequestSummary from "@/components/request/RequestSummary";
 import FlowScreen from "@/components/shared/FlowScreen";
 import { DemoNotice } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
-import { sitterNameFor } from "@/data/sitter-name";
+import { findRequest, requestsReceived, requestsSent, sitterNameFor } from "@/data/repository";
 import { useDemo } from "@/state/demo/context";
 
 /**
@@ -26,7 +26,7 @@ export default function RequestSent() {
   const { state } = useDemo();
 
   const id = searchParams.get("id");
-  const request = state.requests.find((r) => r.id === id) ?? null;
+  const request = findRequest(state, id);
   const sitterName = request ? sitterNameFor(state, request.sitterId) : "";
 
   /* Reloaded after the state was cleared, or opened directly: there is no
