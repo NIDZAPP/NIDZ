@@ -5,6 +5,7 @@ import { resolveWorkspace, type Workspace } from "@/data/workspace";
 import { cn } from "@/lib/utils";
 import { useDemo } from "@/state/demo/context";
 
+import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import RouteLoading from "@/components/shared/RouteLoading";
 import Header from "./Header";
 import Footer from "./Footer";
@@ -88,7 +89,10 @@ export default function Layout() {
        phantom padding under screens with nothing pinned to them, and 11rem
        where a pinned action bar stacked with it. */
     <div className={cn("flex min-h-dvh flex-col", hasBar && "has-bottom-nav")}>
-      <Header workspace={workspace} navContext={navContext} />
+      {/* The home is an "Accueil" like the entry screen, so it carries the
+          same language icon (design system amendment 0.1). Elsewhere the
+          choice lives in Compte. */}
+      <Header workspace={workspace} navContext={navContext} actions={pathname === "/" ? <LanguageSwitcher /> : undefined} />
       {/* `pb-28` below md keeps the last content clear of the floating tab
           bar, which overlays the page rather than taking a row of its own. */}
       <main className={cn("flex-1", hasBar && "pb-28 md:pb-0")}>

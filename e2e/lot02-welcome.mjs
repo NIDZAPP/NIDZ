@@ -32,7 +32,9 @@ for (const c of CASES) {
     return el === top || el.contains(top);
   });
   check(`${tag}: no overlay above the actions`, hit);
-  check(`${tag}: language selector reachable`, await page.getByRole("combobox", { name: /Language|Langue|اللغة/ }).isVisible());
+  /* 1.4: an icon-only trigger whose accessible name carries the current
+     language ("Langue : Français"), opening a menu. */
+  check(`${tag}: language selector reachable`, await page.getByRole("button", { name: /Language|Langue|اللغة/ }).isVisible());
   await context.close();
 }
 

@@ -14,7 +14,8 @@
     "progress": "Progression",
     "backToRequests": "Retour à mes demandes",
     "loading": "Chargement…",
-    "moreInfoAbout": "Plus d'informations : {{topic}}"
+    "moreInfoAbout": "Plus d'informations : {{topic}}",
+    "languageCurrent": "Langue : {{name}}"
   },
   "nav": {
     "home": "Accueil",
@@ -350,7 +351,7 @@
     }
   },
   "entry": {
-    "title": "Faites garder votre animal, ou gardez celui des autres.",
+    "title": "La garde de votre animal, en toute confiance.",
     "intro": "Nidz met en relation les propriétaires de chiens, de chats et d’oiseaux avec des pet-sitters près de chez eux, en expliquant clairement ce que chaque personne propose et ce qu’elle ne peut pas accepter.",
     "browse": "Voir les pet-sitters",
     "resume": "Reprendre ma recherche",
@@ -374,7 +375,14 @@
     "requestsCount_many": "{{count}} demandes",
     "requestsPending_many": "{{count}} en attente de réponse",
     "findCare": "Trouver une garde",
-    "becomeSitter": "Devenir pet-sitter"
+    "becomeSitter": "Devenir pet-sitter",
+    "subtitle": "Trouvez une personne adaptée à votre compagnon, près de chez vous.",
+    "bothSides": "Un seul compte pour les deux.",
+    "bothSidesInfo": "Ce choix ne crée pas deux comptes : vous pouvez chercher une garde et garder des animaux avec le même compte, et passer de l'un à l'autre dans Compte.",
+    "animalsTitle": "Votre animal",
+    "animalsHint": "Chiens, chats et oiseaux pour l'instant.",
+    "sitterTitle": "Garder des animaux",
+    "sitterBody": "Décrivez comment vous gardez les animaux et recevez des demandes adaptées."
   },
   "intent": {
     "owner": "Trouver quelqu'un pour mon animal",

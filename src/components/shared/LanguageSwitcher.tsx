@@ -1,52 +1,77 @@
 import { Languages } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAppLocale } from "@/hooks/use-locale";
 import { SUPPORTED_LOCALES, setLocale, type AppLocale } from "@/i18n";
+import { cn } from "@/lib/utils";
 
 /**
- * The language chooser — on the ENTRY SCREEN ONLY.
- *
- * §89 takes the selector out of the rest of the product: Nidz follows the
- * device on first launch, and a manual choice lives in Settings. The entry
- * screen is the documented exception, and it is the one that matters: it is
- * exactly where detection may have guessed wrong, and it is the only screen a
- * first-time visitor sees before they have any reason to know Settings exists.
- *
- * Everywhere else there is a Settings link instead — in the header on browsable
- * screens, in the top bar on flow screens.
- *
- * Shows the icon and the language code only. At 320px a full-width trigger does
- * not fit beside the rest of a top bar, so this keeps the 44px touch target and
- * drops the width. There is no wide variant, because nothing is left that would
- * use one.
- *
- * Selecting here writes an EXPLICIT choice (`setLocale`), which is what stops
- * Nidz following the device from then on.
+ * Each language written in itself — an endonym, not a translation. Someone
+ * landed in the wrong language has to recognise their own without reading the
+ * one they are lost in, so "العربية" stays "العربية" in the French interface.
+ * Data, not copy: it never changes with the interface language.
  */
-export default function LanguageSwitcher() {
+const ENDONYM: Record<AppLocale, string> = {
+  fr: "Français",
+  ar: "العربية",
+  en: "English",
+};
+
+/** Menu order: the two languages of daily life in Algeria first. */
+const ORDER: AppLocale[] = ["fr", "ar", "en"];
+
+/**
+ * The language chooser, as a single icon (design system amendment 0.1 —
+ * « déclencheur icône seule, menu accessible au clic, avec nom accessible »).
+ *
+ * The trigger shows no code: its accessible name says what it does and which
+ * language is current ("Langue : Français"), so a screen reader hears both.
+ * The menu is a Radix radio group — arrow keys, Escape, focus return — with
+ * each entry marked up in its own language (`lang`), so it is read and
+ * shaped correctly.
+ *
+ * Selecting writes an EXPLICIT choice (`setLocale`), which is what stops Nidz
+ * following the device from then on.
+ */
+export default function LanguageSwitcher({ className, onDeep = false }: { className?: string; onDeep?: boolean }) {
   const { t } = useTranslation();
-  /* The shared hook rather than a local `as AppLocale` cast: it validates the
-     value instead of asserting it, and i18next can report a region tag. */
   const current = useAppLocale();
 
-  const label = (lng: AppLocale) =>
-    lng === "en" ? t("common.english") : lng === "fr" ? t("common.french") : t("common.arabic");
-
   return (
-    <Select value={current} onValueChange={(lng) => setLocale(lng as AppLocale)}>
-      <SelectTrigger aria-label={t("common.language")} className="h-11 w-auto gap-2 px-3">
-        <Languages className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-        <span className="text-sm font-medium uppercase">{current}</span>
-      </SelectTrigger>
-      <SelectContent align="end">
-        {SUPPORTED_LOCALES.map((lng) => (
-          <SelectItem key={lng} value={lng}>
-            {label(lng)}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        aria-label={t("common.languageCurrent", { name: ENDONYM[current] })}
+        className={cn(
+          "inline-flex size-11 shrink-0 items-center justify-center rounded-full transition-[transform,background-color] duration-150 ease-out active:scale-[0.96]",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          onDeep
+            ? "bg-white/10 text-white hover:bg-white/20"
+            : "bg-card text-foreground shadow-pill hover:bg-secondary data-[state=open]:bg-secondary",
+          className,
+        )}
+      >
+        <Languages className="size-5" aria-hidden="true" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-48">
+        <DropdownMenuLabel className="px-3 pb-1 pt-2 text-xs font-medium text-muted-foreground">
+          {t("common.language")}
+        </DropdownMenuLabel>
+        <DropdownMenuRadioGroup value={current} onValueChange={(lng) => setLocale(lng as AppLocale)}>
+          {ORDER.filter((lng) => SUPPORTED_LOCALES.includes(lng)).map((lng) => (
+            <DropdownMenuRadioItem key={lng} value={lng} lang={lng}>
+              {ENDONYM[lng]}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

@@ -14,7 +14,8 @@
     "progress": "Progress",
     "backToRequests": "Back to my requests",
     "loading": "Loading…",
-    "moreInfoAbout": "More information: {{topic}}"
+    "moreInfoAbout": "More information: {{topic}}",
+    "languageCurrent": "Language: {{name}}"
   },
   "nav": {
     "home": "Home",
@@ -349,7 +350,7 @@
     }
   },
   "entry": {
-    "title": "Find care for your animal, or offer care to others.",
+    "title": "Care for your pet, with complete confidence.",
     "intro": "Nidz connects owners of dogs, cats and birds with sitters nearby, and spells out what each person offers and what they cannot take on.",
     "browse": "See the sitters",
     "resume": "Resume my search",
@@ -371,7 +372,14 @@
       "rates": "Your rates, service by service"
     },
     "findCare": "Find care",
-    "becomeSitter": "Become a pet-sitter"
+    "becomeSitter": "Become a pet-sitter",
+    "subtitle": "Find someone suited to your companion, near you.",
+    "bothSides": "One account for both sides.",
+    "bothSidesInfo": "Choosing creates no separate account: you can look for care and look after animals with the same account, and switch at any time in Account.",
+    "animalsTitle": "Your animal",
+    "animalsHint": "Dogs, cats and birds for now.",
+    "sitterTitle": "Look after animals",
+    "sitterBody": "Describe how you look after animals and receive requests that fit."
   },
   "intent": {
     "owner": "Find someone for my animal",

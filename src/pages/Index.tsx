@@ -2,9 +2,11 @@ import { useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link, Navigate } from "react-router-dom";
-import { ArrowRight, X } from "lucide-react";
+import { ArrowRight, Inbox, Plus, Search, X } from "lucide-react";
 
-import { REGISTER_ROW } from "@/components/shared/register";
+import HomeHero from "@/components/home/HomeHero";
+import { HomeHeart } from "@/components/icons/nidz-icons";
+import { AnimalPortrait } from "@/components/illustrations/animals";
 import SitterCard from "@/components/sitter/SitterCard";
 import { Button } from "@/components/ui/button";
 import { getWilaya } from "@/data/algeria";
@@ -23,7 +25,6 @@ import { localized } from "@/data/types";
 import { WORKSPACE_ROOT } from "@/data/workspace";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useSwitchWorkspace } from "@/hooks/use-workspace";
-import { cn } from "@/lib/utils";
 import { useDemo } from "@/state/demo/context";
 import { isolate } from "@/utils/format";
 
@@ -33,9 +34,11 @@ import { isolate } from "@/utils/format";
 const SUGGESTION_LIMIT = 3;
 
 /**
- * The OWNER home.
+ * The OWNER home (Nidz 1.4, step 2).
  *
- * An editorial flow, not a dashboard (§127). Every section here is either the
+ * The same promise as the entry screen — the approved title, subtitle and
+ * the three animals on the deep-teal card — then the person's own things as
+ * cards, one idea each. Not a dashboard (§127). Every section here is either the
  * person's own data or a real match against the fixtures, and **each one is
  * absent entirely when there is nothing behind it** — an empty placeholder is
  * how a home page starts inventing activity.
@@ -133,78 +136,158 @@ export default function Index() {
     ? new URLSearchParams(criteriaToParams(suggestionCriteria)).toString()
     : "";
 
+  const rowCls =
+    "surface surface-press flex min-h-[4.5rem] w-full items-center gap-3.5 p-4 text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
+
   return (
-    <div className="container py-10 md:py-14">
+    <div className="container pb-10 pt-1 md:pb-16 md:pt-4">
       <Helmet>
         <title>
-          {t("common.appName")} — {t("home.title")}
+          {t("common.appName")} — {t("entry.title")}
         </title>
-        <meta name="description" content={t("home.subtitle")} />
+        <meta name="description" content={t("entry.subtitle")} />
       </Helmet>
 
-      <div className="mx-auto max-w-[720px]">
-        <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">
-          {account?.firstName ? t("home.greeting", { name: account.firstName }) : t("home.title")}
-        </h1>
-        <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{t("home.subtitle")}</p>
+      <div className="mx-auto max-w-[1080px]">
+        <HomeHero />
 
-        <div className="mt-8">
-          <Button asChild size="lg" className="w-full sm:w-auto sm:min-w-52">
+        <div className="mt-4 grid gap-2.5 sm:flex sm:flex-wrap sm:gap-3">
+          <Button asChild size="lg" className="w-full sm:w-auto sm:min-w-60">
             {hasNeed ? (
-              <Link to={{ pathname: "/search", search: resume }}>{t("entry.resume")}</Link>
+              <Link to={{ pathname: "/search", search: resume }}>
+                <Search aria-hidden="true" />
+                {t("entry.resume")}
+              </Link>
             ) : (
-              <Link to="/owner/need/pet">{t("entry.findSitter")}</Link>
+              <Link to="/owner/need/pet">
+                <Search aria-hidden="true" />
+                {t("entry.findCare")}
+              </Link>
             )}
           </Button>
+          {/* The other side, as the second door. With no sitter side yet it is
+              an invitation phrased as an activity; with one, it is the SWITCH
+              — having a sitter profile does not stop you being an owner, and
+              nothing is discarded by moving. */}
+          {state.capabilities.sitter ? (
+            <Button type="button" size="lg" variant="surface" className="w-full sm:w-auto sm:min-w-60" onClick={() => switchWorkspace("sitter")}>
+              <HomeHeart aria-hidden="true" />
+              {t("workspace.toSitter")}
+            </Button>
+          ) : (
+            <Button asChild size="lg" variant="surface" className="w-full sm:w-auto sm:min-w-60">
+              <Link to="/sitter/start">
+                <HomeHeart aria-hidden="true" />
+                {t("entry.becomeSitter")}
+              </Link>
+            </Button>
+          )}
         </div>
 
-        {/* An unsent request, named after its sitter (Audit 1.3 LOT 01). The
-            row says "not sent yet" in words: a request in preparation must
-            never read as one that was sent. Discarding forgets the bookmark
-            only — no animal and no request is touched. */}
-        {draft && draftSitter && (
-          <div className="mt-8 flex items-center gap-2 border-y border-border">
-            <Link
-              to={requestPath(draft.sitterId, draft.search)}
-              className="flex min-w-0 flex-1 items-center justify-between gap-4 py-4 transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              <span className="min-w-0">
-                <span className="block font-medium text-foreground">
-                  {t("request.review.titleFor", { sitter: isolate(draftSitter.publicName) })}
+        <div className="mt-8 grid gap-3 md:grid-cols-2">
+          {/* An unsent request, named after its sitter (Audit 1.3 LOT 01). It
+              says "not sent yet" in words: a request in preparation must never
+              read as one that was sent. Discarding forgets the bookmark only. */}
+          {draft && draftSitter && (
+            <div className="surface flex items-center gap-1 p-1.5 md:col-span-2">
+              <Link
+                to={requestPath(draft.sitterId, draft.search)}
+                className="flex min-w-0 flex-1 items-center gap-3.5 rounded-lg p-2.5 transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-full bg-sand text-foreground">
+                  <Inbox className="size-5" />
                 </span>
-                <span className="mt-0.5 block text-sm text-muted-foreground">{t("home.draft.body")}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-semibold text-foreground">
+                    {t("request.review.titleFor", { sitter: isolate(draftSitter.publicName) })}
+                  </span>
+                  <span className="mt-0.5 block text-sm text-muted-foreground">{t("home.draft.body")}</span>
+                </span>
+                <ArrowRight className="size-5 shrink-0 text-muted-foreground rtl:-scale-x-100" aria-hidden="true" />
+              </Link>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="shrink-0 text-muted-foreground"
+                onClick={() => dispatch({ type: "discardRequestDraft" })}
+              >
+                <X className="size-5" aria-hidden="true" />
+                <span className="sr-only">
+                  {t("home.draft.discard", { sitter: isolate(draftSitter.publicName) })}
+                </span>
+              </Button>
+            </div>
+          )}
+
+          {/* The household. Shown once there is anything to show: the need
+              flow saves an animal with no account at all. */}
+          {(pets.length > 0 || state.capabilities.owner) && (
+            <Link to="/owner/pets" className={rowCls}>
+              {pets.length > 0 ? (
+                <span aria-hidden="true" className="flex shrink-0 -space-x-3 rtl:space-x-reverse">
+                  {pets.slice(0, 3).map((p) => (
+                    <AnimalPortrait key={p.id} species={p.species} className="size-11 rounded-full ring-2 ring-card" />
+                  ))}
+                </span>
+              ) : (
+                <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
+                  <Plus className="size-5" />
+                </span>
+              )}
+              <span className="min-w-0 flex-1">
+                <span className="block font-semibold text-foreground">{t("nav.pets")}</span>
+                <span className="mt-0.5 block truncate text-sm text-muted-foreground">
+                  {pets.length > 0 ? pets.map((p) => p.name).filter(Boolean).join(" · ") : t("pets.empty.title")}
+                </span>
               </span>
               <ArrowRight className="size-5 shrink-0 text-muted-foreground rtl:-scale-x-100" aria-hidden="true" />
             </Link>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="size-11 shrink-0 text-muted-foreground"
-              onClick={() => dispatch({ type: "discardRequestDraft" })}
-            >
-              <X className="size-5" aria-hidden="true" />
-              <span className="sr-only">
-                {t("home.draft.discard", { sitter: isolate(draftSitter.publicName) })}
+          )}
+
+          {/* The person's own data, so it is the one thing that can honestly be
+              counted. Absent entirely when there is nothing to count. */}
+          {sent.length > 0 && (
+            <Link to="/owner/requests" className={rowCls}>
+              <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
+                <Inbox className="size-5" />
               </span>
-            </Button>
-          </div>
-        )}
+              <span className="min-w-0 flex-1">
+                <span className="block font-semibold text-foreground">{t("entry.myRequests")}</span>
+                <span className="mt-0.5 block text-sm text-muted-foreground">
+                  {pending > 0
+                    ? t("entry.requestsPending", { count: pending })
+                    : t("entry.requestsCount", { count: sent.length })}
+                </span>
+              </span>
+              <ArrowRight className="size-5 shrink-0 text-muted-foreground rtl:-scale-x-100" aria-hidden="true" />
+            </Link>
+          )}
+        </div>
 
         {/* Only with a location, and only with real matches. The heading names
             the filter that produced the list — not a verdict about the animal. */}
         {suggestions.length > 0 && (
-          <section aria-labelledby="home-nearby" className="mt-12">
-            <h2 id="home-nearby" className="text-name font-semibold text-foreground">
-              {suggestionCriteria?.species
-                ? t("home.nearby.titleSpecies", {
-                    wilaya: wilayaName,
-                    species: t(`speciesPlural.${suggestionCriteria.species}`).toLocaleLowerCase(lng),
-                  })
-                : t("home.nearby.title", { wilaya: wilayaName })}
-            </h2>
+          <section aria-labelledby="home-nearby" className="mt-10">
+            <div className="flex items-end justify-between gap-4">
+              <h2 id="home-nearby" className="text-title font-semibold text-foreground">
+                {suggestionCriteria?.species
+                  ? t("home.nearby.titleSpecies", {
+                      wilaya: wilayaName,
+                      species: t(`speciesPlural.${suggestionCriteria.species}`).toLocaleLowerCase(lng),
+                    })
+                  : t("home.nearby.title", { wilaya: wilayaName })}
+              </h2>
+              <Link
+                to={{ pathname: "/search", search: suggestionSearch }}
+                className="-me-2 inline-flex min-h-11 shrink-0 items-center gap-1 rounded-full px-2 text-sm font-semibold text-primary hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {t("home.nearby.seeAll")}
+                <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden="true" />
+              </Link>
+            </div>
 
-            <ul role="list" className="mt-4 border-t border-border">
+            <ul role="list" className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
               {suggestions.map(({ sitter, rate }) => (
                 <SitterCard
                   key={sitter.id}
@@ -217,87 +300,12 @@ export default function Index() {
                   search={suggestionSearch}
                   actionVariant="outline"
                   /* The heading already says "who accept cats"; repeating it on
-                     every row discriminates nothing. Same rule /search applies. */
+                     every card discriminates nothing. Same rule /search applies. */
                   showSpeciesEyebrow={!suggestionCriteria?.species}
                 />
               ))}
             </ul>
-
-            <p className="mt-5 text-sm">
-              <Link
-                to={{ pathname: "/search", search: suggestionSearch }}
-                className="font-medium text-primary underline-offset-4 hover:underline"
-              >
-                {t("home.nearby.seeAll")}
-              </Link>
-            </p>
           </section>
-        )}
-
-        <div className="mt-12">
-          {/* My pets is also a tab since Audit 1.3 LOT 04; this row stays as the
-              summary of the household (the animals' names) on Home. */}
-          {/* Shown once there is anything to show. The need flow saves an
-              animal with no account at all, so gating on the capability alone
-              hid pets that genuinely existed. */}
-          {(pets.length > 0 || state.capabilities.owner) && (
-            <Link to="/owner/pets" className={REGISTER_ROW}>
-              <span>
-                <span className="block font-medium text-foreground">{t("nav.pets")}</span>
-                <span className="mt-0.5 block text-sm text-muted-foreground">
-                  {pets.length > 0
-                    ? pets.map((p) => p.name).filter(Boolean).join(" · ")
-                    : t("pets.empty.title")}
-                </span>
-              </span>
-              <ArrowRight className="size-5 shrink-0 text-muted-foreground rtl:-scale-x-100" aria-hidden="true" />
-            </Link>
-          )}
-
-          {/* The person's own data, so it is the one thing that can honestly be
-              counted. Absent entirely when there is nothing to count. */}
-          {sent.length > 0 && (
-            <Link to="/owner/requests" className={REGISTER_ROW}>
-              <span>
-                <span className="block font-medium text-foreground">{t("entry.myRequests")}</span>
-                <span className="mt-0.5 block text-sm text-muted-foreground">
-                  {pending > 0
-                    ? t("entry.requestsPending", { count: pending })
-                    : t("entry.requestsCount", { count: sent.length })}
-                </span>
-              </span>
-              <ArrowRight className="size-5 shrink-0 text-muted-foreground rtl:-scale-x-100" aria-hidden="true" />
-            </Link>
-          )}
-
-          {/* The SWITCH, not a fork. Having a sitter profile does not stop you
-              being an owner, so this offers the other workspace and records the
-              move; it does not replace this page. Nothing is discarded. */}
-          {state.capabilities.sitter && (
-            <button
-              type="button"
-              onClick={() => switchWorkspace("sitter")}
-              className={cn(REGISTER_ROW, "w-full text-start")}
-            >
-              <span>
-                <span className="block font-medium text-foreground">{t("workspace.toSitter")}</span>
-                <span className="mt-0.5 block text-sm text-muted-foreground">
-                  {state.sitter?.published ? t("entry.sitterPublished") : t("entry.sitterDraft")}
-                </span>
-              </span>
-              <ArrowRight className="size-5 shrink-0 text-muted-foreground rtl:-scale-x-100" aria-hidden="true" />
-            </button>
-          )}
-        </div>
-
-        {/* One quiet invitation, only for someone who has no sitter side yet.
-            Phrased as an activity rather than an identity. */}
-        {!state.capabilities.sitter && (
-          <p className="mt-10 text-sm text-muted-foreground">
-            <Link to="/sitter/start" className="font-medium text-primary underline-offset-4 hover:underline">
-              {t("entry.switchToSitter")}
-            </Link>
-          </p>
         )}
       </div>
     </div>

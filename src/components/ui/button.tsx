@@ -45,7 +45,10 @@ const buttonVariants = cva(
       size: {
         default: "h-11 px-5 text-[0.9375rem]",
         sm: "h-9 px-4 text-sm",
-        lg: "h-[3.25rem] px-7 text-base",
+        /* Large pills may wrap: a translated label in a wide face can be
+           longer than a 320px screen, and a second line inside the capsule
+           beats a page that scrolls sideways. */
+        lg: "min-h-[3.25rem] max-w-full whitespace-normal px-6 py-2.5 text-center text-base leading-tight [text-wrap:balance]",
         icon: "size-11",
       },
     },
