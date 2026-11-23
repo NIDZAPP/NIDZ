@@ -10,43 +10,86 @@ import Layout from "@/components/layout/Layout";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import DemoProvider from "@/state/demo/DemoProvider";
 
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import Search from "@/pages/Search";
-import SitterProfile from "@/pages/SitterProfile";
-import NotAvailable from "@/pages/NotAvailable";
-import Policies from "@/pages/Policies";
-import Help from "@/pages/Help";
-import Settings from "@/pages/Settings";
-import Welcome from "@/pages/onboarding/Welcome";
-import NeedPet from "@/pages/owner/need/NeedPet";
-import NeedLocation from "@/pages/owner/need/NeedLocation";
-import NeedCare from "@/pages/owner/need/NeedCare";
-import Auth from "@/pages/Auth";
-import OwnerAccount from "@/pages/owner/OwnerAccount";
-import PetsList from "@/pages/owner/PetsList";
-import PetEdit from "@/pages/owner/PetEdit";
-import RequestReview from "@/pages/owner/request/RequestReview";
-import RequestWhen from "@/pages/owner/request/RequestWhen";
-import RequestSent from "@/pages/owner/request/RequestSent";
-import OwnerRequests from "@/pages/owner/OwnerRequests";
-import OwnerRequestDetail from "@/pages/owner/OwnerRequestDetail";
-import SitterStart from "@/pages/sitter/SitterStart";
-import { SitterName, SitterPhone, SitterVerify, SitterLocation } from "@/pages/sitter/SitterJoin";
-import {
-  StepAbout,
-  StepServices,
-  StepAnimals,
-  StepHousing,
-  StepLimits,
-  StepAvailability,
-} from "@/pages/sitter/SitterBuilder";
-import SitterProfileHome from "@/pages/sitter/SitterProfileHome";
-import { SectionCare, SectionExperience, SectionProfessional } from "@/pages/sitter/SitterSections";
-import SitterTrust from "@/pages/sitter/SitterTrust";
-import SitterPreview from "@/pages/sitter/SitterPreview";
-import SitterPublished from "@/pages/sitter/SitterPublished";
-import SitterRequests from "@/pages/sitter/SitterRequests";
+import { Suspense, lazy, useEffect } from "react";
+
+import RouteLoading from "@/components/shared/RouteLoading";
+
+/* Every screen is its own chunk (Audit 1.3 LOT 09 — fluidity). The app used
+   to ship one ~840 KB bundle, so a phone on a slow network downloaded every
+   sitter-builder form before it could show the entry screen. Named exports
+   are mapped to `default` for `lazy`. */
+const Index = lazy(() => import("./pages/Index"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Search = lazy(() => import("@/pages/Search"));
+const SitterProfile = lazy(() => import("@/pages/SitterProfile"));
+const NotAvailable = lazy(() => import("@/pages/NotAvailable"));
+const Policies = lazy(() => import("@/pages/Policies"));
+const Help = lazy(() => import("@/pages/Help"));
+const Settings = lazy(() => import("@/pages/Settings"));
+const Welcome = lazy(() => import("@/pages/onboarding/Welcome"));
+const NeedPet = lazy(() => import("@/pages/owner/need/NeedPet"));
+const NeedLocation = lazy(() => import("@/pages/owner/need/NeedLocation"));
+const NeedCare = lazy(() => import("@/pages/owner/need/NeedCare"));
+const Auth = lazy(() => import("@/pages/Auth"));
+const OwnerAccount = lazy(() => import("@/pages/owner/OwnerAccount"));
+const PetsList = lazy(() => import("@/pages/owner/PetsList"));
+const PetEdit = lazy(() => import("@/pages/owner/PetEdit"));
+const RequestReview = lazy(() => import("@/pages/owner/request/RequestReview"));
+const RequestWhen = lazy(() => import("@/pages/owner/request/RequestWhen"));
+const RequestSent = lazy(() => import("@/pages/owner/request/RequestSent"));
+const OwnerRequests = lazy(() => import("@/pages/owner/OwnerRequests"));
+const OwnerRequestDetail = lazy(() => import("@/pages/owner/OwnerRequestDetail"));
+const SitterStart = lazy(() => import("@/pages/sitter/SitterStart"));
+const joinStep = (name: "SitterName" | "SitterPhone" | "SitterVerify" | "SitterLocation") =>
+  lazy(() => import("@/pages/sitter/SitterJoin").then((m) => ({ default: m[name] })));
+const SitterName = joinStep("SitterName");
+const SitterPhone = joinStep("SitterPhone");
+const SitterVerify = joinStep("SitterVerify");
+const SitterLocation = joinStep("SitterLocation");
+const builderStep = (
+  name: "StepAbout" | "StepServices" | "StepAnimals" | "StepHousing" | "StepLimits" | "StepAvailability",
+) => lazy(() => import("@/pages/sitter/SitterBuilder").then((m) => ({ default: m[name] })));
+const StepAbout = builderStep("StepAbout");
+const StepServices = builderStep("StepServices");
+const StepAnimals = builderStep("StepAnimals");
+const StepHousing = builderStep("StepHousing");
+const StepLimits = builderStep("StepLimits");
+const StepAvailability = builderStep("StepAvailability");
+const SitterProfileHome = lazy(() => import("@/pages/sitter/SitterProfileHome"));
+const sectionStep = (name: "SectionCare" | "SectionExperience" | "SectionProfessional") =>
+  lazy(() => import("@/pages/sitter/SitterSections").then((m) => ({ default: m[name] })));
+const SectionCare = sectionStep("SectionCare");
+const SectionExperience = sectionStep("SectionExperience");
+const SectionProfessional = sectionStep("SectionProfessional");
+const SitterTrust = lazy(() => import("@/pages/sitter/SitterTrust"));
+const SitterPreview = lazy(() => import("@/pages/sitter/SitterPreview"));
+const SitterPublished = lazy(() => import("@/pages/sitter/SitterPublished"));
+const SitterRequests = lazy(() => import("@/pages/sitter/SitterRequests"));
+
+/* After the first screen has painted, fetch the others while the browser is
+   idle, so moving between screens does not wait on the network. The first
+   load stays small; the rest arrives in the background. */
+function prefetchScreens() {
+  const load = () => {
+    void import("./pages/Index");
+    void import("@/pages/Search");
+    void import("@/pages/SitterProfile");
+    void import("@/pages/Settings");
+    void import("@/pages/owner/request/RequestReview");
+    void import("@/pages/owner/request/RequestWhen");
+    void import("@/pages/owner/need/NeedPet");
+    void import("@/pages/owner/OwnerRequests");
+    void import("@/pages/owner/OwnerRequestDetail");
+    void import("@/pages/owner/PetsList");
+    void import("@/pages/owner/PetEdit");
+    void import("@/pages/sitter/SitterRequests");
+    void import("@/pages/sitter/SitterProfileHome");
+  };
+  if (typeof window === "undefined") return;
+  const idle = (window as Window & { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback;
+  if (idle) idle(load);
+  else window.setTimeout(load, 1500);
+}
 
 const queryClient = new QueryClient();
 
@@ -83,6 +126,9 @@ function LegacyRequestRedirect() {
  */
 const App = () => {
   const { i18n } = useTranslation();
+  useEffect(() => {
+    prefetchScreens();
+  }, []);
   /* Radix reads its own context, not `<html dir>`. Without this the roving
      focus in every radio group has its arrow keys reversed in Arabic, and
      `align="end"` on a Select aligns to the wrong edge. */
@@ -97,6 +143,7 @@ const App = () => {
       <Sonner />
       <BrowserRouter>
         <DemoProvider>
+          <Suspense fallback={<RouteLoading />}>
           <Routes>
             {/* Flow screens: full viewport, own back control, own action bar,
                 no site chrome. */}
@@ -202,6 +249,7 @@ const App = () => {
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
+          </Suspense>
         </DemoProvider>
       </BrowserRouter>
     </TooltipProvider>

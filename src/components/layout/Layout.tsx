@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { Outlet, useLocation, useNavigationType } from "react-router-dom";
 
 import { resolveWorkspace, type Workspace } from "@/data/workspace";
 import { cn } from "@/lib/utils";
 import { useDemo } from "@/state/demo/context";
 
+import RouteLoading from "@/components/shared/RouteLoading";
 import Header from "./Header";
 import Footer from "./Footer";
 import WorkspaceNav from "./WorkspaceNav";
@@ -35,7 +36,32 @@ export default function Layout() {
      (Audit 1.3 LOT 04 review). Back and Forward (POP) keep the browser's own
      scroll restoration. */
   useEffect(() => {
-    if (navigationType !== "POP") window.scrollTo({ top: 0, behavior: "auto" });
+    if (navigationType === "POP") return;
+    window.scrollTo({ top: 0, behavior: "auto" });
+    /* …and focus moves to its heading, as FlowScreen does for every step: a
+       screen-reader user hears where they arrived instead of nothing, and a
+       keyboard user's next Tab starts in the new screen. Screens load on
+       demand now, so the heading may need a few frames to exist. No visible
+       ring on programmatic focus. */
+    const deadline = performance.now() + 5000;
+    let handle = 0;
+    const focusHeading = () => {
+      /* VISIBLE heading only: while the new screen's code loads, React keeps
+         the previous screen mounted but hidden, and focusing its heading
+         silently fails. */
+      const heading = [...document.querySelectorAll<HTMLElement>("main h1")].find(
+        (h) => h.getClientRects().length > 0,
+      );
+      if (heading) {
+        if (!heading.hasAttribute("tabindex")) heading.setAttribute("tabindex", "-1");
+        heading.classList.add("focus:outline-none");
+        heading.focus({ preventScroll: true });
+        if (document.activeElement === heading) return;
+      }
+      if (performance.now() < deadline) handle = window.requestAnimationFrame(focusHeading);
+    };
+    handle = window.requestAnimationFrame(focusHeading);
+    return () => window.cancelAnimationFrame(handle);
   }, [pathname, navigationType]);
 
   /* Which workspace's chrome to draw. The PATH decides when it belongs to one
@@ -64,9 +90,16 @@ export default function Layout() {
     <div className={cn("flex min-h-dvh flex-col", hasBar && "has-bottom-nav")}>
       <Header workspace={workspace} navContext={navContext} />
       <main className="flex-1">
-        <Outlet />
+        {/* Inside the shell, so the header and the bar stay put while a
+            screen's code loads — only the page area waits. */}
+        <Suspense fallback={<RouteLoading />}>
+          <Outlet />
+        </Suspense>
       </main>
-      <Footer />
+      {/* Below md, when the bottom bar is there, the footer would be a second
+          navigation under the first (Audit 1.3 LOT 09). Help and Policies
+          stay one tap away in Compte, which is in the bar. */}
+      <Footer hideOnMobile={hasBar} />
       <WorkspaceNav workspace={workspace} context={navContext} />
     </div>
   );

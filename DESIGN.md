@@ -310,6 +310,16 @@ une garde" and "Devenir pet-sitter" — within the first 390×844 screen.
 
 ## 11. Accessibility expectations
 
+- Every navigation to a browsable screen scrolls to its top and moves focus to
+  its `<h1>` (Back/Forward keep the browser's own restoration), as
+  `FlowScreen` does for steps (Audit 1.3 LOT 09).
+- Screens load on demand (`React.lazy`); the layout keeps the header and the
+  bar while only the page area waits, with a quiet "Chargement…" status after
+  300 ms — never a skeleton of content that does not exist.
+- Below `md`, when the bottom bar is present, the footer is hidden; Help and
+  Policies are reached from Compte. Every control is at least 44px tall,
+  including the wordmark and footer links (checked by `e2e/lot09`).
+
 - Every field has a visible label. `FieldShell` returns its ARIA wiring to the
   caller, because only the control can point at the help and error text.
 - Radix `combobox` triggers are named with `aria-labelledby`, never a second

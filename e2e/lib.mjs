@@ -74,6 +74,21 @@ export async function open({ viewport = { width: 390, height: 844 }, lang = "en"
     { lang, state },
   );
   const page = await context.newPage();
+  /* Screens load on demand (React.lazy), so the URL changes before the screen
+     exists. Every navigation helper waits for the new screen's heading, so a
+     check never reads the loading placeholder or the previous screen. */
+  const settle = async () => {
+    await page.waitForSelector("h1", { timeout: 15000 }).catch(() => {});
+    await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+  };
+  for (const method of ["goto", "reload", "goBack", "waitForURL"]) {
+    const original = page[method].bind(page);
+    page[method] = async (...args) => {
+      const result = await original(...args);
+      await settle();
+      return result;
+    };
+  }
   const errors = [];
   page.on("pageerror", (e) => errors.push(String(e)));
   page.on("console", (m) => {

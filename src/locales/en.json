@@ -12,7 +12,8 @@
     "changePhoto": "Change the photo",
     "photoLocalOnly": "The photo stays on your device: this demonstration does not upload or store any file.",
     "progress": "Progress",
-    "backToRequests": "Back to my requests"
+    "backToRequests": "Back to my requests",
+    "loading": "Loading…"
   },
   "nav": {
     "home": "Home",
@@ -574,7 +575,6 @@
     "count_one": "{{count}} request",
     "count_other": "{{count}} requests",
     "demoNote": "These requests exist only in this browser. No sitter was notified.",
-    "demoBody": "This request exists only in this browser. No sitter was notified, no booking was created and no payment took place.",
     "alreadySent": "You had already sent this request. Here it is."
   },
   "sitterRequests": {

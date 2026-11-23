@@ -2,13 +2,13 @@ import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Info } from "lucide-react";
 
 import ClarificationThread from "@/components/request/ClarificationThread";
 import RequestSummary from "@/components/request/RequestSummary";
 import BackButton from "@/components/shared/BackButton";
 import EmptyState from "@/components/shared/EmptyState";
 import { Button } from "@/components/ui/button";
-import { DemoNotice } from "@/components/shared/trust";
 import { awaitingReplyFrom, canClarify } from "@/data/clarification";
 import { sitterNameFor } from "@/data/sitter-name";
 import { useAppLocale } from "@/hooks/use-locale";
@@ -83,14 +83,16 @@ export default function OwnerRequestDetail() {
               </p>
             )}
 
-            {/* Deep-linkable, and the screen an owner comes back to. The one
-                place that says nothing was sent is the success screen, which
-                they pass through once. */}
-            <DemoNotice
-              className="mt-8"
-              title={t("request.sent.demoTitle")}
-              body={t("ownerRequests.demoBody")}
-            />
+            {/* ONE honesty statement, fitted to the status (Audit 1.3 LOT 09):
+                this page used to carry a "nothing was sent" banner on top AND
+                the same fact again at the bottom. It is deep-linkable and the
+                screen an owner comes back to, so the statement stays — once,
+                first, at body size, with the info glyph that marks the honesty
+                layer everywhere else. */}
+            <p className="mt-8 flex max-w-[64ch] items-start gap-2 border-y border-border py-4 text-base leading-relaxed text-foreground">
+              <Info className="mt-1 size-4 shrink-0" aria-hidden="true" />
+              <span>{t(`ownerRequests.explain.${request.status}`)}</span>
+            </p>
 
             <div className="mt-8">
               <RequestSummary request={request} sitterName={sitterName} showStatus headingLevel="h2" />
@@ -116,11 +118,7 @@ export default function OwnerRequestDetail() {
               </div>
             )}
 
-            {/* What the status actually means. "Acceptée" is a person saying
-                yes, not a booking Nidz holds. */}
-            <p className="mt-8 max-w-[64ch] text-base leading-relaxed text-muted-foreground">
-              {t(`ownerRequests.explain.${request.status}`)}
-            </p>
+
 
             <div className="mt-8">
               <Button asChild variant="outline">

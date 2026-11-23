@@ -74,7 +74,7 @@ export default function Header({
           <Link
             to={home}
             aria-label={`${t("common.appName")} — ${t("nav.home")}`}
-            className="flex shrink-0 items-center gap-2 rounded-md text-lg font-semibold tracking-tight text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="flex min-h-11 shrink-0 items-center gap-2 rounded-md text-lg font-semibold tracking-tight text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <PawPrint className="size-5 text-brand" aria-hidden="true" />
             {t("common.appName")}

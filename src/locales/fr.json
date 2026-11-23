@@ -12,7 +12,8 @@
     "changePhoto": "Changer la photo",
     "photoLocalOnly": "La photo reste sur votre appareil : cette démonstration n'envoie et n'enregistre aucun fichier.",
     "progress": "Progression",
-    "backToRequests": "Retour à mes demandes"
+    "backToRequests": "Retour à mes demandes",
+    "loading": "Chargement…"
   },
   "nav": {
     "home": "Accueil",
@@ -589,7 +590,6 @@
     "count_one": "{{count}} demande",
     "count_other": "{{count}} demandes",
     "demoNote": "Ces demandes existent uniquement dans ce navigateur. Aucun pet-sitter n'a été prévenu.",
-    "demoBody": "Cette demande existe uniquement dans ce navigateur. Aucun pet-sitter n'a été prévenu, aucune réservation n'a été créée et aucun paiement n'a eu lieu.",
     "alreadySent": "Vous aviez déjà envoyé cette demande. La voici.",
     "count_many": "{{count}} demandes"
   },
