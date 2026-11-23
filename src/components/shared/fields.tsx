@@ -1,7 +1,9 @@
 import { useId, useRef } from "react";
 import { CircleAlert, ImagePlus, Paperclip, X } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { ChipGroup } from "@/components/shared/Chip";
 import Combobox, { type ComboboxOption } from "@/components/shared/Combobox";
 import InfoTip from "@/components/shared/InfoTip";
 import { Button } from "@/components/ui/button";
@@ -77,7 +79,7 @@ export function FieldShell({
 
   return (
     <div className={className}>
-      <div className="mb-2 flex items-center gap-1.5">
+      <div className="mb-2 flex items-center gap-2">
         <Label id={`${id}-label`} htmlFor={id} className="text-[0.9375rem] font-medium text-foreground">
           {label}
         </Label>
@@ -110,6 +112,54 @@ export function FieldShell({
  * field name is wired with `aria-labelledby` pointing at the one visible label
  * — adding a second `<label for>` would make it a control with two labels.
  */
+/**
+ * A question answered with chips: the visible label, an optional grey "!"
+ * for the secondary why, an optional visible help line for what must not be
+ * hidden, then a single-choice chip row. One component so every chip question
+ * in Nidz looks and reads the same (1.4, step 3).
+ */
+export function ChipField<T extends string>({
+  label,
+  info,
+  help,
+  value,
+  onChange,
+  options,
+  className,
+}: {
+  label: string;
+  info?: string;
+  help?: string;
+  value: T | null;
+  onChange: (value: T) => void;
+  options: { value: T; label: string; icon?: LucideIcon }[];
+  className?: string;
+}) {
+  const id = useId();
+  return (
+    <div className={className}>
+      <div className="mb-2 flex items-center gap-2">
+        <p id={`${id}-label`} className="text-[0.9375rem] font-medium text-foreground">
+          {label}
+        </p>
+        {info && <InfoTip topic={label}>{info}</InfoTip>}
+      </div>
+      <ChipGroup
+        labelledBy={`${id}-label`}
+        describedBy={help ? `${id}-help` : undefined}
+        value={value}
+        onChange={onChange}
+        options={options}
+      />
+      {help && (
+        <p id={`${id}-help`} className="mt-2 text-sm text-muted-foreground">
+          {help}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function SelectField<T extends string>({
   label,
   value,

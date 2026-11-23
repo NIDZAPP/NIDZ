@@ -6,25 +6,42 @@ import { cn } from "@/lib/utils";
 
 const chipClass = (selected: boolean) =>
   cn(
-    /* A pill, like every control in 1.4. White with a hairline at rest so it
-       reads both on the mist ground and inside a white card; teal tint, a
+    /* A pill, like every control in 1.4. White with a 1px --input ring at
+       rest (3.5:1 on white, 3.1:1 on mist — a control boundary, WCAG 1.4.11); teal tint, a
        1.5px teal ring and a check when chosen — never colour alone (§12.2).
        min-h-11 holds the Nidz ~44px floor (§17). */
-    "inline-flex min-h-11 select-none items-center gap-2 rounded-full px-4 text-[0.9375rem] transition-[transform,background-color,box-shadow,color] duration-150 ease-out active:scale-[0.97]",
+    /* The transparent border is for forced-colours mode, which drops box
+       shadows: the system then draws the chip's edge itself. */
+    "inline-flex min-h-11 select-none items-center rounded-full border border-transparent px-4 text-[0.9375rem] transition-[transform,background-color,box-shadow,color] duration-150 ease-out active:scale-[0.97]",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
     selected
-      ? "bg-primary-soft font-semibold text-primary shadow-[inset_0_0_0_1.5px_hsl(var(--primary))]"
-      : "bg-card font-normal text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border)),0_1px_2px_hsl(var(--shadow)/0.05)] hover:bg-secondary",
+      ? "bg-primary-soft text-primary shadow-[inset_0_0_0_1.5px_hsl(var(--primary))]"
+      : "bg-card text-foreground shadow-[inset_0_0_0_1px_hsl(var(--input)),0_1px_2px_hsl(var(--shadow)/0.05)] hover:bg-secondary",
   );
 
-function ChipGlyph({ selected, icon: Icon }: { selected: boolean; icon?: LucideIcon }) {
+/**
+ * Both states of the label, stacked in one grid cell; only the current one
+ * is visible. The chip is always as wide as its widest state (check + bold
+ * label), so choosing never reflows the row under the finger — and, unlike a
+ * reserved empty glyph slot, an unchosen label stays optically centred.
+ */
+function ChipContent({ selected, icon: Icon, children }: { selected: boolean; icon?: LucideIcon; children: React.ReactNode }) {
   return (
-    <span className="flex size-[1.125rem] shrink-0 items-center justify-center" aria-hidden="true">
-      {selected ? (
-        <Check className="size-[1.125rem] animate-pop" strokeWidth={2.5} />
-      ) : Icon ? (
-        <Icon className="size-[1.125rem] text-muted-foreground" />
-      ) : null}
+    <span className="grid">
+      <span
+        aria-hidden={!selected}
+        className={cn("col-start-1 row-start-1 flex items-center justify-center gap-1.5 font-semibold", !selected && "invisible")}
+      >
+        <Check className={cn("size-[1.125rem] shrink-0", selected && "animate-pop")} strokeWidth={2.5} aria-hidden="true" />
+        {children}
+      </span>
+      <span
+        aria-hidden={selected}
+        className={cn("col-start-1 row-start-1 flex items-center justify-center gap-1.5", selected && "invisible")}
+      >
+        {Icon && <Icon className="size-[1.125rem] shrink-0 text-muted-foreground" aria-hidden="true" />}
+        {children}
+      </span>
     </span>
   );
 }
@@ -51,8 +68,9 @@ export function Chip({
 }) {
   return (
     <button type="button" role="checkbox" aria-checked={selected} onClick={onClick} className={chipClass(selected)}>
-      <ChipGlyph selected={selected} icon={Icon} />
-      {children}
+      <ChipContent selected={selected} icon={Icon}>
+        {children}
+      </ChipContent>
     </button>
   );
 }
@@ -105,8 +123,9 @@ export function ChipGroup<T extends string>({
           value={option.value}
           className={chipClass(value === option.value)}
         >
-          <ChipGlyph selected={value === option.value} icon={option.icon} />
-          {option.label}
+          <ChipContent selected={value === option.value} icon={option.icon}>
+            {option.label}
+          </ChipContent>
         </RadioGroupPrimitive.Item>
       ))}
     </RadioGroupPrimitive.Root>

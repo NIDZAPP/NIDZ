@@ -1,6 +1,7 @@
 import type { TFunction } from "i18next";
 
-import type { SharedPet } from "@/data/pets";
+import { kindLabel, type SharedPet } from "@/data/pets";
+import type { AppLocale } from "@/i18n";
 
 /**
  * The species-specific facts an owner actually answered, as label/value pairs.
@@ -24,7 +25,7 @@ import type { SharedPet } from "@/data/pets";
  *    by accident. §83 keeps those for someone actually looking after the
  *    animal.
  */
-export function petFacts(pet: SharedPet, t: TFunction): { key: string; label: string; value: string }[] {
+export function petFacts(pet: SharedPet, t: TFunction, locale: AppLocale): { key: string; label: string; value: string }[] {
   const facts: { key: string; label: string; value: string }[] = [];
 
   const add = (key: string, labelKey: string, value: string | null) => {
@@ -37,6 +38,8 @@ export function petFacts(pet: SharedPet, t: TFunction): { key: string; label: st
     add(key, labelKey, t(`pets.declared.${value}`));
   };
 
+  /* Breed or species first: it is what a sitter pictures before anything. */
+  add("kind", `pets.kind.label.${pet.species}`, kindLabel(pet, locale));
   if (pet.sex !== "unknown") add("sex", "pets.sexLabel", t(`pets.sex.${pet.sex}`));
 
   switch (pet.species) {
@@ -63,7 +66,6 @@ export function petFacts(pet: SharedPet, t: TFunction): { key: string; label: st
     }
     case "bird": {
       const d = pet.details;
-      add("kind", "pets.bird.kind", d.kind.trim() || null);
       add("housing", "pets.bird.housing", d.housing ? t(`pets.bird.housingOption.${d.housing}`) : null);
       add(
         "handling",

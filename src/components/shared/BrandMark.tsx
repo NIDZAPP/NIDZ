@@ -11,20 +11,17 @@ import { cn } from "@/lib/utils";
  * is one of the few deliberate places terracotta appears (non-interactive).
  * The name comes from `common.appName` so it reads نيدز in Arabic.
  */
-export default function BrandMark({ className, onDeep = false }: { className?: string; onDeep?: boolean }) {
+export default function BrandMark({ className }: { className?: string }) {
   const { t } = useTranslation();
   return (
     <span className={cn("flex items-center gap-2", className)}>
       <span
         aria-hidden="true"
-        className={cn(
-          "flex size-8 items-center justify-center rounded-full",
-          onDeep ? "bg-white/10 text-sand" : "bg-brand-soft text-brand",
-        )}
+        className="flex size-8 items-center justify-center rounded-full bg-brand-soft text-brand"
       >
         <PawPrint className="size-[1.125rem]" strokeWidth={2.25} />
       </span>
-      <span className={cn("text-lg font-semibold tracking-tight", onDeep ? "text-white" : "text-foreground")}>
+      <span className="text-lg font-semibold tracking-tight text-foreground">
         {t("common.appName")}
       </span>
     </span>

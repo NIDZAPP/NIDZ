@@ -54,7 +54,7 @@ export default function RequestSummary({
      tells a sitter something, nine rows of unknown tell them nothing and stop
      them reading. */
   const pet = request.pet;
-  const facts = pet ? petFacts(pet, t) : [];
+  const facts = pet ? petFacts(pet, t, lng) : [];
 
   const rows: { key: string; label: string; value: string }[] = [
     { key: "sitter", label: t("request.summary.sitter"), value: sitterName },

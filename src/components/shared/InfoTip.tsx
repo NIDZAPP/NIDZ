@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
  *
  * A popover, not a hover tooltip: a tooltip does not open on a phone, and
  * this has to work for a thumb. The trigger is a real button with a name
- * ("Plus d'informations : <topic>"), 32px of hit area around a 18px glyph,
+ * ("Plus d'informations : <topic>"), 44px of hit area around an 18px glyph,
  * and the popover is focusable and dismissible with Escape (Radix).
  */
 export default function InfoTip({
@@ -37,7 +37,9 @@ export default function InfoTip({
         type="button"
         aria-label={t("common.moreInfoAbout", { topic })}
         className={cn(
-          "-m-1.5 inline-flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground/80 transition-colors duration-150",
+          /* 44px of target (the Nidz floor, §17) with -12px margins, so the
+             mark takes ~20px of the line it sits on. */
+          "-m-3 inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground/80 transition-colors duration-150",
           "hover:bg-secondary hover:text-foreground data-[state=open]:bg-secondary data-[state=open]:text-foreground",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           className,

@@ -2,6 +2,7 @@ import { useId } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ChipGroup } from "@/components/shared/Chip";
+import InfoTip from "@/components/shared/InfoTip";
 import type { Declared } from "@/data/pets";
 
 /* Two answers and a way back out of them.
@@ -35,12 +36,15 @@ const OPTIONS: readonly Declared[] = ["yes", "no", "unknown"];
 export default function DeclaredField({
   label,
   help,
+  info,
   value,
   onChange,
   className,
 }: {
   label: string;
   help?: string;
+  /** Secondary "why", behind the grey "!" (see InfoTip). */
+  info?: string;
   value: Declared;
   onChange: (next: Declared) => void;
   className?: string;
@@ -50,9 +54,12 @@ export default function DeclaredField({
 
   return (
     <div className={className}>
-      <p id={id} className="text-sm font-medium text-foreground">
-        {label}
-      </p>
+      <div className="flex items-center gap-1.5">
+        <p id={id} className="text-[0.9375rem] font-medium text-foreground">
+          {label}
+        </p>
+        {info && <InfoTip topic={label}>{info}</InfoTip>}
+      </div>
       {help && (
         <p id={`${id}-help`} className="mt-1 text-sm text-muted-foreground">
           {help}

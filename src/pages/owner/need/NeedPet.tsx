@@ -2,20 +2,24 @@ import { useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { ChevronDown, Plus } from "lucide-react";
 
-import { ChipGroup } from "@/components/shared/Chip";
+import { AnimalPortrait } from "@/components/illustrations/animals";
+import { AnimalCategoryRadio } from "@/components/shared/AnimalCategories";
 import FlowScreen from "@/components/shared/FlowScreen";
+import KindPicker from "@/components/shared/KindPicker";
 import OptionGroup from "@/components/shared/OptionGroup";
-import { SPECIES_ICON } from "@/components/shared/species";
-import { FieldShell } from "@/components/shared/fields";
+import { ChipField, FieldShell } from "@/components/shared/fields";
+import { DemoNotice } from "@/components/shared/trust";
 import { DraftNotice, SaveFeedback } from "@/components/shared/SaveFeedback";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { emptyPet, type Pet } from "@/data/pets";
+import { emptyPet, kindLabel, type Pet } from "@/data/pets";
 import { DOG_SIZES, SPECIES, type DogSize, type Species } from "@/data/types";
 import { useDraftField, useFormDraft } from "@/hooks/use-form-draft";
+import { useAppLocale } from "@/hooks/use-locale";
+import { cn } from "@/lib/utils";
 import { useSave } from "@/hooks/use-save";
 import { useDemo } from "@/state/demo/context";
 
@@ -53,8 +57,13 @@ const NEW_PET = "__new__";
  */
 export default function NeedPet() {
   const { t } = useTranslation();
+  const lng = useAppLocale();
   const navigate = useNavigate();
   const { state } = useDemo();
+  /* « Mon animal n'est pas dans la liste », at the category level: an honest
+     answer in place, never a fourth category (design system §0.1 — extending
+     what Nidz matches is a product decision). */
+  const [otherAnimal, setOtherAnimal] = useState(false);
   /* A new animal always gets a new id, so there is nothing another tab could
      have changed under this form: no conflict check, only a confirmed save. */
   const save = useSave({ scope: "need-pet" });
@@ -75,6 +84,8 @@ export default function NeedPet() {
   const [draft, setDraft, clearDraft] = useFormDraft("need-pet", () => ({
     species: state.need.species as Species | null,
     dogSize: null as DogSize | null,
+    kindId: null as string | null,
+    kindOther: "",
     name: "",
     age: "",
     notes: "",
@@ -85,7 +96,11 @@ export default function NeedPet() {
   const dogSize =
     draft.dogSize && (DOG_SIZES as readonly string[]).includes(draft.dogSize) ? draft.dogSize : null;
   const { name, age, notes } = draft;
-  const setSpecies = (value: Species | null) => setDraft((d) => ({ ...d, species: value }));
+  const kindId = typeof draft.kindId === "string" ? draft.kindId : null;
+  const kindOther = typeof draft.kindOther === "string" ? draft.kindOther : "";
+  /* A breed belongs to the species it was chosen for. */
+  const setSpecies = (value: Species | null) =>
+    setDraft((d) => (d.species === value ? d : { ...d, species: value, kindId: null, kindOther: "" }));
   const setDogSize = (value: DogSize | null) => setDraft((d) => ({ ...d, dogSize: value }));
   const setName = (value: string) => setDraft((d) => ({ ...d, name: value }));
   const setAge = (value: string) => setDraft((d) => ({ ...d, age: value }));
@@ -128,6 +143,8 @@ export default function NeedPet() {
     const base = emptyPet(`pet-${Date.now().toString(36)}`, species as Species);
     const pet: Pet = {
       ...(base.species === "dog" ? { ...base, details: { ...base.details, size: dogSize } } : base),
+      kindId,
+      kindOther: kindId ? "" : kindOther.trim(),
       name: name.trim(),
       age: age.trim(),
       notes: notes.trim(),
@@ -175,7 +192,7 @@ export default function NeedPet() {
         >
           {pets.length > 0 && (
             <div>
-              <p id="pet-choice-label" className="mb-3 text-sm font-medium text-foreground">
+              <p id="pet-choice-label" className="mb-3 text-[0.9375rem] font-medium text-foreground">
                 {t("need.pet.chooseLabel")}
               </p>
               <OptionGroup
@@ -186,8 +203,8 @@ export default function NeedPet() {
                   ...pets.map((pet) => ({
                     value: pet.id,
                     label: pet.name,
-                    description: t(`species.${pet.species}`),
-                    icon: SPECIES_ICON[pet.species],
+                    description: [t(`species.${pet.species}`), kindLabel(pet, lng)].filter(Boolean).join(" · "),
+                    art: <AnimalPortrait species={pet.species} className="size-11" />,
                   })),
                   { value: NEW_PET, label: t("need.pet.another"), icon: Plus },
                 ]}
@@ -198,10 +215,12 @@ export default function NeedPet() {
           {addingNew && (
             <>
               <div>
-                <p id="pet-species-label" className="mb-3 text-sm font-medium text-foreground">
+                <p id="pet-species-label" className="mb-3 text-[0.9375rem] font-medium text-foreground">
                   {t("need.pet.speciesLabel")}
                 </p>
-                <OptionGroup
+                {/* The three categories as illustrated cards — the same cards
+                    a sitter ticks to say what they accept. */}
+                <AnimalCategoryRadio
                   labelledBy="pet-species-label"
                   describedBy={errors.species ? "pet-species-error" : undefined}
                   invalid={Boolean(errors.species)}
@@ -209,87 +228,110 @@ export default function NeedPet() {
                   value={species}
                   onChange={(value) => {
                     setSpecies(value);
+                    setOtherAnimal(false);
                     setErrors((e) => ({ ...e, species: undefined }));
                   }}
-                  options={SPECIES.map((s) => ({
-                    value: s,
-                    label: t(`species.${s}`),
-                    icon: SPECIES_ICON[s],
-                  }))}
                 />
                 {errors.species && (
                   <p id="pet-species-error" role="alert" className="mt-2 text-sm font-medium text-destructive">
                     {errors.species}
                   </p>
                 )}
+                <button
+                  type="button"
+                  aria-expanded={otherAnimal}
+                  aria-controls="pet-other-animal"
+                  onClick={() => setOtherAnimal((open) => !open)}
+                  className="-ms-2 mt-2 inline-flex min-h-11 items-center gap-1 rounded-full px-2 text-sm font-semibold text-primary hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {t("need.pet.otherAnimal.toggle")}
+                  <ChevronDown
+                    className={cn("size-4 transition-transform duration-200 ease-out", otherAnimal && "rotate-180")}
+                    aria-hidden="true"
+                  />
+                </button>
+                <div id="pet-other-animal" hidden={!otherAnimal}>
+                  {otherAnimal && (
+                    <DemoNotice
+                      className="mt-2 animate-fade-in"
+                      title={t("need.pet.otherAnimal.title")}
+                      body={t("need.pet.otherAnimal.body")}
+                    />
+                  )}
+                </div>
               </div>
 
-              <FieldShell label={t("need.pet.nameLabel")} error={errors.name}>
-                {/* `id` comes from the shell — overriding it would break the
-                    `label[for]` pairing and leave the field unnamed. Focus is
-                    moved with a ref instead. */}
-                {({ id, describedBy, invalid }) => (
-                  <Input
-                    id={id}
-                    ref={nameRef}
-                    value={name}
-                    autoComplete="off"
-                    aria-describedby={describedBy}
-                    aria-invalid={invalid || undefined}
-                    onChange={(e) => {
-                      setName(e.target.value);
-                      setErrors((err) => ({ ...err, name: undefined }));
-                    }}
+              {species && (
+                <div className="space-y-7 animate-fade-in">
+                  <KindPicker
+                    key={species}
+                    species={species}
+                    kindId={kindId}
+                    kindOther={kindOther}
+                    onChange={(next) => setDraft((d) => ({ ...d, ...next }))}
                   />
-                )}
-              </FieldShell>
 
-              {species === "dog" && (
-                <div>
-                  <p id="pet-size-label" className="mb-3 text-sm font-medium text-foreground">
-                    {t("need.pet.sizeLabel")}
-                  </p>
-                  <ChipGroup
-                    labelledBy="pet-size-label"
-                    describedBy="pet-size-help"
-                    value={dogSize ?? ""}
-                    onChange={(v) => setDogSize(v ? (v as DogSize) : null)}
-                    options={[
-                      ...DOG_SIZES.map((size) => ({ value: size as string, label: t(`dogSize.${size}`) })),
-                      { value: "", label: t("pets.notSure") },
-                    ]}
-                  />
-                  <p id="pet-size-help" className="mt-2 text-sm text-muted-foreground">
-                    {t("need.pet.sizeHelp")}
-                  </p>
+                  <FieldShell label={t("need.pet.nameLabel")} error={errors.name}>
+                    {/* `id` comes from the shell — overriding it would break the
+                        `label[for]` pairing. Focus is moved with a ref instead. */}
+                    {({ id, describedBy, invalid }) => (
+                      <Input
+                        id={id}
+                        ref={nameRef}
+                        value={name}
+                        autoComplete="off"
+                        aria-describedby={describedBy}
+                        aria-invalid={invalid || undefined}
+                        onChange={(e) => {
+                          setName(e.target.value);
+                          setErrors((err) => ({ ...err, name: undefined }));
+                        }}
+                      />
+                    )}
+                  </FieldShell>
+
+                  {species === "dog" && (
+                    <ChipField
+                      label={t("need.pet.sizeLabel")}
+                      info={t("need.pet.sizeHelp")}
+                      value={dogSize ?? ""}
+                      onChange={(v) => setDogSize(v ? (v as DogSize) : null)}
+                      options={[
+                        ...DOG_SIZES.map((size) => ({ value: size as string, label: t(`dogSize.${size}`) })),
+                        { value: "", label: t("pets.notSure") },
+                      ]}
+                    />
+                  )}
+
+                  <FieldShell label={t("need.pet.ageLabel")}>
+                    {({ id, describedBy }) => (
+                      <Input
+                        id={id}
+                        value={age}
+                        placeholder={t("need.pet.agePlaceholder")}
+                        aria-describedby={describedBy}
+                        onChange={(e) => setAge(e.target.value)}
+                      />
+                    )}
+                  </FieldShell>
+
+                  <FieldShell label={t("need.pet.notesLabel")} info={t("need.pet.notesInfo")}>
+                    {({ id, describedBy }) => (
+                      <Textarea
+                        id={id}
+                        rows={3}
+                        value={notes}
+                        placeholder={t("need.pet.notesPlaceholder")}
+                        aria-describedby={describedBy}
+                        onChange={(e) => setNotes(e.target.value)}
+                      />
+                    )}
+                  </FieldShell>
+
+                  {pets.length > 0 && (
+                    <p className="text-sm text-muted-foreground">{t("need.pet.editElsewhere")}</p>
+                  )}
                 </div>
-              )}
-
-              <FieldShell label={t("need.pet.ageLabel")} help={t("need.pet.ageHelp")}>
-                {({ id, describedBy }) => (
-                  <Input
-                    id={id}
-                    value={age}
-                    aria-describedby={describedBy}
-                    onChange={(e) => setAge(e.target.value)}
-                  />
-                )}
-              </FieldShell>
-
-              <FieldShell label={t("need.pet.notesLabel")} help={t("need.pet.notesHelp")}>
-                {({ id, describedBy }) => (
-                  <Textarea
-                    id={id}
-                    rows={4}
-                    value={notes}
-                    aria-describedby={describedBy}
-                    onChange={(e) => setNotes(e.target.value)}
-                  />
-                )}
-              </FieldShell>
-
-              {pets.length > 0 && (
-                <p className="text-sm text-muted-foreground">{t("need.pet.editElsewhere")}</p>
               )}
             </>
           )}

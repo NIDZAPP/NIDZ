@@ -15,8 +15,9 @@ import { cn } from "@/lib/utils";
  * NOT destructive red. Red is reserved for danger, error and destruction
  * (§12.1). It uses the neutral surface instead.
  *
- * Pending uses the soft-teal "en attente" treatment from the audit's colour
- * table: an unfinished state, not a warning.
+ * Pending is sand + a clock (1.4): an unfinished state, not a warning, and
+ * not the teal "selected" tint. An unsent draft never wears it — nothing has
+ * been sent until a request exists.
  */
 const STYLES: Record<RequestStatus, { className: string; icon: typeof Check }> = {
   pending: { className: "bg-sand text-foreground", icon: Clock },

@@ -307,7 +307,7 @@ export function SectionProfessional() {
 
       {hasBackground && (
         <>
-          <FieldShell label={t("sitterProfessional.detailLabel")} help={t("sitterProfessional.detailHelp")}>
+          <FieldShell label={t("sitterProfessional.detailLabel")} info={t("sitterProfessional.detailHelp")}>
             {({ id, describedBy }) => (
               <Textarea
                 id={id}
@@ -351,19 +351,19 @@ export function SectionProfessional() {
     one means "not answered" when empty rather than zero. */
 function CountField({
   label,
-  help,
+  info,
   max,
   value,
   onChange,
 }: {
   label: string;
-  help?: string;
+  info?: string;
   max: number;
   value: string;
   onChange: (next: string) => void;
 }) {
   return (
-    <FieldShell label={label} help={help}>
+    <FieldShell label={label} info={info}>
       {({ id, describedBy }) => (
         <Input
           id={id}
@@ -574,13 +574,13 @@ export function SectionCare() {
         />
         <FieldShell
           label={t("sitterCare.restrictedRoomsLabel")}
-          help={t("sitterCare.restrictedRoomsHelp")}
         >
           {({ id, describedBy }) => (
             <Textarea
               id={id}
               rows={2}
               value={restrictedRooms}
+              placeholder={t("sitterCare.restrictedRoomsPlaceholder")}
               aria-describedby={describedBy}
               onChange={(e) => setRestrictedRooms(e.target.value)}
             />
@@ -614,7 +614,7 @@ export function SectionCare() {
         {contains && (
           <FieldShell
             label={t("sitterCare.containmentReasonLabel")}
-            help={t("sitterCare.containmentReasonHelp")}
+            info={t("sitterCare.containmentReasonHelp")}
           >
             {({ id, describedBy }) => (
               <Textarea
@@ -645,7 +645,7 @@ export function SectionCare() {
         />
         <CountField
           label={t("sitterCare.maxHoursAloneLabel")}
-          help={t("sitterCare.maxHoursAloneHelp")}
+          info={t("sitterCare.maxHoursAloneHelp")}
           max={24}
           value={maxHoursAlone}
           onChange={setMaxHoursAlone}
@@ -658,7 +658,7 @@ export function SectionCare() {
           value={feeding}
           onChange={(next) => setFeeding(next)}
         />
-        <FieldShell label={t("sitterCare.enrichmentLabel")} help={t("sitterCare.enrichmentHelp")}>
+        <FieldShell label={t("sitterCare.enrichmentLabel")} info={t("sitterCare.enrichmentHelp")}>
           {({ id, describedBy }) => (
             <Textarea
               id={id}
@@ -675,7 +675,7 @@ export function SectionCare() {
         <Block id="care-dog" title={t("sitterCare.blocks.dogs")}>
           <CountField
             label={t("sitterCare.dog.walksLabel")}
-            help={t("sitterCare.dog.walksHelp")}
+            info={t("sitterCare.dog.walksHelp")}
             max={12}
             value={dogWalks}
             onChange={setDogWalks}
@@ -688,7 +688,7 @@ export function SectionCare() {
           />
           <DeclaredField
             label={t("sitterCare.dog.offLeashLabel")}
-            help={t("sitterCare.dog.offLeashHelp")}
+            info={t("sitterCare.dog.offLeashHelp")}
             value={dog.offLeash}
             onChange={(v) => setDog((d) => ({ ...d, offLeash: v }))}
           />
@@ -715,7 +715,7 @@ export function SectionCare() {
           />
           <DeclaredField
             label={t("sitterCare.cat.hidingLabel")}
-            help={t("sitterCare.cat.hidingHelp")}
+            info={t("sitterCare.cat.hidingHelp")}
             value={cat.hidingSpaces}
             onChange={(v) => setCat((c) => ({ ...c, hidingSpaces: v }))}
           />
@@ -732,7 +732,7 @@ export function SectionCare() {
           />
           <DeclaredField
             label={t("sitterCare.bird.flightSafeLabel")}
-            help={t("sitterCare.bird.flightSafeHelp")}
+            info={t("sitterCare.bird.flightSafeHelp")}
             value={bird.flightSafeRoom}
             onChange={(v) => setBird((b) => ({ ...b, flightSafeRoom: v }))}
           />
@@ -767,11 +767,11 @@ export function SectionCare() {
         </fieldset>
         <DeclaredField
           label={t("sitterCare.canReachVetLabel")}
-          help={t("sitterCare.canReachVetHelp")}
+          info={t("sitterCare.canReachVetHelp")}
           value={canReachVet}
           onChange={setCanReachVet}
         />
-        <FieldShell label={t("sitterCare.emergencyPlanLabel")} help={t("sitterCare.emergencyPlanHelp")}>
+        <FieldShell label={t("sitterCare.emergencyPlanLabel")} info={t("sitterCare.emergencyPlanHelp")}>
           {({ id, describedBy }) => (
             <Textarea
               id={id}

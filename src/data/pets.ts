@@ -24,6 +24,8 @@
    fields never mean a better animal, and no surface may imply that.
    ------------------------------------------------------------------------ */
 
+import { getKind } from "./animal-kinds";
+import type { AppLocale } from "@/i18n";
 import type { DogSize, Species } from "./types";
 
 /**
@@ -69,9 +71,9 @@ export type CatDetails = {
 };
 
 export type BirdDetails = {
-  /** Budgerigar, canary, cockatiel… free text, because the range is wide and
-      a fixed list would be wrong more often than right. */
-  kind: string;
+  /* The bird's species used to be free text here (`kind`). Since 1.4 it is the
+     shared `kindId` / `kindOther` on every pet; `restorePet` moves an old
+     answer across into `kindOther`. */
   housing: "cage" | "aviary" | null;
   /** What "out of the cage" means for this bird, in the owner's words. */
   outOfCageNotes: string;
@@ -113,6 +115,14 @@ type PetCommon = {
       owner of a rescue animal often genuinely does not know. */
   age: string;
   sex: PetSex;
+  /**
+   * Breed (dog, cat) or species (bird), from the shared reference list in
+   * `animal-kinds.ts`. Null when not answered — the question is optional.
+   * DETAIL ONLY: matching never reads it (see that file).
+   */
+  kindId: string | null;
+  /** « Mon animal n'est pas dans la liste » — the owner's own words. */
+  kindOther: string;
   /** Anything the owner considers important that the structured fields do not
       cover. Shown to a sitter with the request. */
   notes: string;
@@ -176,7 +186,6 @@ export function emptyDetails(species: Species): DogDetails | CatDetails | BirdDe
       };
     case "bird":
       return {
-        kind: "",
         housing: null,
         outOfCageNotes: "",
         handling: null,
@@ -187,7 +196,16 @@ export function emptyDetails(species: Species): DogDetails | CatDetails | BirdDe
 }
 
 export function emptyPet(id: string, species: Species): Pet {
-  const common = { id, name: "", age: "", sex: "unknown" as const, notes: "", care: { ...EMPTY_CARE } };
+  const common = {
+    id,
+    name: "",
+    age: "",
+    sex: "unknown" as const,
+    kindId: null,
+    kindOther: "",
+    notes: "",
+    care: { ...EMPTY_CARE },
+  };
   switch (species) {
     case "dog":
       return { ...common, species: "dog", details: emptyDetails("dog") };
@@ -209,7 +227,8 @@ export function emptyPet(id: string, species: Species): Pet {
 export function withSpecies(pet: Pet, species: Species): Pet {
   if (pet.species === species) return pet;
   const { id, name, age, sex, notes, photoUrl, care } = pet;
-  const common = { id, name, age, sex, notes, photoUrl, care };
+  /* The breed goes with the species: a "Sloughi" is not a cat's breed. */
+  const common = { id, name, age, sex, notes, photoUrl, care, kindId: null, kindOther: "" };
   switch (species) {
     case "dog":
       return { ...common, species: "dog", details: emptyDetails("dog") };
@@ -234,7 +253,12 @@ export function withSpecies(pet: Pet, species: Species): Pet {
  * cannot see about their animal, so they can decide whether to say more.
  */
 export function answeredCount(pet: Pet): { answered: number; total: number } {
-  const shared = [pet.age.trim(), pet.sex !== "unknown" ? "x" : "", pet.notes.trim()];
+  const shared = [
+    pet.age.trim(),
+    pet.sex !== "unknown" ? "x" : "",
+    pet.kindId || pet.kindOther.trim() ? "x" : "",
+    pet.notes.trim(),
+  ];
   const detail = Object.values(pet.details as Record<string, unknown>).map((value) => {
     if (value === null || value === "unknown") return "";
     if (typeof value === "string") return value.trim();
@@ -248,6 +272,14 @@ export function answeredCount(pet: Pet): { answered: number; total: number } {
     is optional by design (§19). */
 export function isUsable(pet: Pet): boolean {
   return pet.name.trim().length > 0;
+}
+
+/** The breed or species in words, in the interface language — the listed
+    name, else the owner's own words, else null (not answered). */
+export function kindLabel(pet: Pick<Pet, "species" | "kindId" | "kindOther">, locale: AppLocale): string | null {
+  const kind = getKind(pet.kindId, pet.species);
+  if (kind) return kind.name[locale];
+  return pet.kindOther.trim() || null;
 }
 
 /* --------------------------------------------------------------- storage */
@@ -288,11 +320,21 @@ export function restorePet(raw: unknown): Pet | null {
   const species = oneOf(raw.species, ["dog", "cat", "bird"] as const);
   if (!species) return null;
 
+  /* Absent on anything saved before Audit 1.2 — hence the fallback to an empty
+     record rather than a cast. */
+  const detail = isRecord(raw.details) ? raw.details : {};
+
   const common = {
     id,
     name: str(raw.name),
     age: str(raw.age),
     sex: oneOf(raw.sex, PET_SEXES) ?? "unknown",
+    /* Only an id that belongs to THIS species survives; anything else is
+       dropped rather than shown as a breed. */
+    kindId: getKind(str(raw.kindId), species)?.id ?? null,
+    /* Before 1.4 a bird's species was free text on `details.kind`: it is the
+       owner's own words, so it moves across unchanged. */
+    kindOther: str(raw.kindOther) || (species === "bird" ? str(detail.kind) : ""),
     notes: str(raw.notes),
     care: isRecord(raw.care)
       ? {
@@ -303,10 +345,6 @@ export function restorePet(raw: unknown): Pet | null {
         }
       : { ...EMPTY_CARE },
   };
-
-  /* Absent on anything saved before Audit 1.2 — hence the fallback to an empty
-     record rather than a cast. */
-  const detail = isRecord(raw.details) ? raw.details : {};
 
   switch (species) {
     case "dog":
@@ -342,7 +380,6 @@ export function restorePet(raw: unknown): Pet | null {
         ...common,
         species,
         details: {
-          kind: str(detail.kind),
           housing: oneOf(detail.housing, ["cage", "aviary"] as const),
           outOfCageNotes: str(detail.outOfCageNotes),
           handling: oneOf(detail.handling, ["handleable", "limited", "none"] as const),

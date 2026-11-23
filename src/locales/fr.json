@@ -15,7 +15,8 @@
     "backToRequests": "Retour à mes demandes",
     "loading": "Chargement…",
     "moreInfoAbout": "Plus d'informations : {{topic}}",
-    "languageCurrent": "Langue : {{name}}"
+    "languageCurrent": "Langue : {{name}}",
+    "optional": "facultatif"
   },
   "nav": {
     "home": "Accueil",
@@ -210,7 +211,6 @@
       "intro": "C'est ce qu'un propriétaire lit en premier pour se faire une idée de vous.",
       "photoLabel": "Votre photo (facultatif)",
       "headlineLabel": "En une phrase",
-      "headlineHelp": "Par exemple : « Je garde les chiens chez moi, dans une maison avec cour clôturée. »",
       "headlineRequired": "Écrivez une phrase qui décrit ce que vous proposez.",
       "aboutLabel": "Présentation",
       "aboutHelp": "Comment se passe une journée avec un animal chez vous ? C'est ce qui aide le plus un propriétaire à se projeter.",
@@ -218,7 +218,8 @@
       "speciesLabel": "Avec quels animaux avez-vous le plus d'expérience ?",
       "professionalLabel": "Expérience professionnelle liée aux animaux (facultatif)",
       "professionalHelp": "Bénévolat en refuge, formation, travail en clinique vétérinaire…",
-      "demoNote": "Ce que vous écrivez reste dans ce navigateur : rien n'est envoyé ni publié en ligne."
+      "demoNote": "Ce que vous écrivez reste dans ce navigateur : rien n'est envoyé ni publié en ligne.",
+      "headlinePlaceholder": "Ex. Je garde les chiens chez moi, maison avec cour clôturée."
     },
     "services": {
       "title": "Services et tarifs",
@@ -244,16 +245,16 @@
       "dogsLabel": "Chiens vivant chez vous",
       "catsLabel": "Chats vivant chez vous",
       "conditionsLabel": "Conditions importantes du logement (facultatif)",
-      "conditionsHelp": "Étage sans ascenseur, cour clôturée, enfants à la maison…",
       "typeRequired": "Indiquez si vous vivez en appartement ou en maison.",
-      "outdoorRequired": "Indiquez si vous avez un espace extérieur."
+      "outdoorRequired": "Indiquez si vous avez un espace extérieur.",
+      "conditionsPlaceholder": "Ex. 3e étage sans ascenseur, enfants à la maison…"
     },
     "limits": {
       "title": "Ce que vous ne pouvez pas accepter",
       "intro": "C'est ce qui évite les demandes qui ne vous conviennent pas. Expliquez la raison : elle est aussi utile que la limite.",
       "addLabel": "Ajouter une limite",
-      "addHelp": "Par exemple : « Je ne peux pas accueillir de chat : mon chien ne les supporte pas. »",
-      "add": "Ajouter"
+      "add": "Ajouter",
+      "addPlaceholder": "Ex. Pas de chat : mon chien ne les supporte pas."
     },
     "availability": {
       "title": "Vos indisponibilités",
@@ -394,21 +395,27 @@
   "need": {
     "pet": {
       "title": "Votre animal",
-      "intro": "Ces informations aident un pet-sitter à savoir s'il peut réellement accueillir votre animal.",
+      "intro": "Pour savoir qui peut vraiment accueillir votre animal.",
       "speciesLabel": "Pour quel animal cherchez-vous une garde ?",
       "speciesRequired": "Choisissez l’animal concerné.",
       "nameLabel": "Son nom",
       "nameRequired": "Indiquez le nom de votre animal.",
       "ageLabel": "Son âge",
-      "ageHelp": "Par exemple : 8 mois, 3 ans.",
       "notesLabel": "Besoins ou contraintes importantes",
-      "notesHelp": "Traitement en cours, peur des autres chiens, ne peut pas rester seul longtemps…",
       "chooseLabel": "De quel animal s’agit-il ?",
       "another": "Un autre animal",
       "editElsewhere": "Vos animaux enregistrés se modifient dans Mes animaux, pas ici.",
       "sizeLabel": "Sa taille",
       "sizeHelp": "Les pet-sitters indiquent les tailles qu'ils acceptent : cela vous montre seulement ceux qui peuvent prendre votre chien.",
-      "photoLabel": "Une photo (facultatif)"
+      "photoLabel": "Une photo (facultatif)",
+      "agePlaceholder": "Ex. 8 mois, 3 ans",
+      "notesPlaceholder": "Ex. traitement en cours, peur des autres chiens…",
+      "notesInfo": "Montré au pet-sitter avec votre demande, pour qu'il puisse juger avant d'accepter.",
+      "otherAnimal": {
+        "toggle": "Mon animal n'est pas dans la liste",
+        "title": "Chiens, chats et oiseaux seulement, pour l'instant",
+        "body": "Nidz ne permet pas encore de chercher un pet-sitter pour un autre animal — lapin, tortue, poisson. Les pet-sitters ne déclarent que les chiens, les chats et les oiseaux : aucun résultat ne pourrait honnêtement correspondre."
+      }
     },
     "location": {
       "title": "Où cherchez-vous ?",
@@ -782,7 +789,8 @@
       "details": "À propos de cet animal",
       "detailsHelp": "Rien n’est obligatoire. Cela aide un pet-sitter à juger honnêtement s’il peut accueillir votre animal — un profil plus complet ne rend pas l’animal meilleur, il le rend plus clair.",
       "care": "Détails de garde",
-      "careHelp": "Privé. Réservé à la personne qui s’occupe réellement de votre animal, jamais affiché sur une page publique."
+      "careHelp": "Privé. Réservé à la personne qui s’occupe réellement de votre animal, jamais affiché sur une page publique.",
+      "carePrivate": "Privé — jamais affiché sur une page publique."
     },
     "sexLabel": "Sexe",
     "sex": {
@@ -803,8 +811,7 @@
       "goodWithChildren": "À l’aise avec les enfants ?",
       "walksPerDay": "Promenades par jour",
       "walksPerDayHelp": "Ce à quoi votre chien est habitué. Laissez vide si cela varie.",
-      "leashNotes": "En laisse",
-      "leashNotesHelp": "Tire, réagit aux autres chiens, très bien sans laisse — ce à quoi un pet-sitter doit s’attendre."
+      "leashNotes": "En laisse"
     },
     "cat": {
       "living": "À l’intérieur ou dehors ?",
@@ -817,12 +824,9 @@
       "goodWithCats": "À l’aise avec les autres chats ?",
       "goodWithDogs": "À l’aise avec les chiens ?",
       "escapeRisk": "Risque de filer par une porte ouverte ?",
-      "litterNotes": "Litière",
-      "litterNotesHelp": "Où elle se trouve, à quelle fréquence elle est changée, tout ce qui sort de l’ordinaire."
+      "litterNotes": "Litière"
     },
     "bird": {
-      "kind": "Quel oiseau ?",
-      "kindHelp": "Par exemple : perruche, canari, calopsitte.",
       "housing": "Vit dans",
       "housingOption": {
         "cage": "Une cage",
@@ -836,9 +840,7 @@
       },
       "escapeRisk": "Risque de s’échapper si une porte ou une fenêtre est ouverte ?",
       "outOfCageNotes": "Temps hors de la cage",
-      "outOfCageNotesHelp": "Combien de temps, à quelle fréquence, et ce qu’il faut fermer avant.",
-      "socialNotes": "Bruit et compagnie",
-      "socialNotesHelp": "À quel point il est bruyant, et s’il a besoin de compagnie dans la journée."
+      "socialNotes": "Bruit et compagnie"
     },
     "care": {
       "feeding": "Alimentation",
@@ -848,7 +850,41 @@
     },
     "notSure": "Je ne sais pas",
     "deleteFailedTitle": "Impossible de supprimer {{name}} : rien n'a changé.",
-    "deleteFailedBody": "Ce navigateur n'a pas pu enregistrer la suppression (stockage plein ou bloqué). L'animal est toujours dans votre liste : vous pouvez réessayer."
+    "deleteFailedBody": "Ce navigateur n'a pas pu enregistrer la suppression (stockage plein ou bloqué). L'animal est toujours dans votre liste : vous pouvez réessayer.",
+    "kind": {
+      "label": {
+        "dog": "Race",
+        "cat": "Race",
+        "bird": "Espèce"
+      },
+      "search": {
+        "dog": "Rechercher une race",
+        "cat": "Rechercher une race",
+        "bird": "Rechercher une espèce"
+      },
+      "notInList": "Mon animal n'est pas dans la liste",
+      "otherLabel": {
+        "dog": "Sa race",
+        "cat": "Sa race",
+        "bird": "Son espèce"
+      },
+      "otherPlaceholder": {
+        "dog": "Ex. Shar-pei",
+        "cat": "Ex. Abyssin",
+        "bird": "Ex. Mainate"
+      },
+      "noMatch": "Rien ne correspond à « {{query}} ». Choisissez « Mon animal n'est pas dans la liste » pour l'écrire vous-même.",
+      "showAll": "Voir toute la liste",
+      "info": "Cela aide le pet-sitter à se représenter votre animal. Les résultats n'en dépendent pas : on cherche par animal et, pour un chien, par taille — jamais par race."
+    },
+    "placeholder": {
+      "walks": "Ex. 2",
+      "leash": "Ex. tire, réagit aux autres chiens, très bien sans laisse",
+      "litter": "Ex. dans la salle de bain, changée chaque jour",
+      "outOfCage": "Ex. une heure le soir, fenêtres fermées",
+      "social": "Ex. chante le matin, aime la compagnie"
+    },
+    "speciesLabel": "Quel animal ?"
   },
   "reviews": {
     "title": "Avis",
@@ -1036,7 +1072,6 @@
       "oneRoom": "Une seule pièce"
     },
     "restrictedRoomsLabel": "Y a-t-il des endroits interdits ?",
-    "restrictedRoomsHelp": "La chambre, le balcon, l’étage — ce que c’est chez vous.",
     "sleepingLabel": "Où dort l’animal ?",
     "sleeping": {
       "sitterRoom": "Dans ma chambre",
@@ -1102,7 +1137,8 @@
     "canReachVetLabel": "Pourriez-vous emmener un animal chez le vétérinaire ?",
     "canReachVetHelp": "Un non franc est utile. Un propriétaire préfère le savoir maintenant plutôt que pendant une urgence.",
     "emergencyPlanLabel": "Que feriez-vous en cas de problème ?",
-    "emergencyPlanHelp": "Qui vous appelleriez, dans quel ordre, et comment vous iriez."
+    "emergencyPlanHelp": "Qui vous appelleriez, dans quel ordre, et comment vous iriez.",
+    "restrictedRoomsPlaceholder": "Ex. la chambre, le balcon"
   },
   "verification": {
     "domain": {

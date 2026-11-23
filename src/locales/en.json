@@ -15,7 +15,8 @@
     "backToRequests": "Back to my requests",
     "loading": "Loading…",
     "moreInfoAbout": "More information: {{topic}}",
-    "languageCurrent": "Language: {{name}}"
+    "languageCurrent": "Language: {{name}}",
+    "optional": "optional"
   },
   "nav": {
     "home": "Home",
@@ -210,7 +211,6 @@
       "intro": "This is the first thing an owner reads to get a sense of you.",
       "photoLabel": "Your photo (optional)",
       "headlineLabel": "In one sentence",
-      "headlineHelp": "For example: “I board dogs at my home, a house with a fenced yard.”",
       "headlineRequired": "Write one sentence describing what you offer.",
       "aboutLabel": "About you",
       "aboutHelp": "What does a day with an animal at your place look like? That is what helps an owner picture it.",
@@ -218,7 +218,8 @@
       "speciesLabel": "Which animals do you have the most experience with?",
       "professionalLabel": "Professional animal experience (optional)",
       "professionalHelp": "Shelter volunteering, training, work in a veterinary practice…",
-      "demoNote": "What you write stays in this browser: nothing is sent or published online."
+      "demoNote": "What you write stays in this browser: nothing is sent or published online.",
+      "headlinePlaceholder": "e.g. I look after dogs at home, a house with a fenced yard."
     },
     "services": {
       "title": "Services and rates",
@@ -244,16 +245,16 @@
       "dogsLabel": "Dogs living with you",
       "catsLabel": "Cats living with you",
       "conditionsLabel": "Important conditions about your home (optional)",
-      "conditionsHelp": "Upper floor with no lift, fenced yard, children at home…",
       "typeRequired": "Say whether you live in a flat or a house.",
-      "outdoorRequired": "Say whether you have any outdoor space."
+      "outdoorRequired": "Say whether you have any outdoor space.",
+      "conditionsPlaceholder": "e.g. 3rd floor without a lift, children at home…"
     },
     "limits": {
       "title": "What you cannot accept",
       "intro": "This is what keeps unsuitable requests away. Give the reason: it matters as much as the limit.",
       "addLabel": "Add a limit",
-      "addHelp": "For example: “I cannot take a cat: my own dog does not tolerate them.”",
-      "add": "Add"
+      "add": "Add",
+      "addPlaceholder": "e.g. No cats: my dog can't stand them."
     },
     "availability": {
       "title": "When you are not available",
@@ -391,21 +392,27 @@
   "need": {
     "pet": {
       "title": "Your animal",
-      "intro": "This is what a sitter needs in order to know whether they can genuinely take your animal.",
+      "intro": "So sitters can tell whether they can really take your animal.",
       "speciesLabel": "Which animal are you looking for care for?",
       "speciesRequired": "Choose the animal this is about.",
       "nameLabel": "Its name",
       "nameRequired": "Enter your animal's name.",
       "ageLabel": "Its age",
-      "ageHelp": "For example: 8 months, 3 years.",
       "notesLabel": "Important needs or constraints",
-      "notesHelp": "Ongoing medication, afraid of other dogs, cannot be left alone for long…",
       "chooseLabel": "Which animal is this about?",
       "another": "Another animal",
       "editElsewhere": "Your saved animals are edited in My pets, not here.",
       "sizeLabel": "Its size",
       "sizeHelp": "Sitters state which sizes they can take, so this shows you only the ones who can take your dog.",
-      "photoLabel": "A photo (optional)"
+      "photoLabel": "A photo (optional)",
+      "agePlaceholder": "e.g. 8 months, 3 years",
+      "notesPlaceholder": "e.g. on medication, afraid of other dogs…",
+      "notesInfo": "Shown to the sitter with your request, so they can judge before saying yes.",
+      "otherAnimal": {
+        "toggle": "My animal isn't in the list",
+        "title": "Dogs, cats and birds only, for now",
+        "body": "Nidz does not yet let you look for a sitter for another animal — a rabbit, a tortoise, a fish. Sitters only declare dogs, cats and birds, so no result could honestly match."
+      }
     },
     "location": {
       "title": "Where are you looking?",
@@ -766,7 +773,8 @@
       "details": "About this animal",
       "detailsHelp": "None of this is required. It helps a sitter judge honestly whether they can take your animal — a fuller profile is not a better animal, it is a clearer one.",
       "care": "Care details",
-      "careHelp": "Private. Kept for the person actually looking after your animal, and never shown on a public page."
+      "careHelp": "Private. Kept for the person actually looking after your animal, and never shown on a public page.",
+      "carePrivate": "Private — never shown on a public page."
     },
     "sexLabel": "Sex",
     "sex": {
@@ -787,8 +795,7 @@
       "goodWithChildren": "Comfortable around children?",
       "walksPerDay": "Walks a day",
       "walksPerDayHelp": "How many your dog is used to. Leave empty if it varies.",
-      "leashNotes": "On the lead",
-      "leashNotesHelp": "Pulling, reactive to other dogs, fine off the lead — whatever a sitter should expect."
+      "leashNotes": "On the lead"
     },
     "cat": {
       "living": "Indoors or outdoors?",
@@ -801,12 +808,9 @@
       "goodWithCats": "Comfortable around other cats?",
       "goodWithDogs": "Comfortable around dogs?",
       "escapeRisk": "Likely to bolt through an open door?",
-      "litterNotes": "Litter routine",
-      "litterNotesHelp": "Where it is, how often it is changed, anything unusual."
+      "litterNotes": "Litter routine"
     },
     "bird": {
-      "kind": "What kind of bird?",
-      "kindHelp": "For example: budgerigar, canary, cockatiel.",
       "housing": "Lives in",
       "housingOption": {
         "cage": "A cage",
@@ -820,9 +824,7 @@
       },
       "escapeRisk": "Likely to escape if a door or window is open?",
       "outOfCageNotes": "Time out of the cage",
-      "outOfCageNotesHelp": "How long, how often, and what has to be shut first.",
-      "socialNotes": "Noise and company",
-      "socialNotesHelp": "How vocal it is, and whether it needs company during the day."
+      "socialNotes": "Noise and company"
     },
     "care": {
       "feeding": "Feeding",
@@ -832,7 +834,41 @@
     },
     "notSure": "Not sure",
     "deleteFailedTitle": "Couldn't delete {{name}} — nothing changed.",
-    "deleteFailedBody": "This browser couldn't save the deletion (storage full or blocked). The animal is still in your list, so you can try again."
+    "deleteFailedBody": "This browser couldn't save the deletion (storage full or blocked). The animal is still in your list, so you can try again.",
+    "kind": {
+      "label": {
+        "dog": "Breed",
+        "cat": "Breed",
+        "bird": "Species"
+      },
+      "search": {
+        "dog": "Search for a breed",
+        "cat": "Search for a breed",
+        "bird": "Search for a species"
+      },
+      "notInList": "My animal isn't in the list",
+      "otherLabel": {
+        "dog": "Its breed",
+        "cat": "Its breed",
+        "bird": "Its species"
+      },
+      "otherPlaceholder": {
+        "dog": "e.g. Shar-Pei",
+        "cat": "e.g. Abyssinian",
+        "bird": "e.g. Myna"
+      },
+      "noMatch": "Nothing matches “{{query}}”. Choose “My animal isn't in the list” to write it yourself.",
+      "showAll": "Show the whole list",
+      "info": "It helps a sitter picture your animal. It does not change the results: sitters are found by animal and, for a dog, by size — never by breed."
+    },
+    "placeholder": {
+      "walks": "e.g. 2",
+      "leash": "e.g. pulls, reacts to other dogs, fine off lead",
+      "litter": "e.g. in the bathroom, changed every day",
+      "outOfCage": "e.g. an hour in the evening, windows shut",
+      "social": "e.g. sings in the morning, likes company"
+    },
+    "speciesLabel": "Which animal?"
   },
   "reviews": {
     "title": "Reviews",
@@ -1014,7 +1050,6 @@
       "oneRoom": "One room"
     },
     "restrictedRoomsLabel": "Anywhere that stays off limits?",
-    "restrictedRoomsHelp": "The bedroom, the balcony, upstairs — whatever it is.",
     "sleepingLabel": "Where does the animal sleep?",
     "sleeping": {
       "sitterRoom": "In my room",
@@ -1080,7 +1115,8 @@
     "canReachVetLabel": "Could you get an animal to a vet?",
     "canReachVetHelp": "A straight no is useful. An owner would rather know now than find out during an emergency.",
     "emergencyPlanLabel": "What would you do if something went wrong?",
-    "emergencyPlanHelp": "Who you would call, in what order, and how you would get there."
+    "emergencyPlanHelp": "Who you would call, in what order, and how you would get there.",
+    "restrictedRoomsPlaceholder": "e.g. the bedroom, the balcony"
   },
   "verification": {
     "domain": {

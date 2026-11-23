@@ -92,8 +92,8 @@ export default function Combobox({
           disabled={disabled}
           className={cn(
             "flex h-12 w-full items-center justify-between gap-2 rounded-md border border-input bg-card px-4 py-2 text-start text-base",
-            "transition-[box-shadow,border-color,background-color] duration-150 hover:bg-muted",
-            "focus-visible:border-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15",
+            "transition-[box-shadow,border-color,background-color] duration-150 hover:bg-secondary",
+            "focus-visible:border-primary focus-visible:shadow-[inset_0_0_0_1px_hsl(var(--primary))] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15",
             "aria-[invalid=true]:border-destructive disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-card",
             className,
           )}

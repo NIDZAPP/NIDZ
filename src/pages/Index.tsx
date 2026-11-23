@@ -194,7 +194,8 @@ export default function Index() {
                 to={requestPath(draft.sitterId, draft.search)}
                 className="flex min-w-0 flex-1 items-center gap-3.5 rounded-lg p-2.5 transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-full bg-sand text-foreground">
+                {/* Neutral, never a status colour: nothing has been sent. */}
+                <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary text-foreground">
                   <Inbox className="size-5" />
                 </span>
                 <span className="min-w-0 flex-1">

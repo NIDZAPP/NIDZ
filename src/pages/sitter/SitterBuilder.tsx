@@ -5,6 +5,7 @@ import { Navigate } from "react-router-dom";
 import { Cat, Dog, Plus, X } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { AnimalCategoryChecks } from "@/components/shared/AnimalCategories";
 import Chip from "@/components/shared/Chip";
 import FlowScreen from "@/components/shared/FlowScreen";
 import { useReturnToDashboard } from "@/hooks/use-return-to-dashboard";
@@ -217,7 +218,6 @@ export function StepAbout() {
 
       <FieldShell
         label={t("sitterFlow.about.headlineLabel")}
-        help={t("sitterFlow.about.headlineHelp")}
         error={error}
       >
         {({ id, describedBy, invalid }) => (
@@ -225,6 +225,7 @@ export function StepAbout() {
             id={id}
             ref={headlineRef}
             value={headline}
+            placeholder={t("sitterFlow.about.headlinePlaceholder")}
             aria-describedby={describedBy}
             aria-invalid={invalid || undefined}
             onChange={(e) => {
@@ -235,7 +236,7 @@ export function StepAbout() {
         )}
       </FieldShell>
 
-      <FieldShell label={t("sitterFlow.about.aboutLabel")} help={t("sitterFlow.about.aboutHelp")}>
+      <FieldShell label={t("sitterFlow.about.aboutLabel")} info={t("sitterFlow.about.aboutHelp")}>
         {({ id, describedBy }) => (
           <Textarea id={id} rows={5} value={about} aria-describedby={describedBy} onChange={(e) => setAbout(e.target.value)} />
         )}
@@ -416,7 +417,7 @@ export function StepAnimals() {
   });
   const [max, setMax] = useDraftField(scope, "max", () => String(profile?.maxAnimals ?? 1));
   const [error, setError] = useState<string>();
-  const speciesRef = useRef<HTMLFieldSetElement>(null);
+  const speciesRef = useRef<HTMLDivElement>(null);
   const sizesRef = useRef<HTMLFieldSetElement>(null);
 
   return (
@@ -445,28 +446,26 @@ export function StepAnimals() {
         );
       }}
     >
-      <fieldset ref={speciesRef} tabIndex={-1} className="focus:outline-none">
-        <legend className="mb-3 text-sm font-medium text-foreground">{t("sitterFlow.animals.label")}</legend>
-        <div className="flex flex-wrap gap-2">
-          {SPECIES.map((s) => (
-            <Chip
-              key={s}
-              icon={s === "dog" ? Dog : Cat}
-              selected={accepted.includes(s)}
-              onClick={() => {
-                setAccepted(toggle(accepted, s));
-                setError(undefined);
-              }}
-            >
-              {t(`speciesPlural.${s}`)}
-            </Chip>
-          ))}
-        </div>
-      </fieldset>
+      {/* The same illustrated cards the owner picks from (1.4, step 3): one
+          classification for both sides, so "chats" means the same thing to
+          the person asking and the person accepting. */}
+      <div ref={speciesRef} tabIndex={-1} className="focus:outline-none">
+        <p id="sitter-animals-label" className="mb-3 text-[0.9375rem] font-medium text-foreground">
+          {t("sitterFlow.animals.label")}
+        </p>
+        <AnimalCategoryChecks
+          labelledBy="sitter-animals-label"
+          values={accepted}
+          onToggle={(s) => {
+            setAccepted(toggle(accepted, s));
+            setError(undefined);
+          }}
+        />
+      </div>
 
       {accepted.includes("dog") && (
-        <fieldset ref={sizesRef} tabIndex={-1} className="focus:outline-none">
-          <legend className="mb-3 text-sm font-medium text-foreground">{t("sitterFlow.animals.sizesLabel")}</legend>
+        <fieldset ref={sizesRef} tabIndex={-1} className="animate-fade-in focus:outline-none">
+          <legend className="mb-3 text-[0.9375rem] font-medium text-foreground">{t("sitterFlow.animals.sizesLabel")}</legend>
           <div className="flex flex-wrap gap-2">
             {DOG_SIZES.map((s) => (
               <Chip
@@ -484,7 +483,7 @@ export function StepAnimals() {
         </fieldset>
       )}
 
-      <FieldShell label={t("sitterFlow.animals.maxLabel")} help={t("sitterFlow.animals.maxHelp")}>
+      <FieldShell label={t("sitterFlow.animals.maxLabel")} info={t("sitterFlow.animals.maxHelp")}>
         {({ id, describedBy }) => (
           <Input
             id={id}
@@ -632,12 +631,13 @@ export function StepHousing() {
         </FieldShell>
       </div>
 
-      <FieldShell label={t("sitterFlow.housing.conditionsLabel")} help={t("sitterFlow.housing.conditionsHelp")}>
+      <FieldShell label={t("sitterFlow.housing.conditionsLabel")}>
         {({ id, describedBy }) => (
           <Textarea
             id={id}
             rows={3}
             value={conditions}
+            placeholder={t("sitterFlow.housing.conditionsPlaceholder")}
             aria-describedby={describedBy}
             onChange={(e) => setConditions(e.target.value)}
           />
@@ -699,13 +699,14 @@ export function StepLimits() {
         </ul>
       )}
 
-      <FieldShell label={t("sitterFlow.limits.addLabel")} help={t("sitterFlow.limits.addHelp")}>
+      <FieldShell label={t("sitterFlow.limits.addLabel")}>
         {({ id, describedBy }) => (
           <div className="flex items-start gap-2">
             <Textarea
               id={id}
               rows={2}
               value={draft}
+              placeholder={t("sitterFlow.limits.addPlaceholder")}
               aria-describedby={describedBy}
               onChange={(e) => setDraft(e.target.value)}
             />

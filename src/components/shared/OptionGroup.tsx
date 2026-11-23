@@ -11,6 +11,9 @@ export type Option<T extends string> = {
       than padding the row with a restatement of the label. */
   description?: string;
   icon?: LucideIcon;
+  /** A picture in place of the icon tile — an animal's portrait. Decorative:
+      the label still names the option. */
+  art?: React.ReactNode;
   /** Shown but not choosable. The description must then say why: an option
       that is greyed out with no reason reads as a broken control, and an
       option silently left out hides a fact the person may need — "this
@@ -91,7 +94,11 @@ export default function OptionGroup<T extends string>({
                   : "bg-card shadow-card hover:shadow-raised active:scale-[0.99]",
             )}
           >
-            {Icon && (
+            {option.art ? (
+              <span aria-hidden="true" className="size-11 shrink-0 overflow-hidden rounded-full">
+                {option.art}
+              </span>
+            ) : Icon && (
               <span
                 aria-hidden="true"
                 className={cn(

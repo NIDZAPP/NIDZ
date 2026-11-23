@@ -57,7 +57,9 @@ import { ACCOUNT, BASE, check, clean, done, open, pickCombobox, seedState, store
   await page.waitForSelector("h1");
   await page.getByRole("radio", { name: "Bird", exact: true }).click();
   const birdText = clean(await page.locator("main").innerText());
-  check("bird form asks bird questions, not dog ones", birdText.includes("What kind of bird?") && !/Walks a day|Size\b/.test(birdText));
+  /* 1.4: the species is chosen from the shared list (a goldfinch is offered)
+     rather than typed into "What kind of bird?". */
+  check("bird form asks bird questions, not dog ones", birdText.includes("Species") && birdText.includes("European goldfinch") && !/Walks a day|Size\b/.test(birdText));
   await page.getByLabel("Its age").fill("2 years");
   await page.getByRole("button", { name: "Save" }).click();
   check("missing name is reported", await page.getByText("Enter your animal's name.").isVisible());

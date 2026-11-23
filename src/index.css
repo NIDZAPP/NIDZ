@@ -11,9 +11,12 @@
 
    THE 1.4 WORLD IN ONE PARAGRAPH. A mist ground (a light green-grey drawn from
    the teal), white cards with a large soft radius and one soft shadow, and the
-   deep teal as the ONLY action colour — always a pill. Warmth lives on animals
-   and people: terracotta, its soft tint, sand and sky are illustration and
-   identity surfaces, never controls.
+   signature teal as the ONLY action colour — always a pill. Warmth lives on
+   animals and people: terracotta, its soft tint, sand and sky are illustration
+   and identity surfaces. They never carry a STATE (hover, focus, selection,
+   error) and never fill an action button; the one exception is the resting
+   fill of an illustrated animal-category card, whose selection is carried by
+   the teal ring and the check badge.
 
    WHY THE GROUND IS NO LONGER WHITE. Audit 1.2 made the ground white and
    pushed structure into spacing and hairlines. 1.4 is a consumer app built
@@ -64,12 +67,13 @@
     --popover-foreground: 167 16% 11%;
 
     /* Brand primary — identity + THE action colour */
-    --primary: 175 77% 26%;             /* #0F766E deep teal — 5.5:1 on white, 4.9:1 on mist */
+    --primary: 175 77% 26%;             /* #0F766E signature teal — 5.5:1 on white, 4.9:1 on mist */
     --primary-foreground: 0 0% 100%;
     --primary-hover: 176 69% 22%;       /* #115E59 hover / pressed */
     --primary-soft: 168 40% 91%;        /* #DFF1EE selected rows, active tab — teal text 4.7:1 */
-    /* The hero field: the home panel and the brief capsule's expanded sheet.
-       White on it 10:1; --primary-on-deep (secondary text) 7.5:1. */
+    /* The hero field (the home panel). NON-INTERACTIVE: never the fill of a
+       pressable thing — teal on it is only 1.8:1. White on it 10:1;
+       --primary-on-deep (secondary text, only here) 7.5:1. */
     --primary-deep: 175 74% 17%;        /* #0B4B46 */
     --primary-on-deep: 168 30% 85%;     /* #CDE4E0 */
 
@@ -97,8 +101,9 @@
     --brand-foreground: 0 0% 100%;
     --brand-soft: 19 54% 93%;           /* #F7EAE4 */
     --sand: 33 62% 90%;                 /* #F5E7D6 dog tile */
-    --sand-strong: 30 52% 72%;          /* illustration fur */
-    --sky: 190 45% 91%;                 /* #DEEFF2 bird tile */
+    --sky: 205 60% 93%;                 /* #E2EFF8 bird tile — kept clearly apart
+                                           from --primary-soft (the selected
+                                           tint), per the colour review */
 
     /* Status — each pairs with white text at >= 5.6:1 */
     --success: 143 64% 24%;             /* #166534 */

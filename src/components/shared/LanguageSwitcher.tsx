@@ -41,7 +41,7 @@ const ORDER: AppLocale[] = ["fr", "ar", "en"];
  * Selecting writes an EXPLICIT choice (`setLocale`), which is what stops Nidz
  * following the device from then on.
  */
-export default function LanguageSwitcher({ className, onDeep = false }: { className?: string; onDeep?: boolean }) {
+export default function LanguageSwitcher({ className }: { className?: string }) {
   const { t } = useTranslation();
   const current = useAppLocale();
 
@@ -52,9 +52,7 @@ export default function LanguageSwitcher({ className, onDeep = false }: { classN
         className={cn(
           "inline-flex size-11 shrink-0 items-center justify-center rounded-full transition-[transform,background-color] duration-150 ease-out active:scale-[0.96]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-          onDeep
-            ? "bg-white/10 text-white hover:bg-white/20"
-            : "bg-card text-foreground shadow-pill hover:bg-secondary data-[state=open]:bg-secondary",
+          "bg-card text-foreground shadow-pill hover:bg-secondary data-[state=open]:bg-secondary",
           className,
         )}
       >

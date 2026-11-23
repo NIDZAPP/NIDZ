@@ -1,9 +1,10 @@
 import { useTranslation } from "react-i18next";
+import { Lock } from "lucide-react";
 
-import { ChipGroup } from "@/components/shared/Chip";
-import OptionGroup from "@/components/shared/OptionGroup";
-import { SPECIES_ICON } from "@/components/shared/species";
-import { FieldShell, PhotoField } from "@/components/shared/fields";
+import { AnimalCategoryRadio } from "@/components/shared/AnimalCategories";
+import InfoTip from "@/components/shared/InfoTip";
+import KindPicker from "@/components/shared/KindPicker";
+import { ChipField, FieldShell, PhotoField } from "@/components/shared/fields";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -15,7 +16,7 @@ import {
   type Pet,
   type PetSex,
 } from "@/data/pets";
-import { DOG_SIZES, SPECIES, type Species } from "@/data/types";
+import { DOG_SIZES, type Species } from "@/data/types";
 
 /* Same three chips and the same rule as `DeclaredField`, which the sitter side
    uses: `unknown` is what an untouched question already stores, so it draws no
@@ -91,52 +92,51 @@ export default function PetForm({
   const setCare = (patch: Partial<Pet["care"]>) => onChange({ ...pet, care: { ...pet.care, ...patch } });
 
   /** A yes / no / not-answered question, rendered the same way everywhere. */
-  const declaredField: DeclaredRenderer = (labelKey, value, apply) => {
-    const id = `pet-${labelKey.replace(/\W+/g, "-")}`;
-    return (
-      <div key={labelKey}>
-        <p id={id} className="text-sm font-medium text-foreground">
-          {t(labelKey)}
-        </p>
-        <ChipGroup
-          className="mt-2"
-          labelledBy={id}
-          value={value === "unknown" ? null : value}
-          onChange={apply}
-          options={DECLARED.map((option) => ({ value: option, label: t(`pets.declared.${option}`) }))}
-        />
-      </div>
-    );
-  };
+  const declaredField: DeclaredRenderer = (labelKey, value, apply) => (
+    <ChipField
+      key={labelKey}
+      label={t(labelKey)}
+      value={value === "unknown" ? null : value}
+      onChange={apply}
+      options={DECLARED.map((option) => ({ value: option, label: t(`pets.declared.${option}`) }))}
+    />
+  );
+
+  /* Three cards, one idea each (1.4): what the animal is, what a sitter
+     needs to judge, and what stays private. */
+  const card = "surface space-y-6 p-5 md:p-6";
 
   return (
-    <div className="space-y-10">
-      <section aria-labelledby="pet-basics" className="space-y-6">
-        <h2 id="pet-basics" className="text-name font-semibold text-foreground">
+    <div className="space-y-4">
+      <section aria-labelledby="pet-basics" className={card}>
+        <h2 id="pet-basics" className="text-title font-semibold text-foreground">
           {t("pets.sections.basics")}
         </h2>
 
         {!speciesLocked && (
           <div>
-            <p id="pet-species" className="mb-3 text-sm font-medium text-foreground">
-              {t("need.pet.speciesLabel")}
+            <p id="pet-species" className="mb-3 text-[0.9375rem] font-medium text-foreground">
+              {t("pets.speciesLabel")}
             </p>
-            <OptionGroup
+            {/* `withSpecies` rebuilds the detail record rather than carrying
+                answers across. "Good with dogs" answered about a dog is not an
+                answer about the bird it was mistakenly filed as. */}
+            <AnimalCategoryRadio
               labelledBy="pet-species"
               groupRef={speciesRef}
               value={pet.species}
-              /* `withSpecies` rebuilds the detail record rather than carrying
-                 answers across. "Good with dogs" answered about a dog is not an
-                 answer about the bird it was mistakenly filed as. */
               onChange={(next) => onChange(withSpecies(pet, next as Species))}
-              options={SPECIES.map((value) => ({
-                value,
-                label: t(`species.${value}`),
-                icon: SPECIES_ICON[value],
-              }))}
             />
           </div>
         )}
+
+        <KindPicker
+          key={pet.species}
+          species={pet.species}
+          kindId={pet.kindId}
+          kindOther={pet.kindOther}
+          onChange={(next) => set(next)}
+        />
 
         <FieldShell label={t("need.pet.nameLabel")} error={nameError}>
           {({ id, describedBy, invalid }) => (
@@ -152,29 +152,24 @@ export default function PetForm({
           )}
         </FieldShell>
 
-        <FieldShell label={t("need.pet.ageLabel")} help={t("need.pet.ageHelp")}>
+        <FieldShell label={t("need.pet.ageLabel")}>
           {({ id, describedBy }) => (
             <Input
               id={id}
               value={pet.age}
+              placeholder={t("need.pet.agePlaceholder")}
               aria-describedby={describedBy}
               onChange={(e) => set({ age: e.target.value })}
             />
           )}
         </FieldShell>
 
-        <div>
-          <p id="pet-sex" className="text-sm font-medium text-foreground">
-            {t("pets.sexLabel")}
-          </p>
-          <ChipGroup
-            className="mt-2"
-            labelledBy="pet-sex"
-            value={pet.sex}
-            onChange={(next) => set({ sex: next })}
-            options={SEXES.map((value) => ({ value, label: t(`pets.sex.${value}`) }))}
-          />
-        </div>
+        <ChipField
+          label={t("pets.sexLabel")}
+          value={pet.sex}
+          onChange={(next) => set({ sex: next })}
+          options={SEXES.map((value) => ({ value, label: t(`pets.sex.${value}`) }))}
+        />
 
         <PhotoField
           label={t("need.pet.photoLabel")}
@@ -183,17 +178,15 @@ export default function PetForm({
         />
       </section>
 
-      <section aria-labelledby="pet-details" className="space-y-6 border-t border-border pt-8">
-        <div>
-          <h2 id="pet-details" className="text-name font-semibold text-foreground">
+      <section aria-labelledby="pet-details" className={card}>
+        {/* What more detail buys, and what it does not, behind the "!": a
+            fuller profile helps a sitter judge; it does not make the animal
+            better (§118). */}
+        <div className="flex items-center gap-1.5">
+          <h2 id="pet-details" className="text-title font-semibold text-foreground">
             {t("pets.sections.details")}
           </h2>
-          {/* Says what more detail buys, and what it does not. A fuller profile
-              helps a sitter judge whether they can take this animal; it does
-              not make the animal better, and §118's rule applies here too. */}
-          <p className="mt-2 max-w-[64ch] text-sm text-muted-foreground">
-            {t("pets.sections.detailsHelp")}
-          </p>
+          <InfoTip topic={t("pets.sections.details")}>{t("pets.sections.detailsHelp")}</InfoTip>
         </div>
 
         {pet.species === "dog" && (
@@ -207,19 +200,24 @@ export default function PetForm({
         )}
       </section>
 
-      <section aria-labelledby="pet-care" className="space-y-6 border-t border-border pt-8">
+      <section aria-labelledby="pet-care" className={card}>
         <div>
-          <h2 id="pet-care" className="text-name font-semibold text-foreground">
+          <h2 id="pet-care" className="text-title font-semibold text-foreground">
             {t("pets.sections.care")}
           </h2>
-          <p className="mt-2 max-w-[64ch] text-sm text-muted-foreground">{t("pets.sections.careHelp")}</p>
+          {/* Visible, not behind a "!": who sees an answer is part of the
+              decision to give it. */}
+          <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
+            <Lock className="size-4 shrink-0" aria-hidden="true" />
+            {t("pets.sections.carePrivate")}
+          </p>
         </div>
 
         <FieldShell label={t("pets.care.feeding")}>
           {({ id }) => (
             <Textarea
               id={id}
-              rows={3}
+              rows={2}
               value={pet.care.feeding}
               onChange={(e) => setCare({ feeding: e.target.value })}
             />
@@ -230,7 +228,7 @@ export default function PetForm({
           {({ id }) => (
             <Textarea
               id={id}
-              rows={3}
+              rows={2}
               value={pet.care.medication}
               onChange={(e) => setCare({ medication: e.target.value })}
             />
@@ -269,21 +267,15 @@ function DogFields({
   const { t } = useTranslation();
   return (
     <>
-      <div>
-        <p id="pet-dog-size" className="text-sm font-medium text-foreground">
-          {t("pets.dog.size")}
-        </p>
-        <ChipGroup
-          className="mt-2"
-          labelledBy="pet-dog-size"
-          value={details.size ?? ""}
-          onChange={(next) => setDetail({ size: next || null })}
-          options={[
+      <ChipField
+        label={t("pets.dog.size")}
+        value={details.size ?? ""}
+        onChange={(next) => setDetail({ size: next || null })}
+        options={[
             ...DOG_SIZES.map((value) => ({ value: value as string, label: t(`dogSize.${value}`) })),
             { value: UNSET, label: t("pets.notSure") },
           ]}
-        />
-      </div>
+      />
 
       {declaredField("pets.dog.neutered", details.neutered, (v) => setDetail({ neutered: v }))}
       {declaredField("pets.dog.goodWithDogs", details.goodWithDogs, (v) => setDetail({ goodWithDogs: v }))}
@@ -292,7 +284,7 @@ function DogFields({
         setDetail({ goodWithChildren: v }),
       )}
 
-      <FieldShell label={t("pets.dog.walksPerDay")} help={t("pets.dog.walksPerDayHelp")}>
+      <FieldShell label={t("pets.dog.walksPerDay")} info={t("pets.dog.walksPerDayHelp")}>
         {({ id, describedBy }) => (
           <Input
             id={id}
@@ -300,6 +292,7 @@ function DogFields({
             min={0}
             max={12}
             inputMode="numeric"
+            placeholder={t("pets.placeholder.walks")}
             value={details.walksPerDay ?? ""}
             aria-describedby={describedBy}
             /* Empty stays null rather than becoming 0: "not answered" and
@@ -317,11 +310,12 @@ function DogFields({
         )}
       </FieldShell>
 
-      <FieldShell label={t("pets.dog.leashNotes")} help={t("pets.dog.leashNotesHelp")}>
+      <FieldShell label={t("pets.dog.leashNotes")}>
         {({ id, describedBy }) => (
           <Textarea
             id={id}
-            rows={3}
+            rows={2}
+            placeholder={t("pets.placeholder.leash")}
             value={details.leashNotes}
             aria-describedby={describedBy}
             onChange={(e) => setDetail({ leashNotes: e.target.value })}
@@ -344,35 +338,30 @@ function CatFields({
   const { t } = useTranslation();
   return (
     <>
-      <div>
-        <p id="pet-cat-living" className="text-sm font-medium text-foreground">
-          {t("pets.cat.living")}
-        </p>
-        <ChipGroup
-          className="mt-2"
-          labelledBy="pet-cat-living"
-          value={details.living ?? ""}
-          onChange={(next) => setDetail({ living: next || null })}
-          options={[
+      <ChipField
+        label={t("pets.cat.living")}
+        value={details.living ?? ""}
+        onChange={(next) => setDetail({ living: next || null })}
+        options={[
             ...(["indoor", "outdoor", "both"] as const).map((value) => ({
               value: value as string,
               label: t(`pets.cat.livingOption.${value}`),
             })),
             { value: UNSET, label: t("pets.notSure") },
           ]}
-        />
-      </div>
+      />
 
       {declaredField("pets.cat.neutered", details.neutered, (v) => setDetail({ neutered: v }))}
       {declaredField("pets.cat.goodWithCats", details.goodWithCats, (v) => setDetail({ goodWithCats: v }))}
       {declaredField("pets.cat.goodWithDogs", details.goodWithDogs, (v) => setDetail({ goodWithDogs: v }))}
       {declaredField("pets.cat.escapeRisk", details.escapeRisk, (v) => setDetail({ escapeRisk: v }))}
 
-      <FieldShell label={t("pets.cat.litterNotes")} help={t("pets.cat.litterNotesHelp")}>
+      <FieldShell label={t("pets.cat.litterNotes")}>
         {({ id, describedBy }) => (
           <Textarea
             id={id}
-            rows={3}
+            rows={2}
+            placeholder={t("pets.placeholder.litter")}
             value={details.litterNotes}
             aria-describedby={describedBy}
             onChange={(e) => setDetail({ litterNotes: e.target.value })}
@@ -395,62 +384,40 @@ function BirdFields({
   const { t } = useTranslation();
   return (
     <>
-      <FieldShell label={t("pets.bird.kind")} help={t("pets.bird.kindHelp")}>
-        {({ id, describedBy }) => (
-          <Input
-            id={id}
-            value={details.kind}
-            aria-describedby={describedBy}
-            onChange={(e) => setDetail({ kind: e.target.value })}
-          />
-        )}
-      </FieldShell>
-
-      <div>
-        <p id="pet-bird-housing" className="text-sm font-medium text-foreground">
-          {t("pets.bird.housing")}
-        </p>
-        <ChipGroup
-          className="mt-2"
-          labelledBy="pet-bird-housing"
-          value={details.housing ?? ""}
-          onChange={(next) => setDetail({ housing: next || null })}
-          options={[
+      <ChipField
+        label={t("pets.bird.housing")}
+        value={details.housing ?? ""}
+        onChange={(next) => setDetail({ housing: next || null })}
+        options={[
             ...(["cage", "aviary"] as const).map((value) => ({
               value: value as string,
               label: t(`pets.bird.housingOption.${value}`),
             })),
             { value: UNSET, label: t("pets.notSure") },
           ]}
-        />
-      </div>
+      />
 
-      <div>
-        <p id="pet-bird-handling" className="text-sm font-medium text-foreground">
-          {t("pets.bird.handling")}
-        </p>
-        <ChipGroup
-          className="mt-2"
-          labelledBy="pet-bird-handling"
-          value={details.handling ?? ""}
-          onChange={(next) => setDetail({ handling: next || null })}
-          options={[
+      <ChipField
+        label={t("pets.bird.handling")}
+        value={details.handling ?? ""}
+        onChange={(next) => setDetail({ handling: next || null })}
+        options={[
             ...(["handleable", "limited", "none"] as const).map((value) => ({
               value: value as string,
               label: t(`pets.bird.handlingOption.${value}`),
             })),
             { value: UNSET, label: t("pets.notSure") },
           ]}
-        />
-      </div>
+      />
 
       {declaredField("pets.bird.escapeRisk", details.escapeRisk, (v) => setDetail({ escapeRisk: v }))}
 
-      <FieldShell label={t("pets.bird.outOfCageNotes")} help={t("pets.bird.outOfCageNotesHelp")}>
+      <FieldShell label={t("pets.bird.outOfCageNotes")}>
         {({ id, describedBy }) => (
           <Textarea
             id={id}
-            rows={3}
+            rows={2}
+            placeholder={t("pets.placeholder.outOfCage")}
             value={details.outOfCageNotes}
             aria-describedby={describedBy}
             onChange={(e) => setDetail({ outOfCageNotes: e.target.value })}
@@ -458,11 +425,12 @@ function BirdFields({
         )}
       </FieldShell>
 
-      <FieldShell label={t("pets.bird.socialNotes")} help={t("pets.bird.socialNotesHelp")}>
+      <FieldShell label={t("pets.bird.socialNotes")}>
         {({ id, describedBy }) => (
           <Textarea
             id={id}
-            rows={3}
+            rows={2}
+            placeholder={t("pets.placeholder.social")}
             value={details.socialNotes}
             aria-describedby={describedBy}
             onChange={(e) => setDetail({ socialNotes: e.target.value })}

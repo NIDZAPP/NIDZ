@@ -16,7 +16,9 @@ import { cn } from "@/lib/utils"
    the global rule in index.css. */
 const buttonVariants = cva(
   [
-    "inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold",
+    /* border-transparent: forced-colours mode drops box shadows, and then
+       draws this border so every pill keeps an edge. */
+    "inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-full border border-transparent font-semibold",
     "ring-offset-background transition-[transform,background-color,box-shadow,color] duration-150 ease-out active:scale-[0.97]",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
     "disabled:pointer-events-none disabled:opacity-50",
@@ -35,8 +37,6 @@ const buttonVariants = cva(
         /* The resting secondary action on the ground: white, soft shadow. */
         surface: "bg-card text-foreground shadow-pill hover:bg-secondary",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary-hover",
-        /* Teal on its soft tint — a positive but non-dominant action. */
-        soft: "bg-primary-soft text-primary hover:bg-primary-soft/70",
         ghost: "hover:bg-secondary hover:text-foreground",
         link: "rounded-md text-primary underline-offset-4 hover:underline active:scale-100",
       },

@@ -76,11 +76,8 @@ export default {
 					soft: 'hsl(var(--brand-soft))'
 				},
 				/* Warm supporting surfaces for animals and people (illustration
-				   tiles). Non-interactive, like --brand. */
-				sand: {
-					DEFAULT: 'hsl(var(--sand))',
-					strong: 'hsl(var(--sand-strong))'
-				},
+				   tiles). Never a state colour — see src/index.css. */
+				sand: 'hsl(var(--sand))',
 				sky: 'hsl(var(--sky))',
 				success: {
 					DEFAULT: 'hsl(var(--success))',
