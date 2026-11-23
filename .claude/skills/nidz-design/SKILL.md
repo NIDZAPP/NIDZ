@@ -1,52 +1,28 @@
 ---
 name: nidz-design
-description: Source de vérité Produit, UX/UI et Design System de Nidz. Use for any task involving Nidz screens, components, layouts, colors, typography, spacing, navigation, forms, responsive behavior, mobile UX, trust signals, accessibility, UX writing, or visual design.
+description: Nidz product truth, brand anchors, UX constraints, accessibility and v1.4 visual redesign direction. Use for any Nidz screen, component, layout, mobile UI or design decision.
 ---
 
-# Nidz Design
+# Nidz Design — v1.4
 
-Before creating, modifying, reviewing, or refactoring any user-facing Nidz interface, read:
+Read `NIDZ_DESIGN_SYSTEM.md`, **starting with §0.1 (Nidz 1.4)** and then the relevant product/trust sections. Historical visual prescriptions in §0.0 and elsewhere describe the previous implementation; §0.1 supersedes them for the 1.4 redesign.
 
-`NIDZ_DESIGN_SYSTEM.md`
+## Always preserve
 
-Treat that document as the source of truth for Nidz product UX, UI and design decisions.
+- Nidz's real brand name/logo and teal `#0F766E` + terracotta `#A84F32` as recognizable color anchors. Consult `nidz-color-guardian` on color changes.
+- Product truth, privacy, safety, trust provenance, accessibility, mobile usability, multilingual French/English/Arabic and RTL.
+- Existing user journeys and functionality unless the task specifically authorizes product changes.
+- No fake verification, testimonials, ratings, payments, insurance, bookings, availability or cross-user communication.
 
-## Priority
+## Creative freedom (v1.4)
 
-When another skill, agent, design pattern, existing legacy UI, or generic recommendation conflicts with the Nidz design system:
+- **Do not preserve old layouts, font choices, radii, cards, whitespace or animation rules solely because they exist.** The old UI is not the quality standard.
+- Pill-shaped main/secondary action buttons are an approved global direction; maintain clear action hierarchy and comfortable touch targets.
+- Seek a distinct, polished, warm, mobile-first design with intentional compositions, typography, imagery, surfaces and restrained, useful motion.
+- Use HaHo through Figma MCP **only if access is verified**; it is inspiration, not an authority or a license to copy. Use Impeccable and Emil's skills when accessible.
+- A full visual reinvention is allowed; a product rewrite, fake functionality, accessibility regression or unapproved brand-color replacement is not.
+- Prefer semantic design tokens and reusable patterns. Proposed additions/change of palette roles need explicit review, not random hard-coded colors.
 
-**Nidz rules win.**
+## Working method
 
-This includes recommendations from:
-- Impeccable
-- ui-designer
-- generic Apple-inspired design principles
-- shadcn examples
-- Tailwind examples
-- existing legacy UI in the application
-
-## Rules
-
-- Do not invent new brand colors, typography, spacing rules, trust badges, or visual conventions when the Nidz design system already defines them.
-- Reuse existing semantic design tokens and components whenever possible.
-- Preserve mobile-first behavior, accessibility, i18n and RTL.
-- Never make a simulated feature look genuinely functional.
-- Never invent verification, reviews, availability, payment protection, booking confirmation, insurance, trust metrics, or user data.
-- Prefer clarity, trust and serenity over decorative effects.
-- Use Lucide as the interface icon family when icons are needed.
-- Keep Inter as the main interface font unless the Nidz design system explicitly says otherwise.
-- Keep one visually dominant primary action per decision context.
-- Avoid unnecessary gradients, heavy shadows, decorative hover zoom, glassmorphism, and visual noise.
-- If the requested change conflicts with the source of truth, identify the conflict before implementing it.
-- For each UI task, read only the relevant sections of `NIDZ_DESIGN_SYSTEM.md` rather than repeating or rewriting the whole document.
-
-## Working Principle
-
-Before changing the design, first ask:
-
-1. Does this make the user's decision easier?
-2. Does this make compatibility more understandable?
-3. Does this make trust more honest?
-4. Does this make the next action more obvious?
-
-Only then improve aesthetics within the Nidz design system.
+Inspect the existing screen → propose visual direction and any required design-system updates → obtain approval → implement scoped screens → review real screenshots and interactions. Clearly separate **implemented**, **approved**, and **proposed**. Never claim a design, test or Figma access was verified unless it was.
