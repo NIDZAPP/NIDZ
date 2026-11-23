@@ -54,7 +54,7 @@ export default function OwnerRequestDetail() {
   const again = searchParams.get("again") === "1";
 
   return (
-    <div className="container py-10 md:py-14">
+    <div className="container pb-10 pt-4 md:pb-16 md:pt-8">
       <Helmet>
         <title>
           {t("common.appName")} — {request ? request.pet.name : t("ownerRequests.notFoundTitle")}
@@ -66,7 +66,7 @@ export default function OwnerRequestDetail() {
           variant="labelled"
           fallback="/owner/requests"
           label={t("common.backToRequests")}
-          className="mb-6"
+          className="mb-3"
         />
         {!request ? (
           /* No action: the back control above already goes to the only place
@@ -102,12 +102,14 @@ export default function OwnerRequestDetail() {
                 screen an owner comes back to, so the statement stays — once,
                 first, at body size, with the info glyph that marks the honesty
                 layer everywhere else. */}
-            <p className="mt-8 flex max-w-[64ch] items-start gap-2 border-y border-border py-4 text-base leading-relaxed text-foreground">
-              <Info className="mt-1 size-4 shrink-0" aria-hidden="true" />
-              <span>{t(`ownerRequests.explain.${request.status}`)}</span>
-            </p>
+            <div className="mt-5 flex max-w-[64ch] items-start gap-3 rounded-xl bg-card p-4 text-base leading-relaxed text-foreground shadow-card">
+              <span aria-hidden="true" className="flex size-9 shrink-0 items-center justify-center rounded-full bg-sand">
+                <Info className="size-[1.125rem]" />
+              </span>
+              <span className="pt-1">{t(`ownerRequests.explain.${request.status}`)}</span>
+            </div>
 
-            <div className="mt-8">
+            <div className="mt-3">
               <RequestSummary request={request} sitterName={sitterName} showStatus headingLevel="h2" />
             </div>
 
@@ -142,8 +144,8 @@ export default function OwnerRequestDetail() {
 
 
 
-            <div className="mt-8">
-              <Button asChild variant="outline">
+            <div className="mt-6">
+              <Button asChild variant="surface">
                 <Link to={`/sitters/${request.sitterId}`}>{t("ownerRequests.viewSitter")}</Link>
               </Button>
             </div>

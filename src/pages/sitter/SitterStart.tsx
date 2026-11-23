@@ -1,13 +1,15 @@
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { PawPrint } from "lucide-react";
+import { House, ListChecks, Wallet } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 import FlowScreen from "@/components/shared/FlowScreen";
 import { SaveFeedback } from "@/components/shared/SaveFeedback";
 import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { useSave } from "@/hooks/use-save";
+import { AnimalPortrait } from "@/components/illustrations/animals";
 
 /**
  * The sitter's entry point.
@@ -18,6 +20,13 @@ import { useSave } from "@/hooks/use-save";
  * suggests demand: none of those numbers exist, and inventing them is the
  * §38 "gamification before validation" failure in its most tempting form.
  */
+/* The three promises of the sitter side, each with its picture. */
+const POINTS: { key: string; icon: LucideIcon }[] = [
+  { key: "what", icon: House },
+  { key: "control", icon: Wallet },
+  { key: "limits", icon: ListChecks },
+];
+
 export default function SitterStart() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -48,7 +57,13 @@ export default function SitterStart() {
         backTo="/start"
         title={t("sitterFlow.start.title")}
         intro={t("sitterFlow.start.intro")}
-        headerExtra={<PawPrint className="mt-8 size-8 text-brand" aria-hidden="true" />}
+        headerExtra={
+          <div aria-hidden="true" className="mt-6 flex -space-x-4 rtl:space-x-reverse">
+            {(["dog", "cat", "bird"] as const).map((sp) => (
+              <AnimalPortrait key={sp} species={sp} className="size-16 rounded-full ring-4 ring-background" />
+            ))}
+          </div>
+        }
         action={
           <Button type="button" size="lg" onClick={start}>
             {t("sitterFlow.start.cta")}
@@ -56,10 +71,13 @@ export default function SitterStart() {
         }
         footNote={<DemoLine>{t("sitterFlow.start.demoNote")}</DemoLine>}
       >
-        <ul role="list" className="max-w-[60ch] space-y-3">
-          {["what", "control", "limits"].map((key) => (
-            <li key={key} className="text-base leading-relaxed text-foreground">
-              {t(`sitterFlow.start.points.${key}`)}
+        <ul role="list" className="grid gap-2.5">
+          {POINTS.map(({ key, icon: Icon }) => (
+            <li key={key} className="surface flex items-start gap-3.5 p-4 text-base leading-relaxed text-foreground">
+              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand">
+                <Icon className="size-5" />
+              </span>
+              <span className="pt-1.5">{t(`sitterFlow.start.points.${key}`)}</span>
             </li>
           ))}
         </ul>

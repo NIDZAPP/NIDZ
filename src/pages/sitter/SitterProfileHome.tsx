@@ -2,10 +2,24 @@ import { useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link, Navigate } from "react-router-dom";
-import { ArrowRight, Check } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpen,
+  CalendarOff,
+  Check,
+  HandHeart,
+  House,
+  IdCard,
+  ListChecks,
+  PawPrint,
+  UserRound,
+  Wallet,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 import BackButton from "@/components/shared/BackButton";
-import { REGISTER_ROW } from "@/components/shared/register";
+import { ACTION_LINK } from "@/components/shared/link-styles";
+import { LIST_GROUP, REGISTER_ROW } from "@/components/shared/register";
 import { DemoNotice } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import {
@@ -67,7 +81,7 @@ export default function SitterProfileHome() {
   const published = workspace.published;
 
   return (
-    <div className="container py-10 md:py-14">
+    <div className="container pb-10 pt-4 md:pb-16 md:pt-8">
       <Helmet>
         <title>
           {t("common.appName")} — {t("sitterSections.title")}
@@ -75,7 +89,7 @@ export default function SitterProfileHome() {
         <meta name="robots" content="noindex" />
       </Helmet>
       <div className="mx-auto max-w-[720px]">
-        {!published && <BackButton variant="labelled" fallback="/" className="mb-6" />}
+        {!published && <BackButton variant="labelled" fallback="/" className="mb-3" />}
         <h1
           ref={heading}
           tabIndex={-1}
@@ -83,16 +97,19 @@ export default function SitterProfileHome() {
         >
           {t("sitterSections.title")}
         </h1>
-        <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{t("sitterSections.intro")}</p>
+        <p className="mt-2 text-base leading-relaxed text-muted-foreground">{t("sitterSections.intro")}</p>
 
         {/* ------------------------------------------------- pour publier */}
-        <section aria-labelledby="sections-publish" className="mt-10">
-          <h2 id="sections-publish" className="text-name font-semibold text-foreground">
-            {t("sitterSections.publish.title")}
-          </h2>
-          <p className="mt-2 max-w-[64ch] text-sm text-muted-foreground">
+        <section aria-labelledby="sections-publish" className="mt-6">
+          <div className="flex items-end justify-between gap-4">
+            <h2 id="sections-publish" className="text-title font-semibold text-foreground">
+              {t("sitterSections.publish.title")}
+            </h2>
+            <Progress answered={counts.publish.answered} total={counts.publish.total} />
+          </div>
+          <p className="mt-1.5 max-w-[64ch] text-sm text-muted-foreground">
             {t("sitterSections.publish.body")}{" "}
-            <span className="font-medium text-foreground">
+            <span className="font-semibold text-foreground">
               {t("sitterSections.publish.count", { count: counts.publish.answered, total: counts.publish.total })}
             </span>
           </p>
@@ -101,7 +118,7 @@ export default function SitterProfileHome() {
           {/* The one action of the screen, once it is possible. Not a
               disabled button before then: the missing sections are named and
               each one is a link. */}
-          <div className="mt-6">
+          <div className="mt-5">
             {ready ? (
               <Button asChild size="lg" className="w-full sm:w-auto">
                 <Link to="/sitter/preview" state={FROM_DASHBOARD}>
@@ -109,19 +126,16 @@ export default function SitterProfileHome() {
                 </Link>
               </Button>
             ) : (
-              <div>
-                <p className="text-base text-foreground">
+              <div className="rounded-xl bg-card p-4 shadow-card">
+                <p className="text-base font-medium text-foreground">
                   {published ? t("sitterSections.missingPublished") : t("sitterSections.missingTitle")}
                 </p>
-                <ul role="list" className="mt-2 space-y-1">
+                <ul role="list" className="mt-1.5 flex flex-wrap gap-x-4">
                   {missing.map((section) => (
-                    <li key={section.id} className="text-base">
-                      <Link
-                        to={section.path}
-                        state={FROM_DASHBOARD}
-                        className="inline-flex min-h-11 items-center font-medium text-primary underline-offset-4 hover:underline"
-                      >
+                    <li key={section.id}>
+                      <Link to={section.path} state={FROM_DASHBOARD} className={ACTION_LINK}>
                         {t(section.labelKey)}
+                        <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden="true" />
                       </Link>
                     </li>
                   ))}
@@ -132,13 +146,16 @@ export default function SitterProfileHome() {
         </section>
 
         {/* ------------------------------------------- enrichir mon profil */}
-        <section aria-labelledby="sections-enrich" className="mt-14">
-          <h2 id="sections-enrich" className="text-name font-semibold text-foreground">
-            {t("sitterSections.enrich.title")}
-          </h2>
-          <p className="mt-2 max-w-[64ch] text-sm text-muted-foreground">
+        <section aria-labelledby="sections-enrich" className="mt-10">
+          <div className="flex items-end justify-between gap-4">
+            <h2 id="sections-enrich" className="text-title font-semibold text-foreground">
+              {t("sitterSections.enrich.title")}
+            </h2>
+            <Progress answered={counts.enrich.answered} total={counts.enrich.total} />
+          </div>
+          <p className="mt-1.5 max-w-[64ch] text-sm text-muted-foreground">
             {t("sitterSections.enrich.body")}{" "}
-            <span className="font-medium text-foreground">
+            <span className="font-semibold text-foreground">
               {t("sitterSections.enrich.count", { count: counts.enrich.answered, total: counts.enrich.total })}
             </span>
           </p>
@@ -146,12 +163,39 @@ export default function SitterProfileHome() {
         </section>
 
         <DemoNotice
-          className="mt-10"
+          className="mt-8"
           title={t("sitterSections.demoTitle")}
           body={t("sitterSections.demoBody")}
         />
       </div>
     </div>
+  );
+}
+
+/** One picture per section, so the list reads at a glance. */
+const SECTION_ICON: Record<string, LucideIcon> = {
+  identity: UserRound,
+  about: BookOpen,
+  services: Wallet,
+  animals: PawPrint,
+  experience: HandHeart,
+  professional: IdCard,
+  housing: House,
+  care: HandHeart,
+  limits: ListChecks,
+  availability: CalendarOff,
+  verification: IdCard,
+};
+
+/** Answered sections as segments: the count above, drawn. Decorative — the
+    sentence beside it says the same in words. */
+function Progress({ answered, total }: { answered: number; total: number }) {
+  return (
+    <span aria-hidden="true" className="flex shrink-0 gap-1 pb-1.5">
+      {Array.from({ length: total }, (_, i) => (
+        <span key={i} className={i < answered ? "h-1.5 w-4 rounded-full bg-primary" : "h-1.5 w-4 rounded-full bg-track/60"} />
+      ))}
+    </span>
   );
 }
 
@@ -167,17 +211,23 @@ function SectionRows({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="mt-4">
+    <div className={`mt-3 ${LIST_GROUP}`}>
       {sections.map((section) => {
         const done = section.isAnswered(profile);
+        const Icon = SECTION_ICON[section.id] ?? ListChecks;
         return (
           <Link key={section.id} to={section.path} state={FROM_DASHBOARD} className={REGISTER_ROW}>
-            <span className="flex min-w-0 items-start gap-3">
-              {/* Slot always reserved, so answering a section never shifts the
-                  list under the pointer. A check, never a colour alone; and an
+            <span className="flex min-w-0 flex-1 items-center gap-3.5">
+              {/* The section's picture, with its state on it: answered wears a
+                  teal check badge. A check, never a colour alone; and an
                   sr-only word, because a glyph is not announced. */}
-              <span aria-hidden="true" className="mt-0.5 flex size-5 shrink-0 items-center justify-center">
-                {done && <Check className="size-5 text-primary" />}
+              <span aria-hidden="true" className="relative flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-foreground">
+                <Icon className="size-5" />
+                {done && (
+                  <span className="absolute -bottom-0.5 -end-0.5 flex size-[1.125rem] items-center justify-center rounded-full bg-primary text-primary-foreground ring-2 ring-card">
+                    <Check className="size-3" strokeWidth={3} />
+                  </span>
+                )}
               </span>
               <span className="min-w-0">
                 <span className="block font-medium text-foreground">

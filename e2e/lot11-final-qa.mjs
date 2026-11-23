@@ -115,7 +115,9 @@ check("SITTER: minimum complete (4 sur 4), enrichment optional", (await main(pag
 await page.getByRole("link", { name: "Voir ce que verraient les propriétaires" }).click();
 await page.waitForURL(/\/sitter\/preview/);
 await shot(page, "apercu");
-check("SITTER: preview = public profile component (glance with price and unit)", /Promenade · 500\s?DA par promenade/.test(await main(page)));
+/* 1.4: the service and its price sit in two columns, so innerText breaks
+   the line between them; the facts checked are the same. */
+check("SITTER: preview = public profile component (glance with price and unit)", /Promenade\s*·\s*500\s?DA\s*par promenade/.test(await main(page)));
 await page.getByRole("button", { name: "Publier mon profil" }).click();
 await page.waitForURL(/\/sitter\/published/);
 check("SITTER: published locally", (await storedState(page)).sitter.published === true);

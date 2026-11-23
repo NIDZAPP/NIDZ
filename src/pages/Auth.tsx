@@ -55,7 +55,7 @@ export default function Auth() {
       </Helmet>
       <FlowScreen backTo={backTo} title={t("auth.title")} intro={t("auth.intro")}>
         <section aria-labelledby="auth-providers">
-          <h2 id="auth-providers" className="eyebrow">
+          <h2 id="auth-providers" className="text-[0.9375rem] font-semibold text-foreground">
             {t("auth.plannedTitle")}
           </h2>
 
@@ -116,7 +116,7 @@ export default function Auth() {
             </Button>
             {/* §15's guest path. A real exit, not small print: browsing,
                 filtering and reading a profile need no identity at all. */}
-            <Button asChild variant="link" className="text-muted-foreground">
+            <Button asChild variant="ghost" className="text-muted-foreground">
               <Link to="/search">{t("auth.explore")}</Link>
             </Button>
           </div>

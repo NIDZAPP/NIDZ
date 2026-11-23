@@ -2,6 +2,10 @@ import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
+import { Inbox, MessageCircleQuestion } from "lucide-react";
+
+import { CARE_ICON } from "@/components/icons/domain-icons";
+import { AnimalPortrait } from "@/components/illustrations/animals";
 import EmptyState from "@/components/shared/EmptyState";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { awaitingReplyFrom } from "@/data/clarification";
@@ -31,7 +35,7 @@ export default function OwnerRequests() {
 
 
   return (
-    <div className="container py-10 md:py-14">
+    <div className="container pb-10 pt-4 md:pb-16 md:pt-8">
       <Helmet>
         <title>
           {t("common.appName")} — {t("ownerRequests.title")}
@@ -43,11 +47,12 @@ export default function OwnerRequests() {
 
         {requestsSent(state).length === 0 ? (
           <EmptyState
-            className="mt-8"
+            className="mt-6"
+            icon={Inbox}
             title={t("ownerRequests.emptyTitle")}
             body={t("ownerRequests.emptyBody")}
             action={
-              <Button asChild variant="outline">
+              <Button asChild>
                 <Link to="/owner/need/pet">{t("entry.findSitter")}</Link>
               </Button>
             }
@@ -61,40 +66,46 @@ export default function OwnerRequests() {
                 carries the marker rather than relying on the success screen
                 they passed through once. */}
             <DemoLine className="mt-4">{t("ownerRequests.demoNote")}</DemoLine>
-            <ul role="list" className="mt-6">
-              {requestsSent(state).map((request) => (
-                <li key={request.id} className="border-b border-border first:border-t">
-                  <Link
-                    to={`/owner/requests/${request.id}`}
-                    className="flex items-start justify-between gap-4 py-4 transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  >
-                    <span className="min-w-0">
-                      <span className="block text-name font-semibold text-foreground">
-                        <bdi>{request.pet.name}</bdi>
-                        <span className="text-muted-foreground"> · </span>
-                        <bdi className="font-normal text-muted-foreground">
-                          {sitterNameFor(state, request.sitterId)}
-                        </bdi>
-                      </span>
-                      <span className="mt-1 block text-sm text-muted-foreground">
-                        {t(`care.${request.careType}`)}
-                        <span aria-hidden="true"> · </span>
-                        <bdi>{formatDateRange(request.dates, lng)}</bdi>
-                      </span>
-                      {/* A question waiting for this owner — said in words, and
-                          still "En attente": a question is not a decision. */}
-                      {awaitingReplyFrom(request) === "owner" && (
-                        <span className="mt-1 block text-sm font-medium text-foreground">
-                          {t("clarify.questionForYouShort")}
+            <ul role="list" className="mt-5 space-y-3">
+              {requestsSent(state).map((request) => {
+                const CareIcon = CARE_ICON[request.careType];
+                return (
+                  <li key={request.id}>
+                    <Link
+                      to={`/owner/requests/${request.id}`}
+                      className="surface surface-press flex items-center gap-3.5 p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      <AnimalPortrait species={request.pet.species} className="size-12 shrink-0 rounded-full" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-name font-semibold text-foreground">
+                          <bdi>{request.pet.name}</bdi>
+                          <span className="text-muted-foreground"> · </span>
+                          <bdi className="font-normal text-muted-foreground">
+                            {sitterNameFor(state, request.sitterId)}
+                          </bdi>
                         </span>
-                      )}
-                    </span>
-                    <span className="shrink-0 pt-0.5">
-                      <StatusBadge status={request.status} />
-                    </span>
-                  </Link>
-                </li>
-              ))}
+                        <span className="mt-0.5 flex items-center gap-1.5 text-sm text-muted-foreground">
+                          <CareIcon className="size-4 shrink-0" aria-hidden="true" />
+                          <span className="truncate">
+                            {t(`care.${request.careType}`)}
+                            <span aria-hidden="true"> · </span>
+                            <bdi>{formatDateRange(request.dates, lng)}</bdi>
+                          </span>
+                        </span>
+                        {/* A question waiting for this owner — said in words,
+                            and still "En attente": a question is not a decision. */}
+                        {awaitingReplyFrom(request) === "owner" && (
+                          <span className="mt-1.5 inline-flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                            <MessageCircleQuestion className="size-4 shrink-0 text-primary" aria-hidden="true" />
+                            {t("clarify.questionForYouShort")}
+                          </span>
+                        )}
+                      </span>
+                      <StatusBadge status={request.status} className="shrink-0" />
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </>
         )}

@@ -1,6 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, FileText, LifeBuoy, Search, UserRound } from "lucide-react";
+import { HomeHeart } from "@/components/icons/nidz-icons";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import BackButton from "@/components/shared/BackButton";
@@ -17,7 +18,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { REGISTER_ROW } from "@/components/shared/register";
+import { LIST_GROUP, REGISTER_ROW, ROW_ICON } from "@/components/shared/register";
 import { SaveFeedback } from "@/components/shared/SaveFeedback";
 import { SUPPORTED_LOCALES, hasExplicitLocale, setLocale, type AppLocale } from "@/i18n";
 import { useAppLocale } from "@/hooks/use-locale";
@@ -92,7 +93,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="container py-10 md:py-14">
+    <div className="container pb-10 pt-4 md:pb-16 md:pt-8">
       <Helmet>
         <title>
           {t("common.appName")} — {t("settings.title")}
@@ -101,19 +102,25 @@ export default function Settings() {
       </Helmet>
 
       <div className="mx-auto max-w-[720px]">
-        {fromFlow && <BackButton variant="labelled" fallback="/" className="mb-6" />}
+        {fromFlow && <BackButton variant="labelled" fallback="/" className="mb-3" />}
         <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">{t("settings.title")}</h1>
 
         {/* The two spaces of ONE account. The current one is stated, not
             offered; the other is a real switch, or the honest next step when
             that side does not exist yet. */}
-        <section aria-labelledby="settings-spaces" className="mt-10">
-          <h2 id="settings-spaces" className="text-name font-semibold text-foreground">
+        <section aria-labelledby="settings-spaces" className="mt-6">
+          <h2 id="settings-spaces" className="text-title font-semibold text-foreground">
             {t("settings.spaces.title")}
           </h2>
-          <p className="mt-2 max-w-[64ch] text-sm text-muted-foreground">{t("settings.spaces.body")}</p>
-          <div className="mt-4">
+          <p className="mt-1.5 max-w-[64ch] text-sm text-muted-foreground">{t("settings.spaces.body")}</p>
+          <div className={cn("mt-3", LIST_GROUP)}>
             {(["owner", "sitter"] as const).map((space) => {
+              const SpaceIcon = space === "owner" ? Search : HomeHeart;
+              const spaceIcon = (
+                <span aria-hidden="true" className={ROW_ICON}>
+                  <SpaceIcon className="size-5" />
+                </span>
+              );
               /* The sitter side is only "current" once it has something in it;
                  before publication its row is the way to continue the
                  profile, never an inert "this is where you are". */
@@ -122,7 +129,8 @@ export default function Settings() {
               if (current) {
                 return (
                   <div key={space} className={cn(REGISTER_ROW, "hover:bg-transparent")} aria-current="true">
-                    <span>
+                    {spaceIcon}
+                    <span className="min-w-0 flex-1">
                       <span className="block font-medium text-foreground">{label}</span>
                       <span className="mt-0.5 block text-sm text-muted-foreground">
                         {t("settings.spaces.current")}
@@ -141,7 +149,8 @@ export default function Settings() {
                     to={state.sitter ? "/sitter/profile" : "/sitter/start"}
                     className={REGISTER_ROW}
                   >
-                    <span>
+                    {spaceIcon}
+                    <span className="min-w-0 flex-1">
                       <span className="block font-medium text-foreground">{label}</span>
                       <span className="mt-0.5 block text-sm text-muted-foreground">
                         {state.sitter ? t("settings.spaces.sitterDraft") : t("settings.spaces.sitterNone")}
@@ -158,7 +167,8 @@ export default function Settings() {
                   onClick={() => switchWorkspace(space)}
                   className={cn(REGISTER_ROW, "w-full text-start")}
                 >
-                  <span>
+                  {spaceIcon}
+                  <span className="min-w-0 flex-1">
                     <span className="block font-medium text-foreground">{label}</span>
                     <span className="mt-0.5 block text-sm text-muted-foreground">
                       {t(space === "owner" ? "workspace.toOwner" : "workspace.toSitter")}
@@ -171,14 +181,14 @@ export default function Settings() {
           </div>
         </section>
 
-        <section aria-labelledby="settings-language" className="mt-12">
-          <h2 id="settings-language" className="text-name font-semibold text-foreground">
+        <section aria-labelledby="settings-language" className="mt-8">
+          <h2 id="settings-language" className="text-title font-semibold text-foreground">
             {t("settings.language.title")}
           </h2>
           {/* Says which of the two things is actually happening rather than
               implying a decision the visitor never made. Nidz follows the
               device until someone chooses here; after that the choice wins. */}
-          <p className="mt-2 max-w-[64ch] text-sm text-muted-foreground">
+          <p className="mt-1.5 max-w-[64ch] text-sm text-muted-foreground">
             {explicit ? t("settings.language.chosen") : t("settings.language.following")}
           </p>
           {/* No explicit `<OptionGroup<AppLocale>>` type argument, deliberately.
@@ -189,7 +199,7 @@ export default function Settings() {
               500 for this module. The type is inferred from `value` and
               `options` anyway. */}
           <OptionGroup
-            className="mt-4"
+            className="mt-3"
             labelledBy="settings-language"
             value={locale}
             onChange={setLocale}
@@ -205,13 +215,16 @@ export default function Settings() {
             state — and that commune is what Owner Home's whole suggestion
             section keys off. */}
         {state.capabilities.owner && (
-          <section aria-labelledby="settings-account" className="mt-12">
-            <h2 id="settings-account" className="text-name font-semibold text-foreground">
+          <section aria-labelledby="settings-account" className="mt-8">
+            <h2 id="settings-account" className="text-title font-semibold text-foreground">
               {t("settings.account.title")}
             </h2>
-            <div className="mt-4">
+            <div className={cn("mt-3", LIST_GROUP)}>
               <Link to="/owner/account" className={REGISTER_ROW}>
-                <span>
+                <span aria-hidden="true" className={ROW_ICON}>
+                  <UserRound className="size-5" />
+                </span>
+                <span className="min-w-0 flex-1">
                   <span className="block font-medium text-foreground">
                     {t("settings.account.edit")}
                   </span>
@@ -228,17 +241,20 @@ export default function Settings() {
           </section>
         )}
 
-        <section aria-labelledby="settings-about" className="mt-12">
-          <h2 id="settings-about" className="text-name font-semibold text-foreground">
+        <section aria-labelledby="settings-about" className="mt-8">
+          <h2 id="settings-about" className="text-title font-semibold text-foreground">
             {t("settings.about.title")}
           </h2>
-          <div className="mt-4">
+          <div className={cn("mt-3", LIST_GROUP)}>
             {[
-              { to: "/help", label: t("nav.help"), description: t("settings.about.helpLine") },
-              { to: "/policies", label: t("nav.policies"), description: t("settings.about.policiesLine") },
-            ].map((row) => (
+              { to: "/help", label: t("nav.help"), description: t("settings.about.helpLine"), icon: LifeBuoy },
+              { to: "/policies", label: t("nav.policies"), description: t("settings.about.policiesLine"), icon: FileText },
+            ].map(({ icon: RowIcon, ...row }) => (
               <Link key={row.to} to={row.to} className={REGISTER_ROW}>
-                <span>
+                <span aria-hidden="true" className={ROW_ICON}>
+                  <RowIcon className="size-5" />
+                </span>
+                <span className="min-w-0 flex-1">
                   <span className="block font-medium text-foreground">{row.label}</span>
                   <span className="mt-0.5 block text-sm text-muted-foreground">{row.description}</span>
                 </span>
@@ -259,8 +275,8 @@ export default function Settings() {
             so it lives here and nowhere in the owner's or the sitter's
             screens. */}
         {state.sitter && isPubliclyListed(state, state.sitter.profile) && (
-          <section aria-labelledby="settings-tools" className="mt-12 border-t border-border pt-8">
-            <h2 id="settings-tools" className="text-name font-semibold text-foreground">
+          <section aria-labelledby="settings-tools" className="surface mt-8 p-5">
+            <h2 id="settings-tools" className="text-title font-semibold text-foreground">
               {t("settings.tools.title")}
             </h2>
             <p className="mt-2 max-w-[64ch] text-base leading-relaxed text-muted-foreground">
@@ -272,8 +288,8 @@ export default function Settings() {
           </section>
         )}
 
-        <section aria-labelledby="settings-reset" className="mt-12 border-t border-border pt-8">
-          <h2 id="settings-reset" className="text-name font-semibold text-foreground">
+        <section aria-labelledby="settings-reset" className="surface mt-8 p-5">
+          <h2 id="settings-reset" className="text-title font-semibold text-foreground">
             {t("settings.reset.title")}
           </h2>
           <p className="mt-2 max-w-[64ch] text-base leading-relaxed text-muted-foreground">

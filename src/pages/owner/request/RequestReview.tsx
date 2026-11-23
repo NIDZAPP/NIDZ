@@ -7,7 +7,7 @@ import { Pencil, Plus } from "lucide-react";
 import RequestSummary from "@/components/request/RequestSummary";
 import FlowScreen from "@/components/shared/FlowScreen";
 import OptionGroup from "@/components/shared/OptionGroup";
-import { SPECIES_ICON } from "@/components/shared/species";
+import { AnimalPortrait } from "@/components/illustrations/animals";
 import { SaveFeedback } from "@/components/shared/SaveFeedback";
 import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import { useSitter } from "@/hooks/use-sitter";
 import { useDemo } from "@/state/demo/context";
 import { toISODate, today } from "@/utils/dates";
 import { formatList, isolate } from "@/utils/format";
+import { ACTION_LINK, INLINE_LINK } from "@/components/shared/link-styles";
 
 /**
  * "Votre demande à Amina" — everything that is about to be sent, before it is
@@ -293,8 +294,8 @@ export default function RequestReview() {
         }
         footNote={<DemoLine>{t("request.review.demoNote")}</DemoLine>}
       >
-        <section aria-labelledby="request-pet" className="mb-10">
-          <h2 id="request-pet" className="text-name font-semibold text-foreground">
+        <section aria-labelledby="request-pet" className="mb-6">
+          <h2 id="request-pet" className="text-title font-semibold text-foreground">
             {t("request.review.petTitle")}
           </h2>
 
@@ -321,7 +322,7 @@ export default function RequestReview() {
                   value: pet.id,
                   label: pet.name,
                   description: fitMessage(fit, pet) ?? t(`species.${pet.species}`),
-                  icon: SPECIES_ICON[pet.species],
+                  art: <AnimalPortrait species={pet.species} className="size-11" />,
                   disabled: fit.fits === false,
                 }))}
               />
@@ -338,12 +339,12 @@ export default function RequestReview() {
                 )
               )}
 
-              <div className="mt-3 flex flex-wrap gap-x-6">
+              <div className="mt-3 flex flex-wrap gap-x-4">
                 {editHref && selected && (
                   <Link
                     to={editHref}
                     state={FROM_REQUEST}
-                    className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
+                    className={ACTION_LINK}
                   >
                     <Pencil className="size-4" aria-hidden="true" />
                     {selected.fit.fits === "unknown"
@@ -354,7 +355,7 @@ export default function RequestReview() {
                 <Link
                   to={addHref}
                   state={FROM_REQUEST}
-                  className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
+                  className={ACTION_LINK}
                 >
                   <Plus className="size-4" aria-hidden="true" />
                   {t("request.review.addAnother")}
@@ -366,7 +367,7 @@ export default function RequestReview() {
 
         <RequestSummary request={{ ...draftRequest, id: "preview", createdAt: "" }} sitterName={sitter.publicName} />
 
-        <SaveFeedback className="mt-8" save={save} onRetry={send} />
+        <SaveFeedback className="mt-6" save={save} onRetry={send} />
 
         <p className="mt-4">
           {/* `replace`, and the step replaces itself on submit: changing the
@@ -375,7 +376,7 @@ export default function RequestReview() {
           <Link
             to={requestWhenPath(sitter.id, search)}
             replace
-            className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
+            className={ACTION_LINK}
           >
             <Pencil className="size-4" aria-hidden="true" />
             {t("request.review.changeWhen")}

@@ -1,13 +1,13 @@
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { ArrowRight, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
+import { AnimalPortrait } from "@/components/illustrations/animals";
 import EmptyState from "@/components/shared/EmptyState";
-import { REGISTER_ROW } from "@/components/shared/register";
-import { SPECIES_ICON } from "@/components/shared/species";
 import { Button } from "@/components/ui/button";
-import { answeredCount } from "@/data/pets";
+import { answeredCount, kindLabel } from "@/data/pets";
+import { useAppLocale } from "@/hooks/use-locale";
 import { useDemo } from "@/state/demo/context";
 
 /**
@@ -17,7 +17,7 @@ import { useDemo } from "@/state/demo/context";
  * The screen that makes multi-pet real: Nidz no longer assumes one animal, so
  * there has to be somewhere the whole household lives.
  *
- * A register, not a grid of cards. These are a handful of rows that get read
+ * 1.4: a gallery of animal cards (was a register). These are a handful of rows that get read
  * top to bottom, and a card each would be four borders per animal on a white
  * ground for no gain (see the note at the top of `src/index.css`).
  *
@@ -28,11 +28,12 @@ import { useDemo } from "@/state/demo/context";
  */
 export default function PetsList() {
   const { t } = useTranslation();
+  const lng = useAppLocale();
   const { state } = useDemo();
   const pets = state.pets;
 
   return (
-    <div className="container py-10 md:py-14">
+    <div className="container pb-10 pt-4 md:pb-16 md:pt-8">
       <Helmet>
         <title>
           {t("common.appName")} — {t("pets.title")}
@@ -42,11 +43,18 @@ export default function PetsList() {
 
       <div className="mx-auto max-w-[720px]">
         <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">{t("pets.title")}</h1>
-        <p className="mt-4 max-w-[64ch] text-lg leading-relaxed text-muted-foreground">{t("pets.intro")}</p>
+        <p className="mt-2 max-w-[64ch] text-base leading-relaxed text-muted-foreground">{t("pets.intro")}</p>
 
         {pets.length === 0 ? (
           <EmptyState
-            className="mt-10"
+            className="mt-6"
+            art={
+              <span aria-hidden="true" className="flex -space-x-4 rtl:space-x-reverse">
+                {(["dog", "cat", "bird"] as const).map((sp) => (
+                  <AnimalPortrait key={sp} species={sp} className="size-16 rounded-full ring-4 ring-card" />
+                ))}
+              </span>
+            }
             title={t("pets.empty.title")}
             body={t("pets.empty.body")}
             action={
@@ -57,51 +65,52 @@ export default function PetsList() {
           />
         ) : (
           <>
-            <div className="mt-10">
+            {/* A gallery: each animal is a card with its picture — the owner's
+                own photo when they added one, else its species portrait. */}
+            <ul role="list" className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3">
               {pets.map((pet) => {
-                const Icon = SPECIES_ICON[pet.species];
                 const { answered, total } = answeredCount(pet);
+                const kind = kindLabel(pet, lng);
                 return (
-                  <Link key={pet.id} to={`/owner/pets/${pet.id}`} className={REGISTER_ROW}>
-                    <span className="flex min-w-0 items-center gap-4">
+                  <li key={pet.id}>
+                    <Link
+                      to={`/owner/pets/${pet.id}`}
+                      className="surface surface-press flex h-full flex-col overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
                       {pet.photoUrl ? (
-                        <img src={pet.photoUrl} alt="" className="size-10 shrink-0 rounded-sm object-cover" />
+                        <img src={pet.photoUrl} alt="" className="aspect-square w-full object-cover" />
                       ) : (
-                        <span
-                          aria-hidden="true"
-                          className="flex size-10 shrink-0 items-center justify-center rounded-sm bg-brand-soft text-brand"
-                        >
-                          <Icon className="size-5" />
-                        </span>
+                        <AnimalPortrait species={pet.species} className="aspect-square w-full" />
                       )}
-                      <span className="min-w-0">
-                        <span className="block font-medium text-foreground">
+                      <span className="flex flex-1 flex-col p-3.5">
+                        <span className="block truncate text-name font-semibold text-foreground">
                           <bdi>{pet.name}</bdi>
                         </span>
-                        <span className="mt-0.5 block text-sm text-muted-foreground">
-                          {t(`species.${pet.species}`)}
-                          {" · "}
+                        <span className="mt-0.5 block truncate text-sm text-muted-foreground">
+                          {[t(`species.${pet.species}`), kind].filter(Boolean).join(" · ")}
+                        </span>
+                        {/* Administrative only (§118): what a sitter can still
+                            not see — never a score for the animal. */}
+                        <span className="mt-auto pt-2.5 text-xs text-muted-foreground">
                           {t("pets.answered", { answered, total })}
                         </span>
                       </span>
-                    </span>
-                    <ArrowRight
-                      className="size-5 shrink-0 text-muted-foreground rtl:-scale-x-100"
-                      aria-hidden="true"
-                    />
-                  </Link>
+                    </Link>
+                  </li>
                 );
               })}
-            </div>
-
-            <div className="mt-8">
-              <Button asChild variant="outline">
-                <Link to="/owner/pets/new">
-                  <Plus className="size-4" aria-hidden="true" />
+              <li>
+                <Link
+                  to="/owner/pets/new"
+                  className="flex h-full min-h-[12rem] flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-input/50 p-4 text-center text-[0.9375rem] font-semibold text-primary transition-colors hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <span aria-hidden="true" className="flex size-12 items-center justify-center rounded-full bg-primary-soft">
+                    <Plus className="size-6" />
+                  </span>
                   {t("pets.add")}
                 </Link>
-              </Button>
-            </div>
+              </li>
+            </ul>
           </>
         )}
       </div>

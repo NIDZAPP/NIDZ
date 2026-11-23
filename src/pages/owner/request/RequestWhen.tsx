@@ -22,6 +22,7 @@ import { useSitter } from "@/hooks/use-sitter";
 import { useDemo } from "@/state/demo/context";
 import { formatDateRange, toISODate, today } from "@/utils/dates";
 import { formatDZD, formatList, isolate } from "@/utils/format";
+import { CARE_ICON } from "@/components/icons/domain-icons";
 
 const FORM_ID = "request-when";
 
@@ -181,6 +182,7 @@ export default function RequestWhen() {
                 /* The price with its unit, so the choice is made knowing what
                    it costs — and what it costs PER. */
                 description: `${formatDZD(sitter.rates[c] as number, lng)} ${t(CARE_UNIT_KEY[c])}`,
+                icon: CARE_ICON[c],
               }))}
             />
             {errors.care && (

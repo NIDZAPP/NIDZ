@@ -16,6 +16,7 @@ import { useDraftField } from "@/hooks/use-form-draft";
 import { useSave } from "@/hooks/use-save";
 import { toISODate, today } from "@/utils/dates";
 import { useDemo } from "@/state/demo/context";
+import { CARE_ICON } from "@/components/icons/domain-icons";
 
 const FORM_ID = "need-care";
 const SCOPE = "need-care";
@@ -124,6 +125,7 @@ export default function NeedCare() {
                 value: c,
                 label: t(`care.${c}`),
                 description: t(`care.description.${c}`),
+                icon: CARE_ICON[c],
               }))}
             />
             {errors.care && (

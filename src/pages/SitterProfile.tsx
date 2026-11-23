@@ -48,7 +48,7 @@ export default function SitterProfile() {
 
   if (!sitter || !publicallyVisible) {
     return (
-      <div className="container py-10 md:py-14">
+      <div className="container pb-10 pt-4 md:pb-16 md:pt-8">
         <Helmet>
           <title>
             {t("common.appName")} — {t("profile.notFoundTitle")}

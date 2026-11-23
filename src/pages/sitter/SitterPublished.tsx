@@ -7,6 +7,7 @@ import FlowScreen from "@/components/shared/FlowScreen";
 import { DemoNotice } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { useDemo } from "@/state/demo/context";
+import { AnimalPortrait } from "@/components/illustrations/animals";
 
 /**
  * "Votre profil est publié."
@@ -37,12 +38,12 @@ export default function SitterPublished() {
         title={t("sitterFlow.published.title")}
         intro={t("sitterFlow.published.intro")}
         headerExtra={
-          <div className="mt-6">
-            <span
-              aria-hidden="true"
-              className="inline-flex size-12 items-center justify-center rounded-full bg-primary-soft text-primary motion-safe:animate-scale-in"
-            >
-              <Check className="size-6" />
+          <div aria-hidden="true" className="relative mt-6 inline-flex -space-x-4 motion-safe:animate-scale-in rtl:space-x-reverse">
+            {profile.acceptedSpecies.map((sp) => (
+              <AnimalPortrait key={sp} species={sp} className="size-16 rounded-full ring-4 ring-background" />
+            ))}
+            <span className="absolute -bottom-1 -end-1 flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground ring-4 ring-background">
+              <Check className="size-4" strokeWidth={3} />
             </span>
           </div>
         }
@@ -52,7 +53,7 @@ export default function SitterPublished() {
           </Button>
         }
         secondaryAction={
-          <Button asChild variant="link" className="text-muted-foreground">
+          <Button asChild variant="ghost" className="text-muted-foreground">
             <Link to={`/sitters/${profile.id}`}>{t("sitterFlow.published.viewProfile")}</Link>
           </Button>
         }

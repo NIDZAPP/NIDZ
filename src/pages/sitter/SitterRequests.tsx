@@ -16,6 +16,8 @@ import { useSwitchWorkspace } from "@/hooks/use-workspace";
 import { SaveFeedback } from "@/components/shared/SaveFeedback";
 import { useSave } from "@/hooks/use-save";
 import { useDemo } from "@/state/demo/context";
+import { ACTION_LINK, INLINE_LINK } from "@/components/shared/link-styles";
+import { Inbox } from "lucide-react";
 
 /**
  * "Demandes reçues" — the sitter's side of the same records.
@@ -52,7 +54,7 @@ export default function SitterRequests() {
   const requests = requestsReceived(state);
 
   return (
-    <div className="container py-10 md:py-14">
+    <div className="container pb-10 pt-4 md:pb-16 md:pt-8">
       <Helmet>
         <title>
           {t("common.appName")} — {t("sitterRequests.title")}
@@ -86,7 +88,7 @@ export default function SitterRequests() {
           <p className="mt-3 text-sm">
             <Link
               to={`/sitters/${state.sitter.profile.id}`}
-              className="font-medium text-primary underline-offset-4 hover:underline"
+              className={INLINE_LINK}
             >
               {t("sitterFlow.published.viewProfile")}
             </Link>
@@ -96,14 +98,15 @@ export default function SitterRequests() {
         {/* Above the branch: the first thing a new sitter reads must not be an
             unqualified promise that owners will write to them. */}
         <DemoNotice
-          className="mt-6"
+          className="mt-5"
           title={t("sitterRequests.demoTitle")}
           body={t("sitterRequests.demoBody")}
         />
 
         {requests.length === 0 ? (
           <EmptyState
-            className="mt-8"
+            className="mt-6"
+            icon={Inbox}
             title={t("sitterRequests.emptyTitle")}
             body={t("sitterRequests.emptyBody")}
             action={
@@ -116,7 +119,7 @@ export default function SitterRequests() {
           />
         ) : (
           <>
-            <ul role="list" className="mt-8 space-y-10">
+            <ul role="list" className="mt-6 space-y-10">
               {requests.map((request) => (
                 <IncomingRequest key={request.id} request={request} answeredRef={answeredRef} />
               ))}
@@ -127,11 +130,11 @@ export default function SitterRequests() {
         {/* The way back to the other side of the same account. A workspace has
             to have an exit that is not the browser's Back button, and this one
             records the move so the chrome and every shared screen follow. */}
-        <p className="mt-12 border-t border-border pt-8 text-sm text-muted-foreground">
+        <p className="mt-10">
           <button
             type="button"
             onClick={() => switchWorkspace("owner")}
-            className="min-h-11 font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className={ACTION_LINK}
           >
             {t("workspace.toOwner")}
           </button>
@@ -171,9 +174,9 @@ function IncomingRequest({
   const waitingForOwner = awaitingReplyFrom(request) === "owner";
 
   return (
-    <li className="border-b border-border pb-10 last:border-0">
-      <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <h2 className="text-name font-semibold text-foreground">
+    <li className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+        <h2 className="text-title font-semibold text-foreground">
           <bdi>{request.pet.name}</bdi>
           <span className="font-normal text-muted-foreground">
             {" · "}
@@ -186,7 +189,6 @@ function IncomingRequest({
       {/* The same summary the owner confirmed — everything the sitter needs in
           order to answer honestly, including the animal's important needs. */}
       <RequestSummary
-        className="mt-4"
         request={request}
         sitterName={sitterNameFor(state, request.sitterId)}
         headingLevel="h3"
@@ -207,9 +209,9 @@ function IncomingRequest({
       {request.status === "pending" ? (
         <>
           {waitingForOwner && (
-            <p className="mt-4 text-sm font-medium text-foreground">{t("clarify.waitingOwner")}</p>
+            <p className="px-1 text-sm font-medium text-foreground">{t("clarify.waitingOwner")}</p>
           )}
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="flex flex-col gap-2.5 pt-1 sm:flex-row sm:flex-wrap sm:items-center">
             <Button
               type="button"
               size="lg"
@@ -238,8 +240,8 @@ function IncomingRequest({
               {t("sitterRequests.decline")}
             </Button>
           </div>
-          <p className="mt-3 max-w-[64ch] text-sm text-muted-foreground">{t("sitterRequests.acceptNote")}</p>
-          <SaveFeedback className="mt-4" save={save} onRetry={() => decide(lastDecision.current)} />
+          <p className="max-w-[64ch] px-1 text-sm text-muted-foreground">{t("sitterRequests.acceptNote")}</p>
+          <SaveFeedback save={save} onRetry={() => decide(lastDecision.current)} />
         </>
       ) : (
         <p
@@ -251,7 +253,7 @@ function IncomingRequest({
               answeredRef.current = null;
             }
           }}
-          className="mt-6 max-w-[64ch] text-base leading-relaxed text-muted-foreground focus:outline-none"
+          className="max-w-[64ch] rounded-xl bg-card p-4 text-base leading-relaxed text-muted-foreground shadow-card focus:outline-none"
         >
           {t(`sitterRequests.answered.${request.status}`)}
         </p>

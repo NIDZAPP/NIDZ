@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 import BackButton from "@/components/shared/BackButton";
+import { ACTION_LINK, INLINE_LINK } from "@/components/shared/link-styles";
 
 /**
  * What this demonstration is, and what it is not.
@@ -18,7 +19,7 @@ export default function Help() {
   const { t } = useTranslation();
 
   return (
-    <div className="container py-10 md:py-14">
+    <div className="container pb-10 pt-4 md:pb-16 md:pt-8">
       <Helmet>
         <title>
           {t("common.appName")} — {t("help.title")}
@@ -27,7 +28,7 @@ export default function Help() {
       </Helmet>
 
       <div className="mx-auto max-w-[720px]">
-        <BackButton variant="labelled" fallback="/settings" className="mb-6" />
+        <BackButton variant="labelled" fallback="/settings" className="mb-3" />
         <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">{t("help.title")}</h1>
         <p className="mt-4 max-w-[64ch] text-lg leading-relaxed text-muted-foreground">{t("help.intro")}</p>
 
@@ -54,7 +55,7 @@ export default function Help() {
           <p className="mt-4">
             <Link
               to="/settings"
-              className="font-medium text-primary underline-offset-4 hover:underline"
+              className={INLINE_LINK}
             >
               {t("help.reset.inSettings")}
             </Link>

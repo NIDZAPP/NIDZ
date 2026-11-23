@@ -1,18 +1,17 @@
 /**
- * The hairline register row.
+ * The grouped list — Nidz 1.4's one pattern for a list of navigable things.
  *
- * Nidz's one pattern for a list of navigable things: a rule between siblings
- * rather than a box around each of them. Bordered boxes read as controls —
- * that is `OptionGroup`'s silhouette — and a page of them looks like a
- * dashboard stub. On the white ground of Audit 1.2 this carries more of the
- * layout than it used to, because a white block no longer groups anything by
- * itself (see the note at the top of `src/index.css`).
+ * Rows live INSIDE one white card (`LIST_GROUP`), separated by inner hairlines,
+ * like a settings list on a phone: the card says "these belong together", the
+ * hairline says "these are separate". A row is never a card of its own here —
+ * that silhouette belongs to choices (`OptionGroup`) and to results.
  *
- * Defined once because it was defined twice, identically, in two screens that
- * both described it as "like every other list of navigable things in the app".
- *
- * `hover:bg-secondary`, not `hover:bg-muted`: `--muted` is 1.08:1 on white and
- * is a shadcn-primitive-only surface. One hover surface, one meaning.
+ * Hover is the neutral `secondary` tint: one hover surface, one meaning.
  */
+export const LIST_GROUP = "surface overflow-hidden divide-y divide-border";
+
 export const REGISTER_ROW =
-  "flex items-center justify-between gap-4 border-b border-border py-4 transition-colors first:border-t hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
+  "flex min-h-16 w-full items-center justify-between gap-3.5 px-4 py-3.5 text-start transition-colors hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring";
+
+/** The round icon tile at the start of a row. */
+export const ROW_ICON = "flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary";

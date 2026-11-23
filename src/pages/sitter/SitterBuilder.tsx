@@ -39,6 +39,7 @@ import { useDemo } from "@/state/demo/context";
 import { patchProfile, watchProfile } from "@/state/demo/profile-commit";
 import { formatDateRange } from "@/utils/dates";
 import { formatDZD } from "@/utils/format";
+import { CARE_ICON, HOUSING_ICON, OUTDOOR_ICON } from "@/components/icons/domain-icons";
 
 /* ---------------------------------------------------------------------------
    Profile SECTIONS.
@@ -344,11 +345,12 @@ export function StepServices() {
       }}
     >
       <fieldset ref={servicesRef} tabIndex={-1} className="focus:outline-none">
-        <legend className="mb-3 text-sm font-medium text-foreground">{t("sitterFlow.services.label")}</legend>
+        <legend className="mb-3 text-[0.9375rem] font-medium text-foreground">{t("sitterFlow.services.label")}</legend>
         <div className="flex flex-wrap gap-2">
           {CARE_TYPES.map((c) => (
             <Chip
               key={c}
+              icon={CARE_ICON[c]}
               selected={services.includes(c)}
               onClick={() => {
                 setServices(toggle(services, c));
@@ -593,6 +595,7 @@ export function StepHousing() {
           options={(["apartment", "house"] as HousingType[]).map((v) => ({
             value: v,
             label: t(`housing.type.${v}`),
+            icon: HOUSING_ICON[v],
           }))}
         />
       </div>
@@ -612,6 +615,7 @@ export function StepHousing() {
           options={(["none", "balcony", "yard", "garden"] as OutdoorSpace[]).map((v) => ({
             value: v,
             label: t(`housing.outdoor.${v}`),
+            icon: OUTDOOR_ICON[v],
           }))}
         />
       </div>

@@ -91,7 +91,7 @@ export default function SitterPreview() {
           /* Back to the dashboard by history when the preview was opened from
              it, so Back from the dashboard does not return here (LOT 05
              review). */
-          <Button type="button" variant="link" className="text-muted-foreground" onClick={returnToDashboard}>
+          <Button type="button" variant="ghost" className="text-muted-foreground" onClick={returnToDashboard}>
             {t("sitterFlow.preview.edit")}
           </Button>
         }

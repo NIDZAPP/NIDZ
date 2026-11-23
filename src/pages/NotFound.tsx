@@ -24,7 +24,7 @@ export default function NotFound() {
   }, [location.pathname]);
 
   return (
-    <div className="container py-10 md:py-14">
+    <div className="container pb-10 pt-4 md:pb-16 md:pt-8">
       <Helmet>
         <title>
           {t("common.appName")} — {t("notFound.title")}
@@ -32,7 +32,7 @@ export default function NotFound() {
         <meta name="robots" content="noindex" />
       </Helmet>
       <div className="mx-auto max-w-[720px]">
-        <BackButton variant="labelled" fallback="/" className="mb-6" />
+        <BackButton variant="labelled" fallback="/" className="mb-3" />
         <EmptyState
           headingLevel="h1"
           title={t("notFound.title")}

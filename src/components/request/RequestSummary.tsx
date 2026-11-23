@@ -1,9 +1,13 @@
 import { useTranslation } from "react-i18next";
+import { CalendarDays, MapPin, UserRound, Wallet } from "lucide-react";
 
+import { CARE_ICON } from "@/components/icons/domain-icons";
+import { AnimalPortrait } from "@/components/illustrations/animals";
 import { petFacts } from "@/components/request/pet-facts";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { ProvenanceLabel } from "@/components/shared/trust";
 import { communeWithWilaya } from "@/data/algeria";
+import { kindLabel } from "@/data/pets";
 import { CARE_UNIT_KEY, type CareRequest, type SharedPet } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
 import { cn } from "@/lib/utils";
@@ -26,6 +30,7 @@ export default function RequestSummary({
   request,
   sitterName,
   showStatus = false,
+  bare = false,
   className,
   /** The needs block is a real content group; give it a heading level that
       fits the page it lands on. */
@@ -38,6 +43,8 @@ export default function RequestSummary({
   request: Omit<CareRequest, "pet"> & { pet: SharedPet | null };
   sitterName: string;
   showStatus?: boolean;
+  /** No card of its own — for a caller that already puts it on one. */
+  bare?: boolean;
   className?: string;
   headingLevel?: "h2" | "h3";
 }) {
@@ -56,52 +63,73 @@ export default function RequestSummary({
   const pet = request.pet;
   const facts = pet ? petFacts(pet, t, lng) : [];
 
-  const rows: { key: string; label: string; value: string }[] = [
-    { key: "sitter", label: t("request.summary.sitter"), value: sitterName },
-    ...(pet
-      ? [
-          {
-            key: "pet",
-            label: t("request.summary.pet"),
-            value: `${pet.name} · ${t(`species.${pet.species}`)}${pet.age ? ` · ${pet.age}` : ""}`,
-          },
-        ]
-      : []),
-    { key: "care", label: t("request.summary.care"), value: t(`care.${request.careType}`) },
-    { key: "dates", label: t("request.summary.dates"), value: formatDateRange(request.dates, lng) },
-    ...(ownerZone
-      ? [{ key: "zone", label: t("request.summary.ownerZone"), value: ownerZone }]
-      : []),
+  /* 1.4: the request as a PASS — the animal on top, then labelled
+     segments, like a ticket you could hand over. It states what was ASKED;
+     nothing on it reads as confirmed (no stamp, no seat, no booking). */
+  const segments: { key: string; label: string; value: string; icon: typeof CalendarDays; wide?: boolean }[] = [
+    { key: "sitter", label: t("request.summary.sitter"), value: sitterName, icon: UserRound },
+    { key: "care", label: t("request.summary.care"), value: t(`care.${request.careType}`), icon: CARE_ICON[request.careType] },
+    { key: "dates", label: t("request.summary.dates"), value: formatDateRange(request.dates, lng), icon: CalendarDays, wide: true },
+    ...(ownerZone ? [{ key: "zone", label: t("request.summary.ownerZone"), value: ownerZone, icon: MapPin }] : []),
     ...(request.displayedRate
       ? [
           {
             key: "rate",
             label: t("request.summary.rate"),
-            value: `${formatDZD(request.displayedRate.amount, lng)} ${t(
-              CARE_UNIT_KEY[request.displayedRate.careType],
-            )}`,
+            value: `${formatDZD(request.displayedRate.amount, lng)} ${t(CARE_UNIT_KEY[request.displayedRate.careType])}`,
+            icon: Wallet,
           },
         ]
       : []),
   ];
+  const kind = pet ? kindLabel(pet, lng) : null;
 
   return (
-    <div className={className}>
-      {showStatus && (
-        <div className="mb-4">
-          <StatusBadge status={request.status} />
+    <div className={cn(!bare && "surface overflow-hidden", className)}>
+      {/* The animal, first: it is what the request is about. */}
+      <div className={cn("flex items-center gap-3.5", bare ? "pb-4" : "p-5 pb-4")}>
+        {pet ? (
+          <AnimalPortrait species={pet.species} className="size-14 shrink-0 rounded-full" />
+        ) : (
+          <span aria-hidden="true" className="size-14 shrink-0 rounded-full bg-secondary" />
+        )}
+        <div className="min-w-0 flex-1">
+          {pet ? (
+            <>
+              <p className="truncate text-name font-semibold text-foreground">
+                <bdi>{pet.name}</bdi>
+              </p>
+              <p className="truncate text-sm text-muted-foreground">
+                {[t(`species.${pet.species}`), kind, pet.age].filter(Boolean).join(" · ")}
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">{t("request.summary.pet")}</p>
+          )}
         </div>
-      )}
+        {showStatus && <StatusBadge status={request.status} className="shrink-0" />}
+      </div>
 
-      <dl className="border-t border-border">
-        {rows.map((row) => (
-          <div
-            key={row.key}
-            className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-border py-3"
-          >
-            <dt className="text-sm text-muted-foreground">{row.label}</dt>
-            <dd className={cn("text-base text-foreground", row.key === "rate" && "tabular-nums")}>
-              <bdi>{row.value}</bdi>
+      {/* The tear line of a pass: a dashed rule with a notch at each end. */}
+      <div aria-hidden="true" className={cn("relative", !bare && "mx-5")}>
+        <div className="border-t-2 border-dashed border-border" />
+        {!bare && (
+          <>
+            <span className="absolute -start-8 -top-3 size-6 rounded-full bg-background" />
+            <span className="absolute -end-8 -top-3 size-6 rounded-full bg-background" />
+          </>
+        )}
+      </div>
+
+      <dl className={cn("grid grid-cols-2 gap-x-4 gap-y-4", bare ? "py-4" : "p-5")}>
+        {segments.map(({ key, label, value, icon: Icon, wide }) => (
+          <div key={key} className={cn("min-w-0", wide && "col-span-2")}>
+            <dt className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Icon className="size-3.5 shrink-0" aria-hidden="true" />
+              {label}
+            </dt>
+            <dd className={cn("mt-1 text-[0.9375rem] font-semibold text-foreground", key === "rate" && "tabular-nums")}>
+              <bdi>{value}</bdi>
             </dd>
           </div>
         ))}
@@ -110,43 +138,39 @@ export default function RequestSummary({
       {/* What the owner said about THIS animal. Collected on the pet screen
           under an explicit promise that it helps a sitter judge whether they
           can take it — so it has to arrive. */}
-      {pet && facts.length > 0 && (
-        <div className="mt-6">
-          <Heading className="text-base font-semibold text-foreground">
-            {t("request.summary.aboutPet", { name: pet.name })}
-          </Heading>
-          <dl className="mt-2 border-t border-border">
-            {facts.map((fact) => (
-              <div
-                key={fact.key}
-                className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-border py-2.5"
-              >
-                <dt className="text-sm text-muted-foreground">{fact.label}</dt>
-                <dd className="text-base text-foreground">
-                  <bdi>{fact.value}</bdi>
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-      )}
-
-      {/* The needs travel with the request: they are the thing a sitter most
-          needs in order to answer honestly. */}
-      {pet?.notes && (
-        <div className="mt-6">
-          {/* The most decision-relevant text a sitter reads. `.eyebrow` is a
-              filing label; this is a content heading. */}
-          <Heading className="text-base font-semibold text-foreground">
-            {t("request.summary.needs")}
-          </Heading>
-          <p className="mt-2 max-w-[64ch] text-base leading-relaxed text-foreground">{pet.notes}</p>
+      {pet && (facts.length > 0 || pet.notes) && (
+        <div className={cn("space-y-4 rounded-lg bg-muted p-4", !bare && "mx-5 mb-5")}>
+          {facts.length > 0 && (
+            <div>
+              <Heading className="text-[0.9375rem] font-semibold text-foreground">
+                {t("request.summary.aboutPet", { name: pet.name })}
+              </Heading>
+              <dl className="mt-2 grid gap-x-4 gap-y-2 sm:grid-cols-2">
+                {facts.map((fact) => (
+                  <div key={fact.key} className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 sm:block">
+                    <dt className="text-sm text-muted-foreground">{fact.label}</dt>
+                    <dd className="text-[0.9375rem] text-foreground">
+                      <bdi>{fact.value}</bdi>
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          )}
+          {/* The needs travel with the request: they are what a sitter most
+              needs in order to answer honestly. */}
+          {pet.notes && (
+            <div>
+              <Heading className="text-[0.9375rem] font-semibold text-foreground">{t("request.summary.needs")}</Heading>
+              <p className="mt-1.5 max-w-[64ch] text-base leading-relaxed text-foreground">{pet.notes}</p>
+            </div>
+          )}
         </div>
       )}
 
       {request.displayedRate && (
         /* Whose number this is, and what it is not. */
-        <ProvenanceLabel className="mt-4">
+        <ProvenanceLabel className={cn(bare ? "pb-1" : "px-5 pb-5")}>
           {` · ${t("profile.noPayment")}`}
         </ProvenanceLabel>
       )}

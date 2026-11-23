@@ -1,5 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import MessageBubble from "@/components/messages/MessageBubble";
 import { MessageCircleQuestion } from "lucide-react";
 
 import { DraftNotice, SaveFeedback } from "@/components/shared/SaveFeedback";
@@ -110,14 +112,14 @@ export default function ClarificationThread({
         : t("clarify.fromOwner");
 
   return (
-    <section aria-labelledby={`${ids}-title`} className="mt-6">
+    <section aria-labelledby={`${ids}-title`} className="surface mt-3 p-5">
       <Heading
         id={`${ids}-title`}
         ref={headingRef}
         tabIndex={-1}
-        className="flex items-center gap-2 text-base font-semibold text-foreground focus:outline-none"
+        className="flex items-center gap-2 text-title font-semibold text-foreground focus:outline-none"
       >
-        <MessageCircleQuestion className="size-4 shrink-0" aria-hidden="true" />
+        <MessageCircleQuestion className="size-5 shrink-0 text-primary" aria-hidden="true" />
         {t("clarify.title")}
       </Heading>
       {/* Always stated where the questions are shown: these stay in this
@@ -127,14 +129,14 @@ export default function ClarificationThread({
       {thread.length > 0 && (
         <ol className="mt-4 space-y-3">
           {thread.map((message) => (
-            <li key={message.id} className="border-s-2 border-border ps-4">
-              <p className="text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">{authorLabel(message.author)}</span>
-                {message.createdAt && ` · ${formatDate(toISODate(new Date(message.createdAt)), lng)}`}
-              </p>
-              <p className="mt-1 max-w-[64ch] whitespace-pre-line text-base leading-relaxed text-foreground">
+            <li key={message.id}>
+              <MessageBubble
+                mine={message.author === side}
+                author={authorLabel(message.author)}
+                meta={message.createdAt ? formatDate(toISODate(new Date(message.createdAt)), lng) : undefined}
+              >
                 {message.text}
-              </p>
+              </MessageBubble>
             </li>
           ))}
         </ol>
@@ -161,7 +163,7 @@ export default function ClarificationThread({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-auto min-h-11 whitespace-normal text-start"
+                    className="h-auto min-h-11 whitespace-normal py-2 text-start font-medium"
                     onClick={() => {
                       setText(t(key));
                       setError(undefined);
@@ -204,7 +206,7 @@ export default function ClarificationThread({
             <Button type="submit" variant="secondary">
               {t("clarify.add")}
             </Button>
-            <Button type="button" variant="link" className="text-muted-foreground" onClick={() => onComposerOpenChange(false, "cancelled")}>
+            <Button type="button" variant="ghost" className="text-muted-foreground" onClick={() => onComposerOpenChange(false, "cancelled")}>
               {t("clarify.cancel")}
             </Button>
           </div>

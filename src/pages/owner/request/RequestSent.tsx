@@ -9,6 +9,7 @@ import { DemoNotice } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { findRequest, requestsReceived, requestsSent, sitterNameFor } from "@/data/repository";
 import { useDemo } from "@/state/demo/context";
+import { AnimalPortrait } from "@/components/illustrations/animals";
 
 /**
  * Sent — in the only sense available here.
@@ -45,12 +46,13 @@ export default function RequestSent() {
         title={t("request.sent.title")}
         intro={t("request.sent.intro", { sitter: sitterName, pet: request.pet.name })}
         headerExtra={
-          <div className="mt-6">
-            <span
-              aria-hidden="true"
-              className="inline-flex size-12 items-center justify-center rounded-full bg-primary-soft text-primary motion-safe:animate-scale-in"
-            >
-              <Check className="size-6" />
+          /* The animal the request is about, with a check for the one thing
+             that did happen: the request is kept on this device. The notice
+             below says plainly that nobody received it. */
+          <div aria-hidden="true" className="relative mt-6 inline-flex motion-safe:animate-scale-in">
+            <AnimalPortrait species={request.pet.species} className="size-20 rounded-full" />
+            <span className="absolute -bottom-1 -end-1 flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground ring-4 ring-background">
+              <Check className="size-4" strokeWidth={3} />
             </span>
           </div>
         }
@@ -60,13 +62,13 @@ export default function RequestSent() {
           </Button>
         }
         secondaryAction={
-          <Button asChild variant="link" className="text-muted-foreground">
+          <Button asChild variant="ghost" className="text-muted-foreground">
             <Link to="/">{t("request.sent.home")}</Link>
           </Button>
         }
       >
         <DemoNotice
-          className="mb-8"
+          className="mb-3"
           title={t("request.sent.demoTitle")}
           body={t("request.sent.demoBody")}
         />
