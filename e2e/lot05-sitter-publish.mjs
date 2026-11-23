@@ -87,6 +87,37 @@ const state = seedState({ account: ACCOUNT, capabilities: { owner: true, sitter:
   await context.close();
 }
 
+/* Review findings: a published profile that lost an essential is not
+   reachable by link or requestable; the preview's outline never jumps up;
+   "Edit" on the preview returns by history. */
+{
+  const lost = publishedSitter({ services: ["boarding"], rates: { boarding: 900 }, acceptedSpecies: ["dog"], acceptedDogSizes: ["large"], housing: { type: null, outdoor: null, residentPets: [], canSeparateAnimals: "unknown", conditions: null } });
+  const { page, context } = await open({ state: seedState({ account: ACCOUNT, capabilities: { owner: true, sitter: true }, sitter: lost }) });
+  await page.goto(`${BASE}/sitters/sitter-local`);
+  check("lost essential: public profile is not served", (await text(page)).includes("This profile does not exist"));
+  await page.goto(`${BASE}/owner/request/sitter-local`);
+  await page.waitForURL(/\/search/);
+  check("lost essential: no request flow", page.url().includes("/search"));
+  await page.goto(`${BASE}/settings`);
+  check("lost essential: no test request offered", (await page.getByText("Test tools for this demonstration").count()) === 0);
+  await context.close();
+}
+{
+  const { page, context } = await open({ state: seedState({ account: ACCOUNT, capabilities: { owner: true, sitter: true }, sitter: { ...publishedSitter(), published: false } }) });
+  await page.goto(`${BASE}/sitter/profile`);
+  await page.getByRole("link", { name: /what owners would see/i }).click();
+  await page.waitForURL(/\/sitter\/preview/);
+  const levels = await page.locator("main h1, main h2, main h3, main h4").evaluateAll((els) => els.map((e) => Number(e.tagName[1])));
+  const jumpsUp = levels.slice(levels.indexOf(2) + 1).some((l) => l <= 2);
+  check("preview outline: nothing climbs back to h2 after the name", !jumpsUp, levels.join(","));
+  await page.getByRole("button", { name: "Edit my profile" }).click();
+  await page.waitForURL(/\/sitter\/profile$/);
+  await page.goBack();
+  await page.waitForTimeout(300);
+  check("Back from the dashboard does not return to the preview", !page.url().includes("/sitter/preview"), page.url());
+  await context.close();
+}
+
 /* French: the two group names. */
 {
   const { page, context } = await open({ lang: "fr", state });

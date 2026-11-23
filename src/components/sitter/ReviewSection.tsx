@@ -31,15 +31,19 @@ export default function ReviewSection({
   reviews,
   sitterName,
   isDemoFixture,
+  headingLevel = "h2",
 }: {
   reviews: Review[];
   sitterName: string;
+  /** Same rule as the portfolio: one level below the sitter's name. */
+  headingLevel?: "h2" | "h3";
   /** The sitter is an example, so their reviews are too. Said once, here,
       rather than on every entry. */
   isDemoFixture: boolean;
 }) {
   const { t } = useTranslation();
   const locale = useAppLocale();
+  const SectionHeading = headingLevel;
   const [expanded, setExpanded] = useState(false);
 
   const summary = summarise(reviews);
@@ -50,9 +54,9 @@ export default function ReviewSection({
       {/* On an example profile the heading itself says these are examples
           (Audit 1.3 LOT 06): a reader who skims headings must not file six
           invented stays under "Avis" as real opinions. */}
-      <h2 id="sitter-reviews" className="text-name font-semibold text-foreground">
+      <SectionHeading id="sitter-reviews" className="text-name font-semibold text-foreground">
         {isDemoFixture && summary ? t("reviews.titleExample") : t("reviews.title")}
-      </h2>
+      </SectionHeading>
       {isDemoFixture && summary && (
         <p className="mt-2 flex max-w-[64ch] items-start gap-2 text-sm font-medium text-foreground">
           <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />

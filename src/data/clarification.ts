@@ -85,17 +85,23 @@ export function newMessage(author: ClarificationAuthor, text: string): Clarifica
 /** Storage is untrusted: keep only whole messages. */
 export function restoreThread(value: unknown): ClarificationMessage[] {
   if (!Array.isArray(value)) return [];
+  const seen = new Set<string>();
   return value.flatMap((m): ClarificationMessage[] => {
     if (typeof m !== "object" || m === null) return [];
     const raw = m as Record<string, unknown>;
     if (raw.author !== "sitter" && raw.author !== "owner") return [];
     if (typeof raw.id !== "string" || typeof raw.text !== "string" || !raw.text.trim()) return [];
+    /* A duplicated id would be a duplicated React key. */
+    if (seen.has(raw.id)) return [];
+    seen.add(raw.id);
     return [
       {
         id: raw.id,
         author: raw.author,
         text: raw.text.slice(0, CLARIFICATION_MAX_LENGTH),
-        createdAt: typeof raw.createdAt === "string" ? raw.createdAt : "",
+        /* Formatted on screen: an unparseable date is dropped, not shown. */
+        createdAt:
+          typeof raw.createdAt === "string" && Number.isFinite(Date.parse(raw.createdAt)) ? raw.createdAt : "",
       },
     ];
   });

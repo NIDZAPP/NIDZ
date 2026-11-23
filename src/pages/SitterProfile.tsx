@@ -9,6 +9,7 @@ import { DemoNotice } from "@/components/shared/trust";
 import SitterProfileView, { QuotedRate } from "@/components/sitter/SitterProfileView";
 import { Button } from "@/components/ui/button";
 import { parseCriteria, petFit, reasonsFor, sizeLimitToState } from "@/data/criteria";
+import { isPubliclyListed } from "@/data/repository";
 import { offeredServices, rateFor } from "@/data/offer";
 import { communeName, getWilaya } from "@/data/algeria";
 import { CARE_UNIT_KEY, localized } from "@/data/types";
@@ -43,7 +44,7 @@ export default function SitterProfile() {
   /* An unpublished draft is not a public profile. `useSitter` resolves it so
      the sitter's own preview can render, but this route serves the public and
      `profile.notFoundBody` already promises the distinction. */
-  const publicallyVisible = sitter && (!isOwnProfile || state.sitter?.published);
+  const publicallyVisible = sitter && isPubliclyListed(state, sitter);
 
   if (!sitter || !publicallyVisible) {
     return (

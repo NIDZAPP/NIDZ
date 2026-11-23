@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { normalizeCriteria, parseCriteria } from "@/data/criteria";
 import { offeredServices, overlapsDeclaredUnavailable } from "@/data/offer";
 import { profilePathForRequest, requestPath } from "@/data/request-draft";
+import { isPubliclyListed } from "@/data/repository";
 import { CARE_UNIT_KEY, type CareType, type DateRange } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useSitter } from "@/hooks/use-sitter";
@@ -43,8 +44,13 @@ export default function RequestWhen() {
   const navigate = useNavigate();
   const { sitterId } = useParams();
   const [searchParams] = useSearchParams();
-  const { sitter } = useSitter(sitterId);
+  const { sitter: found } = useSitter(sitterId);
   const { state, dispatch } = useDemo();
+  /* Only a sitter owners may find can be asked: an own profile that is not
+     published — or lost an essential after publication — has no request flow
+     (`isPubliclyListed`, LOT 05 review). Treated as absent before any effect
+     writes the draft bookmark or the URL. */
+  const sitter = found && isPubliclyListed(state, found) ? found : null;
   const search = searchParams.toString();
 
   const criteria = useMemo(() => parseCriteria(new URLSearchParams(search)), [search]);

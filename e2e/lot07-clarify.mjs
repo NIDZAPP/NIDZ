@@ -83,6 +83,27 @@ check("Compte holds the test tool, labelled as such", (await page.getByText("Tes
 check("no page errors", page.errors.length === 0, page.errors.join(" | "));
 await context.close();
 
+/* Review findings: no question box towards an example sitter (nobody could
+   read it); focus never falls to <body>. */
+{
+  const toAmina = { ...request, id: "req-amina", sitterId: "amina-b" };
+  const { page, context } = await open({ state: seedState({ ...state, activeWorkspace: "owner", requests: [request, toAmina] }) });
+  await page.goto(`${BASE}/owner/requests/req-amina`);
+  check("example sitter: no 'Ask a question' offered", (await page.getByRole("button", { name: "Ask a question" }).count()) === 0);
+  check("example sitter: says why, honestly", await page.getByText(/This sitter is an example: nobody can read/).isVisible());
+
+  await page.goto(`${BASE}/sitter/requests`);
+  await page.getByRole("button", { name: "Ask a question" }).click();
+  check("opening the composer focuses the field", await page.evaluate(() => document.activeElement?.tagName === "TEXTAREA"));
+  await page.getByRole("button", { name: "Cancel" }).click();
+  check("cancelling returns focus to 'Ask a question'", await page.evaluate(() => document.activeElement?.textContent?.trim() === "Ask a question"));
+  await page.getByRole("button", { name: "Ask a question" }).click();
+  await page.getByLabel("Your question to the owner").fill("Une question ?");
+  await page.getByRole("button", { name: "Add to the request" }).click();
+  check("adding moves focus to the thread heading", await page.evaluate(() => /H[23]/.test(document.activeElement?.tagName ?? "") && document.activeElement?.textContent?.includes("Questions before deciding")));
+  await context.close();
+}
+
 /* Arabic renders the thread without raw keys. */
 {
   const { page, context } = await open({ lang: "ar", state: seedState({ ...state, requests: [{ ...request, thread: [{ id: "m1", author: "sitter", text: "سؤال", createdAt: "2026-11-21T10:00:00Z" }] }] }) });

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -149,6 +149,14 @@ function IncomingRequest({
   const { t } = useTranslation();
   const { state, dispatch } = useDemo();
   const [asking, setAsking] = useState(false);
+  const askRef = useRef<HTMLButtonElement>(null);
+  const restoreAsk = useRef(false);
+  useEffect(() => {
+    if (!asking && restoreAsk.current) {
+      restoreAsk.current = false;
+      askRef.current?.focus();
+    }
+  }, [asking]);
   const waitingForOwner = awaitingReplyFrom(request) === "owner";
 
   return (
@@ -173,7 +181,15 @@ function IncomingRequest({
         headingLevel="h3"
       />
 
-      <ClarificationThread request={request} side="sitter" composerOpen={asking} onComposerOpenChange={setAsking} />
+      <ClarificationThread
+        request={request}
+        side="sitter"
+        composerOpen={asking}
+        onComposerOpenChange={(open, reason) => {
+          if (!open && reason === "cancelled") restoreAsk.current = true;
+          setAsking(open);
+        }}
+      />
 
       {/* Announced and focusable: answering removes the buttons from the DOM,
           which would otherwise drop focus to the body with nothing said. */}
@@ -195,7 +211,7 @@ function IncomingRequest({
             </Button>
             {/* Before deciding: a question, not a third verdict. */}
             {!asking && (
-              <Button type="button" variant="outline" onClick={() => setAsking(true)}>
+              <Button ref={askRef} type="button" variant="outline" onClick={() => setAsking(true)}>
                 {t("clarify.ask")}
               </Button>
             )}

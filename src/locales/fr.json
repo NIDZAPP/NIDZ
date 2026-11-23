@@ -1137,6 +1137,7 @@
     "fromOwner": "Le propriétaire",
     "waitingOwner": "Votre question figure sur la demande. Celle-ci attend toujours votre décision : poser une question n'accepte rien.",
     "questionForYou": "Le pet-sitter a une question avant de décider. La demande est toujours en attente.",
-    "questionForYouShort": "Une question pour vous"
+    "questionForYouShort": "Une question pour vous",
+    "exampleNoInbox": "Ce pet-sitter est un exemple : personne ne peut lire ni répondre à une question qui lui serait adressée, donc aucune n'est proposée ici."
   }
 }

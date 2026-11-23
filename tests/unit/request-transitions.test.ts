@@ -87,3 +87,76 @@ describe("storage is untrusted", () => {
     assert.ok(!("care" in pet), "the private care plan never rides along");
   });
 });
+
+describe("storage hardening (LOT 05–07 review)", () => {
+  const store = new Map<string, string>();
+  const g = globalThis as unknown as { window?: unknown };
+  const install = () => {
+    g.window = {
+      localStorage: {
+        getItem: (k: string) => store.get(k) ?? null,
+        setItem: (k: string, v: string) => void store.set(k, v),
+        removeItem: (k: string) => void store.delete(k),
+      },
+    };
+  };
+  after(() => {
+    delete g.window;
+  });
+
+  test("requests with unformattable dates or an unknown service are dropped", () => {
+    install();
+    store.set(
+      "nidz.demo",
+      JSON.stringify({
+        version: 3,
+        requests: [
+          { ...request, id: "ok" },
+          { ...request, id: "baddate", dates: { start: "soon", end: "later" } },
+          { ...request, id: "badcare", careType: "grooming" },
+          { ...request, id: "badcreated", createdAt: "yesterday" },
+        ],
+      }),
+    );
+    assert.deepEqual(loadState().requests.map((r) => r.id), ["ok"]);
+  });
+
+  test("a thread keeps one message per id and never an unparseable date", () => {
+    const thread = restoreThread([
+      { id: "a", author: "sitter", text: "one", createdAt: "not a date" },
+      { id: "a", author: "owner", text: "dup", createdAt: "2026-01-01T00:00:00Z" },
+    ]);
+    assert.equal(thread.length, 1);
+    assert.equal(thread[0].createdAt, "");
+  });
+
+  test("a stored sitter with a null commune or a plain-string headline does not crash", () => {
+    install();
+    store.set(
+      "nidz.demo",
+      JSON.stringify({
+        version: 3,
+        sitter: {
+          published: true,
+          profile: {
+            id: "me",
+            publicName: "Lina K.",
+            communeCode: null,
+            headline: "plain string",
+            services: [],
+            rates: {},
+            acceptedSpecies: [],
+            acceptedDogSizes: [],
+            limits: ["one limit"],
+            declaredUnavailable: [],
+            housing: {},
+          },
+        },
+      }),
+    );
+    const s = loadState();
+    assert.equal(s.sitter?.profile.communeCode, "");
+    assert.equal(s.sitter?.profile.headline.fr, "plain string");
+    assert.equal(s.sitter?.profile.limits[0].en, "one limit");
+  });
+});

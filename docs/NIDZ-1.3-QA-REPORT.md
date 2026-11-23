@@ -17,8 +17,8 @@
 | `npm run check:locales` | PASS | parité fr/en/ar, pluriels complets, clés utilisées résolues |
 | `npm run build` | PASS | avertissement de taille de chunk **ancien mais réduit** : bundle principal 841 KB → 523 KB (gzip 261 → 174 KB) grâce au découpage par écran |
 | `git diff --check` | PASS | |
-| `npm run test:unit` | PASS 28/28 | `node:test` via Vite (aucune dépendance ajoutée) |
-| `npm run test:e2e` | PASS 237/237 | 10 fichiers, un par lot + le parcours final, contre le serveur de dev |
+| `npm run test:unit` | PASS 31/31 | `node:test` via Vite (aucune dépendance ajoutée) |
+| `npm run test:e2e` | PASS 247/247 | 10 fichiers, un par lot + le parcours final, contre le serveur de dev |
 | Build de production (`vite preview`) | PASS 104/104 | `lot11`, `lot01`, `lot04`, `lot09` rejoués contre le build (chunks différés, service worker) |
 
 ## Parcours réels dans le navigateur (`e2e/lot11-final-qa.mjs`, français, 390×844, navigateur vierge)
@@ -38,13 +38,17 @@
 | 02 — Accueil mobile, démarrage immédiat (P0) | PASS | `lot02` 29 |
 | 03 — Recherche, vrais filtres, bonnes cartes (P0) | PASS | `lot03` 34 + unitaires |
 | 04 — Navigation propriétaire / sitter (P0) | PASS | `lot04` 28 |
-| 05 — Onboarding sitter compréhensible (P0) | PASS | `lot05` 17 + unitaires |
+| 05 — Onboarding sitter compréhensible (P0) | PASS | `lot05` 22 + unitaires |
 | 06 — Profil humain, lisible (P1) | PASS | `lot06` 15 |
-| 07 — Clarifier avant d'accepter (P1) | PASS | `lot07` 20 + unitaires |
+| 07 — Clarifier avant d'accepter (P1) | PASS | `lot07` 25 + unitaires |
 | 08 — Animaux, compte, formulaires (P1) | PASS | `lot08` 18 |
 | 09 — Fluidité, microcopy, mobile, a11y (P1) | PASS | `lot09` 16 |
-| 10 — Nettoyage ciblé, préparation backend (P1) | PASS | unitaires 28 |
+| 10 — Nettoyage ciblé, préparation backend (P1) | PASS | unitaires 31 |
 | 11 — QA finale | PASS | `lot11` 23 |
+
+## Relectures de code
+
+Chaque lot (ou groupe de lots) a été relu par l'agent `code-reviewer` du projet, et les recherches/cartes par `ui-designer`. Tous les défauts signalés ont été reproduits puis corrigés dans des commits séparés : LOT 01 (`fa84994`), LOT 03 (inclus dans `d2abd4e`), LOT 04 (`5d4408c`), LOTS 05–07 (commit de correctifs final : données stockées validées champ par champ, profil publié incomplet non joignable par lien, pas de question vers un pet-sitter d'exemple, gestion du focus dans le fil, ordre des titres de l'aperçu, retour depuis l'aperçu).
 
 ## NON TESTÉ (déclaré, pas supposé)
 

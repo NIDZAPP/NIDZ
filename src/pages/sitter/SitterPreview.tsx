@@ -7,6 +7,7 @@ import SitterProfileView from "@/components/sitter/SitterProfileView";
 import { DemoNotice } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { canPublish } from "@/data/sitter-sections";
+import { useReturnToDashboard } from "@/hooks/use-return-to-dashboard";
 import { useDemo } from "@/state/demo/context";
 
 /**
@@ -25,6 +26,7 @@ export default function SitterPreview() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { state, dispatch } = useDemo();
+  const returnToDashboard = useReturnToDashboard();
 
   const profile = state.sitter?.profile;
   /* Publishing must not be reachable for a profile that is not one. The rule is
@@ -81,8 +83,11 @@ export default function SitterPreview() {
         /* "Modifier" re-enters the builder at step one, which is where it
            means something. */
         secondaryAction={
-          <Button asChild variant="link" className="text-muted-foreground">
-            <Link to="/sitter/profile">{t("sitterFlow.preview.edit")}</Link>
+          /* Back to the dashboard by history when the preview was opened from
+             it, so Back from the dashboard does not return here (LOT 05
+             review). */
+          <Button type="button" variant="link" className="text-muted-foreground" onClick={returnToDashboard}>
+            {t("sitterFlow.preview.edit")}
           </Button>
         }
       >

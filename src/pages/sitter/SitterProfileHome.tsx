@@ -104,7 +104,7 @@ export default function SitterProfileHome() {
           <div className="mt-6">
             {ready ? (
               <Button asChild size="lg" className="w-full sm:w-auto">
-                <Link to="/sitter/preview">
+                <Link to="/sitter/preview" state={FROM_DASHBOARD}>
                   {published ? t("sitterSections.viewPublished") : t("sitterSections.preview")}
                 </Link>
               </Button>

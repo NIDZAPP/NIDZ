@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router-dom";
@@ -30,10 +30,23 @@ export default function OwnerRequestDetail() {
   const [searchParams] = useSearchParams();
   const { state } = useDemo();
   const [asking, setAsking] = useState(false);
+  const askRef = useRef<HTMLButtonElement>(null);
+  const restoreAsk = useRef(false);
+  useEffect(() => {
+    if (!asking && restoreAsk.current) {
+      restoreAsk.current = false;
+      askRef.current?.focus();
+    }
+  }, [asking]);
 
   const request = findRequest(state, id);
   /* A question from the sitter, waiting for the owner (Audit 1.3 LOT 07). */
   const questionForYou = request ? awaitingReplyFrom(request) === "owner" : false;
+  /* A question is only offered where the other side of THIS browser can read
+     it: a request addressed to the visitor's own sitter profile. An example
+     sitter has no inbox, so a question to one would be read by nobody — and
+     the composer's note promises it can be read (LOT 07 review). */
+  const sitterCanRead = Boolean(request && state.sitter && request.sitterId === state.sitter.profile.id);
   const sitterName = request ? sitterNameFor(state, request.sitterId) : "";
   /* Set when the owner tried to send a request identical to one already
      waiting — otherwise arriving here after tapping "Envoyer" looks like
@@ -107,15 +120,21 @@ export default function OwnerRequestDetail() {
               request={request}
               side="owner"
               composerOpen={asking}
-              onComposerOpenChange={setAsking}
+              onComposerOpenChange={(open, reason) => {
+                if (!open && reason === "cancelled") restoreAsk.current = true;
+                setAsking(open);
+              }}
               headingLevel="h2"
             />
-            {canClarify(request) && !asking && (
+            {canClarify(request) && !asking && sitterCanRead && (
               <div className="mt-4">
-                <Button type="button" variant="outline" onClick={() => setAsking(true)}>
+                <Button ref={askRef} type="button" variant="outline" onClick={() => setAsking(true)}>
                   {questionForYou ? t("clarify.reply") : t("clarify.ask")}
                 </Button>
               </div>
+            )}
+            {canClarify(request) && !sitterCanRead && (
+              <p className="mt-6 max-w-[64ch] text-sm text-muted-foreground">{t("clarify.exampleNoInbox")}</p>
             )}
 
 

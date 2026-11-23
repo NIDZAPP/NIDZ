@@ -16,6 +16,7 @@
    ------------------------------------------------------------------------ */
 
 import {
+  CARE_TYPES,
   EMPTY_NEED,
   asLocalized,
   type CareRequest,
@@ -32,6 +33,7 @@ import { emptyCareConditions, restoreCareConditions } from "@/data/care-conditio
 import { forSharing, restorePet } from "@/data/pets";
 import { restoreRequestDraft, type RequestDraft } from "@/data/request-draft";
 import { canClarify, restoreThread, type ClarificationMessage } from "@/data/clarification";
+import { isISODate } from "@/utils/dates";
 import {
   NO_CAPABILITIES,
   isWorkspace,
@@ -496,6 +498,13 @@ function restoreSitter(value: unknown): SitterWorkspace | null {
   const restored: SitterProfile = {
     ...empty,
     ...profile,
+    /* Read by `canPublish` (now on /search, through `publicSitters`) with
+       `.trim()`: a stored null or a pre-Localized string here took the
+       results page down. */
+    communeCode: typeof profile.communeCode === "string" ? profile.communeCode : "",
+    headline: normaliseLocalized(profile.headline, empty.headline),
+    about: normaliseLocalized(profile.about, empty.about),
+    limits: (profile.limits as unknown[]).map((limit) => normaliseLocalized(limit, asLocalized(""))).filter((l) => l.en.trim() || l.fr.trim() || l.ar.trim()),
     experience: { ...empty.experience, ...(profile.experience ?? {}) },
     professional: {
       ...empty.professional,
@@ -576,9 +585,13 @@ function restoreRequest(raw: Record<string, unknown>): CareRequest[] {
   const dates = raw.dates as Partial<DateRange> | undefined;
   const status = raw.status;
   if (!pet || typeof raw.id !== "string" || typeof raw.sitterId !== "string") return [];
-  if (!isObject(dates) || typeof dates.start !== "string" || typeof dates.end !== "string") return [];
+  /* Every field a screen FORMATS is checked as the thing it formats: an
+     unparseable date reached `Intl.DateTimeFormat` and threw "Invalid time
+     value" on the owner's list, the request detail and the sitter's inbox. */
+  if (!isObject(dates) || !isISODate(dates.start) || !isISODate(dates.end) || dates.start > dates.end) return [];
   if (status !== "pending" && status !== "accepted" && status !== "declined") return [];
-  if (typeof raw.careType !== "string") return [];
+  if (typeof raw.careType !== "string" || !(CARE_TYPES as readonly string[]).includes(raw.careType)) return [];
+  if (typeof raw.createdAt !== "string" || !Number.isFinite(Date.parse(raw.createdAt))) return [];
   return [
     {
       ...(raw as unknown as CareRequest),

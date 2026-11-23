@@ -14,6 +14,7 @@ import { parseCriteria, petFit, type PetFit } from "@/data/criteria";
 import { offeredServices, overlapsDeclaredUnavailable } from "@/data/offer";
 import { forSharing, type Pet } from "@/data/pets";
 import { FROM_REQUEST, profilePathForRequest, requestPath, requestWhenPath } from "@/data/request-draft";
+import { isPubliclyListed } from "@/data/repository";
 import type { CareRequest, Species } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useSitter } from "@/hooks/use-sitter";
@@ -57,8 +58,13 @@ export default function RequestReview() {
   const navigate = useNavigate();
   const { sitterId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { sitter } = useSitter(sitterId);
+  const { sitter: found } = useSitter(sitterId);
   const { state, dispatch } = useDemo();
+  /* Only a sitter owners may find can be asked: an own profile that is not
+     published — or lost an essential after publication — has no request flow
+     (`isPubliclyListed`, LOT 05 review). Treated as absent before any effect
+     writes the draft bookmark or the URL. */
+  const sitter = found && isPubliclyListed(state, found) ? found : null;
   const search = searchParams.toString();
 
   /* Guards a same-tick double event; the duplicate check below guards the

@@ -40,10 +40,15 @@ const ACTIVITY_ICON: Record<PortfolioActivity, LucideIcon> = {
 export default function PortfolioSection({
   items,
   isDemoFixture,
+  headingLevel = "h2",
 }: {
   items: PortfolioItem[];
   isDemoFixture: boolean;
+  /** The level of the profile's other sections, so the outline never jumps
+      back up inside the sitter's preview (where the name is an h2). */
+  headingLevel?: "h2" | "h3";
 }) {
+  const SectionHeading = headingLevel;
   const { t } = useTranslation();
   const locale = useAppLocale();
 
@@ -53,9 +58,9 @@ export default function PortfolioSection({
 
   return (
     <section aria-labelledby="sitter-portfolio" className="border-t border-border pt-8">
-      <h2 id="sitter-portfolio" className="text-name font-semibold text-foreground">
+      <SectionHeading id="sitter-portfolio" className="text-name font-semibold text-foreground">
         {t("portfolio.title")}
-      </h2>
+      </SectionHeading>
       <p className="mt-2 max-w-[64ch] text-sm text-muted-foreground">{t("portfolio.intro")}</p>
 
       <ul role="list" className="mt-5 grid gap-x-6 gap-y-5 sm:grid-cols-2">

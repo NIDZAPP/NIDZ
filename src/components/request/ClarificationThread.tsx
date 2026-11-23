@@ -1,4 +1,4 @@
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { MessageCircleQuestion } from "lucide-react";
 
@@ -42,9 +42,10 @@ export default function ClarificationThread({
   request: CareRequest;
   /** The side of the request the current screen belongs to. */
   side: ClarificationAuthor;
-  /** Controlled, so the screen's own "Poser une question" button can open it. */
+  /** Controlled, so the screen's own "Poser une question" button can open it.
+      Closing says why, so the screen can put focus back where it belongs. */
   composerOpen: boolean;
-  onComposerOpenChange: (open: boolean) => void;
+  onComposerOpenChange: (open: boolean, reason?: "added" | "cancelled") => void;
   headingLevel?: "h2" | "h3";
 }) {
   const { t } = useTranslation();
@@ -53,8 +54,25 @@ export default function ClarificationThread({
   const [text, setText] = useState("");
   const [error, setError] = useState<string>();
   const fieldRef = useRef<HTMLTextAreaElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const focusHeading = useRef(false);
   const ids = useId();
   const Heading = headingLevel;
+
+  /* Focus never falls to <body> (LOT 07 review): opening the composer puts it
+     in the field; adding moves it to the thread's heading, where the new
+     question is announced as part of the section. Cancelling is the screen's
+     to handle (it restores its "Poser une question" button). */
+  useEffect(() => {
+    if (composerOpen) fieldRef.current?.focus();
+  }, [composerOpen]);
+  const threadLength = threadOf(request).length;
+  useEffect(() => {
+    if (focusHeading.current) {
+      focusHeading.current = false;
+      headingRef.current?.focus();
+    }
+  }, [threadLength]);
 
   const thread = threadOf(request);
   const open = canClarify(request);
@@ -66,10 +84,11 @@ export default function ClarificationThread({
       fieldRef.current?.focus();
       return;
     }
+    focusHeading.current = true;
     dispatch({ type: "addClarification", id: request.id, message: newMessage(side, text) });
     setText("");
     setError(undefined);
-    onComposerOpenChange(false);
+    onComposerOpenChange(false, "added");
   };
 
   const authorLabel = (author: ClarificationAuthor) =>
@@ -81,7 +100,12 @@ export default function ClarificationThread({
 
   return (
     <section aria-labelledby={`${ids}-title`} className="mt-6">
-      <Heading id={`${ids}-title`} className="flex items-center gap-2 text-base font-semibold text-foreground">
+      <Heading
+        id={`${ids}-title`}
+        ref={headingRef}
+        tabIndex={-1}
+        className="flex items-center gap-2 text-base font-semibold text-foreground focus:outline-none"
+      >
         <MessageCircleQuestion className="size-4 shrink-0" aria-hidden="true" />
         {t("clarify.title")}
       </Heading>
@@ -168,7 +192,7 @@ export default function ClarificationThread({
             <Button type="submit" variant="secondary">
               {t("clarify.add")}
             </Button>
-            <Button type="button" variant="link" className="text-muted-foreground" onClick={() => onComposerOpenChange(false)}>
+            <Button type="button" variant="link" className="text-muted-foreground" onClick={() => onComposerOpenChange(false, "cancelled")}>
               {t("clarify.cancel")}
             </Button>
           </div>

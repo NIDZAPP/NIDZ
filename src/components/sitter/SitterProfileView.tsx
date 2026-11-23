@@ -104,6 +104,8 @@ export default function SitterProfileView({
      h2 they would claim to be siblings of the profile inside an embed whose
      h1 belongs to the surrounding screen. */
   const Section = headingLevel === "h1" ? "h2" : "h3";
+  /* Care-block titles sit one level below their section. */
+  const BlockHeading = Section === "h2" ? "h3" : "h4";
   const services = offeredServices(sitter);
 
   const location = communeWithWilaya(sitter.communeCode, lng);
@@ -364,7 +366,7 @@ export default function SitterProfileView({
           <div className="mt-8 max-w-[64ch] space-y-6">
             {careBlocks.map((block) => (
               <div key={block.id}>
-                <h3 className="text-sm font-semibold text-foreground">{block.title}</h3>
+                <BlockHeading className="text-sm font-semibold text-foreground">{block.title}</BlockHeading>
                 <ul role="list" className="mt-2 space-y-1.5">
                   {block.lines.map((line, i) => (
                     <li key={i} className="text-base leading-relaxed text-foreground">
@@ -415,9 +417,10 @@ export default function SitterProfileView({
           Both are absent for a profile the visitor built themselves — the
           honest state of a sitter nobody has used yet — and the review section
           says so rather than disappearing. */}
-      <PortfolioSection items={portfolio} isDemoFixture={sitter.isDemoFixture} />
+      <PortfolioSection items={portfolio} isDemoFixture={sitter.isDemoFixture} headingLevel={Section} />
 
       <ReviewSection
+        headingLevel={Section}
         reviews={reviews}
         sitterName={sitter.publicName}
         isDemoFixture={sitter.isDemoFixture}

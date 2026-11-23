@@ -1115,6 +1115,7 @@
     "fromOwner": "The owner",
     "waitingOwner": "Your question is on the request. It is still awaiting your decision: asking accepts nothing.",
     "questionForYou": "The sitter has a question before deciding. The request is still awaiting a reply.",
-    "questionForYouShort": "A question for you"
+    "questionForYouShort": "A question for you",
+    "exampleNoInbox": "This sitter is an example: nobody can read or answer a question addressed to them, so none is offered here."
   }
 }

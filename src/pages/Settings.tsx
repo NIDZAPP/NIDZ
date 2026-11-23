@@ -23,6 +23,7 @@ import { useAppLocale } from "@/hooks/use-locale";
 import { useSwitchWorkspace } from "@/hooks/use-workspace";
 import { clearFormDrafts } from "@/hooks/use-form-draft";
 import { cn } from "@/lib/utils";
+import { isPubliclyListed } from "@/data/repository";
 import { useDemo } from "@/state/demo/context";
 
 
@@ -254,7 +255,7 @@ export default function Settings() {
             an instruction for testing, not something a real sitter would do,
             so it lives here and nowhere in the owner's or the sitter's
             screens. */}
-        {state.sitter?.published && (
+        {state.sitter && isPubliclyListed(state, state.sitter.profile) && (
           <section aria-labelledby="settings-tools" className="mt-12 border-t border-border pt-8">
             <h2 id="settings-tools" className="text-name font-semibold text-foreground">
               {t("settings.tools.title")}

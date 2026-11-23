@@ -41,8 +41,21 @@ import type { DemoState } from "@/state/demo/reducer";
  */
 export function publicSitters(state: DemoState, { excludeOwn = false } = {}): SitterProfile[] {
   const own = state.sitter;
-  const ownListed = !excludeOwn && own?.published && canPublish(own.profile) ? [own.profile] : [];
+  const ownListed = !excludeOwn && own && isPubliclyListed(state, own.profile) ? [own.profile] : [];
   return [...DEMO_SITTERS, ...ownListed];
+}
+
+/**
+ * Whether a profile may be shown to owners and asked for care: every example,
+ * and the visitor's own only while published AND publishable. ONE rule for the
+ * search, the public profile page, the request flow and the test tool — a
+ * profile that lost an essential after publication (boarding without a home
+ * description) must not be reachable by link either (LOT 05 review).
+ */
+export function isPubliclyListed(state: DemoState, sitter: SitterProfile): boolean {
+  if (sitter.isDemoFixture) return true;
+  const own = state.sitter;
+  return Boolean(own && own.profile.id === sitter.id && own.published && canPublish(own.profile));
 }
 
 /**
