@@ -4,6 +4,41 @@
 
 ---
 
+## 0.1 Amendements actifs — Nidz 1.4 (23 novembre 2026)
+
+> **Niveau 1 inchangé :** sécurité, confidentialité, vérité produit, provenance des preuves de confiance, accessibilité, i18n/RTL, matching et parcours réels restent obligatoires.
+>
+> **Niveau 2 libéré :** le système visuel des audits 1.0–1.3 est une photographie du code existant, **pas une limite créative pour 1.4**. Cet amendement prévaut sur l'amendement 0.0 et les sections ci-dessous **uniquement pour leurs prescriptions visuelles** (fonds, typographie, rayons, cartes, espacements, mise en page, emploi décoratif des couleurs, iconographie et animation). Les modifications de design sont proposées et validées avant leur implémentation ; elles ne modifient pas à elles seules le code actuel.
+
+### Identité à préserver
+
+- Nom et logo Nidz ; **vert `#0F766E`** et **terracotta `#A84F32`** restent les ancres chromatiques de la marque. Les tons doux `#E7F3F1` et `#F7EAE4` et les textes lisibles peuvent être réorganisés. Les couleurs métier (erreur, succès, avertissement, information) gardent leur sens.
+- Utiliser une palette cohérente, des tokens sémantiques et des contrastes vérifiés ; toute nouvelle nuance ou redistribution importante de rôles doit être proposée clairement, pas glissée dans du CSS arbitraire.
+- HaHo (Freebie) dans Figma est **une inspiration**, pas une nouvelle identité ni un fichier dont l'accès MCP est présumé. Étudier ses principes visuels seulement si le fichier est réellement accessible ; ne pas copier des maquettes ou des éléments non autorisés.
+
+### Liberté de refonte visuelle
+
+- **Layouts, composition, navigation visuelle, composants, cartes, surfaces, ombres, espacements, typographies, illustrations et animations peuvent être totalement repensés** en s'appuyant sur Impeccable et les skills d'Emil Kowalski lorsqu'ils sont disponibles. Ne pas conserver une forme simplement parce qu'elle figure dans `DESIGN.md` ou dans un composant existant.
+- Le blanc `#FFFFFF` est le fond **actuellement implémenté**, non une obligation de laisser de grands espaces blancs ou de conserver exclusivement un fond blanc ; un nouveau système de surfaces/fonds cohérent peut être proposé et validé.
+- **Inter n'est plus une obligation de marque pour la refonte** : proposer une typographie plus convaincante est autorisé, à condition de vérifier licences, lisibilité et prise en charge correcte du français, de l'anglais et de l'arabe (RTL). La pile de polices actuelle reste telle quelle jusqu'à une décision d'implémentation.
+- **Boutons d'action principaux et secondaires en forme capsule (pill shape)** comme direction globale approuvée ; leurs états, cibles tactiles et niveaux de priorité restent explicites. L'ancien plafond de rayon 24 px et l'interdiction des pills hors chips ne s'appliquent plus à cette refonte.
+- Les cartes, surfaces colorées, bordures, dégradés, ombres et animations ne sont **ni interdits ni obligatoires**. Leurs choix doivent servir une composition premium, chaleureuse, mobile-first et accessible, sans surcharge ni effets gratuits.
+- Lucide reste une base utile pour la cohérence des icônes, avec possibilité d'illustrations/icônes animales de même style, sans mélange d'emojis disparates. Préserver les préférences de réduction du mouvement.
+
+### Directions confirmées pour les écrans concernés
+
+- Accueil : titre **« La garde de votre animal, en toute confiance. »** ; sous-titre **« Trouvez une personne adaptée à votre compagnon, près de chez vous. »** ; visuel animalier fort, composition compacte et deux accès rapidement visibles : « Trouver une garde » et « Devenir pet-sitter ».
+- Sélecteur de langue : déclencheur **icône seule**, menu accessible au clic, avec nom accessible ; pas de codes FR/EN/AR toujours affichés dans le déclencheur.
+- Formulaires : labels persistants, placeholders d'exemple discrets, erreurs explicites ; supprimer la prose répétitive sans cacher les informations essentielles. Les explications vraiment secondaires peuvent utiliser une petite icône grise « ! » ouvrant un texte accessible.
+- Sélection animale : catégories illustrées, puis espèces détaillées/recherche et « Mon animal n'est pas dans la liste » ; le même référentiel devra servir propriétaires et pet-sitters. **L'extension des espèces/matching est une décision produit distincte, non une conséquence automatique du redesign.**
+- Messagerie : son interface peut être conçue, mais **ne jamais simuler comme réels** des échanges, notifications ou accusés de lecture entre deux comptes sans backend.
+
+### Méthode de validation
+
+Examiner la référence et l'écran réel → proposer une direction → faire approuver → implémenter écran par écran → vérifier captures sur mobile et desktop, large texte, i18n/RTL, contrastes et régressions. Une esthétique plus moderne ne justifie jamais de nouvelles promesses produit inventées.
+
+---
+
 ## 0.0 Amendements actifs — Audit 1.2 (13 août 2026)
 
 > **À lire avant les §12 et §13.** Deux décisions de **niveau 2** (§42 —
