@@ -2,6 +2,7 @@ import { MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
+import { AnimalPortrait } from "@/components/illustrations/animals";
 import { MatchReasonList } from "@/components/sitter/match";
 import { ProvenanceLabel } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
@@ -86,90 +87,84 @@ export default function SitterCard({
       : null;
 
   return (
-    <li className="border-b border-border">
+    <li>
+      {/* 1.4: one card per sitter — identity and place, what they say, the
+          facts that tell this result apart, where the information came from,
+          then the price and the one action on a closing line. The stretched
+          link makes the whole card pressable with exactly one tab stop. */}
       <article
         className={cn(
-          "relative grid rounded-md px-3 py-6 transition-colors md:py-8",
-          "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
-          /* Gated so the wash does not stick after a tap. */
-          "[@media(hover:hover)]:hover:bg-secondary",
-          /* Mobile: identity beside the entry, price on a second row.
-             Desktop: adds the price axis as a third column. */
-          "grid-cols-[40px_minmax(0,1fr)] gap-x-3",
-          "md:grid-cols-[48px_minmax(0,1fr)_190px] md:gap-x-6",
+          "surface surface-press relative flex h-full flex-col gap-3 p-4 md:p-5",
+          "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background",
         )}
       >
-        {/* A monogram, not a stock portrait: §21 and §40 both forbid presenting
-            stock photography as a real person's profile. Kept at this size on
-            the profile too, where it reads as a recognition mark carried over
-            from this row rather than as a substitute for a face. */}
-        {sitter.photoUrl ? (
-          <img src={sitter.photoUrl} alt="" className="size-10 rounded-sm object-cover md:size-12" />
-        ) : (
-          <span
-            aria-hidden="true"
-            className="flex size-10 items-center justify-center rounded-sm bg-brand-soft text-base font-semibold text-brand md:size-12 md:text-name"
-          >
-            {sitter.publicName.charAt(0)}
-          </span>
-        )}
-
-        <div className="min-w-0">
-          {/* Species as a filing system: scanning the column shows the page is
-              organised around animals before it is organised around people.
-              Dropped when species is a criterion, because then it is true of
-              every row and the preamble has already said so. */}
+        <div className="flex items-start gap-3.5">
+          {/* A monogram, not a stock portrait: §21 and §40 forbid presenting
+              stock photography as a real person. Terracotta belongs on the
+              PERSON, the one place without a photograph to carry them. */}
+          {sitter.photoUrl ? (
+            <img src={sitter.photoUrl} alt="" className="size-12 shrink-0 rounded-full object-cover" />
+          ) : (
+            <span
+              aria-hidden="true"
+              className="flex size-12 shrink-0 items-center justify-center rounded-full bg-brand-soft text-lg font-semibold text-brand"
+            >
+              {sitter.publicName.charAt(0)}
+            </span>
+          )}
+          <div className="min-w-0 flex-1">
+            {/* <bdi> isolates these Latin strings: without it "Youcef H."
+                renders as ".Youcef H" in Arabic. */}
+            <h2 className="text-name font-semibold text-foreground">
+              <bdi>{sitter.publicName}</bdi>
+            </h2>
+            <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
+              <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
+              {/* The commune when the sitter gave one, else their wilaya —
+                  never a raw id, never a commune they did not state. */}
+              <bdi className="truncate">
+                {communeName(sitter.communeCode, lng) ??
+                  t("location.wilayaOnly", { name: wilayaName(wilayaOfPlace(sitter), lng) ?? "" })}
+              </bdi>
+            </p>
+          </div>
+          {/* The animals they take, as the animals themselves. Dropped when
+              species is a criterion: it is then true of every result. */}
           {showSpeciesEyebrow && (
-            <p className="eyebrow">
-              {sitter.acceptedSpecies.map((sp) => t(`speciesPlural.${sp}`)).join(" · ")}
+            <p className="flex shrink-0 -space-x-2 rtl:space-x-reverse">
+              <span className="sr-only">
+                {sitter.acceptedSpecies.map((sp) => t(`speciesPlural.${sp}`)).join(" · ")}
+              </span>
+              {sitter.acceptedSpecies.map((sp) => (
+                <AnimalPortrait key={sp} species={sp} className="size-8 rounded-full ring-2 ring-card" />
+              ))}
             </p>
           )}
-          {/* <bdi> isolates these Latin strings: without it "Youcef H." renders
-              as ".Youcef H" in Arabic, the trailing period being neutral. */}
-          <h2 className={cn("text-name font-semibold text-foreground", showSpeciesEyebrow && "mt-1.5")}>
-            <bdi>{sitter.publicName}</bdi>
-          </h2>
-          <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
-            <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
-            {/* The commune when the sitter gave one, else their wilaya — never
-                a raw id, and never a commune they did not state. */}
-            <bdi className="truncate">
-              {communeName(sitter.communeCode, lng) ??
-                t("location.wilayaOnly", { name: wilayaName(wilayaOfPlace(sitter), lng) ?? "" })}
-            </bdi>
-          </p>
-
-          {sizeNote && <p className="mt-3 text-sm font-medium text-foreground">{sizeNote}</p>}
-
-          <MatchReasonList className="mt-3" reasons={reasons} trailing={rest} />
-
-          <p className="mt-3 line-clamp-3 max-w-[56ch] text-base leading-relaxed text-foreground">
-            {localized(sitter.headline, lng)}
-          </p>
-
-          {/* One honesty line per entry: where the information came from, and
-              whether the person is an example. */}
-          <ProvenanceLabel className="mt-3">
-            {sitter.isDemoFixture ? ` · ${t("search.card.demoTag")}` : null}
-          </ProvenanceLabel>
         </div>
 
-        {/* Price on its own axis, always with its unit: at md+ the amounts line
-            up in one column, so prices compare at a glance without the row
-            reading as a pricing card. (Price is not the default ORDER — see
-            `matchSitters`.) */}
-        <div className="col-span-2 mt-4 flex items-end justify-between gap-4 md:col-span-1 md:mt-0 md:block md:text-end">
-          <div>
-            {rate.isFrom && <p className="text-sm text-muted-foreground">{t("search.card.from")}</p>}
+        {sizeNote && <p className="text-sm font-semibold text-foreground">{sizeNote}</p>}
+
+        <p className="line-clamp-3 max-w-[56ch] text-[0.9375rem] leading-relaxed text-foreground">
+          {localized(sitter.headline, lng)}
+        </p>
+
+        <MatchReasonList reasons={reasons} trailing={rest} />
+
+        {/* One honesty line per entry: where the information came from, and
+            whether the person is an example. */}
+        <ProvenanceLabel>{sitter.isDemoFixture ? ` · ${t("search.card.demoTag")}` : null}</ProvenanceLabel>
+
+        {/* Price with its unit, and the action. (Price is not the default
+            ORDER — see `matchSitters`.) The accessible name keeps the visible
+            label as its prefix (WCAG 2.5.3). */}
+        <div className="mt-auto flex items-end justify-between gap-3 border-t border-border pt-3.5">
+          <div className="min-w-0">
+            {rate.isFrom && <p className="text-xs text-muted-foreground">{t("search.card.from")}</p>}
             <p className="text-price font-semibold tabular-nums text-foreground">{formatDZD(rate.amount, lng)}</p>
-            <p className="text-sm text-muted-foreground">{t(CARE_UNIT_KEY[rate.careType])}</p>
+            <p className="text-xs text-muted-foreground">{t(CARE_UNIT_KEY[rate.careType])}</p>
           </div>
-          {/* The entry's only action. The stretched pseudo element makes the
-              whole row clickable while keeping exactly one tab stop. The name
-              is in the accessible name via sr-only, so the visible label stays
-              a prefix of it (WCAG 2.5.3). */}
-          <Button asChild variant={actionVariant} className="md:mt-4">
-            <Link to={{ pathname: `/sitters/${sitter.id}`, search }} className="after:absolute after:inset-0">
+          <Button asChild variant={actionVariant}>
+            <Link to={{ pathname: `/sitters/${sitter.id}`, search }} className="after:absolute after:inset-0 after:rounded-xl">
               {t("search.card.viewProfile")}
               <span className="sr-only"> — {sitter.publicName}</span>
             </Link>

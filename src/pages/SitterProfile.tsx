@@ -176,7 +176,7 @@ export default function SitterProfile() {
         <meta name="description" content={localized(sitter.headline, lng)} />
       </Helmet>
 
-      <div className="container py-10 md:py-14">
+      <div className="container pb-10 pt-2 md:pb-16 md:pt-6">
         <div className="mx-auto max-w-[1120px]">
           {/* Unconditional at Audit 1.2 (§86). It used to appear only when the
               URL carried search criteria, so a profile opened from a shared
@@ -197,11 +197,11 @@ export default function SitterProfile() {
                otherwise read "Back to results" and go somewhere else. A control
                that states a destination has to keep the promise. */
             label={hasCriteria ? t("profile.backToResults") : undefined}
-            className="mb-6"
+            className="mb-3"
           />
 
-          <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
-            <div className="min-w-0 xl:pe-12">
+          <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start xl:gap-6">
+            <div className="min-w-0">
               {/* The "send yourself a test request" control left this page at
                   Audit 1.3 LOT 07: test instructions do not belong in the
                   product's own screens. It lives in Compte, under "Outils de
@@ -215,7 +215,7 @@ export default function SitterProfile() {
                    pushing the identity and the offer below it. */
                 ledeAside={
                   sitter.isDemoFixture ? (
-                    <DemoNotice className="mt-6" title={t("profile.demo.title")} body={t("profile.demo.body")} />
+                    <DemoNotice title={t("profile.demo.title")} body={t("profile.demo.body")} />
                   ) : undefined
                 }
                 sitter={sitter}
@@ -231,11 +231,11 @@ export default function SitterProfile() {
                 Mobile mounts the pinned bar below instead — exactly one of the
                 two is ever displayed, so there is never a second tab stop for
                 the same action. */}
-            <aside className="hidden xl:sticky xl:top-24 xl:block xl:border-s xl:border-border xl:ps-12">
+            <aside className="surface hidden p-6 xl:sticky xl:top-24 xl:block">
               {rate && (
                 <QuotedRate amount={rate.amount} careType={rate.careType} isFrom={rate.isFrom} className="mb-4" />
               )}
-              {cta}
+              <div className="[&>*]:w-full">{cta}</div>
             </aside>
           </div>
         </div>
@@ -252,14 +252,20 @@ export default function SitterProfile() {
            bottom:0 in the root stacking context, so without this the nav
            sat over the one conversion action in the product and swallowed
            the tap. Above md the nav is gone and this returns to the edge. */
-        className="has-pinned-action-sm sticky bottom-14 z-30 border-t border-border bg-background shadow-chrome-t md:bottom-0 xl:hidden"
-        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+        /* 1.4: a floating pill like the brief capsule, held above the
+           floating tab bar below md (bottom-[5.75rem]) and at the edge from
+           md, where the tab bar is gone. */
+        className="has-pinned-action-sm pointer-events-none sticky bottom-[5.75rem] z-30 md:bottom-4 xl:hidden"
       >
-        <div className="container flex items-center gap-4 py-3">
-          {rate && (
-            <QuotedRate amount={rate.amount} careType={rate.careType} isFrom={rate.isFrom} className="flex-1" />
-          )}
-          <div className="shrink-0">{cta}</div>
+        <div className="container">
+          <div className="pointer-events-auto mx-auto flex max-w-[720px] items-center gap-3 rounded-full bg-card p-1.5 ps-5 shadow-raised">
+            {rate ? (
+              <QuotedRate amount={rate.amount} careType={rate.careType} isFrom={rate.isFrom} compact className="flex-1" />
+            ) : (
+              <span className="flex-1" />
+            )}
+            <div className="shrink-0">{cta}</div>
+          </div>
         </div>
       </div>
     </div>

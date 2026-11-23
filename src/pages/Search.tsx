@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
-import { SlidersHorizontal } from "lucide-react";
+import { SearchX } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { ChipGroup } from "@/components/shared/Chip";
+import BriefCapsule from "@/components/search/BriefCapsule";
 import SitterCard from "@/components/sitter/SitterCard";
 import { useReasonLabel } from "@/components/sitter/use-reason-label";
 import EmptyState from "@/components/shared/EmptyState";
@@ -165,35 +166,6 @@ export default function Search() {
       ? localized(getWilaya(criteria.wilaya)?.name ?? { en: "", fr: "", ar: "" }, lng)
       : null;
 
-  /* The owner's brief. Rendered as a definition list in the desktop rail and
-     condensed into one line in the mobile bar — same data, one source. It is
-     not chrome: it is the question every row on the page is answering. */
-  const brief = [
-    {
-      key: "species",
-      label: t("search.brief.species"),
-      value: speciesValue(criteria.species, criteria.size),
-      brand: true,
-    },
-    {
-      key: "care",
-      label: t("search.brief.care"),
-      value: criteria.care ? careLabel(criteria.care) : t("search.brief.anyCare"),
-    },
-    {
-      key: "dates",
-      label: t("search.brief.dates"),
-      value: criteria.dates ? formatDateRange(criteria.dates, lng) : t("search.brief.anyDates"),
-    },
-    { key: "zone", label: t("search.brief.zone"), value: zoneText ?? t("search.brief.anyZone") },
-    {
-      key: "budget",
-      label: t("search.brief.budget"),
-      value:
-        criteria.maxPrice !== null ? budgetLabel(criteria.maxPrice, criteria.care) : t("search.filters.anyPrice"),
-    },
-  ];
-
   /* Only the criteria actually chosen, for the condensed mobile line. */
   const chosenParts = [
     ...(criteria.care ? [careLabel(criteria.care)] : []),
@@ -223,28 +195,6 @@ export default function Search() {
     apply(cleared);
   };
 
-  const editButton = (
-    <Button
-      type="button"
-      variant="outline"
-      onClick={() => openSheet(true)}
-      aria-label={
-        activeFilters > 0
-          ? t("search.context.editLabelCount", { count: activeFilters })
-          : t("search.context.editLabel")
-      }
-      className="shrink-0"
-    >
-      <SlidersHorizontal className="size-4" aria-hidden="true" />
-      {t("search.context.edit")}
-      {activeFilters > 0 && (
-        <span aria-hidden="true" className="rounded-full bg-primary px-1.5 text-xs text-primary-foreground">
-          {activeFilters}
-        </span>
-      )}
-    </Button>
-  );
-
   return (
     <div>
       <Helmet>
@@ -254,61 +204,53 @@ export default function Search() {
         <meta name="description" content={t("search.demo.body")} />
       </Helmet>
 
-      {/* Below xl the brief is a sticky bar; at xl it becomes the rail
-          (§15 endorses the sidebar <-> drawer transformation). Exactly one is
-          displayed at any width, so only one is in the accessibility tree and
-          there is never a duplicate control. */}
-      <div className="sticky top-16 z-30 border-b border-border bg-background shadow-chrome-b xl:hidden">
-        <div className="container flex h-14 items-center gap-3">
-          <p className="flex min-w-0 flex-1 items-baseline gap-1.5 text-sm">
-            {/* The species leads the line because it is the first thing every
-                row answers to. It was terracotta here and plain everywhere else
-                the same fact appears — a private convention for one screen. */}
-            {/* Never wraps: "Grands chiens" broke onto two lines in the 56px
-                bar (Audit 1.3 QA). The rest of the line truncates instead. */}
-            {speciesText && <bdi className="shrink-0 whitespace-nowrap font-medium text-foreground">{speciesText}</bdi>}
-            {/* Each part is isolated: a commune name may be Latin text inside
-                an Arabic sentence, and the separators are neutral. */}
-            <span className="truncate text-muted-foreground">
-              {!speciesText && chosenParts.length === 0
-                ? t("search.context.noCriteria")
-                : chosenParts.map((part, i) => (
-                    <span key={`${i}-${part}`}>
-                      {(i > 0 || speciesText) && <span aria-hidden="true"> · </span>}
-                      <bdi>{part}</bdi>
-                    </span>
-                  ))}
-            </span>
-          </p>
-          {editButton}
+      {/* THE BRIEF CAPSULE (1.4 signature): the owner's question, floating
+          above every answer at every width — the animal, what is asked, and
+          the way to change it, in one control. */}
+      <div className="sticky top-14 z-30 md:top-[4.5rem]">
+        <div className="container py-2">
+          <BriefCapsule
+            className="mx-auto max-w-[720px]"
+            species={criteria.species}
+            title={speciesText ?? t("search.brief.anySpecies")}
+            parts={chosenParts}
+            emptyText={t("search.context.refine")}
+            actionText={t("search.context.edit")}
+            actionLabel={
+              activeFilters > 0
+                ? t("search.context.editLabelCount", { count: activeFilters })
+                : t("search.context.editLabel")
+            }
+            count={activeFilters}
+            onClick={() => openSheet(true)}
+          />
         </div>
       </div>
 
       {/* Reserve both sticky layers, so a keyboard-focused card is never
           scrolled underneath them (WCAG 2.2 AA — 2.4.11). */}
-      <section className="container scroll-pt-[7.5rem] py-10 md:py-14">
-        {/* Asymmetric at xl: a brief rail against a register column, both hung
-            off one leading axis. Symmetric margins on a 1440 canvas are what
-            made the previous grid read as unfinished. */}
-        <div className="mx-auto max-w-[1120px] xl:grid xl:grid-cols-[264px_minmax(0,1fr)] xl:items-start">
-          <div className="min-w-0 xl:col-start-2 xl:row-start-1 xl:border-s xl:border-border xl:ps-12">
-            {/* The count below carries aria-live, so a criteria change is
-                announced without moving focus — moving it would drag a
-                keyboard user out of the sheet they just applied. */}
-            <h1 className="max-w-[24ch] text-h1 font-semibold text-foreground md:text-h1-lg">
-              {hasCriteria ? t("search.results.title") : t("search.results.titleAll")}
-            </h1>
-            <p className="mt-3 text-sm text-muted-foreground" aria-live="polite">
-              {t("search.results.countLabel", { count: results.length })}
-              {/* No ordering claim when there is nothing to order. ONE claim,
-                  naming the tier that actually dominates first. */}
-              {results.length > 1 && ` · ${orderText}`}
-            </p>
+      <section className="container scroll-pt-[8.5rem] pb-10 pt-4 md:pb-16 md:pt-8">
+        <div className="mx-auto max-w-[1120px]">
+          {/* The count below carries aria-live, so a criteria change is
+              announced without moving focus — moving it would drag a keyboard
+              user out of the sheet they just applied. */}
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h1 className="max-w-[24ch] text-h1 font-semibold text-foreground md:text-h1-lg">
+                {hasCriteria ? t("search.results.title") : t("search.results.titleAll")}
+              </h1>
+              <p className="mt-2 text-sm text-muted-foreground" aria-live="polite">
+                {t("search.results.countLabel", { count: results.length })}
+                {/* No ordering claim when there is nothing to order. ONE
+                    claim, naming the tier that actually dominates first. */}
+                {results.length > 1 && ` · ${orderText}`}
+              </p>
+            </div>
 
-            {/* The order is the owner's choice, not a verdict. Two options, both
-                statable in one sentence; price is never the silent default. */}
+            {/* The order is the owner's choice, not a verdict. Price is never
+                the silent default. */}
             {results.length > 1 && canSortByPrice && (
-              <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                 <span id="search-sort" className="text-sm text-muted-foreground">
                   {t("search.sort.label")}
                 </span>
@@ -323,69 +265,64 @@ export default function Search() {
                 />
               </div>
             )}
+          </div>
 
-            {/* A dog search without a size cannot rule anyone out on size —
-                an absent answer is not a match. Said once, here, and each row
-                states the sitter's own limit. */}
-            {criteria.species === "dog" && !criteria.size && someSizeLimit && (
-              <p className="mt-3 max-w-[70ch] text-sm text-foreground">
-                {t("search.results.sizeHint")}{" "}
-                <button
-                  type="button"
-                  onClick={() => openSheet(true)}
-                  /* 44px target, but `-my-3` keeps its margin box at the text's
-                     line height so the paragraph's last line does not drop. */
-                  className="-my-3 inline-flex min-h-11 items-center font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  {t("search.results.sizeHintAction")}
-                </button>
-              </p>
-            )}
+          {/* A dog search without a size cannot rule anyone out on size — an
+              absent answer is not a match. Said once, here; each card states
+              the sitter's own limit. The action is underlined: it sits inside
+              a sentence, where teal alone is under 3:1 against the text. */}
+          {criteria.species === "dog" && !criteria.size && someSizeLimit && (
+            <p className="mt-4 max-w-[70ch] text-sm text-foreground">
+              {t("search.results.sizeHint")}{" "}
+              <button
+                type="button"
+                onClick={() => openSheet(true)}
+                className="-my-3 inline-flex min-h-11 items-center font-semibold text-primary underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {t("search.results.sizeHintAction")}
+              </button>
+            </p>
+          )}
 
-            {/* What every result has in common, said once. Repeating it as
-                tokens on each row would be four identical chips per entry that
-                discriminate nothing (§5.2) and wrap to three lines at 390px —
-                the badge mosaic §19 forbids by name. */}
-            {universal.length > 0 && (
-              <p className="mt-3 max-w-[70ch] text-sm text-foreground">
-                {/* Labels are used verbatim: lowercasing them would damage
-                    proper nouns, and a commune name is one of the things this
-                    sentence can contain. */}
-                {t("search.results.allOfThem")}{" "}
-                {universal.map((reason, i) => (
-                  <span key={i}>
-                    {i > 0 && <span aria-hidden="true"> · </span>}
-                    {/* Each fact is isolated: a commune name is Latin text
-                        inside an Arabic sentence. */}
-                    <bdi>{reasonLabel(reason)}</bdi>
-                  </span>
-                ))}
-              </p>
-            )}
+          {/* What every result has in common, said once — repeating it on each
+              card would be identical chips that discriminate nothing (§5.2). */}
+          {universal.length > 0 && (
+            <p className="mt-3 flex max-w-[70ch] flex-wrap items-center gap-1.5 text-sm text-foreground">
+              <span>{t("search.results.allOfThem")}</span>
+              {universal.map((reason, i) => (
+                /* Each fact isolated: a commune name is Latin text inside an
+                   Arabic sentence. Labels verbatim: lowercasing would damage
+                   proper nouns. */
+                <bdi key={i} className="rounded-full bg-card px-2.5 py-1 text-[0.8125rem] font-medium shadow-pill">
+                  {reasonLabel(reason)}
+                </bdi>
+              ))}
+            </p>
+          )}
 
-            {/* Scoped to the fixtures. Once the visitor publishes their own
-                profile it appears in this list, and a blanket "these profiles
-                are fictional" would be calling their real profile invented. */}
-            {results.some((r) => r.sitter.isDemoFixture) ? (
-              <DemoNotice className="my-6 md:my-8" title={t("search.demo.title")} body={t("search.demo.body")} />
-            ) : (
-              <div className="my-6 md:my-8" />
-            )}
+          {/* Scoped to the fixtures. Once the visitor publishes their own
+              profile it appears in this list, and a blanket "these profiles
+              are fictional" would call their real profile invented. */}
+          {results.some((r) => r.sitter.isDemoFixture) && (
+            <DemoNotice className="mt-6" title={t("search.demo.title")} body={t("search.demo.body")} />
+          )}
 
+          <div className="mt-6">
             {results.length === 0 ? (
               <EmptyState
+                icon={SearchX}
                 title={t("search.results.emptyTitle")}
                 body={t("search.results.emptyBody")}
                 /* Editing comes first — a cat owner should not be shown dog
-                   sitters — and clearing every criterion is offered beside it,
-                   as the honest way to see the whole (example) directory. */
+                   sitters — and clearing every criterion beside it, as the
+                   honest way to see the whole (example) directory. */
                 action={
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                    <Button type="button" variant="outline" onClick={() => openSheet(true)}>
+                  <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+                    <Button type="button" onClick={() => openSheet(true)}>
                       {t("search.context.editLabel")}
                     </Button>
                     {hasCriteria && (
-                      <Button type="button" variant="link" className="text-muted-foreground" onClick={clearAll}>
+                      <Button type="button" variant="ghost" className="text-muted-foreground" onClick={clearAll}>
                         {t("search.filters.clear")}
                       </Button>
                     )}
@@ -393,11 +330,8 @@ export default function Search() {
                 }
               />
             ) : (
-              /* A register, not a grid of tiles: entries separated by hairlines
-                 on the page ground. §16 ranks space > surface > border > shadow,
-                 and a bordered elevated card used all four at once for a
-                 low-importance element. */
-              <ul role="list">
+              /* One card per sitter, two across from md. */
+              <ul role="list" className="grid gap-3 md:grid-cols-2 md:gap-4">
                 {results.map(({ sitter, rate }) => (
                   <SitterCard
                     key={sitter.id}
@@ -409,32 +343,13 @@ export default function Search() {
                     askedCare={criteria.care}
                     search={paramKey}
                     /* Redundant once the species is a criterion: it is then
-                       true of every row and the line above has said so. */
+                       true of every result and the capsule says so. */
                     showSpeciesEyebrow={criteria.species === null}
                   />
                 ))}
               </ul>
             )}
           </div>
-          {/* Rendered AFTER the register in the DOM and pulled back into the
-              first grid column, so the page's <h1> precedes the rail's <h2>
-              (§25 — logical DOM order). The rule lives on the register's
-              leading edge, not the rail's trailing edge: the rail is sticky
-              and short, so a rule on it would stop a third of the way down. */}
-          <aside className="hidden xl:col-start-1 xl:row-start-1 xl:sticky xl:top-24 xl:block xl:pe-12">
-            <h2 className="eyebrow mb-4">{t("search.brief.title")}</h2>
-            <dl className="space-y-4">
-              {brief.map((row) => (
-                <div key={row.key}>
-                  <dt className="text-sm text-muted-foreground">{row.label}</dt>
-                  <dd className={cn("mt-0.5 text-base text-foreground", row.brand && "font-medium")}>
-                    <bdi>{row.value}</bdi>
-                  </dd>
-                </div>
-              ))}
-            </dl>
-            <div className="mt-6">{editButton}</div>
-          </aside>
         </div>
       </section>
 
@@ -446,9 +361,12 @@ export default function Search() {
         <SheetContent
           side="bottom"
           closeLabel={t("search.filters.close")}
-          className="flex max-h-[85vh] flex-col gap-0 rounded-t-lg p-0"
+          className="flex max-h-[88vh] flex-col gap-0 p-0"
         >
-          <SheetHeader className="shrink-0 border-b border-border px-4 py-4 text-start md:px-6">
+          {/* The grabber says "this is a sheet" at a glance; the close button
+              and Escape do the closing. */}
+          <span aria-hidden="true" className="mx-auto mt-2.5 h-1.5 w-10 shrink-0 rounded-full bg-track/70" />
+          <SheetHeader className="shrink-0 px-4 pb-3 pt-3 text-start md:px-6">
             <div className="mx-auto w-full max-w-[720px]">
               <SheetTitle>{t("search.context.editLabel")}</SheetTitle>
               <SheetDescription className="sr-only">{t("search.filters.description")}</SheetDescription>
@@ -458,7 +376,7 @@ export default function Search() {
           <div className="flex-1 overflow-y-auto px-4 py-6 md:px-6">
             <div className="mx-auto max-w-[720px] space-y-8">
               <fieldset>
-                <legend id="f-species" className="mb-3 text-sm font-medium text-foreground">
+                <legend id="f-species" className="mb-3 text-[0.9375rem] font-medium text-foreground">
                   {t("need.pet.speciesLabel")}
                 </legend>
                 {/* Named by the visible legend rather than a duplicate
@@ -484,7 +402,7 @@ export default function Search() {
 
               {draft.species === "dog" && (
                 <fieldset>
-                  <legend id="f-size" className="mb-3 text-sm font-medium text-foreground">
+                  <legend id="f-size" className="mb-3 text-[0.9375rem] font-medium text-foreground">
                     {t("search.filters.size")}
                   </legend>
                   <ChipGroup
@@ -500,7 +418,7 @@ export default function Search() {
               )}
 
               <fieldset>
-                <legend id="f-care" className="mb-3 text-sm font-medium text-foreground">
+                <legend id="f-care" className="mb-3 text-[0.9375rem] font-medium text-foreground">
                   {t("need.care.careLabel")}
                 </legend>
                 <ChipGroup
@@ -540,8 +458,9 @@ export default function Search() {
                 {draft.dates && (
                   <Button
                     type="button"
-                    variant="link"
-                    className="mt-2 h-auto p-0 text-muted-foreground"
+                    variant="ghost"
+                    size="sm"
+                    className="-ms-3 mt-2 h-11 text-muted-foreground"
                     onClick={() => setDraft({ ...draft, dates: null })}
                   >
                     {t("search.filters.clearDates")}
@@ -564,8 +483,8 @@ export default function Search() {
             </div>
           </div>
 
-          <div className="shrink-0 border-t border-border px-4 py-4 md:px-6">
-            <div className="mx-auto flex max-w-[720px] flex-col items-center gap-3">
+          <div className="shrink-0 px-4 py-3 shadow-chrome-t md:px-6" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
+            <div className="mx-auto flex max-w-[720px] flex-col items-center gap-1">
               <Button
                 type="button"
                 size="lg"
@@ -581,7 +500,7 @@ export default function Search() {
                   rather than silently resetting a form the user cannot see. */}
               <Button
                 type="button"
-                variant="link"
+                variant="ghost"
                 className="text-muted-foreground"
                 onClick={() => {
                   clearAll();

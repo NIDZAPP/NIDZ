@@ -35,7 +35,7 @@ export function MatchReasonList({
   if (tokens.length === 0 && absences.length === 0 && !trailing?.length) return null;
 
   return (
-    <ul role="list" className={cn("flex flex-wrap items-center gap-2 text-sm", className)}>
+    <ul role="list" className={cn("flex flex-wrap items-center gap-1.5 text-[0.8125rem]", className)}>
       {tokens.map((reason) => (
         <li
           key={reasonKey(reason)}
@@ -45,7 +45,7 @@ export function MatchReasonList({
              sheet opens over the register — and one is an interactive
              selection while the other is a read-only fact (§5.2). Containment
              and the check still carry the meaning. */
-          className="inline-flex items-center gap-1 rounded-sm bg-secondary px-2 py-0.5 font-medium text-foreground"
+          className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 font-medium text-foreground"
         >
           <Check className="size-3 shrink-0" aria-hidden="true" />
           {/* The separator lives in the translated string: French puts a space

@@ -50,11 +50,11 @@ export default function ReviewSection({
   const shown = expanded ? reviews : reviews.slice(0, VISIBLE);
 
   return (
-    <section aria-labelledby="sitter-reviews" className="border-t border-border pt-8">
+    <section aria-labelledby="sitter-reviews" className="surface p-5 md:p-7">
       {/* On an example profile the heading itself says these are examples
           (Audit 1.3 LOT 06): a reader who skims headings must not file six
           invented stays under "Avis" as real opinions. */}
-      <SectionHeading id="sitter-reviews" className="text-name font-semibold text-foreground">
+      <SectionHeading id="sitter-reviews" className="text-title font-semibold text-foreground">
         {isDemoFixture && summary ? t("reviews.titleExample") : t("reviews.title")}
       </SectionHeading>
       {isDemoFixture && summary && (
@@ -112,9 +112,9 @@ export default function ReviewSection({
             })}
           </ul>
 
-          <ul role="list" className="mt-6">
+          <ul role="list" className="mt-5 space-y-3">
             {shown.map((review) => (
-              <li key={review.id} className="border-t border-border py-5 first:border-t-0 first:pt-0">
+              <li key={review.id} className="rounded-lg bg-muted p-4">
                 <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                   <p className="font-medium text-foreground">
                     <bdi>{review.authorName}</bdi>
@@ -132,7 +132,7 @@ export default function ReviewSection({
                   /* Threaded under the review, indented by a rule on the inline
                      start — a reply is an answer, not a second opinion of equal
                      standing. */
-                  <div className="ms-4 mt-4 border-s border-border ps-4">
+                  <div className="mt-3 rounded-md bg-card p-3">
                     <p className="text-sm font-medium text-foreground">
                       {t("reviews.replyFrom", { name: sitterName })}
                     </p>

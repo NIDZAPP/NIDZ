@@ -287,7 +287,8 @@
       "edit": "Edit",
       "editLabel": "Edit my search",
       "editLabelCount_one": "Edit my search · {{count}} active criterion",
-      "editLabelCount_other": "Edit my search · {{count}} active criteria"
+      "editLabelCount_other": "Edit my search · {{count}} active criteria",
+      "refine": "Add the care, dates or area"
     },
     "filters": {
       "maxPrice": "Maximum price",

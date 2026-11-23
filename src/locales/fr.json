@@ -288,7 +288,8 @@
       "editLabel": "Modifier ma recherche",
       "editLabelCount_one": "Modifier ma recherche · {{count}} critère actif",
       "editLabelCount_other": "Modifier ma recherche · {{count}} critères actifs",
-      "editLabelCount_many": "Modifier ma recherche · {{count}} critères actifs"
+      "editLabelCount_many": "Modifier ma recherche · {{count}} critères actifs",
+      "refine": "Précisez la garde, les dates, la zone"
     },
     "filters": {
       "maxPrice": "Prix maximum",

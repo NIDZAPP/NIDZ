@@ -57,21 +57,21 @@ export default function PortfolioSection({
   if (items.length === 0) return null;
 
   return (
-    <section aria-labelledby="sitter-portfolio" className="border-t border-border pt-8">
-      <SectionHeading id="sitter-portfolio" className="text-name font-semibold text-foreground">
+    <section aria-labelledby="sitter-portfolio" className="surface p-5 md:p-7">
+      <SectionHeading id="sitter-portfolio" className="text-title font-semibold text-foreground">
         {t("portfolio.title")}
       </SectionHeading>
-      <p className="mt-2 max-w-[64ch] text-sm text-muted-foreground">{t("portfolio.intro")}</p>
+      <p className="mt-1.5 max-w-[64ch] text-sm text-muted-foreground">{t("portfolio.intro")}</p>
 
-      <ul role="list" className="mt-5 grid gap-x-6 gap-y-5 sm:grid-cols-2">
+      <ul role="list" className="mt-4 grid gap-3 sm:grid-cols-2">
         {items.map((item) => {
           const Activity = ACTIVITY_ICON[item.activity];
           const SpeciesIcon = SPECIES_ICON[item.species];
           return (
-            <li key={item.id} className="flex gap-3">
+            <li key={item.id} className="flex gap-3 rounded-lg bg-muted p-3.5">
               <span
                 aria-hidden="true"
-                className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-sm bg-brand-soft text-brand"
+                className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand"
               >
                 <Activity className="size-4" />
               </span>

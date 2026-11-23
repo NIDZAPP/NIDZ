@@ -1,7 +1,9 @@
-import { MapPin } from "lucide-react";
+import { CalendarOff, Heart, MapPin, PawPrint } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { ReactNode } from "react";
 
+import { CARE_ICON, HOUSING_ICON, OUTDOOR_ICON } from "@/components/icons/domain-icons";
+import { AnimalPortrait } from "@/components/illustrations/animals";
 import { careLines } from "@/components/sitter/care-lines";
 import { MatchReasonList, MismatchList } from "@/components/sitter/match";
 import { ProvenanceLabel } from "@/components/shared/trust";
@@ -140,56 +142,56 @@ export default function SitterProfileView({
 
   /* The home, in facts. §14's scale, hairlines only. Species and sizes moved
      to the glance above; what remains describes where the animal would be. */
-  const facts: { key: string; label: string; value: string }[] = [
-    { key: "max", label: t("profile.facts.max"), value: t("profile.facts.maxValue", { count: sitter.maxAnimals }) },
+  const facts: { key: string; label: string; value: string; icon: typeof PawPrint }[] = [
+    { key: "max", label: t("profile.facts.max"), value: t("profile.facts.maxValue", { count: sitter.maxAnimals }), icon: PawPrint },
     /* Only when answered: an unanswered housing question must not appear as a
        declaration under "informations fournies par le pet-sitter". */
     ...(sitter.housing.type
-      ? [{ key: "housing", label: t("profile.facts.housing"), value: t(`housing.type.${sitter.housing.type}`) }]
+      ? [{ key: "housing", label: t("profile.facts.housing"), value: t(`housing.type.${sitter.housing.type}`), icon: HOUSING_ICON[sitter.housing.type] }]
       : []),
     ...(sitter.housing.outdoor
-      ? [{ key: "outdoor", label: t("profile.facts.outdoor"), value: t(`housing.outdoor.${sitter.housing.outdoor}`) }]
+      ? [{ key: "outdoor", label: t("profile.facts.outdoor"), value: t(`housing.outdoor.${sitter.housing.outdoor}`), icon: OUTDOOR_ICON[sitter.housing.outdoor] }]
       : []),
-    { key: "pets", label: t("profile.facts.residentPets"), value: residentPets },
+    { key: "pets", label: t("profile.facts.residentPets"), value: residentPets, icon: Heart },
   ];
 
   /* Blocks with nothing answered are dropped, so the whole section can end
      up empty on a profile whose sitter skipped it. */
   const careBlocks = careLines(sitter.care, sitter.acceptedSpecies, t, lng);
 
+  /* 1.4: the same facts in the same order, each group on its own card.
+     Section headings sit one level below the name. */
+  const card = "surface p-5 md:p-7";
+  const sectionTitle = "text-title font-semibold text-foreground";
+
   return (
-    <div className="space-y-10 md:space-y-14">
+    <div className="space-y-3 md:space-y-4">
       {/* ------------------------------------------------------------ lede */}
-      <header>
-        <div className="flex items-start gap-4">
+      <header className={card}>
+        <div className="flex items-center gap-4">
           {/* The sitter's own photograph when they added one — theirs to
-              publish; otherwise a monogram at card scale, which reads as the
-              recognition mark carried over from the results row. Never a stock
-              portrait (§21, §40). */}
+              publish; otherwise the terracotta monogram carried over from the
+              results card. Never a stock portrait (§21, §40). */}
           {sitter.photoUrl ? (
-            <img
-              src={sitter.photoUrl}
-              alt=""
-              className="size-12 shrink-0 rounded-sm object-cover md:size-14"
-            />
+            <img src={sitter.photoUrl} alt="" className="size-16 shrink-0 rounded-full object-cover md:size-20" />
           ) : (
             sitter.publicName && (
               <span
                 aria-hidden="true"
-                className="flex size-12 shrink-0 items-center justify-center rounded-sm bg-brand-soft text-name font-semibold text-brand md:size-14"
+                className="flex size-16 shrink-0 items-center justify-center rounded-full bg-brand-soft text-2xl font-semibold text-brand md:size-20 md:text-3xl"
               >
                 {sitter.publicName.charAt(0)}
               </span>
             )
           )}
           <div className="min-w-0">
-            <Heading className={cn("font-semibold text-foreground", headingLevel === "h1" ? "text-h1 md:text-h1-lg" : "text-name")}>
+            <Heading className={cn("font-semibold text-foreground", headingLevel === "h1" ? "text-h1 md:text-h1-lg" : "text-title")}>
               <bdi>{sitter.publicName}</bdi>
             </Heading>
             {/* Omitted rather than rendered empty: a lone MapPin over nothing
                 is decoration to sighted users and silence to assistive tech. */}
             {location && (
-              <p className="mt-2 flex items-center gap-1.5 text-base text-muted-foreground">
+              <p className="mt-1 flex items-center gap-1.5 text-base text-muted-foreground">
                 <MapPin className="size-4 shrink-0" aria-hidden="true" />
                 <bdi>{location}</bdi>
               </p>
@@ -197,63 +199,44 @@ export default function SitterProfileView({
           </div>
         </div>
 
-        {/* Why this fits — only when the visitor searched, and only what the
-            sitter's own data supports. The heading names what is actually
-            underneath it: a section holding only a mismatch, or only ABSENCES
-            ("has not declared these dates unavailable"), must not be titled
-            "Bien adapté à Milo" (see `isAbsenceReason`). */}
-        {hasCriteria && (reasons.length > 0 || mismatches.length > 0 || uncertain.length > 0) && (
-          <div className="mt-6">
-            <Section className="text-base font-semibold text-foreground">
-              {!reasons.some((r) => !isAbsenceReason(r))
-                ? t("profile.mismatchTitle")
-                : petName
-                  ? t("profile.section.fitNamed", { name: petName })
-                  : t("profile.section.fit")}
-            </Section>
-            <MatchReasonList className="mt-3" reasons={reasons} />
-            {uncertain.map((line) => (
-              <p key={line} className="mt-3 max-w-[64ch] text-sm font-medium text-foreground">
-                {line}
-              </p>
-            ))}
-            {mismatches.length > 0 && (
-              <div className="mt-3">
-                {reasons.some((r) => !isAbsenceReason(r)) && (
-                  <p className="text-sm font-medium text-foreground">{t("profile.mismatchTitle")}</p>
-                )}
-                <MismatchList
-                  className={reasons.some((r) => !isAbsenceReason(r)) ? "mt-2" : ""}
-                  items={mismatches}
-                />
-              </div>
-            )}
-          </div>
-        )}
+        {headline && <p className="mt-5 max-w-[60ch] text-lg leading-relaxed text-foreground">{headline}</p>}
 
         {/* AT A GLANCE: for which animals, which services, at what price. A
             menu, not a pricing grid — body scale, the unit always beside the
             amount (§19, Audit 1.3 LOT 03). */}
         {(acceptsLine || services.length > 0) && (
-          <dl className="mt-6 grid gap-x-8 gap-y-4 border-y border-border py-4 sm:grid-cols-2">
+          <dl className="mt-5 grid gap-3 sm:grid-cols-2">
             {acceptsLine && (
-              <div>
+              <div className="rounded-lg bg-muted p-4">
                 <dt className="text-sm text-muted-foreground">{t("profile.facts.species")}</dt>
-                <dd className="mt-1 text-base font-medium text-foreground">{acceptsLine}</dd>
+                <dd className="mt-2 flex items-center gap-3">
+                  <span aria-hidden="true" className="flex shrink-0 -space-x-2 rtl:space-x-reverse">
+                    {sitter.acceptedSpecies.map((sp) => (
+                      <AnimalPortrait key={sp} species={sp} className="size-9 rounded-full ring-2 ring-card" />
+                    ))}
+                  </span>
+                  <span className="text-base font-semibold text-foreground">{acceptsLine}</span>
+                </dd>
               </div>
             )}
             {services.length > 0 && (
-              <div>
+              <div className="rounded-lg bg-muted p-4">
                 <dt className="text-sm text-muted-foreground">{t("profile.glance.services")}</dt>
-                <dd className="mt-1 space-y-1">
-                  {services.map((service) => (
-                    <p key={service} className="text-base text-foreground">
-                      {t(`care.${service}`)}
-                      {" · "}
-                      <span className="font-semibold tabular-nums">{formatDZD(sitter.rates[service] as number, lng)}</span>{" "}
-                      <span className="text-muted-foreground">{t(CARE_UNIT_KEY[service])}</span>
-                    </p>
-                  ))}
+                <dd className="mt-2 space-y-2">
+                  {services.map((service) => {
+                    const Icon = CARE_ICON[service];
+                    return (
+                      <p key={service} className="flex items-center gap-2.5 text-[0.9375rem] text-foreground">
+                        <Icon className="size-[1.125rem] shrink-0 text-primary" aria-hidden="true" />
+                        <span className="min-w-0 flex-1">{t(`care.${service}`)}</span>
+                        <span className="sr-only"> · </span>
+                        <span className="shrink-0 text-end">
+                          <span className="font-semibold tabular-nums">{formatDZD(sitter.rates[service] as number, lng)}</span>{" "}
+                          <span className="text-sm text-muted-foreground">{t(CARE_UNIT_KEY[service])}</span>
+                        </span>
+                      </p>
+                    );
+                  })}
                 </dd>
               </div>
             )}
@@ -261,19 +244,46 @@ export default function SitterProfileView({
         )}
         {/* True today and commits to nothing: §28 says the payment model is
             explicitly unvalidated, so this must not imply one. */}
-        {services.length > 0 && <p className="mt-2 text-sm text-muted-foreground">{t("profile.noPayment")}</p>}
-
-        {headline && (
-          <p className="mt-6 max-w-[60ch] text-lg leading-relaxed text-foreground">{headline}</p>
-        )}
+        {services.length > 0 && <p className="mt-3 text-sm text-muted-foreground">{t("profile.noPayment")}</p>}
 
         {/* Scopes the whole page: everything below is what this person says
             about themselves. Shown here, and again only where a claim needs it
             most — six copies would be the badge cascade §7 forbids. */}
         <ProvenanceLabel className="mt-4" />
-
-        {ledeAside}
       </header>
+
+      {/* Why this fits — only when the visitor searched, and only what the
+          sitter's own data supports. The heading names what is actually
+          underneath it: a section holding only a mismatch, or only ABSENCES
+          ("has not declared these dates unavailable"), must not be titled
+          "Bien adapté à Milo" (see `isAbsenceReason`). */}
+      {hasCriteria && (reasons.length > 0 || mismatches.length > 0 || uncertain.length > 0) && (
+        <section className={card}>
+          <Section className={sectionTitle}>
+            {!reasons.some((r) => !isAbsenceReason(r))
+              ? t("profile.mismatchTitle")
+              : petName
+                ? t("profile.section.fitNamed", { name: petName })
+                : t("profile.section.fit")}
+          </Section>
+          <MatchReasonList className="mt-3" reasons={reasons} />
+          {uncertain.map((line) => (
+            <p key={line} className="mt-3 max-w-[64ch] text-sm font-medium text-foreground">
+              {line}
+            </p>
+          ))}
+          {mismatches.length > 0 && (
+            <div className="mt-3">
+              {reasons.some((r) => !isAbsenceReason(r)) && (
+                <p className="text-sm font-medium text-foreground">{t("profile.mismatchTitle")}</p>
+              )}
+              <MismatchList className={reasons.some((r) => !isAbsenceReason(r)) ? "mt-2" : ""} items={mismatches} />
+            </div>
+          )}
+        </section>
+      )}
+
+      {ledeAside}
 
       {/* Directly after what the sitter accepts, so the pair reads as one
           complete answer rather than as a caveat buried at the bottom.
@@ -282,13 +292,14 @@ export default function SitterProfileView({
           icon: a sitter declining an animal their home does not suit is the
           matching working (§12.1). */}
       {sitter.limits.length > 0 && (
-        <section>
-          <Section className="text-name font-semibold text-foreground">{t("profile.section.limits")}</Section>
-          <p className="mt-2 max-w-[64ch] text-sm text-muted-foreground">{t("profile.limitsIntro")}</p>
-          <ul role="list" className="mt-4 max-w-[64ch] space-y-2">
+        <section className={card}>
+          <Section className={sectionTitle}>{t("profile.section.limits")}</Section>
+          <p className="mt-1.5 max-w-[64ch] text-sm text-muted-foreground">{t("profile.limitsIntro")}</p>
+          <ul role="list" className="mt-4 max-w-[64ch] space-y-3">
             {sitter.limits.map((limit, i) => (
-              <li key={i} className="text-base leading-relaxed text-foreground">
-                {localized(limit, lng)}
+              <li key={i} className="flex gap-3 text-base leading-relaxed text-foreground">
+                <span aria-hidden="true" className="mt-2.5 size-1.5 shrink-0 rounded-full bg-foreground/40" />
+                <span>{localized(limit, lng)}</span>
               </li>
             ))}
           </ul>
@@ -296,14 +307,12 @@ export default function SitterProfileView({
       )}
 
       {/* ------------------------------------------------------- narrative */}
-      <section>
-        <Section className="text-name font-semibold text-foreground">{t("profile.section.about")}</Section>
-        {about && <p className="mt-4 max-w-[64ch] text-base leading-relaxed text-foreground">{about}</p>}
-        {/* Experience is a sentence, not a section — a number, a species list
-            and one optional line do not need a heading of their own. */}
+      <section className={card}>
+        <Section className={sectionTitle}>{t("profile.section.about")}</Section>
+        {about && <p className="mt-3 max-w-[64ch] text-base leading-relaxed text-foreground">{about}</p>}
         {/* Two shapes, because "surtout avec : ." is not a sentence. */}
         {sitter.experience.years > 0 && (
-          <p className="mt-4 max-w-[64ch] text-base leading-relaxed text-muted-foreground">
+          <p className="mt-3 max-w-[64ch] text-base leading-relaxed text-muted-foreground">
             {sitter.experience.species.length > 0
               ? t("profile.experienceLine", {
                   count: sitter.experience.years,
@@ -314,15 +323,13 @@ export default function SitterProfileView({
         )}
         {/* A DECLARED profession (§40). The label says who said it, and the
             wording never upgrades on its own: naming a profession is not a
-            credential, and there is no check behind it in Nidz (§68). "None"
-            and "not answered" both render as nothing — an absence is not a
-            claim either way. */}
+            credential, and there is no check behind it in Nidz (§68). */}
         {sitter.professional.kind && sitter.professional.kind !== "none" && (
-          <div className="mt-3">
-            <p className="max-w-[64ch] text-base text-foreground">
+          <div className="mt-4 rounded-lg bg-muted p-4">
+            <p className="max-w-[64ch] text-base font-medium text-foreground">
               {t(`profession.${sitter.professional.kind}`)}
               {sitter.professional.years !== null && (
-                <span className="text-muted-foreground">
+                <span className="font-normal text-muted-foreground">
                   {" · "}
                   {t("profile.professionalYears", { count: sitter.professional.years })}
                 </span>
@@ -333,19 +340,15 @@ export default function SitterProfileView({
                 {localized(sitter.professional.detail, lng)}
               </p>
             )}
-            <p className="mt-1 max-w-[64ch] text-sm text-muted-foreground">
-              {t("profile.professionalUnverified")}
-            </p>
+            <p className="mt-1.5 max-w-[64ch] text-sm text-muted-foreground">{t("profile.professionalUnverified")}</p>
           </div>
         )}
 
-        {/* The §54 answers the sitter actually gave. Unanswered ones are
-            omitted rather than listed as "I don't know": a short list of
-            capabilities is useful, nine rows of uncertainty are not. */}
+        {/* The §54 answers the sitter actually gave ("yes" only). */}
         {experienceFacts.length > 0 && (
-          <ul role="list" className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5">
+          <ul role="list" className="mt-4 flex flex-wrap gap-2">
             {experienceFacts.map((fact) => (
-              <li key={fact} className="text-base text-foreground">
+              <li key={fact} className="rounded-full bg-secondary px-3 py-1.5 text-sm text-foreground">
                 {fact}
               </li>
             ))}
@@ -354,27 +357,30 @@ export default function SitterProfileView({
       </section>
 
       {/* How animals are hosted: the home in facts, then the care details in
-          sentences (§57). Grouped under one heading, so the reader finds
-          "where would my animal be, and how would its day go" in one place
-          rather than across a facts table and a separate narrative. */}
-      <section>
-        <Section className="text-name font-semibold text-foreground">{t("profile.section.care")}</Section>
-        <dl className="mt-4 grid gap-x-8 gap-y-5 sm:grid-cols-2">
-          {facts.map((fact) => (
-            <div key={fact.key}>
-              <dt className="text-sm text-muted-foreground">{fact.label}</dt>
-              <dd className="mt-1 text-base text-foreground">{fact.value}</dd>
+          sentences (§57), under one heading. */}
+      <section className={card}>
+        <Section className={sectionTitle}>{t("profile.section.care")}</Section>
+        <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+          {facts.map(({ key, label, value, icon: Icon }) => (
+            <div key={key} className="flex items-start gap-3 rounded-lg bg-muted p-3.5">
+              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-card text-primary shadow-pill">
+                <Icon className="size-5" />
+              </span>
+              <div className="min-w-0">
+                <dt className="text-sm text-muted-foreground">{label}</dt>
+                <dd className="mt-0.5 text-[0.9375rem] font-medium text-foreground">{value}</dd>
+              </div>
             </div>
           ))}
         </dl>
         {/* Only ANSWERED questions: `careLines` drops the rest rather than
             printing "not specified" twenty times (§118). */}
         {careBlocks.length > 0 && (
-          <div className="mt-8 max-w-[64ch] space-y-6">
+          <div className="mt-6 max-w-[64ch] space-y-5">
             {careBlocks.map((block) => (
               <div key={block.id}>
-                <BlockHeading className="text-sm font-semibold text-foreground">{block.title}</BlockHeading>
-                <ul role="list" className="mt-2 space-y-1.5">
+                <BlockHeading className="text-[0.9375rem] font-semibold text-foreground">{block.title}</BlockHeading>
+                <ul role="list" className="mt-1.5 space-y-1.5">
                   {block.lines.map((line, i) => (
                     <li key={i} className="text-base leading-relaxed text-foreground">
                       {line}
@@ -386,7 +392,7 @@ export default function SitterProfileView({
           </div>
         )}
         {sitter.housing.conditions && localized(sitter.housing.conditions, lng) && (
-          <p className="mt-6 max-w-[64ch] text-base leading-relaxed text-foreground">
+          <p className="mt-5 max-w-[64ch] text-base leading-relaxed text-foreground">
             {localized(sitter.housing.conditions, lng)}
           </p>
         )}
@@ -394,35 +400,31 @@ export default function SitterProfileView({
         <p className="mt-4 max-w-[64ch] text-sm text-muted-foreground">{t("profile.care.declaredNote")}</p>
       </section>
 
-      <section>
-        <Section className="text-name font-semibold text-foreground">{t("profile.section.unavailable")}</Section>
+      <section className={card}>
+        <div className="flex items-center gap-2.5">
+          <CalendarOff className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+          <Section className={sectionTitle}>{t("profile.section.unavailable")}</Section>
+        </div>
         {sitter.declaredUnavailable.length > 0 ? (
-          <ul role="list" className="mt-4 space-y-1.5">
+          <ul role="list" className="mt-4 flex flex-wrap gap-2">
             {sitter.declaredUnavailable.map((range) => (
-              <li key={`${range.start}-${range.end}`} className="text-base text-foreground">
+              <li key={`${range.start}-${range.end}`} className="rounded-full bg-secondary px-3 py-1.5 text-sm text-foreground">
                 <bdi>{formatDateRange(range, lng)}</bdi>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="mt-4 max-w-[64ch] text-base text-muted-foreground">{t("profile.unavailableNone")}</p>
+          <p className="mt-3 max-w-[64ch] text-base text-muted-foreground">{t("profile.unavailableNone")}</p>
         )}
-        {/* The same sentence the need flow uses, so the caveat is phrased once
-            in the product: not-declared-busy is not a reservation. */}
+        {/* Phrased once in the product: not-declared-busy is not a
+            reservation. */}
         <p className="mt-3 max-w-[64ch] text-sm text-muted-foreground">{t("need.care.availabilityNote")}</p>
-        <ProvenanceLabel className="mt-4" />
+        <ProvenanceLabel className="mt-3" />
       </section>
 
-      {/* COMMUNITY evidence, and the absence of it.
-
-          Reviews come last because they qualify everything above rather than
-          replacing it: a reader who has just seen what this person declares is
-          in a position to weigh what other people said about it. The portfolio
-          sits with them because both answer "what is this actually like",
-          which the declarations cannot.
-
-          Both are absent for a profile the visitor built themselves — the
-          honest state of a sitter nobody has used yet — and the review section
+      {/* COMMUNITY evidence, and the absence of it — last, because it
+          qualifies everything above rather than replacing it. Both are absent
+          for a profile the visitor built themselves, and the review section
           says so rather than disappearing. */}
       <PortfolioSection items={portfolio} isDemoFixture={sitter.isDemoFixture} headingLevel={Section} />
 
@@ -442,15 +444,29 @@ export function QuotedRate({
   amount,
   careType,
   isFrom,
+  compact = false,
   className,
 }: {
   amount: number;
   careType: keyof typeof CARE_UNIT_KEY;
   isFrom: boolean;
+  /** Stacked, smaller labels around the amount — for the floating pill. */
+  compact?: boolean;
   className?: string;
 }) {
   const { t } = useTranslation();
   const lng = useAppLocale();
+  if (compact) {
+    return (
+      <p className={cn("min-w-0 leading-tight", className)}>
+        <span className="block truncate text-xs text-muted-foreground">
+          {isFrom ? `${t("search.card.from")} · ` : ""}
+          {t(CARE_UNIT_KEY[careType])}
+        </span>
+        <span className="block text-lg font-semibold tabular-nums text-foreground">{formatDZD(amount, lng)}</span>
+      </p>
+    );
+  }
   return (
     <p className={cn("min-w-0", className)}>
       {isFrom && <span className="text-sm text-muted-foreground">{t("search.card.from")} </span>}

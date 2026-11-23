@@ -291,7 +291,8 @@
       "editLabelCount_two": "تعديل بحثي · معياران مفعّلان",
       "editLabelCount_few": "تعديل بحثي · {{count}} معايير مفعّلة",
       "editLabelCount_many": "تعديل بحثي · {{count}} معياراً مفعّلاً",
-      "editLabelCount_other": "تعديل بحثي · {{count}} معيار مفعّل"
+      "editLabelCount_other": "تعديل بحثي · {{count}} معيار مفعّل",
+      "refine": "حدّد الرعاية أو التواريخ أو المنطقة"
     },
     "filters": {
       "maxPrice": "السعر الأقصى",

@@ -36,13 +36,11 @@ export const HomeKey = createLucideIcon("HomeKey", [
   ["path", { d: "m19.2 21.2 1.3-1.3", key: "bit" }],
 ]);
 
-/** A walk: a lead with its handle loop and clip. */
+/** A walk: a lead — the handle loop, the cord, the clasp on its ring. */
 export const Leash = createLucideIcon("Leash", [
-  ["path", { d: "M6.5 3.5a3 3 0 1 1-.8 5.9", key: "loop" }],
-  ["path", { d: "M5.7 9.4c1.8 3.4 4.6 6.4 9.3 8.6", key: "line" }],
-  ["rect", { x: "14.5", y: "16.5", width: "4", height: "5", rx: "1.5", transform: "rotate(-30 16.5 19)", key: "clip" }],
-  ["circle", { cx: "19.6", cy: "6.6", r: "1.6", key: "paw-a" }],
-  ["circle", { cx: "17.4", cy: "10.2", r: "1.2", key: "paw-b" }],
+  ["rect", { x: "3", y: "2.5", width: "6", height: "7.5", rx: "3", key: "handle" }],
+  ["path", { d: "M6 10c0 5.5 4.5 8 10.2 8.5", key: "cord" }],
+  ["circle", { cx: "18.5", cy: "18.5", r: "2.5", key: "ring" }],
 ]);
 
 /** A bird cage: dome, ring and bars. */
