@@ -616,26 +616,31 @@ a check. Declined: `secondary` with muted text and a cross. Never red.
   The current tab sits on a `primary-soft` capsule that **slides** between tabs
   (transform only, 250ms, ease-in-out, direction-multiplied by `--nav-dir`
   so it travels the other way in Arabic); its label is semibold teal, its icon
-  stroke thickens to 2.25, and it carries `aria-current`. Owner: Accueil ·
-  Recherche · Demandes · Animaux · Compte. Sitter: Reçues · Mon profil · Compte.
-  Hidden from md.
+  stroke thickens to 2.25, and it carries `aria-current`. Since 1.6, four
+  tabs per side — Owner: Accueil · Demandes · Messages · Compte. Sitter:
+  Demandes · Mon profil · Messages · Compte (shown from the first draft) — and
+  a tab stays current on the screens under it (`owns` in `workspace-nav.ts`:
+  results and public profiles under Accueil; Mes animaux, Paramètres, Aide and
+  Politiques under Compte). A tab may carry a teal count badge (18px, ringed
+  in the bar's white, "9+" above nine): only things waiting for this person
+  (`navBadge`), spoken in words in the tab's accessible name. Hidden from md.
 - **Header** (`src/components/layout/Header.tsx`): the brand mark (terracotta
   paw on its soft tile plus the name from `common.appName`) at the start; from
   md, the same destinations in one white segmented pill with the `pill` shadow,
   44px items, the current one on a `primary-soft` capsule with a semibold teal
-  label.
-- **Messages button** (`MessagesButton.tsx`): a 44px white round pill in the
-  header of both spaces, with a teal count badge ringed in the ground colour.
-  The count is the conversations this space has not opened since the other
-  side wrote, spoken in words in its accessible name.
+  label; a tab's count sits inline after its label (a 20px teal pill — a
+  corner badge would cover the 16px icon). The brand mark links to where the active space
+  begins (`workspaceHome`). The 1.4 Messages header button is retired: Messages
+  is a tab.
 - **Language** (`LanguageSwitcher.tsx`): a 44px white round pill with the
   Lucide `Languages` icon and no code. Its name says the current language. The
   menu lists each language in itself (Français, العربية, English), each item
   with its own `lang`. The icon sits in the header of the welcome screen and
-  the home (`/`); Compte (`/settings`) offers the same choice in the page.
+  the home (`/`); Paramètres (`/settings`, behind the gear of Compte and of
+  every flow step) offers the same choice in the page.
 - **Flow screens** (`FlowScreen.tsx`): no site chrome; a sticky mist bar with
-  back, a 6px teal progress pill on the track, and the account button; the
-  action bar pinned at the bottom.
+  back, a 6px teal progress pill on the track, and the settings gear (the same
+  gear as at the top-right of Compte); the action bar pinned at the bottom.
 - **Back button** (`src/components/shared/BackButton.tsx`): ONE form on every
   secondary screen — a 44px white round pill (`card`, `pill` shadow) with a
   20px ink `ArrowLeft` at 2.25 stroke, mirrored in Arabic, at the inline start

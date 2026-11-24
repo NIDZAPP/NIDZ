@@ -50,12 +50,21 @@ Direction: one account with **owner and sitter workspaces** (capabilities plus a
 
 - **The request URL is the source of truth** for a request in preparation: `/owner/request/:sitterId?care&from&to&zone&pet` (`src/data/request-draft.ts`). Detours (sign-in, account, add/edit an animal) carry it as `next` and return to the same sitter.
 - **Dog size is a hard matching constraint**; an unknown size excludes nobody and is never a match. Default result order is the owner's commune then alphabetical; price order is an explicit option, only with a service chosen.
-- **One account, two spaces**: owner bar Accueil · Recherche · Demandes · Animaux · Compte; sitter bar Reçues · Mon profil · Compte. `/settings` is "Compte" and holds the space switch and the separated test tools.
+- **One account, two spaces** (superseded by 1.6 below for the bars and for Compte/Paramètres).
 - **Publication** is `canPublish` (`src/data/sitter-sections.ts`): "Pour publier" vs "Enrichir mon profil", home required only for boarding.
 - **Clarification** before a decision is a local thread on the request (`src/data/clarification.ts`) — never a delivered message.
 - **All sitter/request/review reads go through `src/data/repository.ts`**; see `docs/NIDZ-1.3-BACKEND-HANDOFF.md` for the endpoint each becomes.
 
-## Current state: complete demo front-end, no backend
+## Nidz 1.6 — navigation (branch `nidz-1.6`)
+
+`docs/NIDZ-1.6-NAVIGATION.md` records the refactoring of the 1.5 navigation audit (NAV-01…05 fixed, e2e `lot15`). What to respect:
+
+- **Bars**: owner Accueil · Demandes · Messages · Compte; sitter Demandes · Mon profil · Messages · Compte, drawn as soon as a sitter profile exists (draft included). One list for phone and desktop: `components/layout/workspace-nav.ts`; a tab's `owns` patterns keep it current on the screens under it (results and `/sitters/:id` under Accueil; `/owner/pets`, `/settings`, `/help`, `/policies` under Compte).
+- **Compte is `/account`** (identity, Mes animaux on the owner side, the two spaces, public profile when visible, help and safety). **Paramètres is `/settings`** behind the gear at Compte's top-right and on every flow step (language, security and privacy, the reset, the separated test tools).
+- **Every "where does this go?" decision is in `src/data/navigation.ts`** and nowhere else: `workspaceHome` (logo, `/`, the space switch — never a hard-coded sitter root), `sitterResumePath`, `sitterVisibility` (`none`/`draft`/`listed`/`hidden` — the search's own rule; never read `sitter.published` alone to say a profile is public), `navBadge`, `messagesPath` (the Messages view lives in `?tab=`), `requestSentPath` (the canonical confirmation address).
+- Starting a sitter profile still does not change the active space; switching does (`useSwitchWorkspace`).
+
+
 
 Both marketplace journeys are implemented end to end, entirely in the browser. There is still **no backend**, and that is load-bearing context for every change:
 
