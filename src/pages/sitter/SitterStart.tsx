@@ -9,6 +9,9 @@ import { SaveFeedback } from "@/components/shared/SaveFeedback";
 import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { useSave } from "@/hooks/use-save";
+import { sitterResumePath } from "@/data/navigation";
+import { emptySitterProfile } from "@/state/demo/reducer";
+import { useDemo } from "@/state/demo/context";
 import { AnimalPortrait } from "@/components/illustrations/animals";
 
 /**
@@ -30,7 +33,11 @@ const POINTS: { key: string; icon: LucideIcon }[] = [
 export default function SitterStart() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { state } = useDemo();
   const save = useSave();
+  /* A profile already started on this device is CONTINUED from here, never
+     started again (NAV-01): the action says so and resumes where it stopped. */
+  const resuming = Boolean(state.sitter);
 
   const start = () => {
     /* Idempotent in the reducer — re-entering must not wipe a profile that is
@@ -42,7 +49,17 @@ export default function SitterStart() {
       { type: "enter" },
       { type: "startSitterProfile", id: base.sitter?.profile.id ?? "my-profile" },
     ]);
-    if (saved) navigate("/sitter/join/name");
+    /* Then the next thing to do — not always the name step: an owner whose
+       account already holds a name and a number goes straight to the area
+       (`sitterResumePath`, the rule Compte and the switch use too). */
+    if (saved) {
+      navigate(
+        sitterResumePath({
+          ...state,
+          sitter: state.sitter ?? { profile: emptySitterProfile("my-profile"), published: false, idDocument: null },
+        }),
+      );
+    }
   };
 
   return (
@@ -54,7 +71,7 @@ export default function SitterStart() {
         <meta name="description" content={t("sitterFlow.start.intro")} />
       </Helmet>
       <FlowScreen
-        backTo="/start"
+        backTo="/"
         title={t("sitterFlow.start.title")}
         intro={t("sitterFlow.start.intro")}
         headerExtra={
@@ -66,7 +83,7 @@ export default function SitterStart() {
         }
         action={
           <Button type="button" size="lg" onClick={start}>
-            {t("sitterFlow.start.cta")}
+            {resuming ? t("workspace.continueSitter") : t("sitterFlow.start.cta")}
           </Button>
         }
         footNote={<DemoLine>{t("sitterFlow.start.demoNote")}</DemoLine>}

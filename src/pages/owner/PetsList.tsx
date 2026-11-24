@@ -1,4 +1,6 @@
 import { Helmet } from "react-helmet-async";
+import BackButton from "@/components/shared/BackButton";
+import { ACCOUNT_PATH } from "@/components/layout/workspace-nav";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Plus } from "lucide-react";
@@ -42,6 +44,9 @@ export default function PetsList() {
       </Helmet>
 
       <div className="mx-auto max-w-[720px]">
+        {/* Under Compte since 1.6 (the animals are the household's, chosen
+            per request): Back returns there, and the Compte tab stays lit. */}
+        <BackButton fallback={ACCOUNT_PATH} />
         <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">{t("pets.title")}</h1>
         <p className="mt-2 max-w-[64ch] text-base leading-relaxed text-muted-foreground">{t("pets.intro")}</p>
 

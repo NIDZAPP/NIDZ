@@ -24,14 +24,12 @@
     "help": "Help",
     "policies": "Policies",
     "myRequests": "Requests",
-    "received": "Received",
     "footerLabel": "Footer links",
     "ownerLabel": "Owner navigation",
     "sitterLabel": "Sitter navigation",
     "settings": "Settings",
     "pets": "My pets",
     "account": "Account",
-    "petsShort": "Animals",
     "sitterProfile": "My profile",
     "messages": "Messages",
     "messagesUnread_zero": "Messages",
@@ -39,7 +37,11 @@
     "messagesUnread_two": "Messages, {{count}} unread conversations",
     "messagesUnread_few": "Messages, {{count}} unread conversations",
     "messagesUnread_many": "Messages, {{count}} unread conversations",
-    "messagesUnread_other": "Messages, {{count}} unread conversations"
+    "messagesUnread_other": "Messages, {{count}} unread conversations",
+    "ownerRequestsBadge_one": "Requests, {{count}} question waiting for your answer",
+    "ownerRequestsBadge_other": "Requests, {{count}} questions waiting for your answer",
+    "sitterRequestsBadge_one": "Requests, {{count}} request waiting for your decision",
+    "sitterRequestsBadge_other": "Requests, {{count}} requests waiting for your decision"
   },
   "home": {
     "title": "Find care for your animal",
@@ -53,7 +55,8 @@
     "draft": {
       "body": "Not sent yet — pick up where you left off.",
       "discard": "Discard the request to {{sitter}}"
-    }
+    },
+    "browseAll": "Browse all sitters"
   },
   "species": {
     "dog": "Dog",
@@ -285,7 +288,10 @@
       "demoTitle": "Published, here only",
       "demoBody": "Your profile is not online: it exists in this browser. No real owner can see it, no verification took place, and Nidz promises neither requests nor income.",
       "requests": "View my requests",
-      "viewProfile": "View my profile"
+      "viewProfile": "View my profile",
+      "hiddenTitle": "Your profile is no longer visible",
+      "hiddenIntro": "Since it was published, something it needs was removed, so owners no longer find it. Complete it and it will appear again.",
+      "missing": "To complete:"
     }
   },
   "search": {
@@ -364,12 +370,7 @@
     "browse": "See the sitters",
     "resume": "Resume my search",
     "findSitter": "Find a sitter",
-    "myRequests": "My requests",
     "switchToSitter": "Look after animals on Nidz",
-    "requestsCount_one": "{{count}} request",
-    "requestsCount_other": "{{count}} requests",
-    "requestsPending_one": "{{count}} awaiting a reply",
-    "requestsPending_other": "{{count}} awaiting a reply",
     "sitterPublished": "Your profile is published",
     "sitterDraft": "Your profile is not published yet",
     "ownerPrompt": "Which animal needs care?",
@@ -620,7 +621,11 @@
     "answered": {
       "accepted": "You accepted this request. The owner sees this status on their side. The details remain to be agreed directly between you.",
       "declined": "You declined this request. The owner sees this status on their side."
-    }
+    },
+    "draftTitle": "Your profile is not visible yet",
+    "draftBody": "Owners can only send you a request once your profile is published.",
+    "hiddenTitle": "Your profile no longer appears in results",
+    "hiddenBody": "Something it needs to be published was removed. Complete it and owners will find you again."
   },
   "notAvailable": {
     "title": "This screen is not part of the demonstration",
@@ -679,16 +684,18 @@
     }
   },
   "settings": {
-    "title": "Account",
+    "title": "Settings",
     "language": {
       "title": "Language",
       "following": "Nidz is following your device's language. Choose one below to keep it whichever device you use.",
       "chosen": "You chose this language, so Nidz keeps it instead of following your device."
     },
-    "about": {
-      "title": "About this prototype",
-      "helpLine": "What works, what is simulated, and what does not exist yet.",
-      "policiesLine": "What happens to everything you type."
+    "privacy": {
+      "dataLine": "What happens to everything you type.",
+      "title": "Security and privacy",
+      "signInTitle": "Signing in",
+      "signInBody": "There is no sign-in in this prototype: your account exists only in this browser, with no password and no code. Signing in with Google, Microsoft or a phone number is not available.",
+      "dataTitle": "Your information"
     },
     "reset": {
       "title": "Start over",
@@ -701,20 +708,6 @@
       "failedTitle": "Erasing didn't work.",
       "failedBody": "This browser refused to delete the data — nothing was erased. You can try again."
     },
-    "account": {
-      "title": "Your account",
-      "edit": "Personal information",
-      "editLine": "Your name, date of birth, where you are, and which animals you have."
-    },
-    "spaces": {
-      "title": "Your two spaces",
-      "body": "One account, two ways of using Nidz. Switching changes what you see; it deletes nothing — not your animals, your requests, a request you are preparing, or your sitter profile.",
-      "owner": "Owner space",
-      "sitter": "Sitter space",
-      "current": "The space you are using now",
-      "sitterDraft": "Your profile is not published yet — continue it",
-      "sitterNone": "Look after animals: describe what you offer"
-    },
     "tools": {
       "title": "Test tools for this demonstration",
       "body": "This demonstration has no other users. To see what a sitter receives — a request, a question, a message — you can address them to your own published profile. They stay in this browser.",
@@ -724,7 +717,9 @@
   },
   "workspace": {
     "toSitter": "Switch to my sitter side",
-    "toOwner": "Switch to my owner side"
+    "toOwner": "Switch to my owner side",
+    "continueSitter": "Continue my profile",
+    "completeSitter": "Complete my profile"
   },
   "location": {
     "searchWilaya": "Search a wilaya",
@@ -763,6 +758,7 @@
     "phoneLabel": "Phone number (optional)",
     "phoneHelp": "Private. Nidz never gives it to a sitter unless you decide to share it.",
     "cta": "Create my account",
+    "save": "Save",
     "storageNote": "Everything you type stays in this browser. Nothing is sent anywhere and nothing is verified.",
     "wilayaLabel": "Your wilaya (optional)"
   },
@@ -987,7 +983,12 @@
     },
     "answeredState": "answered",
     "viewPublished": "See my published profile",
-    "missingPublished": "Your profile is published, but it is now missing the following, so it is not shown in search results until you add it:"
+    "missingPublished": "Your profile is published, but it is now missing the following, so it is not shown in search results until you add it:",
+    "status": {
+      "listed": "Visible to owners",
+      "draft": "Not published yet",
+      "hidden": "Hidden from results until completed"
+    }
   },
   "sitterExperience": {
     "intro": "Concrete questions rather than a number of years. Leave anything blank that you are not sure about — a blank question shows nowhere on your profile, whereas a “no” you did not mean reads to an owner as a firm limit.",
@@ -1273,5 +1274,43 @@
       "declined": "{{name}} declined your request for {{pet}}"
     },
     "incoming": "New request from {{name}} for {{pet}}"
+  },
+  "account": {
+    "title": "Account",
+    "spaces": {
+      "title": "Your two spaces",
+      "body": "One account, two ways of using Nidz. Switching changes what you see; it deletes nothing — not your animals, your requests, a request you are preparing, or your sitter profile.",
+      "owner": "Owner space",
+      "sitter": "Sitter space",
+      "current": "The space you are using now",
+      "sitterDraft": "Your profile is not published yet — continue it",
+      "sitterNone": "Look after animals: describe what you offer",
+      "sitterHidden": "Your profile no longer appears in results — complete it"
+    },
+    "help": {
+      "title": "Help and safety",
+      "helpLine": "What works, what is simulated, and what does not exist yet.",
+      "policiesLine": "What happens to everything you type."
+    },
+    "identity": {
+      "title": "Who you are",
+      "edit": "Edit",
+      "editLabel": "Edit my personal information",
+      "noPlace": "Location not given"
+    },
+    "guest": {
+      "title": "You are browsing without an account",
+      "body": "Searching and reading profiles needs nothing. An account, kept on this device, is what lets you send a request or a message.",
+      "cta": "Create my account"
+    },
+    "pets": {
+      "count_one": "{{count}} animal",
+      "count_other": "{{count}} animals",
+      "empty": "Describe your animal once; it is ready for every request."
+    },
+    "publicProfile": {
+      "title": "My public profile",
+      "line": "What owners see when they find you"
+    }
   }
 }

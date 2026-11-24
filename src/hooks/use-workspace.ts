@@ -1,7 +1,8 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { WORKSPACE_ROOT, type Workspace } from "@/data/workspace";
+import { workspaceHome } from "@/data/navigation";
+import type { Workspace } from "@/data/workspace";
 import { useDemo } from "@/state/demo/context";
 
 /**
@@ -11,20 +12,24 @@ import { useDemo } from "@/state/demo/context";
  * hook rather than two lines at each call site: recording the workspace without
  * navigating leaves you on a screen belonging to the other side with the new
  * side's chrome around it, and navigating without recording means the next
- * shared screen — Settings, Help — sends you back to where you were.
+ * shared screen — Compte, Messages — follows the side you left.
+ *
+ * Where it lands is `workspaceHome` — the same answer the logo, `/` and Compte
+ * give (NAV-01): a sitter whose profile is not visible yet resumes it rather
+ * than opening an empty inbox whose only action restarted the sign-up.
  *
  * It changes the view. It does not touch capabilities, and it discards nothing:
  * the other side's pets, requests and profile are exactly where they were.
  */
 export function useSwitchWorkspace(): (workspace: Workspace) => void {
-  const { dispatch } = useDemo();
+  const { state, dispatch } = useDemo();
   const navigate = useNavigate();
 
   return useCallback(
     (workspace: Workspace) => {
       dispatch({ type: "setWorkspace", workspace });
-      navigate(WORKSPACE_ROOT[workspace]);
+      navigate(workspaceHome(state, workspace));
     },
-    [dispatch, navigate],
+    [dispatch, navigate, state],
   );
 }

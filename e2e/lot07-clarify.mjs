@@ -50,7 +50,7 @@ await page.waitForSelector("h1");
 check("the question survives a reload", await page.getByText(/Could we meet before the stay/).first().isVisible());
 
 /* Owner: flagged in the list, answerable, still pending. */
-await page.goto(`${BASE}/settings`);
+await page.goto(`${BASE}/account`);
 await page.getByRole("button", { name: /Owner space/ }).click();
 await page.goto(`${BASE}/owner/requests`);
 check("owner list flags 'A question for you'", await page.getByText("A question for you").isVisible());
@@ -66,7 +66,7 @@ text = clean(await page.locator("main").innerText());
 check("no claim of delivery, notification or confirmed meeting (owner)", !FAKE.test(text));
 
 /* Only a decision changes the status; after it, no more questions. */
-await page.goto(`${BASE}/settings`);
+await page.goto(`${BASE}/account`);
 await page.getByRole("button", { name: /Sitter space/ }).click();
 await page.waitForURL(/\/sitter\/requests/);
 await page.getByRole("button", { name: "Accept the request" }).click();
@@ -79,7 +79,7 @@ await page.goto(`${BASE}/sitters/sitter-local`);
 await page.waitForSelector("h1");
 check("own public profile no longer carries test instructions", !(await page.getByText(/test request|send yourself/i).count()));
 await page.goto(`${BASE}/settings`);
-check("Compte holds the test tool, labelled as such", (await page.getByText("Test tools for this demonstration").isVisible()) && (await page.getByRole("link", { name: "Address a test request to my profile" }).isVisible()));
+check("Paramètres holds the test tool, labelled as such", (await page.getByText("Test tools for this demonstration").isVisible()) && (await page.getByRole("link", { name: "Address a test request to my profile" }).isVisible()));
 check("no page errors", page.errors.length === 0, page.errors.join(" | "));
 await context.close();
 

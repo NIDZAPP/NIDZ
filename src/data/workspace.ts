@@ -103,16 +103,8 @@ export function otherWorkspace(workspace: Workspace): Workspace {
   return workspace === "owner" ? "sitter" : "owner";
 }
 
-/**
- * Where each workspace begins.
- *
- * Switching has to land somewhere that belongs to the side you switched to,
- * otherwise the chrome changes and the content does not — which is how a
- * workspace switch turns into a confusing colour change. The sitter root is
- * their inbox because that is what the sitter workspace is for: things arrive.
- * Group 15 may move these once each side has a Profile.
- */
-export const WORKSPACE_ROOT: Record<Workspace, string> = {
-  owner: "/",
-  sitter: "/sitter/requests",
-};
+/* Where each workspace BEGINS is not a constant: the sitter side begins at its
+   requests only once owners can find the profile, and where the work is until
+   then. That decision needs the stored state, so it lives with the other
+   navigation decisions in `src/data/navigation.ts` (`workspaceHome`) — the
+   1.5 constant here sent an unfinished profile to an empty inbox (NAV-01). */

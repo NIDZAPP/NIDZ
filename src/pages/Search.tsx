@@ -13,6 +13,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { ChipGroup } from "@/components/shared/Chip";
+import BackButton from "@/components/shared/BackButton";
 import BriefCapsule from "@/components/search/BriefCapsule";
 import SitterCard from "@/components/sitter/SitterCard";
 import { useReasonLabel } from "@/components/sitter/use-reason-label";
@@ -215,6 +216,11 @@ export default function Search() {
         </title>
         <meta name="description" content={t("search.demo.body")} />
       </Helmet>
+
+      {/* Results are a screen under Accueil since 1.6 (no Search tab):
+          Back returns to the step or the home it came from, and to Accueil
+          from a shared link. */}
+      <BackButton fallback="/" />
 
       {/* THE BRIEF CAPSULE (1.4 signature): the owner's question, floating
           above every answer at every width — the animal, what is asked, and

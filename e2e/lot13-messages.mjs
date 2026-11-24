@@ -41,7 +41,7 @@ st = await storedState(page);
 check("one thread per sitter", st.conversations.length === 1);
 
 /* 3. The sitter space sees it unread, opens it, answers. */
-await page.goto(`${BASE}/settings`);
+await page.goto(`${BASE}/account`);
 await page.getByRole("button", { name: /Espace pet-sitter/ }).click();
 await page.waitForURL(/\/sitter\/requests/);
 check("sitter header: 1 unread conversation, in words", await page.getByRole("link", { name: /Messages, 1 conversation non lue/ }).isVisible());
@@ -59,7 +59,7 @@ check("the reply is stored as the sitter's", st.conversations[0].messages.at(-1)
 check("opening marked it seen for the sitter space only", st.conversations[0].seen.sitter !== null);
 
 /* 4. Back in the owner space: the reply is unread there, and a notification. */
-await page.goto(`${BASE}/settings`);
+await page.goto(`${BASE}/account`);
 await page.getByRole("button", { name: /Espace propriétaire/ }).click();
 await page.goto(`${BASE}/messages`);
 await page.getByRole("tab", { name: /Notifications/ }).click();

@@ -23,9 +23,19 @@ import { useRef, useState } from "react";
    and the destination differ.
    ------------------------------------------------------------------------ */
 
+/* Every join step writes into the sitter profile, so none opens without one
+   (NAV-05): a direct link to the area step used to show the form and then
+   report a save CONFLICT, because there was no profile to write into. The
+   introduction is where a profile is created — and where an existing one is
+   resumed. */
+const NO_PROFILE = "/sitter/start";
+
 export function SitterName() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { state } = useDemo();
+
+  if (!state.sitter) return <Navigate to={NO_PROFILE} replace />;
 
   return (
     <NameStep
@@ -42,6 +52,7 @@ export function SitterPhone() {
   const navigate = useNavigate();
   const { state } = useDemo();
 
+  if (!state.sitter) return <Navigate to={NO_PROFILE} replace />;
   if (!state.account) return <Navigate to="/sitter/join/name" replace />;
 
   return (
@@ -125,6 +136,7 @@ export function SitterLocation() {
   const [error, setError] = useState<string>();
   const wilayaRef = useRef<HTMLButtonElement>(null);
 
+  if (!state.sitter) return <Navigate to={NO_PROFILE} replace />;
   if (!state.account?.accountComplete) return <Navigate to="/sitter/join/name" replace />;
 
   const submit = (force = false) => {

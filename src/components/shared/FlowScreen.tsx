@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { SlidersHorizontal } from "lucide-react";
+import { Settings } from "lucide-react";
 import type { ReactNode } from "react";
 
 import BackButton from "@/components/shared/BackButton";
@@ -124,15 +124,15 @@ export default function FlowScreen({
             )}
 
             {/* Flow screens carry no header, so this is the route to the
-                account (and the language) without leaving the step for good.
-                It marks the detour, so Compte offers the way back. */}
+                settings — the language above all — without leaving the step
+                for good: Back on Paramètres pops straight back here. The same
+                gear as at the top of Compte, so it means one thing. */}
             <Link
               to="/settings"
-              state={{ fromFlow: true }}
               className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-card text-foreground shadow-pill transition-[transform,background-color] duration-150 ease-out hover:bg-secondary active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
-              <SlidersHorizontal className="size-5" aria-hidden="true" />
-              <span className="sr-only">{t("nav.account")}</span>
+              <Settings className="size-5" aria-hidden="true" />
+              <span className="sr-only">{t("nav.settings")}</span>
             </Link>
           </div>
         </div>

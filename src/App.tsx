@@ -25,6 +25,7 @@ const NotAvailable = lazy(() => import("@/pages/NotAvailable"));
 const Policies = lazy(() => import("@/pages/Policies"));
 const Help = lazy(() => import("@/pages/Help"));
 const Settings = lazy(() => import("@/pages/Settings"));
+const Account = lazy(() => import("@/pages/Account"));
 const Messages = lazy(() => import("@/pages/Messages"));
 const MessageThread = lazy(() => import("@/pages/MessageThread"));
 const Welcome = lazy(() => import("@/pages/onboarding/Welcome"));
@@ -75,6 +76,7 @@ function prefetchScreens() {
     void import("./pages/Index");
     void import("@/pages/Search");
     void import("@/pages/SitterProfile");
+    void import("@/pages/Account");
     void import("@/pages/Settings");
     void import("@/pages/Messages");
     void import("@/pages/owner/request/RequestReview");
@@ -251,8 +253,13 @@ const App = () => {
               <Route path="/policies" element={<Policies />} />
               <Route path="/help" element={<Help />} />
               {/* "Compte": shared by both spaces — it follows whichever is active
-                  rather than belonging to one, and holds the switch between
-                  them and the language choice (Audit 1.3 LOT 04). */}
+                  rather than belonging to one. Since 1.6 it is the person
+                  (identity, animals, the two spaces, help), and "Paramètres"
+                  is its own screen behind the gear at its top-right
+                  (language, security and privacy, the reset, test tools).
+                  `/settings` keeps resolving, so old links and the gear on
+                  every flow step still land on the language choice. */}
+              <Route path="/account" element={<Account />} />
               <Route path="/settings" element={<Settings />} />
               {/* Local conversations and the notifications slot (1.4). */}
               <Route path="/messages" element={<Messages />} />

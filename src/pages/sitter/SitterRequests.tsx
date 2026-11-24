@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 
 import ClarificationThread from "@/components/request/ClarificationThread";
 import RequestSummary from "@/components/request/RequestSummary";
@@ -10,13 +10,13 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import { DemoNotice } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { awaitingReplyFrom } from "@/data/clarification";
-import { findRequest, requestsReceived, requestsSent, sitterNameFor } from "@/data/repository";
+import { requestsReceived, sitterNameFor } from "@/data/repository";
 import type { CareRequest } from "@/data/types";
-import { useSwitchWorkspace } from "@/hooks/use-workspace";
 import { SaveFeedback } from "@/components/shared/SaveFeedback";
 import { useSave } from "@/hooks/use-save";
 import { useDemo } from "@/state/demo/context";
-import { ACTION_LINK, INLINE_LINK } from "@/components/shared/link-styles";
+import { ACTION_LINK } from "@/components/shared/link-styles";
+import { sitterResumePath, sitterVisibility } from "@/data/navigation";
 import { Inbox } from "lucide-react";
 
 /**
@@ -42,16 +42,19 @@ import { Inbox } from "lucide-react";
  */
 export default function SitterRequests() {
   const { t } = useTranslation();
-  const { state, dispatch } = useDemo();
-  const switchWorkspace = useSwitchWorkspace();
+  const { state } = useDemo();
   /* Which request was just answered, so focus can follow the outcome. */
   const answeredRef = useRef<string | null>(null);
 
   /* Only the requests addressed to THIS profile. Showing the ones sent to
      demo sitters under a heading meaning "requests you received" would offer
      Accept and Decline on somebody else's behalf. */
-  const myId = state.sitter?.profile.id;
   const requests = requestsReceived(state);
+  const visibility = sitterVisibility(state);
+
+  /* No sitter side on this device: nothing to receive, and the introduction
+     is where one starts. */
+  if (!state.sitter) return <Navigate to="/sitter/start" replace />;
 
   return (
     <div className="container pb-10 pt-4 md:pb-16 md:pt-8">
@@ -62,83 +65,72 @@ export default function SitterRequests() {
       </Helmet>
 
       <div className="mx-auto max-w-[720px]">
-        {/* No back control: this is the ROOT of the sitter workspace (§86), and
-            a back that fell through to `/` would bounce straight here again —
-            `/` sends an account whose active workspace is sitter to this very
-            screen. The way out of a workspace is the switch below, not Back. */}
+        {/* No back control: this is the ROOT of the sitter workspace (§86).
+            The way to the other side is the switch in Compte, a tab of this
+            bar. */}
         <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">{t("sitterRequests.title")}</h1>
 
-        {/* §22 lists "mon profil de garde" as a real sitter destination, and
-            unlike Messages or Disponibilités that screen exists. Without this
-            a published sitter can only reach it by finding themselves in the
-            search results.
-
-            It points at the PUBLIC profile, not at `/sitter/preview`. The
-            preview is the last step of the builder: it carries an 8-of-8
-            progress bar and, once published, a primary action that leads back
-            to this very screen. Sending a finished sitter there shows them a
-            wizard they have already completed and a button that goes in a
-            circle. The public route is also the honest answer to "view my
-            profile" — it is what an owner sees.
-
-            The owner chrome that comes with `/sitters/*` is correct and not a
-            bug to route around: `workspaceForPath` files public profiles on the
-            owner side because that is whose screen it is. */}
-        {state.sitter?.published && (
-          <p className="mt-3 text-sm">
-            <Link
-              to={`/sitters/${state.sitter.profile.id}`}
-              className={INLINE_LINK}
-            >
+        {/* What owners see — only while they can see it (NAV-02). It points at
+            the PUBLIC profile, not at the builder's preview: "view my
+            profile" is what an owner sees. */}
+        {visibility === "listed" && state.sitter && (
+          <p className="mt-2">
+            <Link to={`/sitters/${state.sitter.profile.id}`} className={ACTION_LINK}>
               {t("sitterFlow.published.viewProfile")}
             </Link>
           </p>
         )}
 
         {/* Above the branch: the first thing a new sitter reads must not be an
-            unqualified promise that owners will write to them. */}
-        <DemoNotice
-          className="mt-5"
-          title={t("sitterRequests.demoTitle")}
-          body={t("sitterRequests.demoBody")}
-        />
+            unqualified promise that owners will write to them. Not shown while
+            the profile is not visible and nothing has arrived — there are no
+            requests for it to qualify, and the card below already says no
+            owner can write yet. */}
+        {(visibility === "listed" || requests.length > 0) && (
+          <DemoNotice
+            className="mt-5"
+            title={t("sitterRequests.demoTitle")}
+            body={t("sitterRequests.demoBody")}
+          />
+        )}
 
-        {requests.length === 0 ? (
+        {/* A profile owners cannot find receives nothing new, whatever this
+            list holds. Said first, with the way to fix it — which RESUMES the
+            profile (NAV-01): 1.5 offered "Créer mon profil" here, back to the
+            very first sign-up screen. */}
+        {visibility !== "listed" && (
           <EmptyState
             className="mt-6"
             icon={Inbox}
-            title={t("sitterRequests.emptyTitle")}
-            body={t("sitterRequests.emptyBody")}
+            headingLevel="h2"
+            title={t(visibility === "hidden" ? "sitterRequests.hiddenTitle" : "sitterRequests.draftTitle")}
+            body={t(visibility === "hidden" ? "sitterRequests.hiddenBody" : "sitterRequests.draftBody")}
             action={
-              !state.sitter?.published ? (
-                <Button asChild variant="outline">
-                  <Link to="/sitter/start">{t("sitterFlow.start.cta")}</Link>
-                </Button>
-              ) : undefined
+              <Button asChild>
+                <Link to={sitterResumePath(state)}>
+                  {t(visibility === "hidden" ? "workspace.completeSitter" : "workspace.continueSitter")}
+                </Link>
+              </Button>
             }
           />
-        ) : (
-          <>
-            <ul role="list" className="mt-6 space-y-10">
-              {requests.map((request) => (
-                <IncomingRequest key={request.id} request={request} answeredRef={answeredRef} />
-              ))}
-            </ul>
-          </>
         )}
 
-        {/* The way back to the other side of the same account. A workspace has
-            to have an exit that is not the browser's Back button, and this one
-            records the move so the chrome and every shared screen follow. */}
-        <p className="mt-10">
-          <button
-            type="button"
-            onClick={() => switchWorkspace("owner")}
-            className={ACTION_LINK}
-          >
-            {t("workspace.toOwner")}
-          </button>
-        </p>
+        {requests.length === 0 ? (
+          visibility === "listed" && (
+            <EmptyState
+              className="mt-6"
+              icon={Inbox}
+              title={t("sitterRequests.emptyTitle")}
+              body={t("sitterRequests.emptyBody")}
+            />
+          )
+        ) : (
+          <ul role="list" className="mt-6 space-y-10">
+            {requests.map((request) => (
+              <IncomingRequest key={request.id} request={request} answeredRef={answeredRef} />
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

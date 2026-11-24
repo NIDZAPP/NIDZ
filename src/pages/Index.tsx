@@ -2,11 +2,10 @@ import { useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link, Navigate } from "react-router-dom";
-import { ArrowRight, Inbox, Plus, Search, X } from "lucide-react";
+import { ArrowRight, Inbox, Search, X } from "lucide-react";
 
 import HomeHero from "@/components/home/HomeHero";
 import { HomeHeart } from "@/components/icons/nidz-icons";
-import { AnimalPortrait } from "@/components/illustrations/animals";
 import SitterCard from "@/components/sitter/SitterCard";
 import { Button } from "@/components/ui/button";
 import { getWilaya } from "@/data/algeria";
@@ -19,15 +18,15 @@ import {
   EMPTY_CRITERIA,
   type SearchCriteria,
 } from "@/data/criteria";
-import { findSitter, publicSitters, requestsSent } from "@/data/repository";
+import { findSitter, publicSitters } from "@/data/repository";
+import { workspaceHome } from "@/data/navigation";
 import { requestPath } from "@/data/request-draft";
 import { localized } from "@/data/types";
-import { WORKSPACE_ROOT } from "@/data/workspace";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useSwitchWorkspace } from "@/hooks/use-workspace";
 import { useDemo } from "@/state/demo/context";
 import { isolate } from "@/utils/format";
-import { ACTION_LINK_END } from "@/components/shared/link-styles";
+import { ACTION_LINK, ACTION_LINK_END } from "@/components/shared/link-styles";
 
 /** How many suggestions the home page shows before sending people to the full
     results. Enough to be useful, few enough that the page stays a home rather
@@ -57,8 +56,15 @@ const SUGGESTION_LIMIT = 3;
  *     "near you" without a location is not a claim it can make.
  *
  * `/` belongs to whichever workspace is active, so an account currently on the
- * sitter side is sent to the sitter root rather than shown the owner home under
- * sitter chrome.
+ * sitter side is sent to where that side begins rather than shown the owner
+ * home under sitter chrome.
+ *
+ * NIDZ 1.6 — SEARCH LIVES HERE. There is no Search tab any more: the first
+ * action of Accueil is the search (start a brief, or pick up the one in
+ * progress), and "Voir tous les pet-sitters" opens the results with no
+ * criteria — discovery never requires an account, an animal or the brief.
+ * The animals and the requests rows left: Mes animaux is in Compte and
+ * Demandes is a tab with its own count, so Accueil keeps to finding care.
  */
 export default function Index() {
   const { t } = useTranslation();
@@ -109,16 +115,13 @@ export default function Index() {
      route outside the site chrome. */
   if (!state.entered) return <Navigate to="/welcome" replace />;
 
-  /* Not a redirect loop: the sitter root is `/sitter/requests`, which resolves
-     to the sitter workspace and never back to here. Guarded on the capability
-     as well as the preference, so a stale `activeWorkspace` in storage can
-     never strand someone on a side they have nothing on. */
-  if (state.activeWorkspace === "sitter" && state.capabilities.sitter) {
-    return <Navigate to={WORKSPACE_ROOT.sitter} replace />;
+  /* Not a redirect loop: where the sitter side begins is always a `/sitter/…`
+     address, never `/`. Guarded on the profile as well as the preference, so a
+     stale `activeWorkspace` in storage can never strand someone on a side
+     they have nothing on. */
+  if (state.activeWorkspace === "sitter" && state.sitter) {
+    return <Navigate to={workspaceHome(state, "sitter")} replace />;
   }
-
-  const sent = requestsSent(state);
-  const pending = sent.filter((r) => r.status === "pending").length;
 
   /* The request the owner was preparing, by name. Resolved against the real
      directory: a bookmark to a sitter that no longer exists is not offered. */
@@ -136,9 +139,6 @@ export default function Index() {
   const suggestionSearch = suggestionCriteria
     ? new URLSearchParams(criteriaToParams(suggestionCriteria)).toString()
     : "";
-
-  const rowCls =
-    "surface surface-press flex min-h-[4.5rem] w-full items-center gap-3.5 p-4 text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
 
   return (
     <div className="container pb-10 pt-1 md:pb-16 md:pt-4">
@@ -169,8 +169,9 @@ export default function Index() {
           {/* The other side, as the second door. With no sitter side yet it is
               an invitation phrased as an activity; with one, it is the SWITCH
               — having a sitter profile does not stop you being an owner, and
-              nothing is discarded by moving. */}
-          {state.capabilities.sitter ? (
+              nothing is discarded by moving. It lands where Compte's switch
+              and the logo land (`workspaceHome`). */}
+          {state.sitter ? (
             <Button type="button" size="lg" variant="surface" className="w-full sm:w-auto sm:min-w-60" onClick={() => switchWorkspace("sitter")}>
               <HomeHeart aria-hidden="true" />
               {t("workspace.toSitter")}
@@ -185,87 +186,50 @@ export default function Index() {
           )}
         </div>
 
-        <div className="mt-8 grid gap-3 md:grid-cols-2">
-          {/* An unsent request, named after its sitter (Audit 1.3 LOT 01). It
-              says "not sent yet" in words: a request in preparation must never
-              read as one that was sent. Discarding forgets the bookmark only. */}
-          {draft && draftSitter && (
-            <div className="surface flex items-center gap-1 p-1.5 md:col-span-2">
-              <Link
-                to={requestPath(draft.sitterId, draft.search)}
-                className="flex min-w-0 flex-1 items-center gap-3.5 rounded-lg p-2.5 transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                {/* Neutral, never a status colour: nothing has been sent. */}
-                <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary text-foreground">
-                  <Inbox className="size-5" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block font-semibold text-foreground">
-                    {t("request.review.titleFor", { sitter: isolate(draftSitter.publicName) })}
-                  </span>
-                  <span className="mt-0.5 block text-sm text-muted-foreground">{t("home.draft.body")}</span>
-                </span>
-                <ArrowRight className="size-5 shrink-0 text-muted-foreground rtl:-scale-x-100" aria-hidden="true" />
-              </Link>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="shrink-0 text-muted-foreground"
-                onClick={() => dispatch({ type: "discardRequestDraft" })}
-              >
-                <X className="size-5" aria-hidden="true" />
-                <span className="sr-only">
-                  {t("home.draft.discard", { sitter: isolate(draftSitter.publicName) })}
-                </span>
-              </Button>
-            </div>
-          )}
+        {/* Free discovery, one tap from Accueil: every sitter, no criteria,
+            no account (the approved "public discovery" rule). */}
+        <p className="mt-3 flex justify-center sm:justify-start">
+          <Link to="/search" className={ACTION_LINK}>
+            {t("home.browseAll")}
+            <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden="true" />
+          </Link>
+        </p>
 
-          {/* The household. Shown once there is anything to show: the need
-              flow saves an animal with no account at all. */}
-          {(pets.length > 0 || state.capabilities.owner) && (
-            <Link to="/owner/pets" className={rowCls}>
-              {pets.length > 0 ? (
-                <span aria-hidden="true" className="flex shrink-0 -space-x-3 rtl:space-x-reverse">
-                  {pets.slice(0, 3).map((p) => (
-                    <AnimalPortrait key={p.id} species={p.species} className="size-11 rounded-full ring-2 ring-card" />
-                  ))}
-                </span>
-              ) : (
-                <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
-                  <Plus className="size-5" />
-                </span>
-              )}
-              <span className="min-w-0 flex-1">
-                <span className="block font-semibold text-foreground">{t("nav.pets")}</span>
-                <span className="mt-0.5 block break-words text-sm text-muted-foreground">
-                  {pets.length > 0 ? pets.map((p) => p.name).filter(Boolean).join(" · ") : t("pets.empty.title")}
-                </span>
-              </span>
-              <ArrowRight className="size-5 shrink-0 text-muted-foreground rtl:-scale-x-100" aria-hidden="true" />
-            </Link>
-          )}
-
-          {/* The person's own data, so it is the one thing that can honestly be
-              counted. Absent entirely when there is nothing to count. */}
-          {sent.length > 0 && (
-            <Link to="/owner/requests" className={rowCls}>
-              <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
+        {/* An unsent request, named after its sitter (Audit 1.3 LOT 01). It
+            says "not sent yet" in words: a request in preparation must never
+            read as one that was sent. Discarding forgets the bookmark only. */}
+        {draft && draftSitter && (
+          <div className="surface mt-8 flex items-center gap-1 p-1.5">
+            <Link
+              to={requestPath(draft.sitterId, draft.search)}
+              className="flex min-w-0 flex-1 items-center gap-3.5 rounded-lg p-2.5 transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {/* Neutral, never a status colour: nothing has been sent. */}
+              <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary text-foreground">
                 <Inbox className="size-5" />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block font-semibold text-foreground">{t("entry.myRequests")}</span>
-                <span className="mt-0.5 block text-sm text-muted-foreground">
-                  {pending > 0
-                    ? t("entry.requestsPending", { count: pending })
-                    : t("entry.requestsCount", { count: sent.length })}
+                <span className="block font-semibold text-foreground">
+                  {t("request.review.titleFor", { sitter: isolate(draftSitter.publicName) })}
                 </span>
+                <span className="mt-0.5 block text-sm text-muted-foreground">{t("home.draft.body")}</span>
               </span>
               <ArrowRight className="size-5 shrink-0 text-muted-foreground rtl:-scale-x-100" aria-hidden="true" />
             </Link>
-          )}
-        </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="shrink-0 text-muted-foreground"
+              onClick={() => dispatch({ type: "discardRequestDraft" })}
+            >
+              <X className="size-5" aria-hidden="true" />
+              <span className="sr-only">
+                {t("home.draft.discard", { sitter: isolate(draftSitter.publicName) })}
+              </span>
+            </Button>
+          </div>
+        )}
 
         {/* Only with a location, and only with real matches. The heading names
             the filter that produced the list — not a verdict about the animal. */}

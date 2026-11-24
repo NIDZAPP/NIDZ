@@ -169,7 +169,7 @@ export default function NeedPet() {
         </title>
       </Helmet>
       <FlowScreen
-        backTo="/start"
+        backTo="/"
         title={t("need.pet.title")}
         intro={t("need.pet.intro")}
         headerExtra={<DraftNotice save={save} />}

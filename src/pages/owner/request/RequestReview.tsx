@@ -16,6 +16,7 @@ import { parseCriteria, petFit, type PetFit } from "@/data/criteria";
 import { offeredServices, overlapsDeclaredUnavailable } from "@/data/offer";
 import { forSharing, type Pet } from "@/data/pets";
 import { FROM_REQUEST, profilePathForRequest, requestPath, requestWhenPath } from "@/data/request-draft";
+import { requestSentPath } from "@/data/navigation";
 import { isPubliclyListed } from "@/data/repository";
 import type { CareRequest, Species } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
@@ -260,7 +261,7 @@ export default function RequestReview() {
     const sent = saved.requests.some((r) => r.id === request.id);
     const twin = sent ? null : saved.requests.find(isSame);
     if (twin) navigate(`/owner/requests/${twin.id}?again=1`, { replace: true });
-    else navigate(`/owner/request/${sitter.id}/sent?id=${request.id}`, { replace: true });
+    else navigate(requestSentPath(request), { replace: true });
   };
 
   const noPets = candidates.length === 0;

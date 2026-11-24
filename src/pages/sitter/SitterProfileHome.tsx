@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-import BackButton from "@/components/shared/BackButton";
 import { ACTION_LINK } from "@/components/shared/link-styles";
 import { LIST_GROUP, REGISTER_ROW } from "@/components/shared/register";
 import { DemoNotice } from "@/components/shared/trust";
@@ -32,6 +31,8 @@ import {
   type SitterSection,
 } from "@/data/sitter-sections";
 import type { SitterProfile } from "@/data/types";
+import { sitterVisibility } from "@/data/navigation";
+import { cn } from "@/lib/utils";
 import { useDemo } from "@/state/demo/context";
 
 /**
@@ -54,8 +55,13 @@ import { useDemo } from "@/state/demo/context";
  * bar, no badge, no congratulation.
  *
  * A browsable screen since Audit 1.3 LOT 04: the sitter space's "Mon profil"
- * tab. Before the profile is published there is no sitter bar yet, so it
- * carries a Back control to the owner home.
+ * tab — from the first draft on since 1.6, so it carries no Back control: it
+ * is a root, and the bar is there.
+ *
+ * 1.6: the first line says where the profile stands for owners — visible,
+ * not published yet, or hidden until completed — with the public profile one
+ * tap away only while owners can actually see it (`sitterVisibility`, the
+ * search's own rule; NAV-02).
  */
 export default function SitterProfileHome() {
   const { t } = useTranslation();
@@ -79,6 +85,7 @@ export default function SitterProfileHome() {
   const missing = missingRequired(profile);
   const ready = canPublish(profile) && Boolean(state.account?.accountComplete);
   const published = workspace.published;
+  const visibility = sitterVisibility(state);
 
   return (
     <div className="container pb-10 pt-4 md:pb-16 md:pt-8">
@@ -89,7 +96,6 @@ export default function SitterProfileHome() {
         <meta name="robots" content="noindex" />
       </Helmet>
       <div className="mx-auto max-w-[720px]">
-        {!published && <BackButton fallback="/" />}
         <h1
           ref={heading}
           tabIndex={-1}
@@ -97,6 +103,31 @@ export default function SitterProfileHome() {
         >
           {t("sitterSections.title")}
         </h1>
+        <p className="mt-1 flex flex-wrap items-center gap-x-4 text-sm">
+          <span
+            className={cn(
+              "inline-flex items-center gap-1.5 font-medium",
+              visibility === "listed" ? "text-primary" : "text-foreground",
+            )}
+          >
+            <span
+              aria-hidden="true"
+              className={cn(
+                "size-2 rounded-full",
+                /* Teal only for "visible"; the words carry the other states —
+                   never terracotta, which is warmth, not a status. */
+                visibility === "listed" ? "bg-primary" : "bg-track",
+              )}
+            />
+            {t(`sitterSections.status.${visibility === "none" ? "draft" : visibility}`)}
+          </span>
+          {visibility === "listed" && (
+            /* Its own action, not words in a sentence: a 44px target. */
+            <Link to={`/sitters/${profile.id}`} className={ACTION_LINK}>
+              {t("sitterFlow.published.viewProfile")}
+            </Link>
+          )}
+        </p>
         <p className="mt-2 text-base leading-relaxed text-muted-foreground">{t("sitterSections.intro")}</p>
 
         {/* ------------------------------------------------- pour publier */}

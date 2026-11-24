@@ -1,13 +1,14 @@
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
-import { Link, Navigate, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useParams, useSearchParams } from "react-router-dom";
 import { Check } from "lucide-react";
 
 import RequestSummary from "@/components/request/RequestSummary";
 import FlowScreen from "@/components/shared/FlowScreen";
 import { DemoNotice } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
-import { findRequest, requestsReceived, requestsSent, sitterNameFor } from "@/data/repository";
+import { findRequest, sitterNameFor } from "@/data/repository";
+import { requestSentPath } from "@/data/navigation";
 import { useDemo } from "@/state/demo/context";
 import { AnimalPortrait } from "@/components/illustrations/animals";
 
@@ -24,6 +25,7 @@ import { AnimalPortrait } from "@/components/illustrations/animals";
 export default function RequestSent() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
+  const { sitterId } = useParams();
   const { state } = useDemo();
 
   const id = searchParams.get("id");
@@ -33,6 +35,12 @@ export default function RequestSent() {
   /* Reloaded after the state was cleared, or opened directly: there is no
      request to celebrate, so go where the real ones are. */
   if (!request) return <Navigate to="/owner/requests" replace />;
+
+  /* ONE address per confirmation (NAV-04). The request names its sitter; a
+     path naming another — a hand-assembled or stale link — is replaced by
+     the canonical one, so the address and the screen never disagree about
+     who was asked. */
+  if (sitterId !== request.sitterId) return <Navigate to={requestSentPath(request)} replace />;
 
   return (
     <>

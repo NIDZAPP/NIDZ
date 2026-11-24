@@ -115,6 +115,7 @@ const screens = [
   ["pet-edit", "/owner/pets/pet-rex", owner],
   ["auth", "/auth", seedState()],
   ["owner-account", "/owner/account", seedState()],
+  ["account", "/account", both],
   ["settings", "/settings", both],
   ["sitter-start", "/sitter/start", seedState()],
   ["sitter-name", "/sitter/join/name", seedState()],

@@ -44,7 +44,7 @@ export default function Footer({ hideOnMobile = false }: { hideOnMobile?: boolea
           <Link className={FOOTER_LINK} to="/help">
             {t("nav.help")}
           </Link>
-          <Link className={FOOTER_LINK} to="/settings">
+          <Link className={FOOTER_LINK} to="/account">
             {t("nav.account")}
           </Link>
         </nav>

@@ -26,12 +26,12 @@ import { ACCOUNT, BASE, check, clean, done, open, pickCombobox, seedState, store
   await page.waitForSelector("h1");
   check("no date of birth asked", (await page.getByLabel(/Date of birth/).count()) === 0);
   await page.getByLabel("First name").fill("Samir");
-  await page.getByRole("link", { name: "Account" }).click();
+  await page.getByRole("link", { name: "Settings" }).click();
   await page.waitForURL(/\/settings/);
   await page.getByRole("radio", { name: "French" }).click();
   await page.getByRole("button", { name: "Retour" }).click();
   await page.waitForURL(/\/owner\/account/);
-  check("typed name kept across Compte + language change", (await page.getByLabel("Prénom").inputValue()) === "Samir");
+  check("typed name kept across Paramètres + language change", (await page.getByLabel("Prénom").inputValue()) === "Samir");
   await page.reload();
   await page.waitForSelector("h1");
   check("typed name kept across a reload", (await page.getByLabel("Prénom").inputValue()) === "Samir");

@@ -12,7 +12,9 @@ const ROUTES = [
   "/owner/requests/req-1",
   "/owner/pets",
   "/owner/pets/pet-rex",
+  "/account",
   "/settings",
+  "/messages?tab=notifications",
   "/help",
   "/owner/need/pet",
   `/owner/request/amina-b?care=boarding&from=${isoIn(3)}&to=${isoIn(5)}`,
@@ -57,7 +59,7 @@ for (const [lang, width] of [["fr", 320], ["ar", 390], ["fr", 768], ["ar", 1280]
   const { page, context } = await open({ state });
   await page.goto(`${BASE}/owner/pets`);
   check("390px: footer hidden under the bottom bar", !(await page.locator("footer").isVisible()));
-  await page.goto(`${BASE}/settings`);
+  await page.goto(`${BASE}/account`);
   check("390px: Help and Policies reachable from Compte", (await page.getByRole("link", { name: /^Help/ }).isVisible()) && (await page.getByRole("link", { name: /^Policies/ }).isVisible()));
   /* Focus follows navigation to the new screen's heading. */
   await page.locator("nav.md\\:hidden a").filter({ hasText: "Requests" }).click();

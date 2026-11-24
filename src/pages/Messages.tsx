@@ -1,7 +1,6 @@
-import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   BellRing,
   CircleCheck,
@@ -19,6 +18,7 @@ import { DemoNotice } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { lastMessage, unreadCount, type Conversation, type ConversationSide } from "@/data/conversations";
 import { notificationsFor, type LocalNotification } from "@/data/notifications";
+import { MESSAGES_TABS, messagesTabFrom, type MessagesTab } from "@/data/navigation";
 import { conversationsOf, sitterNameFor } from "@/data/repository";
 import { useAppLocale } from "@/hooks/use-locale";
 import { cn } from "@/lib/utils";
@@ -37,12 +37,21 @@ import { formatRelativeTime } from "@/utils/dates";
  * Unread is bold plus a count in words ("2 non lus") — never colour alone —
  * and it means only "this space has not opened it since the other side wrote".
  * There is no read receipt anywhere: nothing here could know.
+ *
+ * THE VIEW IS IN THE ADDRESS (1.6, NAV-03): `?tab=notifications`. In 1.5 the
+ * choice lived in this component's state, so opening a notification and
+ * coming Back — by the thread's Back control or the browser's — landed on
+ * Conversations. Switching view REPLACES the entry, so Back never walks
+ * through every view the person looked at.
  */
 export default function Messages() {
   const { t } = useTranslation();
   const { state } = useDemo();
   const side: ConversationSide = state.activeWorkspace;
-  const [tab, setTab] = useState<"conversations" | "notifications">("conversations");
+  const [params, setParams] = useSearchParams();
+  const tab = messagesTabFrom(params);
+  const setTab = (next: MessagesTab) =>
+    setParams(next === "notifications" ? { tab: next } : {}, { replace: true, preventScrollReset: true });
 
   const conversations = conversationsOf(state, side);
   const notifications = notificationsFor(state, side);
@@ -65,7 +74,7 @@ export default function Messages() {
             counts showing, two 16px-padded tabs were 297px wide — 9px more
             than a 320px screen has, so the page scrolled sideways. */}
         <div role="tablist" aria-label={t("messages.title")} className="mt-5 inline-flex max-w-full rounded-full bg-card p-1 shadow-pill">
-          {(["conversations", "notifications"] as const).map((key) => {
+          {MESSAGES_TABS.map((key) => {
             const count = key === "conversations" ? conversations.filter((c) => unreadCount(c, side) > 0).length : notifications.length;
             const selected = tab === key;
             return (

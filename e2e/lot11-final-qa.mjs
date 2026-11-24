@@ -16,7 +16,7 @@ const tab = (page, label) => page.locator("nav.md\\:hidden a").filter({ hasText:
 /* Go to a space through Compte: the row is a button when the space is not the
    current one, and a plain "current" row when it already is. */
 async function toSpace(page, space) {
-  await page.goto(`${BASE}/settings`);
+  await page.goto(`${BASE}/account`);
   const label = space === "sitter" ? /Espace pet-sitter/ : /Espace propriétaire/;
   const button = page.getByRole("button", { name: label });
   if (await button.count()) {
@@ -81,16 +81,14 @@ check("OWNER: history lists Milo · Amina B.", /Milo\s*·\s*Amina B\./.test(awai
 
 /* =========================================================== SITTER */
 await tab(page, "Compte").click();
-await page.waitForURL(/\/settings/);
+await page.waitForURL(/\/account/);
 await page.getByRole("link", { name: /Espace pet-sitter/ }).click();
 await page.waitForURL(/\/sitter\/start/);
 await page.getByRole("link", { name: "Créer mon profil" }).or(page.getByRole("button", { name: "Créer mon profil" })).first().click();
-await page.waitForURL(/\/sitter\/join\/name/);
-await page.getByRole("button", { name: "Continuer" }).click();
-await page.waitForURL(/\/sitter\/join\/phone/);
-await page.getByRole("textbox").first().fill("555123456");
-await page.getByRole("button", { name: "Continuer" }).click();
+/* 1.6: the owner account already holds the name and the number, so the
+   sitter is not asked for them again — straight to the area. */
 await page.waitForURL(/\/sitter\/join\/location/);
+check("SITTER: an owner account skips the name and phone steps", page.url().endsWith("/sitter/join/location"));
 await pickCombobox(page, "Wilaya", "Alger");
 await pickCombobox(page, "Commune", "Hydra");
 await page.getByRole("button", { name: "Continuer" }).click();

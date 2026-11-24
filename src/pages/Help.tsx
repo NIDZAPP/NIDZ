@@ -28,7 +28,7 @@ export default function Help() {
       </Helmet>
 
       <div className="mx-auto max-w-[720px]">
-        <BackButton fallback="/settings" />
+        <BackButton fallback="/account" />
         <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">{t("help.title")}</h1>
         <p className="mt-4 max-w-[64ch] text-lg leading-relaxed text-muted-foreground">{t("help.intro")}</p>
 
@@ -54,7 +54,7 @@ export default function Help() {
           </p>
           <p className="mt-4">
             <Link
-              to="/settings"
+              to="/settings#reset"
               className={INLINE_LINK}
             >
               {t("help.reset.inSettings")}

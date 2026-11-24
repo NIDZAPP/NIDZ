@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { Chip } from "@/components/shared/Chip";
 import { SPECIES_ICON } from "@/components/shared/species";
+import { ACCOUNT_PATH } from "@/components/layout/workspace-nav";
 import FlowScreen from "@/components/shared/FlowScreen";
 import { FieldShell, LocationFields } from "@/components/shared/fields";
 import { DraftNotice, SaveFeedback } from "@/components/shared/SaveFeedback";
@@ -117,7 +118,13 @@ export default function OwnerAccount() {
      handler AFTER the account has been created, leaving a dead button and
      half-applied state. */
   const next = sameOriginPath(searchParams.get("next"));
-  const destination = next ?? "/";
+  /* Editing an account that exists (or creating one from Compte) is a detour
+     from Compte: it returns there, and Back goes there — not to the sign-in
+     gateway, which is only the way in when a request or a message asked for
+     an account (1.6). */
+  const fromAccount = Boolean(state.account) || next === ACCOUNT_PATH;
+  const destination = next ?? (state.account ? ACCOUNT_PATH : "/");
+  const backTo = fromAccount ? (next ?? ACCOUNT_PATH) : next ? `/auth?next=${encodeURIComponent(next)}` : "/auth";
 
   const toggleSpecies = (value: Species) =>
     set({ species: species.includes(value) ? species.filter((s) => s !== value) : [...species, value] });
@@ -179,13 +186,15 @@ export default function OwnerAccount() {
       <FlowScreen
         /* The gateway, still carrying the return trip — without `next`, Back and
            then "create an account" again would lose the request it was for. */
-        backTo={next ? `/auth?next=${encodeURIComponent(next)}` : "/auth"}
+        backTo={backTo}
         title={t("ownerAccount.title")}
         intro={t("ownerAccount.intro")}
         headerExtra={<DraftNotice save={save} />}
         action={
           <Button type="submit" form={FORM_ID} size="lg">
-            {t("ownerAccount.cta")}
+            {/* Creating and editing are different promises: "Créer mon compte"
+                on an account that exists reads as making a second one. */}
+            {state.account ? t("ownerAccount.save") : t("ownerAccount.cta")}
           </Button>
         }
         footNote={<DemoLine>{t("ownerAccount.storageNote")}</DemoLine>}

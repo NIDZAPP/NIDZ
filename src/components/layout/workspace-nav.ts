@@ -1,15 +1,17 @@
-import { Home, Inbox, PawPrint, Search, UserRound } from "lucide-react";
+import { Home, Inbox, MessageCircle, PawPrint, UserRound } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { matchPath } from "react-router-dom";
 
 import type { Workspace } from "@/data/workspace";
+import { MESSAGES_PATH } from "@/data/navigation";
 
 /**
  * The navigation model for both workspaces, in one place.
  *
- * One source, consumed by every breakpoint. The bottom bar below `md`, the
- * header at `md`+ and the sitter's desktop rail all read this list, so a
- * destination cannot be called one thing on a phone and another on a laptop —
- * crossing 768px must never rename a place.
+ * One source, consumed by every breakpoint. The bottom bar below `md` and the
+ * header at `md`+ read this list, so a destination cannot be called one thing
+ * on a phone and another on a laptop — crossing 768px must never rename a
+ * place.
  *
  * THE RULE THAT DECIDES WHAT APPEARS HERE (§84-86 vs. Nidz's own §22):
  *
@@ -17,32 +19,25 @@ import type { Workspace } from "@/data/workspace";
  *   INCLUDING its genuine empty state. It is not listed while it would render
  *   `NotAvailable`.
  *
- * The distinction matters and is easy to blur: an empty Messages screen that
- * says "no conversations yet" IS a destination — the person has arrived
- * somewhere true. A Messages tab that lands on "this is not part of the
- * demonstration" is a dead button wearing navigation's clothes, and a bar of
- * those is worse than a shorter bar. Greying a tab out is the same offence
- * with an apology attached.
+ * NIDZ 1.6 — FOUR TABS ON EACH SIDE (the approved model).
  *
- * AUDIT 1.3 LOT 04 — ONE ACCOUNT, TWO SPACES, EVERY TAB REAL.
+ *   owner   Accueil · Demandes · Messages · Compte
+ *   sitter  Demandes · Mon profil · Messages · Compte
  *
- *   owner   Accueil · Recherche · Demandes · Mes animaux · Compte
- *   sitter  Reçues · Mon profil · Compte
+ * What moved, and where to:
+ *   - Search is part of Accueil. Results and public profiles are screens
+ *     UNDER Accueil — the tab stays lit there — the way Explore holds both
+ *     the search and the listing in the marketplaces owners already use.
+ *   - Mes animaux is part of Compte: the animals are the household's, set up
+ *     once and chosen per request. The list is a screen under Compte.
+ *   - Messages is a tab on both sides (it was an icon in the header), and
+ *     holds the notifications as its second view.
+ *   - Paramètres (language, security and privacy, the reset, the test tools)
+ *     is under Compte, behind the gear at its top-right.
  *
- * "Mes animaux" and the account screen already existed and were hard to find
- * (a row on Home; an unlabelled sliders icon). They are now in the bar rather
- * than recreated. "Compte" is the shared `/settings` screen — one account, so
- * one account screen, whichever space is active — and it is where the switch
- * between the two spaces lives.
- *
- * Not in the bar, and why:
- *   - Messages: there is no messaging in Nidz. A tab would land on
- *     `NotAvailable`.
- *   - Calendar / Disponibilités as a TAB: there is no calendar. What exists is
- *     a form where the sitter declares the periods they cannot take; it is a
- *     full-screen step that returns to "Mon profil", where it is listed. A tab
- *     that drops the visitor out of the tabbed chrome would make the place of
- *     things unstable, which is what LOT 04 asks to fix.
+ * Each side's tabs are the same four slots, so the bar keeps its shape when
+ * the space changes: the two shared tabs (Messages, Compte) sit in the same
+ * place on both sides.
  */
 export type NavDestination = {
   to: string;
@@ -50,33 +45,68 @@ export type NavDestination = {
       translated string is what lets one list serve three languages and both
       orientations. */
   labelKey: string;
+  /** Accessible name when a number is shown on the tab (i18n plural family,
+      called with `count`). Without it the label alone is announced. */
+  badgeLabelKey?: string;
   icon: LucideIcon;
-  /** Exact match only — for `/`, which otherwise matches every route. */
-  end?: boolean;
+  /** The paths under this tab, beyond `to` itself: the tab stays current on
+      them. `matchPath` patterns, matched exactly unless they end in `/*`. */
+  owns?: string[];
 };
 
-/** The account screen, shared by both spaces. */
-export const ACCOUNT_PATH = "/settings";
+/** Compte: the account hub, shared by both spaces. */
+export const ACCOUNT_PATH = "/account";
+/** Paramètres: under Compte, behind its gear. */
+export const SETTINGS_PATH = "/settings";
 
-const ACCOUNT: NavDestination = { to: ACCOUNT_PATH, labelKey: "nav.account", icon: UserRound };
+const MESSAGES: NavDestination = {
+  to: MESSAGES_PATH,
+  labelKey: "nav.messages",
+  badgeLabelKey: "nav.messagesUnread",
+  icon: MessageCircle,
+};
+
+const ACCOUNT: NavDestination = {
+  to: ACCOUNT_PATH,
+  labelKey: "nav.account",
+  icon: UserRound,
+  owns: [SETTINGS_PATH, "/owner/pets", "/help", "/policies"],
+};
 
 const OWNER: NavDestination[] = [
-  { to: "/", labelKey: "nav.home", icon: Home, end: true },
-  { to: "/search", labelKey: "nav.search", icon: Search },
-  { to: "/owner/requests", labelKey: "nav.myRequests", icon: Inbox },
-  { to: "/owner/pets", labelKey: "nav.petsShort", icon: PawPrint },
+  { to: "/", labelKey: "nav.home", icon: Home, owns: ["/search", "/sitters/:id"] },
+  {
+    to: "/owner/requests",
+    labelKey: "nav.myRequests",
+    badgeLabelKey: "nav.ownerRequestsBadge",
+    icon: Inbox,
+    owns: ["/owner/requests/:id"],
+  },
+  MESSAGES,
   ACCOUNT,
 ];
 
 const SITTER: NavDestination[] = [
-  { to: "/sitter/requests", labelKey: "nav.received", icon: Inbox },
-  /* The sitter's own profile, as the sections dashboard — what they keep up
-     to date, including the periods they declare unavailable. Exact match, so
-     a section editor under `/sitter/profile/…` is not shown as this tab (those
-     are full-screen steps without the bar anyway). */
-  { to: "/sitter/profile", labelKey: "nav.sitterProfile", icon: PawPrint, end: true },
+  {
+    to: "/sitter/requests",
+    labelKey: "nav.myRequests",
+    badgeLabelKey: "nav.sitterRequestsBadge",
+    icon: Inbox,
+  },
+  /* The sitter's own profile, as the sections dashboard — what they keep up to
+     date, including the periods they declare unavailable. The section editors
+     under `/sitter/profile/…` are full-screen steps without the bar. */
+  { to: "/sitter/profile", labelKey: "nav.sitterProfile", icon: PawPrint },
+  MESSAGES,
   ACCOUNT,
 ];
+
+/** Whether `pathname` is this destination or one of the screens under it. */
+export function isDestinationActive(destination: NavDestination, pathname: string): boolean {
+  return [destination.to, ...(destination.owns ?? [])].some((path) =>
+    Boolean(matchPath({ path, end: !path.endsWith("/*") }, pathname)),
+  );
+}
 
 /**
  * Everything the shell needs in order to decide what to draw.
@@ -89,43 +119,39 @@ export type NavContext = {
   /** The introduction has been seen. Before it, the entry flow owns the whole
       viewport and there is no chrome at all. */
   entered: boolean;
-  /** A sitter profile exists AND has been published locally.
+  /** A sitter profile exists on this device — started, published or not.
    *
-   * Deliberately `published`, not "a sitter workspace exists": `state.sitter`
-   * is created by the first tap on the sitter introduction, so keying on its
-   * mere existence put a sitter destination in front of people who had typed
-   * nothing. A carried-over 1.1 decision. */
-  sitterPublished: boolean;
+   * 1.5 waited for publication, which left the person FINISHING their profile
+   * — the one who most needs to move between it, their account and their
+   * messages — with no bar at all and a Back control to the owner home. Every
+   * sitter tab renders a real screen for a draft: Demandes says the profile is
+   * not visible yet and links to it; Mon profil is the work itself. Starting a
+   * profile still does not move the ACTIVE space (see the reducer): only the
+   * sitter's own screens draw this bar until the person switches. */
+  sitterSpace: boolean;
 };
 
 /**
  * What this workspace can currently navigate between, for this person.
  *
- * ONE function, used by every breakpoint. Both the bottom bar and the header
- * used to carry their own copy of the availability rule, which is two places to
- * forget — and they had already drifted apart on whether a sitter destination
- * needs a *published* profile.
- *
- * Two different reasons a destination is absent, kept distinct:
- *   - the screen does not exist yet → it is not in the list above at all;
- *   - the screen exists but is not this person's business yet → filtered here.
+ * ONE function, used by every breakpoint. Two different reasons a destination
+ * is absent, kept distinct:
+ *   - the screen does not exist yet → it is not in the lists above at all;
+ *   - the side does not exist for this person yet → filtered here.
  */
 export function workspaceDestinations(workspace: Workspace, ctx: NavContext): NavDestination[] {
   if (!ctx.entered) return [];
-  const all = workspace === "sitter" ? SITTER : OWNER;
-  return all.filter((d) => (d.to.startsWith("/sitter/") ? ctx.sitterPublished : true));
+  if (workspace === "sitter") return ctx.sitterSpace ? SITTER : [];
+  return OWNER;
 }
 
 /**
  * Whether a set of destinations is worth drawing as navigation at all.
  *
  * One destination is not navigation — it is a link, and a full-width bar
- * containing a single tab reads as a broken four-tab bar rather than as a
- * deliberate one. Below the threshold the shell falls back to in-page links,
- * which is the honest state while a workspace is still filling in.
- *
- * Applied to the header as well as the bar, so the two cannot disagree about
- * whether this workspace has navigation.
+ * containing a single tab reads as a broken bar rather than as a deliberate
+ * one. Applied to the header as well as the bar, so the two cannot disagree
+ * about whether this workspace has navigation.
  */
 export function isNavigable(destinations: NavDestination[]): boolean {
   return destinations.length >= 2;
