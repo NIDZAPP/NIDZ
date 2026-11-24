@@ -32,7 +32,14 @@
     "pets": "My pets",
     "account": "Account",
     "petsShort": "Animals",
-    "sitterProfile": "My profile"
+    "sitterProfile": "My profile",
+    "messages": "Messages",
+    "messagesUnread_zero": "Messages",
+    "messagesUnread_one": "Messages, {{count}} unread conversation",
+    "messagesUnread_two": "Messages, {{count}} unread conversations",
+    "messagesUnread_few": "Messages, {{count}} unread conversations",
+    "messagesUnread_many": "Messages, {{count}} unread conversations",
+    "messagesUnread_other": "Messages, {{count}} unread conversations"
   },
   "home": {
     "title": "Find care for your animal",
@@ -703,8 +710,9 @@
     },
     "tools": {
       "title": "Test tools for this demonstration",
-      "body": "This demonstration has no other users. To see what a sitter receives, and to try a question before deciding, you can address a test request to your own published profile. It stays in this browser.",
-      "selfRequest": "Address a test request to my profile"
+      "body": "This demonstration has no other users. To see what a sitter receives — a request, a question, a message — you can address them to your own published profile. They stay in this browser.",
+      "selfRequest": "Address a test request to my profile",
+      "selfMessage": "Write a test message to my profile"
     }
   },
   "workspace": {
@@ -1181,5 +1189,81 @@
     "draftRestored": "We found what you had started typing. It isn't saved yet.",
     "discardDraft": "Discard this draft",
     "conflictBodySingle": "It changed elsewhere — in another tab or on another screen — since you opened this screen, and nothing has been saved here. Show the saved version to carry on."
+  },
+  "messages": {
+    "title": "Messages",
+    "tabs": {
+      "conversations": "Conversations",
+      "notifications": "Notifications"
+    },
+    "local": {
+      "title": "On this device only",
+      "body": "Messages stay in this browser: nobody receives them, and Nidz cannot know whether anyone has read them."
+    },
+    "empty": {
+      "owner": {
+        "title": "No conversations yet",
+        "body": "Before asking for care, ask a sitter a question from their profile.",
+        "action": "See the sitters"
+      },
+      "sitter": {
+        "title": "No messages",
+        "body": "Questions owners write to your profile on this device will appear here."
+      }
+    },
+    "you": "You",
+    "youPrefix": "You: {{text}}",
+    "noMessageYet": "No message yet",
+    "unread_zero": "",
+    "unread_one": "{{count}} unread",
+    "unread_two": "{{count}} unread",
+    "unread_few": "{{count}} unread",
+    "unread_many": "{{count}} unread",
+    "unread_other": "{{count}} unread",
+    "roleSitter": "Pet-sitter",
+    "roleOwner": "Owner",
+    "thread": {
+      "back": "Back to messages",
+      "viewProfile": "See {{name}}'s profile",
+      "contextTitle": "About",
+      "contextNone": "No care chosen yet",
+      "contextNote": "As it was when the conversation started.",
+      "request": "Request care",
+      "noticeExample": "{{name}} is an example profile: nobody will read this conversation.",
+      "noticeOwn": "This is your own sitter profile: you can answer from your sitter space, on this device. Nothing leaves it.",
+      "noticeSitter": "Written on this device from the owner space of the same account. Your reply stays here too: nobody receives it."
+    },
+    "composer": {
+      "label": "Your message — stays on this device",
+      "placeholder": "Write to {{name}}…",
+      "add": "Add the message",
+      "required": "Write something first.",
+      "cannotReply": "Only {{name}}'s own space could answer here — it does not exist on this device."
+    },
+    "ask": "Ask a question",
+    "askName": "Ask {{name}} a question",
+    "notFound": {
+      "title": "This conversation is not here",
+      "body": "It may have been erased with the demo data, or it belongs to another space."
+    }
+  },
+  "notifications": {
+    "note": "What Nidz would tell you. Here nothing is sent: no SMS, no e-mail, no notification on your phone.",
+    "empty": {
+      "title": "Nothing new",
+      "body": "Replies, questions and decisions on your requests will be listed here."
+    },
+    "message_one": "{{name}} wrote {{count}} new message",
+    "message_other": "{{name}} wrote {{count}} new messages",
+    "message_many": "{{name}} wrote {{count}} new messages",
+    "message_zero": "{{name}} wrote",
+    "message_two": "{{name}} wrote {{count}} new messages",
+    "message_few": "{{name}} wrote {{count}} new messages",
+    "question": "A question about {{pet}} is waiting for your answer",
+    "decision": {
+      "accepted": "{{name}} accepted your request for {{pet}}",
+      "declined": "{{name}} declined your request for {{pet}}"
+    },
+    "incoming": "New request from {{name}} for {{pet}}"
   }
 }

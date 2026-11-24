@@ -51,3 +51,20 @@ export function formatDateRange(range: DateRange, locale: AppLocale): string {
   if (range.start === range.end) return formatDate(range.start, locale);
   return `${formatDate(range.start, locale)} – ${formatDate(range.end, locale)}`;
 }
+
+/**
+ * "il y a 5 min", "hier", "12 nov." — when something was written ON THIS
+ * DEVICE. Under an hour in minutes, today in hours, then days, then the date.
+ * Locale-aware through Intl.RelativeTimeFormat; never "seen", never "sent".
+ */
+export function formatRelativeTime(iso: string, locale: AppLocale, now: Date = new Date()): string {
+  const then = new Date(iso);
+  const seconds = Math.round((then.getTime() - now.getTime()) / 1000);
+  const rtf = new Intl.RelativeTimeFormat(`${locale}-DZ`, { numeric: "auto", style: "short" });
+  const abs = Math.abs(seconds);
+  if (abs < 60) return rtf.format(0, "minute");
+  if (abs < 3600) return rtf.format(Math.round(seconds / 60), "minute");
+  if (abs < 86400) return rtf.format(Math.round(seconds / 3600), "hour");
+  if (abs < 7 * 86400) return rtf.format(Math.round(seconds / 86400), "day");
+  return formatDate(toISODate(then), locale);
+}

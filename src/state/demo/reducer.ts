@@ -33,6 +33,12 @@ import { emptyCareConditions, restoreCareConditions } from "@/data/care-conditio
 import { forSharing, restorePet } from "@/data/pets";
 import { restoreRequestDraft, type RequestDraft } from "@/data/request-draft";
 import { canClarify, restoreThread, type ClarificationMessage } from "@/data/clarification";
+import {
+  restoreConversations,
+  type Conversation,
+  type ConversationMessage,
+  type ConversationSide,
+} from "@/data/conversations";
 import { isISODate } from "@/utils/dates";
 import { getWilayaOfCommune, normalizeCommuneId, normalizeWilayaId } from "@/data/algeria";
 import {
@@ -149,6 +155,13 @@ export type DemoState = {
    * it simply has none.
    */
   requestDraft: RequestDraft | null;
+  /**
+   * Messages before a request (Nidz 1.4). Local notes between the owner and a
+   * sitter — never delivered anywhere; see `src/data/conversations.ts`.
+   * Added without a version bump: additive, and a record written before it
+   * simply has none.
+   */
+  conversations: Conversation[];
 };
 
 export const INITIAL_STATE: DemoState = {
@@ -164,6 +177,7 @@ export const INITIAL_STATE: DemoState = {
   requests: [],
   sitter: null,
   requestDraft: null,
+  conversations: [],
 };
 
 export function emptySitterProfile(id: string): SitterProfile {
@@ -237,6 +251,9 @@ export type DemoAction =
   | { type: "discardRequestDraft" }
   | { type: "respondToRequest"; id: string; status: Exclude<RequestStatus, "pending"> }
   | { type: "addClarification"; id: string; message: ClarificationMessage }
+  | { type: "startConversation"; conversation: Conversation }
+  | { type: "addConversationMessage"; id: string; message: ConversationMessage }
+  | { type: "markConversationSeen"; id: string; side: ConversationSide; at: string }
   | { type: "startSitterProfile"; id: string }
   | { type: "patchSitterProfile"; patch: Partial<SitterProfile> }
   | { type: "setIdDocument"; fileName: string }
@@ -340,6 +357,39 @@ export function reducer(state: DemoState, action: DemoAction): DemoState {
 
     case "discardRequestDraft":
       return state.requestDraft ? { ...state, requestDraft: null } : state;
+
+    /* A conversation is created once; a second start with the same id (a
+       double tap, another tab) adds nothing. */
+    case "startConversation":
+      return state.conversations.some((c) => c.id === action.conversation.id)
+        ? state
+        : { ...state, conversations: [...state.conversations, action.conversation] };
+
+    /* A message touches only its conversation's thread. An empty one is
+       refused rather than stored as a blank bubble. */
+    case "addConversationMessage":
+      return action.message.text
+        ? {
+            ...state,
+            conversations: state.conversations.map((c) =>
+              c.id === action.id ? { ...c, messages: [...c.messages, action.message] } : c,
+            ),
+          }
+        : state;
+
+    /* View state: when this SPACE last opened the thread. Never moves
+       backwards, so two tabs cannot un-read each other. */
+    case "markConversationSeen": {
+      const target = state.conversations.find((c) => c.id === action.id);
+      const previous = target?.seen[action.side];
+      if (!target || (previous && previous >= action.at)) return state;
+      return {
+        ...state,
+        conversations: state.conversations.map((c) =>
+          c.id === action.id ? { ...c, seen: { ...c.seen, [action.side]: action.at } } : c,
+        ),
+      };
+    }
 
     case "addClarification":
       /* A question is added to a PENDING request and touches nothing else —
@@ -446,6 +496,12 @@ function stripTransientFields(state: DemoState): DemoState {
     sitter: sitter
       ? { ...sitter, profile: { ...sitter.profile, photoUrl: undefined } }
       : null,
+    /* A conversation carries a copy of the pet too — same dead-URL rule. */
+    conversations: state.conversations.map((c) =>
+      c.context.pet
+        ? { ...c, context: { ...c.context, pet: (({ photoUrl: _photoUrl, ...pet }) => pet)(c.context.pet) as Conversation["context"]["pet"] } }
+        : c,
+    ),
   };
 }
 
@@ -663,6 +719,7 @@ function restore(parsed: Record<string, unknown>): DemoState {
     requests: ((arrayOfObjects(parsed.requests) as Record<string, unknown>[] | null) ?? []).flatMap(restoreRequest),
     sitter,
     requestDraft: restoreRequestDraft(parsed.requestDraft),
+    conversations: restoreConversations(parsed.conversations),
   };
 }
 

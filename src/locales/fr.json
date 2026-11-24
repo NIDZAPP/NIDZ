@@ -32,7 +32,14 @@
     "pets": "Mes animaux",
     "account": "Compte",
     "petsShort": "Animaux",
-    "sitterProfile": "Mon profil"
+    "sitterProfile": "Mon profil",
+    "messages": "Messages",
+    "messagesUnread_zero": "Messages",
+    "messagesUnread_one": "Messages, {{count}} conversation non lue",
+    "messagesUnread_two": "Messages, {{count}} conversations non lues",
+    "messagesUnread_few": "Messages, {{count}} conversations non lues",
+    "messagesUnread_many": "Messages, {{count}} conversations non lues",
+    "messagesUnread_other": "Messages, {{count}} conversations non lues"
   },
   "home": {
     "title": "Trouver une garde pour votre animal",
@@ -719,8 +726,9 @@
     },
     "tools": {
       "title": "Outils de test de la démonstration",
-      "body": "Cette démonstration n'a pas d'autres utilisateurs. Pour voir ce que reçoit un pet-sitter, et essayer une question avant de décider, vous pouvez adresser une demande d'essai à votre propre profil publié. Elle reste dans ce navigateur.",
-      "selfRequest": "M'adresser une demande d'essai"
+      "body": "Cette démonstration n'a pas d'autres utilisateurs. Pour voir ce que reçoit un pet-sitter — une demande, une question, un message —, vous pouvez les adresser à votre propre profil publié. Ils restent dans ce navigateur.",
+      "selfRequest": "M'adresser une demande d'essai",
+      "selfMessage": "M'écrire un message d'essai"
     }
   },
   "workspace": {
@@ -1203,5 +1211,81 @@
     "draftRestored": "Nous avons retrouvé ce que vous aviez commencé à saisir. Ce n'est pas encore enregistré.",
     "discardDraft": "Effacer ce brouillon",
     "conflictBodySingle": "Elles ont changé ailleurs — dans un autre onglet ou un autre écran — depuis que vous avez ouvert cet écran, et rien n'a été enregistré ici. Affichez la version enregistrée pour continuer."
+  },
+  "messages": {
+    "title": "Messages",
+    "tabs": {
+      "conversations": "Conversations",
+      "notifications": "Notifications"
+    },
+    "local": {
+      "title": "Sur cet appareil uniquement",
+      "body": "Les messages restent dans ce navigateur : personne ne les reçoit, et Nidz ne peut pas savoir si quelqu'un les a lus."
+    },
+    "empty": {
+      "owner": {
+        "title": "Aucune conversation",
+        "body": "Avant une demande, posez une question à un pet-sitter depuis son profil.",
+        "action": "Voir les pet-sitters"
+      },
+      "sitter": {
+        "title": "Aucun message",
+        "body": "Les questions écrites à votre profil, sur cet appareil, apparaîtront ici."
+      }
+    },
+    "you": "Vous",
+    "youPrefix": "Vous : {{text}}",
+    "noMessageYet": "Pas encore de message",
+    "unread_zero": "",
+    "unread_one": "{{count}} non lu",
+    "unread_two": "{{count}} non lus",
+    "unread_few": "{{count}} non lus",
+    "unread_many": "{{count}} non lus",
+    "unread_other": "{{count}} non lus",
+    "roleSitter": "Pet-sitter",
+    "roleOwner": "Propriétaire",
+    "thread": {
+      "back": "Retour aux messages",
+      "viewProfile": "Voir le profil de {{name}}",
+      "contextTitle": "À propos de",
+      "contextNone": "Pas encore de garde précise",
+      "contextNote": "Tel qu'au début de la conversation.",
+      "request": "Demander une garde",
+      "noticeExample": "{{name}} est un profil d'exemple : personne ne lira cette conversation.",
+      "noticeOwn": "C'est votre propre profil de pet-sitter : vous pourrez répondre depuis votre espace pet-sitter, sur cet appareil. Rien n'en sort.",
+      "noticeSitter": "Écrit sur cet appareil, depuis l'espace propriétaire du même compte. Votre réponse reste ici aussi : personne ne la reçoit."
+    },
+    "composer": {
+      "label": "Votre message — reste sur cet appareil",
+      "placeholder": "Écrire à {{name}}…",
+      "add": "Ajouter le message",
+      "required": "Écrivez d'abord quelque chose.",
+      "cannotReply": "Seul l'espace de {{name}} pourrait répondre ici — il n'existe pas sur cet appareil."
+    },
+    "ask": "Poser une question",
+    "askName": "Poser une question à {{name}}",
+    "notFound": {
+      "title": "Cette conversation n'est pas ici",
+      "body": "Elle a peut-être été effacée avec les données de démonstration, ou elle appartient à l'autre espace."
+    }
+  },
+  "notifications": {
+    "note": "Ce que Nidz vous signalerait. Ici, rien n'est envoyé : ni SMS, ni e-mail, ni notification sur votre téléphone.",
+    "empty": {
+      "title": "Rien de nouveau",
+      "body": "Les réponses, les questions et les décisions sur vos demandes s'afficheront ici."
+    },
+    "message_one": "{{name}} a écrit {{count}} nouveau message",
+    "message_other": "{{name}} a écrit {{count}} nouveaux messages",
+    "message_many": "{{name}} a écrit {{count}} nouveaux messages",
+    "message_zero": "{{name}} a écrit",
+    "message_two": "{{name}} a écrit {{count}} nouveaux messages",
+    "message_few": "{{name}} a écrit {{count}} nouveaux messages",
+    "question": "Une question sur {{pet}} attend votre réponse",
+    "decision": {
+      "accepted": "{{name}} a accepté votre demande pour {{pet}}",
+      "declined": "{{name}} a refusé votre demande pour {{pet}}"
+    },
+    "incoming": "Nouvelle demande de {{name}} pour {{pet}}"
   }
 }

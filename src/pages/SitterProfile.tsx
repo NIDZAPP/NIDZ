@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { MessageCircle } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router-dom";
@@ -167,6 +168,10 @@ export default function SitterProfile() {
     </Button>
   );
 
+  /* Messages before a request (1.4): one thread per sitter, carrying the
+     brief as its context. Not on your own profile. */
+  const askHref = `/messages/to/${sitter.id}${paramKey ? `?${paramKey}` : ""}`;
+
   return (
     <div>
       <Helmet>
@@ -236,6 +241,14 @@ export default function SitterProfile() {
                 <QuotedRate amount={rate.amount} careType={rate.careType} isFrom={rate.isFrom} className="mb-4" />
               )}
               <div className="[&>*]:w-full">{cta}</div>
+              {!isOwnProfile && (
+                <Button asChild variant="surface" className="mt-2.5 w-full">
+                  <Link to={askHref}>
+                    <MessageCircle aria-hidden="true" />
+                    {t("messages.ask")}
+                  </Link>
+                </Button>
+              )}
             </aside>
           </div>
         </div>
@@ -264,7 +277,16 @@ export default function SitterProfile() {
             ) : (
               <span className="flex-1" />
             )}
-            <div className="shrink-0">{cta}</div>
+            {!isOwnProfile && (
+              <Button asChild variant="secondary" size="icon" className="size-12 shrink-0">
+                <Link to={askHref} aria-label={t("messages.askName", { name: sitter.publicName })}>
+                  <MessageCircle className="!size-5" aria-hidden="true" />
+                </Link>
+              </Button>
+            )}
+            {/* May shrink: at 320px the action's label wraps inside its pill
+                rather than pushing the page sideways. */}
+            <div className="min-w-0 [&>*]:w-full">{cta}</div>
           </div>
         </div>
       </div>

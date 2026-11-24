@@ -282,9 +282,16 @@ export default function Settings() {
             <p className="mt-2 max-w-[64ch] text-base leading-relaxed text-muted-foreground">
               {t("settings.tools.body")}
             </p>
-            <Button asChild variant="outline" className="mt-4">
-              <Link to={`/owner/request/${state.sitter.profile.id}`}>{t("settings.tools.selfRequest")}</Link>
-            </Button>
+            <div className="mt-4 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
+              <Button asChild variant="outline">
+                <Link to={`/owner/request/${state.sitter.profile.id}`}>{t("settings.tools.selfRequest")}</Link>
+              </Button>
+              {/* The same honest detour for Messages (1.4): only your own
+                  profile can answer, from your sitter space. */}
+              <Button asChild variant="outline">
+                <Link to={`/messages/to/${state.sitter.profile.id}`}>{t("settings.tools.selfMessage")}</Link>
+              </Button>
+            </div>
           </section>
         )}
 

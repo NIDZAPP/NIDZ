@@ -25,6 +25,8 @@ const NotAvailable = lazy(() => import("@/pages/NotAvailable"));
 const Policies = lazy(() => import("@/pages/Policies"));
 const Help = lazy(() => import("@/pages/Help"));
 const Settings = lazy(() => import("@/pages/Settings"));
+const Messages = lazy(() => import("@/pages/Messages"));
+const MessageThread = lazy(() => import("@/pages/MessageThread"));
 const Welcome = lazy(() => import("@/pages/onboarding/Welcome"));
 const NeedPet = lazy(() => import("@/pages/owner/need/NeedPet"));
 const NeedLocation = lazy(() => import("@/pages/owner/need/NeedLocation"));
@@ -74,6 +76,7 @@ function prefetchScreens() {
     void import("@/pages/Search");
     void import("@/pages/SitterProfile");
     void import("@/pages/Settings");
+    void import("@/pages/Messages");
     void import("@/pages/owner/request/RequestReview");
     void import("@/pages/owner/request/RequestWhen");
     void import("@/pages/owner/need/NeedPet");
@@ -209,6 +212,10 @@ const App = () => {
             <Route path="/sitter/profile/limits" element={<StepLimits />} />
             <Route path="/sitter/profile/availability" element={<StepAvailability />} />
             <Route path="/sitter/trust" element={<SitterTrust />} />
+            {/* A conversation is a full-screen thread with its own top bar and
+                composer (Nidz 1.4). The list is browsable, below. */}
+            <Route path="/messages/to/:sitterId" element={<MessageThread />} />
+            <Route path="/messages/:id" element={<MessageThread />} />
             <Route path="/sitter/preview" element={<SitterPreview />} />
             <Route path="/sitter/published" element={<SitterPublished />} />
 
@@ -247,6 +254,8 @@ const App = () => {
                   rather than belonging to one, and holds the switch between
                   them and the language choice (Audit 1.3 LOT 04). */}
               <Route path="/settings" element={<Settings />} />
+              {/* Local conversations and the notifications slot (1.4). */}
+              <Route path="/messages" element={<Messages />} />
               {/* Profiles moved out of the sitter's own namespace; the old
                   path stays reachable so existing links do not break. */}
               <Route path="/sitter/:id" element={<LegacySitterRedirect />} />

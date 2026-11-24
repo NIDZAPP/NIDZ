@@ -68,6 +68,33 @@ const both = seedState({
   sitter: publishedSitter(),
   requests: [request],
 });
+const ago = (minutes) => new Date(Date.now() - minutes * 60000).toISOString();
+const petCopy = { ...rex };
+delete petCopy.care;
+const context = { pet: petCopy, careType: "boarding", dates: { start: isoIn(12), end: isoIn(15) }, communeCode: "hydra" };
+both.conversations = [
+  {
+    id: "conv-1",
+    sitterId: "sitter-local",
+    ownerName: "Lina K.",
+    createdAt: ago(180),
+    context,
+    messages: [
+      { id: "m1", author: "owner", text: "Bonjour ! Rex n'a jamais dormi ailleurs. Est-ce qu'on peut se voir avant ?", createdAt: ago(170) },
+      { id: "m2", author: "sitter", text: "Bonjour Lina, avec plaisir. Je peux vous recevoir samedi matin avec Rex.", createdAt: ago(40) },
+    ],
+    seen: { owner: ago(100), sitter: ago(35) },
+  },
+  {
+    id: "conv-2",
+    sitterId: "amina-b",
+    ownerName: "Lina K.",
+    createdAt: ago(60 * 26),
+    context: { ...context, careType: "walk", dates: null },
+    messages: [{ id: "m3", author: "owner", text: "Faites-vous des promenades le soir ?", createdAt: ago(60 * 26) }],
+    seen: { owner: ago(60 * 26), sitter: null },
+  },
+];
 const sitter = { ...both, activeWorkspace: "sitter" };
 
 const screens = [
@@ -98,6 +125,10 @@ const screens = [
   ["sitter-housing", "/sitter/profile/housing", sitter],
   ["help", "/help", owner],
   ["messages", "/messages", both],
+  ["thread-owner", "/messages/conv-1", both],
+  ["thread-example", "/messages/conv-2", both],
+  ["thread-sitter", "/messages/conv-1", sitter],
+  ["messages-sitter", "/messages", sitter],
   ["notfound", "/nowhere", owner],
 ].filter(([name]) => name.includes(filter));
 

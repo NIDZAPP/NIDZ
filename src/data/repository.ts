@@ -29,6 +29,7 @@ import { reviewsFor } from "./reviews";
 import { canPublish } from "./sitter-sections";
 import type { CareRequest, SitterProfile } from "./types";
 import type { DemoState } from "@/state/demo/reducer";
+import { conversationsFor, type Conversation, type ConversationSide } from "./conversations";
 
 /* -------------------------------------------------------------- sitters */
 
@@ -131,4 +132,32 @@ export function requestsReceived(state: DemoState): CareRequest[] {
 /** Server: `GET /requests/:id` — for its owner or its sitter only. */
 export function findRequest(state: DemoState, id: string | null | undefined): CareRequest | null {
   return id ? (state.requests.find((r) => r.id === id) ?? null) : null;
+}
+
+/* -------------------------------------------------------- conversations */
+
+/**
+ * Server: `GET /conversations` — the caller's side only. The owner sees the
+ * conversations they started; the sitter, only those addressed to their own
+ * profile (an example sitter has nobody to read anything).
+ */
+export function conversationsOf(state: DemoState, side: ConversationSide): Conversation[] {
+  return conversationsFor(state.conversations, side, state.sitter?.profile.id ?? null);
+}
+
+/** Server: `GET /conversations/:id` — for its owner or its sitter only. */
+export function findConversation(state: DemoState, id: string | null | undefined): Conversation | null {
+  return state.conversations.find((c) => c.id === id) ?? null;
+}
+
+/** The owner's existing conversation with a sitter, if any: one thread per
+    pair, so "Poser une question" twice opens the same one. */
+export function conversationWith(state: DemoState, sitterId: string): Conversation | null {
+  return state.conversations.find((c) => c.sitterId === sitterId) ?? null;
+}
+
+/** Whether anyone on this device can answer as the sitter: only the
+    visitor's own profile. */
+export function sitterCanAnswer(state: DemoState, sitterId: string): boolean {
+  return state.sitter?.profile.id === sitterId;
 }
