@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { SearchX } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -75,6 +75,18 @@ export default function Search() {
   const criteria = useMemo(() => parseCriteria(new URLSearchParams(paramKey)), [paramKey]);
   const [draft, setDraft] = useState<SearchCriteria>(criteria);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  /* Arriving from the capsule on a profile ("Modifier") opens the brief
+     editor straight away. The flag is consumed so Back/refresh do not
+     reopen it. */
+  useEffect(() => {
+    if ((location.state as { editBrief?: boolean } | null)?.editBrief) {
+      setSheetOpen(true);
+      navigate({ pathname: location.pathname, search: location.search }, { replace: true, state: null });
+    }
+  }, [location, navigate]);
 
   /* Keep the editable copy in step with the URL — including when the change
      came from the Back button rather than from a control on this page. */
@@ -331,7 +343,7 @@ export default function Search() {
               />
             ) : (
               /* One card per sitter, two across from md. */
-              <ul role="list" className="grid gap-3 md:grid-cols-2 md:gap-4">
+              <ul role="list" className="grid gap-3 md:gap-4">
                 {results.map(({ sitter, rate }) => (
                   <SitterCard
                     key={sitter.id}

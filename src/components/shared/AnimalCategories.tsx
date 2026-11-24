@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
      - `pick`    buttons — choosing IS the action (the home's quick start);
      - `single`  a Radix radio group — arrow keys, one tab stop;
      - `multi`   checkboxes — several can be on.
-   Selected = a 2px teal ring + a check badge, never colour alone (§12.2).
+   Selected = a 2.5px teal ring + a check badge, never colour alone (§12.2).
    ------------------------------------------------------------------------ */
 
 const CARD = cn(

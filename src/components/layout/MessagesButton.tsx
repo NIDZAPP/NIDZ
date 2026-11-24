@@ -22,7 +22,7 @@ export default function MessagesButton() {
       aria-label={t("nav.messagesUnread", { count })}
       className={({ isActive }) =>
         cn(
-          "relative inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-card shadow-pill transition-[transform,background-color] duration-150 ease-out active:scale-[0.96]",
+          "relative inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-card shadow-pill transition-[transform,background-color] duration-150 ease-out active:scale-[0.97]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
           isActive ? "text-primary" : "text-foreground hover:bg-secondary",
         )

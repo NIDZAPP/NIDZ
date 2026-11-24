@@ -44,8 +44,7 @@ export default {
 					'h1-lg': ['2.25rem', { lineHeight: '1.1', letterSpacing: '-0.03em' }],
 					title: ['1.25rem', { lineHeight: '1.25', letterSpacing: '-0.015em' }],
 					price: ['1.375rem', { lineHeight: '1.2', letterSpacing: '-0.02em' }],
-					name: ['1.125rem', { lineHeight: '1.3', letterSpacing: '-0.01em' }],
-					eyebrow: ['0.75rem', { lineHeight: '1.2', letterSpacing: '0.04em' }]
+					name: ['1.125rem', { lineHeight: '1.3', letterSpacing: '-0.01em' }]
 				},
 				colors: {
 				border: 'hsl(var(--border))',
@@ -123,7 +122,8 @@ export default {
 				}
 			},
 			/* Nidz 1.4 radius scale: sm 10 · md 14 · lg 18 · xl 22 · 2xl 28 ·
-			   3xl 36 · full. Cards are xl, sheets and hero panels 2xl, every
+			   3xl 36 · full. Cards are xl, message bubbles 2xl, sheets, the
+			   hero and the composer 3xl, every
 			   button and chip full (the pill). */
 			borderRadius: {
 				'3xl': 'calc(var(--radius) + 22px)',

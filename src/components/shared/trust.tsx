@@ -76,10 +76,8 @@ export function ProvenanceLabel({
 /**
  * The honesty layer for a screen that shows simulated behaviour.
  *
- * Rendered as a ruled notice rather than a filled card: horizontal rules read
- * as editorial apparatus, so it keeps positional weight without competing
- * chromatically with the primary action (§16 ranks space > surface > border >
- * shadow). It must never be smaller or quieter than the thing it qualifies.
+ * It must never be smaller or quieter than the thing it qualifies, and never
+ * compete chromatically with the primary action.
  */
 export function DemoNotice({
   title,
@@ -94,10 +92,10 @@ export function DemoNotice({
     /* 1.4: a notification card. Same shape as an iOS banner — an icon tile,
        a bold line, the explanation — at the same visual weight as the content
        it qualifies, never a footnote (CLAUDE.md, "Simulated behaviour carries
-       a DemoNotice at full weight"). Sand, not the action teal: it informs,
-       it is not something to press. */
+       a DemoNotice at full weight"). A neutral tile, not the action teal: it
+       informs, it is not something to press. */
     <div className={cn("flex gap-3 rounded-xl bg-card p-4 shadow-card", className)}>
-      <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-sand text-foreground">
+      <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-foreground">
         <Info className="size-5" />
       </span>
       <div className="min-w-0">

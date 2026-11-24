@@ -12,6 +12,7 @@ import BrandMark from "@/components/shared/BrandMark";
 import InfoTip from "@/components/shared/InfoTip";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
+import { ACTION_LINK_END } from "@/components/shared/link-styles";
 import type { Species } from "@/data/types";
 import { useDemo } from "@/state/demo/context";
 
@@ -134,7 +135,7 @@ export default function Welcome() {
                   <Link
                     to="/search"
                     onClick={enter}
-                    className="-me-2 inline-flex min-h-11 items-center gap-1 rounded-full px-2 text-sm font-semibold text-primary hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className={ACTION_LINK_END}
                   >
                     {t("entry.browse")}
                     <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden="true" />
@@ -156,7 +157,7 @@ export default function Welcome() {
                 <ul role="list" className="mt-5 grid gap-3">
                   {SITTER_PREVIEW.map(({ key, icon: Icon }) => (
                     <li key={key} className="flex items-center gap-3 text-sm text-foreground">
-                      <span aria-hidden="true" className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand">
+                      <span aria-hidden="true" className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
                         <Icon className="size-[1.125rem]" />
                       </span>
                       <span>{t(`entry.sitterPreview.${key}`)}</span>

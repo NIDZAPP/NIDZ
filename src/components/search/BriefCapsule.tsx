@@ -29,6 +29,8 @@ export default function BriefCapsule({
   count = 0,
   onClick,
   to,
+  replace,
+  state,
   className,
 }: {
   species: Species | null;
@@ -44,6 +46,11 @@ export default function BriefCapsule({
   count?: number;
   onClick?: () => void;
   to?: To;
+  /** With `to`: replace the history entry (an edit that must not leave the
+      old version one Back away). */
+  replace?: boolean;
+  /** With `to`: router state, e.g. `{ editBrief: true }` to open the editor. */
+  state?: unknown;
   className?: string;
 }) {
   const id = useId();
@@ -92,7 +99,7 @@ export default function BriefCapsule({
   );
 
   return to ? (
-    <Link to={to} aria-label={actionLabel} aria-describedby={`${id}-summary`} className={cls}>
+    <Link to={to} replace={replace} state={state} aria-label={actionLabel} aria-describedby={`${id}-summary`} className={cls}>
       {body}
     </Link>
   ) : (

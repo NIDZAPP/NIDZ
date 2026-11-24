@@ -74,7 +74,7 @@ export default function SitterStart() {
         <ul role="list" className="grid gap-2.5">
           {POINTS.map(({ key, icon: Icon }) => (
             <li key={key} className="surface flex items-start gap-3.5 p-4 text-base leading-relaxed text-foreground">
-              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand">
+              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
                 <Icon className="size-5" />
               </span>
               <span className="pt-1.5">{t(`sitterFlow.start.points.${key}`)}</span>

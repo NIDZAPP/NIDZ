@@ -8,6 +8,7 @@ import RequestSummary from "@/components/request/RequestSummary";
 import FlowScreen from "@/components/shared/FlowScreen";
 import OptionGroup from "@/components/shared/OptionGroup";
 import { AnimalPortrait } from "@/components/illustrations/animals";
+import BriefCapsule from "@/components/search/BriefCapsule";
 import { SaveFeedback } from "@/components/shared/SaveFeedback";
 import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
@@ -21,9 +22,9 @@ import { useAppLocale } from "@/hooks/use-locale";
 import { useSave } from "@/hooks/use-save";
 import { useSitter } from "@/hooks/use-sitter";
 import { useDemo } from "@/state/demo/context";
-import { toISODate, today } from "@/utils/dates";
+import { formatDateRange, toISODate, today } from "@/utils/dates";
 import { formatList, isolate } from "@/utils/format";
-import { ACTION_LINK, INLINE_LINK } from "@/components/shared/link-styles";
+import { ACTION_LINK } from "@/components/shared/link-styles";
 
 /**
  * "Votre demande à Amina" — everything that is about to be sent, before it is
@@ -277,6 +278,26 @@ export default function RequestReview() {
            it so the profile still explains the same match. */
         backTo={profilePathForRequest(here) ?? "/search"}
         title={t("request.review.titleFor", { sitter: sitterName })}
+        /* THE BRIEF CAPSULE (direction contract): what this request asks —
+           the animal, the care, the dates — and the way to change the care
+           or the dates. `replace`, and the step replaces itself on submit:
+           changing the dates must not leave the OLD summary behind in
+           history, still sendable one Back away. */
+        headerExtra={
+          <BriefCapsule
+            className="mt-5"
+            species={selected?.pet.species ?? null}
+            /* The dates lead the second line: this screen exists to confirm
+               them, so they must never sit behind the ellipsis. */
+            title={selected ? `${selected.pet.name} · ${t(`care.${careType}`)}` : t(`care.${careType}`)}
+            parts={[formatDateRange(dates, lng)]}
+            emptyText=""
+            actionText={t("search.context.edit")}
+            actionLabel={t("request.review.changeWhen")}
+            to={requestWhenPath(sitter.id, search)}
+            replace
+          />
+        }
         action={
           noPets ? (
             /* With no animal there is nothing to send yet, and the one useful
@@ -369,19 +390,6 @@ export default function RequestReview() {
 
         <SaveFeedback className="mt-6" save={save} onRetry={send} />
 
-        <p className="mt-4">
-          {/* `replace`, and the step replaces itself on submit: changing the
-              dates must not leave the OLD summary behind in history, still
-              sendable one Back away. */}
-          <Link
-            to={requestWhenPath(sitter.id, search)}
-            replace
-            className={ACTION_LINK}
-          >
-            <Pencil className="size-4" aria-hidden="true" />
-            {t("request.review.changeWhen")}
-          </Link>
-        </p>
       </FlowScreen>
     </>
   );

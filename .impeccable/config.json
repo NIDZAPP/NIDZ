@@ -2,13 +2,6 @@
   "detector": {
     "ignoreRules": [],
     "ignoreFiles": [],
-    "ignoreValues": [
-      {
-        "rule": "overused-font",
-        "value": "inter",
-        "createdAt": "2026-08-14T03:59:59.158Z",
-        "reason": "Mandated by the Nidz design system (13.1) and by Audit 1.2 (9, 145): Inter throughout, no display face without a deliberate multilingual brand decision. Paired with Noto Sans Arabic because Nidz ships in Arabic and the face must have Arabic coverage."
-      }
-    ]
+    "ignoreValues": []
   }
 }

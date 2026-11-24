@@ -27,6 +27,7 @@ import { useAppLocale } from "@/hooks/use-locale";
 import { useSwitchWorkspace } from "@/hooks/use-workspace";
 import { useDemo } from "@/state/demo/context";
 import { isolate } from "@/utils/format";
+import { ACTION_LINK_END } from "@/components/shared/link-styles";
 
 /** How many suggestions the home page shows before sending people to the full
     results. Enough to be useful, few enough that the page stays a home rather
@@ -281,7 +282,7 @@ export default function Index() {
               </h2>
               <Link
                 to={{ pathname: "/search", search: suggestionSearch }}
-                className="-me-2 inline-flex min-h-11 shrink-0 items-center gap-1 rounded-full px-2 text-sm font-semibold text-primary hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className={ACTION_LINK_END}
               >
                 {t("home.nearby.seeAll")}
                 <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden="true" />
@@ -300,6 +301,7 @@ export default function Index() {
                   askedCare={null}
                   search={suggestionSearch}
                   actionVariant="outline"
+                  layout="stack"
                   /* The heading already says "who accept cats"; repeating it on
                      every card discriminates nothing. Same rule /search applies. */
                   showSpeciesEyebrow={!suggestionCriteria?.species}

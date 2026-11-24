@@ -50,7 +50,7 @@ export default function LanguageSwitcher({ className }: { className?: string }) 
       <DropdownMenuTrigger
         aria-label={t("common.languageCurrent", { name: ENDONYM[current] })}
         className={cn(
-          "inline-flex size-11 shrink-0 items-center justify-center rounded-full transition-[transform,background-color] duration-150 ease-out active:scale-[0.96]",
+          "inline-flex size-11 shrink-0 items-center justify-center rounded-full transition-[transform,background-color] duration-150 ease-out active:scale-[0.97]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
           "bg-card text-foreground shadow-pill hover:bg-secondary data-[state=open]:bg-secondary",
           className,

@@ -126,7 +126,7 @@ export default function FlowScreen({
             <Link
               to="/settings"
               state={{ fromFlow: true }}
-              className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-card text-foreground shadow-pill transition-[transform,background-color] duration-150 ease-out hover:bg-secondary active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-card text-foreground shadow-pill transition-[transform,background-color] duration-150 ease-out hover:bg-secondary active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <SlidersHorizontal className="size-5" aria-hidden="true" />
               <span className="sr-only">{t("nav.account")}</span>

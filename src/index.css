@@ -202,7 +202,7 @@
   }
 
   /* Something a finger presses: a card that is also a link or a button. The
-     press is a 0.98 scale over 160ms — felt, not seen (Emil Kowalski: a
+     press is a 0.98 scale over 150ms — felt, not seen (Emil Kowalski: a
      button that does not respond to the press feels dead). */
   .surface-press {
     @apply transition-[transform,box-shadow] duration-150 ease-out active:scale-[0.98];
@@ -217,20 +217,6 @@
   /* A screen's content arriving (6px, 220ms). Keyed on the route by its caller. */
   .page-in {
     @apply animate-page-in;
-  }
-
-  /* The section eyebrow, defined once. Uppercase is a no-op in Arabic and
-     letter-spacing breaks cursive joining, so both are dropped there — the
-     role keeps its size and weight instead.
-
-     Keyed on `[dir="rtl"]`, which is what Tailwind's `rtl:` variant compiles
-     to, so the whole codebase has ONE right-to-left mechanism. */
-  .eyebrow {
-    @apply text-eyebrow font-semibold uppercase text-muted-foreground;
-  }
-
-  [dir="rtl"] .eyebrow {
-    @apply normal-case tracking-normal;
   }
 
   /* Direction multiplier for transform-driven indicators (the tab bar's

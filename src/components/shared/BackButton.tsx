@@ -67,7 +67,7 @@ export default function BackButton({
       type="button"
       onClick={goBack}
       className={cn(
-        "inline-flex shrink-0 items-center transition-[transform,background-color,color] duration-150 ease-out active:scale-[0.96]",
+        "inline-flex shrink-0 items-center transition-[transform,background-color,color] duration-150 ease-out active:scale-[0.97]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         variant === "round"
           ? "size-11 justify-center rounded-full bg-card text-foreground shadow-pill hover:bg-secondary"

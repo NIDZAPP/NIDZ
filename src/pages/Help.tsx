@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 import BackButton from "@/components/shared/BackButton";
-import { ACTION_LINK, INLINE_LINK } from "@/components/shared/link-styles";
+import { INLINE_LINK } from "@/components/shared/link-styles";
 
 /**
  * What this demonstration is, and what it is not.

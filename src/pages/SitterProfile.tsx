@@ -7,6 +7,8 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import BackButton from "@/components/shared/BackButton";
 import EmptyState from "@/components/shared/EmptyState";
 import { DemoNotice } from "@/components/shared/trust";
+import BriefCapsule from "@/components/search/BriefCapsule";
+import { useBriefText } from "@/components/search/use-brief-text";
 import SitterProfileView, { QuotedRate } from "@/components/sitter/SitterProfileView";
 import { Button } from "@/components/ui/button";
 import { parseCriteria, petFit, reasonsFor, sizeLimitToState } from "@/data/criteria";
@@ -41,6 +43,7 @@ export default function SitterProfile() {
 
   const paramKey = searchParams.toString();
   const criteria = useMemo(() => parseCriteria(new URLSearchParams(paramKey)), [paramKey]);
+  const brief = useBriefText(criteria);
 
   /* An unpublished draft is not a public profile. `useSitter` resolves it so
      the sitter's own preview can render, but this route serves the public and
@@ -172,6 +175,22 @@ export default function SitterProfile() {
      brief as its context. Not on your own profile. */
   const askHref = `/messages/to/${sitter.id}${paramKey ? `?${paramKey}` : ""}`;
 
+  /* THE BRIEF CAPSULE rides here too (direction contract): the question this
+     profile is being read against. "Modifier" goes back to the same results
+     with the editor open. Only when the visitor actually searched. */
+  const capsule = hasCriteria ? (
+    <BriefCapsule
+      species={criteria.species}
+      title={brief.title ?? t("search.brief.anySpecies")}
+      parts={brief.parts}
+      emptyText={t("search.context.refine")}
+      actionText={t("search.context.edit")}
+      actionLabel={t("search.context.editLabel")}
+      to={{ pathname: "/search", search: paramKey }}
+      state={{ editBrief: true }}
+    />
+  ) : null;
+
   return (
     <div>
       <Helmet>
@@ -204,6 +223,7 @@ export default function SitterProfile() {
             label={hasCriteria ? t("profile.backToResults") : undefined}
             className="mb-3"
           />
+          {capsule && <div className="mb-3 xl:hidden">{capsule}</div>}
 
           <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start xl:gap-6">
             <div className="min-w-0">
@@ -236,19 +256,37 @@ export default function SitterProfile() {
                 Mobile mounts the pinned bar below instead — exactly one of the
                 two is ever displayed, so there is never a second tab stop for
                 the same action. */}
-            <aside className="surface hidden p-6 xl:sticky xl:top-24 xl:block">
-              {rate && (
-                <QuotedRate amount={rate.amount} careType={rate.careType} isFrom={rate.isFrom} className="mb-4" />
+            {/* The rail: the brief this profile is read against, then the
+                price and the actions — one column of weight, not an island. */}
+            <aside className="hidden space-y-3 xl:sticky xl:top-24 xl:block">
+              {capsule ?? (
+                /* Without a brief the page cannot say what fits: the rail offers
+                   the one step that would let it. */
+                !isOwnProfile && (
+                  <div className="surface p-5">
+                    <p className="text-[0.9375rem] font-semibold text-foreground">{t("profile.rail.fitTitle")}</p>
+                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{t("profile.rail.fitBody")}</p>
+                    <Button asChild variant="outline" size="sm" className="mt-3 h-11">
+                      <Link to="/owner/need/pet">{t("profile.rail.fitAction")}</Link>
+                    </Button>
+                  </div>
+                )
               )}
-              <div className="[&>*]:w-full">{cta}</div>
-              {!isOwnProfile && (
-                <Button asChild variant="surface" className="mt-2.5 w-full">
-                  <Link to={askHref}>
-                    <MessageCircle aria-hidden="true" />
-                    {t("messages.ask")}
-                  </Link>
-                </Button>
-              )}
+              <div className="surface p-6">
+                {rate && (
+                  <QuotedRate amount={rate.amount} careType={rate.careType} isFrom={rate.isFrom} className="mb-4" />
+                )}
+                <div className="[&>*]:w-full">{cta}</div>
+                {!isOwnProfile && (
+                  <Button asChild variant="surface" className="mt-2.5 w-full">
+                    <Link to={askHref}>
+                      <MessageCircle aria-hidden="true" />
+                      {t("messages.ask")}
+                    </Link>
+                  </Button>
+                )}
+                <p className="mt-4 text-xs leading-relaxed text-muted-foreground">{t("profile.noPayment")}</p>
+              </div>
             </aside>
           </div>
         </div>
@@ -268,12 +306,14 @@ export default function SitterProfile() {
         /* 1.4: a floating pill like the brief capsule, held above the
            floating tab bar below md (bottom-[5.75rem]) and at the edge from
            md, where the tab bar is gone. */
-        className="has-pinned-action-sm pointer-events-none sticky bottom-[5.75rem] z-30 md:bottom-4 xl:hidden"
+        className="has-pinned-action-sm pointer-events-none sticky bottom-[5rem] z-30 md:bottom-0 xl:hidden"
       >
-        <div className="container">
-          <div className="pointer-events-auto mx-auto flex max-w-[720px] items-center gap-3 rounded-full bg-card p-1.5 ps-5 shadow-raised">
+        {/* An opaque band under the pill, down to the tab bar, so page text
+            never shows through the gap between the two floating layers. */}
+        <div className="container bg-gradient-to-t from-background from-60% to-transparent pb-2 pt-5 md:pb-4">
+          <div className="pointer-events-auto mx-auto flex max-w-[720px] items-center gap-2 rounded-full bg-card p-1.5 ps-4 shadow-raised">
             {rate ? (
-              <QuotedRate amount={rate.amount} careType={rate.careType} isFrom={rate.isFrom} compact className="flex-1" />
+              <QuotedRate amount={rate.amount} careType={rate.careType} isFrom={rate.isFrom} compact className="min-w-[4.75rem] flex-1" />
             ) : (
               <span className="flex-1" />
             )}
@@ -286,7 +326,7 @@ export default function SitterProfile() {
             )}
             {/* May shrink: at 320px the action's label wraps inside its pill
                 rather than pushing the page sideways. */}
-            <div className="min-w-0 [&>*]:w-full">{cta}</div>
+            <div className="min-w-0 shrink [&>*]:w-full [&>*]:px-4 [&>*]:text-[0.9375rem]">{cta}</div>
           </div>
         </div>
       </div>

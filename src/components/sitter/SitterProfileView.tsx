@@ -458,12 +458,12 @@ export function QuotedRate({
   const lng = useAppLocale();
   if (compact) {
     return (
-      <p className={cn("min-w-0 leading-tight", className)}>
-        <span className="block truncate text-xs text-muted-foreground">
-          {isFrom ? `${t("search.card.from")} · ` : ""}
-          {t(CARE_UNIT_KEY[careType])}
-        </span>
+      <p className={cn("min-w-0 whitespace-nowrap leading-tight", className)}>
+        {/* Never truncated: "à partir de" qualifies the amount, and an
+            amount without its qualifier says something false. */}
+        {isFrom && <span className="block text-xs text-muted-foreground">{t("search.card.from")}</span>}
         <span className="block text-lg font-semibold tabular-nums text-foreground">{formatDZD(amount, lng)}</span>
+        <span className="block text-xs text-muted-foreground">{t(CARE_UNIT_KEY[careType])}</span>
       </p>
     );
   }

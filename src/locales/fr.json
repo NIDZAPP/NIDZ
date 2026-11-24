@@ -596,6 +596,11 @@
     "demo": {
       "title": "Un profil d'exemple",
       "body": "Cette personne n'existe pas. Tout ce qui figure sur cette page, y compris les moments de garde et les avis plus bas, est un contenu d'exemple écrit pour cette démonstration. Nidz n'a rien vérifié."
+    },
+    "rail": {
+      "fitTitle": "Adapté à votre animal ?",
+      "fitBody": "Décrivez votre animal et vos dates : ce profil dira ce qui correspond, et ce qui ne correspond pas.",
+      "fitAction": "Décrire mon besoin"
     }
   },
   "ownerRequests": {
@@ -1267,7 +1272,8 @@
     "notFound": {
       "title": "Cette conversation n'est pas ici",
       "body": "Elle a peut-être été effacée avec les données de démonstration, ou elle appartient à l'autre espace."
-    }
+    },
+    "youLabel": "Vous :"
   },
   "notifications": {
     "note": "Ce que Nidz vous signalerait. Ici, rien n'est envoyé : ni SMS, ni e-mail, ni notification sur votre téléphone.",

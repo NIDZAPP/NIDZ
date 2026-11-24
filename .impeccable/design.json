@@ -1,0 +1,765 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-24T00:28:53+00:00",
+  "title": "Design System: Nidz",
+  "extensions": {
+    "colorMeta": {
+      "mist": {
+        "role": "neutral",
+        "displayName": "Mist",
+        "canonical": "hsl(156 17% 94%)",
+        "cssVar": "--background",
+        "tonalRamp": [
+          "#232A27",
+          "#394741",
+          "#4D655C",
+          "#618576",
+          "#84A497",
+          "#AFC0B9",
+          "#D5DCD9",
+          "#F1F3F2"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "hsl(167 16% 11%)",
+        "cssVar": "--foreground",
+        "tonalRamp": [
+          "#232928",
+          "#394643",
+          "#4E6460",
+          "#62847C",
+          "#85A39D",
+          "#B0BFBC",
+          "#D6DCDA",
+          "#F1F3F3"
+        ]
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Card White",
+        "canonical": "hsl(0 0% 100%)",
+        "cssVar": "--card",
+        "tonalRamp": [
+          "#262626",
+          "#404040",
+          "#595959",
+          "#737373",
+          "#949494",
+          "#B8B8B8",
+          "#D9D9D9",
+          "#F2F2F2"
+        ]
+      },
+      "primary": {
+        "role": "primary",
+        "displayName": "Signature Teal",
+        "canonical": "hsl(175 77% 26%)",
+        "cssVar": "--primary",
+        "tonalRamp": [
+          "#183533",
+          "#205F5A",
+          "#238F86",
+          "#21C5B7",
+          "#4BDDD1",
+          "#92DDD7",
+          "#CAE7E5",
+          "#EFF6F5"
+        ]
+      },
+      "primary-foreground": {
+        "role": "primary",
+        "displayName": "On Teal",
+        "canonical": "hsl(0 0% 100%)",
+        "cssVar": "--primary-foreground",
+        "tonalRamp": [
+          "#262626",
+          "#404040",
+          "#595959",
+          "#737373",
+          "#949494",
+          "#B8B8B8",
+          "#D9D9D9",
+          "#F2F2F2"
+        ]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Pressed Teal",
+        "canonical": "hsl(176 69% 22%)",
+        "cssVar": "--primary-hover",
+        "tonalRamp": [
+          "#193332",
+          "#235C58",
+          "#298A83",
+          "#29BCB2",
+          "#52D5CD",
+          "#96D9D5",
+          "#CCE6E4",
+          "#EFF5F5"
+        ]
+      },
+      "primary-soft": {
+        "role": "primary",
+        "displayName": "Selected Tint",
+        "canonical": "hsl(168 40% 91%)",
+        "cssVar": "--primary-soft",
+        "tonalRamp": [
+          "#1F2E2B",
+          "#2F504A",
+          "#3D756A",
+          "#489D8C",
+          "#6EBAAB",
+          "#A4CBC3",
+          "#D1E0DD",
+          "#F0F4F3"
+        ]
+      },
+      "primary-deep": {
+        "role": "primary",
+        "displayName": "Deep Teal Field",
+        "canonical": "hsl(175 74% 17%)",
+        "cssVar": "--primary-deep",
+        "tonalRamp": [
+          "#183432",
+          "#215E59",
+          "#258D84",
+          "#24C2B4",
+          "#4EDACE",
+          "#93DCD6",
+          "#CBE7E5",
+          "#EFF6F5"
+        ]
+      },
+      "primary-on-deep": {
+        "role": "primary",
+        "displayName": "On-Deep Text",
+        "canonical": "hsl(168 30% 85%)",
+        "cssVar": "--primary-on-deep",
+        "tonalRamp": [
+          "#212C2A",
+          "#334C47",
+          "#446E66",
+          "#539386",
+          "#77B0A5",
+          "#A9C6C0",
+          "#D3DEDC",
+          "#F1F4F3"
+        ]
+      },
+      "secondary": {
+        "role": "neutral",
+        "displayName": "Quiet Fill",
+        "canonical": "hsl(156 16% 91%)",
+        "cssVar": "--secondary",
+        "tonalRamp": [
+          "#232927",
+          "#394641",
+          "#4E645B",
+          "#628476",
+          "#85A397",
+          "#B0BFB9",
+          "#D6DCD9",
+          "#F1F3F2"
+        ]
+      },
+      "secondary-hover": {
+        "role": "neutral",
+        "displayName": "Quiet Fill Hover",
+        "canonical": "hsl(156 14% 86%)",
+        "cssVar": "--secondary-hover",
+        "tonalRamp": [
+          "#232927",
+          "#3A4541",
+          "#4F635B",
+          "#648276",
+          "#87A197",
+          "#B1BEB9",
+          "#D6DCD9",
+          "#F1F3F2"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "canonical": "hsl(156 18% 96%)",
+        "cssVar": "--muted",
+        "tonalRamp": [
+          "#232A27",
+          "#384741",
+          "#4D665C",
+          "#608677",
+          "#83A597",
+          "#AFC0B9",
+          "#D5DCD9",
+          "#F1F3F2"
+        ]
+      },
+      "muted-foreground": {
+        "role": "neutral",
+        "displayName": "Secondary Text",
+        "canonical": "hsl(162 8% 36%)",
+        "cssVar": "--muted-foreground",
+        "tonalRamp": [
+          "#232927",
+          "#3B4542",
+          "#52605C",
+          "#6A7C76",
+          "#8B9C97",
+          "#B2BDBA",
+          "#D6DCDA",
+          "#F1F3F3"
+        ]
+      },
+      "track": {
+        "role": "neutral",
+        "displayName": "Track",
+        "canonical": "hsl(160 9% 74%)",
+        "cssVar": "--track",
+        "tonalRamp": [
+          "#232927",
+          "#3B4541",
+          "#52605C",
+          "#697C76",
+          "#8B9C97",
+          "#B2BDBA",
+          "#D6DCDA",
+          "#F1F3F3"
+        ]
+      },
+      "brand": {
+        "role": "secondary",
+        "displayName": "Warm Terracotta",
+        "canonical": "hsl(15 54% 43%)",
+        "cssVar": "--brand",
+        "tonalRamp": [
+          "#31211C",
+          "#56352A",
+          "#7F4633",
+          "#AC5639",
+          "#C77A61",
+          "#D2AA9D",
+          "#E3D4CE",
+          "#F5F1F0"
+        ]
+      },
+      "brand-soft": {
+        "role": "secondary",
+        "displayName": "Terracotta Tint",
+        "canonical": "hsl(19 54% 93%)",
+        "cssVar": "--brand-soft",
+        "tonalRamp": [
+          "#31221C",
+          "#56382A",
+          "#7F4B33",
+          "#AC5E39",
+          "#C78161",
+          "#D2AE9D",
+          "#E3D5CE",
+          "#F5F1F0"
+        ]
+      },
+      "sand": {
+        "role": "secondary",
+        "displayName": "Sand",
+        "canonical": "hsl(33 62% 90%)",
+        "cssVar": "--sand",
+        "tonalRamp": [
+          "#32271A",
+          "#594226",
+          "#855E2E",
+          "#B57931",
+          "#CF9A59",
+          "#D6BB99",
+          "#E5DACD",
+          "#F5F3EF"
+        ]
+      },
+      "sky": {
+        "role": "secondary",
+        "displayName": "Sky",
+        "canonical": "hsl(205 60% 93%)",
+        "cssVar": "--sky",
+        "tonalRamp": [
+          "#1B2832",
+          "#274458",
+          "#2F6083",
+          "#337DB3",
+          "#5B9DCD",
+          "#9ABCD5",
+          "#CDDBE4",
+          "#F0F3F5"
+        ]
+      },
+      "success": {
+        "role": "status",
+        "displayName": "Success",
+        "canonical": "hsl(143 64% 24%)",
+        "cssVar": "--success",
+        "tonalRamp": [
+          "#1A3223",
+          "#265A3A",
+          "#2C864F",
+          "#2FB763",
+          "#57D186",
+          "#98D7B0",
+          "#CDE5D6",
+          "#EFF5F2"
+        ]
+      },
+      "warning": {
+        "role": "status",
+        "displayName": "Warning",
+        "canonical": "hsl(34 100% 30%)",
+        "cssVar": "--warning",
+        "tonalRamp": [
+          "#392913",
+          "#694517",
+          "#9F6313",
+          "#DD8108",
+          "#F3A135",
+          "#E9BE87",
+          "#ECDBC6",
+          "#F7F3EE"
+        ]
+      },
+      "destructive": {
+        "role": "status",
+        "displayName": "Destructive",
+        "canonical": "hsl(0 74% 42%)",
+        "cssVar": "--destructive",
+        "tonalRamp": [
+          "#341818",
+          "#5E2121",
+          "#8D2525",
+          "#C22424",
+          "#DA4E4E",
+          "#DC9393",
+          "#E7CBCB",
+          "#F6EFEF"
+        ]
+      },
+      "info": {
+        "role": "status",
+        "displayName": "Info",
+        "canonical": "hsl(224 76% 48%)",
+        "cssVar": "--info",
+        "tonalRamp": [
+          "#181F35",
+          "#21315F",
+          "#24408F",
+          "#224DC4",
+          "#4C72DC",
+          "#92A6DD",
+          "#CAD2E7",
+          "#EFF1F6"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "hsl(156 14% 88%)",
+        "cssVar": "--border",
+        "tonalRamp": [
+          "#232927",
+          "#3A4541",
+          "#4F635B",
+          "#648276",
+          "#87A197",
+          "#B1BEB9",
+          "#D6DCD9",
+          "#F1F3F2"
+        ]
+      },
+      "input": {
+        "role": "neutral",
+        "displayName": "Control Edge",
+        "canonical": "hsl(160 6% 52%)",
+        "cssVar": "--input",
+        "tonalRamp": [
+          "#242927",
+          "#3C4441",
+          "#545F5B",
+          "#6C7A75",
+          "#8D9A96",
+          "#B3BCB9",
+          "#D6DBDA",
+          "#F1F3F3"
+        ]
+      },
+      "shadow-ink": {
+        "role": "neutral",
+        "displayName": "Shadow Ink",
+        "canonical": "hsl(170 40% 10%)",
+        "cssVar": "--shadow",
+        "tonalRamp": [
+          "#1F2E2B",
+          "#2F504B",
+          "#3D756C",
+          "#489D8F",
+          "#6EBAAD",
+          "#A4CBC5",
+          "#D1E0DE",
+          "#F0F4F3"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Home hero title (clamps 28-34px on phones)."
+      },
+      "display-lg": {
+        "displayName": "Display Large",
+        "purpose": "Home hero title from md."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "The one h1 of a screen and every flow step."
+      },
+      "headline-lg": {
+        "displayName": "Headline Large",
+        "purpose": "Screen h1 from md."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Section headings, empty-state titles."
+      },
+      "price": {
+        "displayName": "Price",
+        "purpose": "Rates on cards and the pinned profile bar, tabular figures, unit beneath."
+      },
+      "name": {
+        "displayName": "Name",
+        "purpose": "A person's or an animal's name."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Prose, 56-70ch."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "15px workhorse: chips, option rows, capsule title, messages, request facts."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Provenance bylines, units, fact labels."
+      }
+    },
+    "fontSource": {
+      "family": "Readex Pro Variable",
+      "package": "@fontsource-variable/readex-pro",
+      "weights": "160-700",
+      "license": "OFL",
+      "scripts": [
+        "Latin",
+        "Arabic"
+      ],
+      "selfHosted": true
+    },
+    "shadows": [
+      {
+        "name": "card",
+        "value": "0 1px 2px hsl(var(--shadow) / 0.05), 0 8px 24px -6px hsl(var(--shadow) / 0.08)",
+        "purpose": "Every resting white card and the hero."
+      },
+      {
+        "name": "pill",
+        "value": "0 1px 2px hsl(var(--shadow) / 0.06), 0 4px 12px -3px hsl(var(--shadow) / 0.10)",
+        "purpose": "White and teal pills on the ground, header icon buttons, segmented nav."
+      },
+      {
+        "name": "raised",
+        "value": "0 2px 6px hsl(var(--shadow) / 0.06), 0 18px 40px -10px hsl(var(--shadow) / 0.22)",
+        "purpose": "What genuinely floats: brief capsule, tab bar, pinned profile bar, popovers, menus, sheets; card hover with a fine pointer."
+      },
+      {
+        "name": "chrome-t",
+        "value": "0 -10px 24px -14px hsl(var(--shadow) / 0.18)",
+        "purpose": "Top edge of a pinned bottom bar."
+      },
+      {
+        "name": "chrome-b",
+        "value": "0 1px 0 0 hsl(var(--border))",
+        "purpose": "Hairline under chrome."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "Default for presses, state changes, arrivals."
+      },
+      {
+        "name": "ease-in-out",
+        "value": "cubic-bezier(0.77, 0, 0.175, 1)",
+        "purpose": "Something moving on screen: the tab capsule (250ms)."
+      },
+      {
+        "name": "ease-drawer",
+        "value": "cubic-bezier(0.32, 0.72, 0, 1)",
+        "purpose": "Sheets: 300ms in, 200-250ms out."
+      },
+      {
+        "name": "press",
+        "value": "150ms; scale(0.97) buttons and chips, scale(0.98) cards",
+        "purpose": "Felt, not seen."
+      },
+      {
+        "name": "page-in",
+        "value": "220ms, 6px rise from opacity 0.01",
+        "purpose": "Screen arrival, keyed on the route."
+      },
+      {
+        "name": "scale-in",
+        "value": "180ms from 0.96",
+        "purpose": "Popovers and menus."
+      },
+      {
+        "name": "pop",
+        "value": "180ms from 0.85",
+        "purpose": "Checks and counts appearing."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "all animations and transitions 0.01ms",
+        "purpose": "Global rule in src/index.css; Radix still gets animationend."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      },
+      {
+        "name": "container-max",
+        "value": "1400px"
+      }
+    ],
+    "measures": [
+      {
+        "name": "flow",
+        "value": "560px"
+      },
+      {
+        "name": "flow-wide / forms / capsule / profile column",
+        "value": "720px"
+      },
+      {
+        "name": "messages",
+        "value": "640px"
+      },
+      {
+        "name": "home",
+        "value": "1080px"
+      },
+      {
+        "name": "results / profile frame",
+        "value": "1120px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Pill",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one action colour: teal capsule, semibold label, optional leading icon.",
+      "html": "<button class=\"ds-btn-primary\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg>Trouver une garde</button>",
+      "css": ".ds-btn-primary{font-family:'Readex Pro Variable',ui-sans-serif,system-ui,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 20px;border:1px solid transparent;border-radius:9999px;background:hsl(var(--primary));color:hsl(var(--primary-foreground));font-size:15px;font-weight:600;box-shadow:0 1px 2px hsl(var(--shadow) / 0.06), 0 4px 12px -3px hsl(var(--shadow) / 0.10);cursor:pointer;transition:transform 150ms cubic-bezier(0.23, 1, 0.32, 1),background-color 150ms cubic-bezier(0.23, 1, 0.32, 1);}.ds-btn-primary:hover{background:hsl(var(--primary-hover));}.ds-btn-primary:active{transform:scale(0.97);}.ds-btn-primary:focus-visible{outline:none;box-shadow:0 0 0 2px hsl(var(--background)),0 0 0 4px hsl(var(--ring));}"
+    },
+    {
+      "name": "Surface Pill",
+      "kind": "button",
+      "refersTo": "button-surface",
+      "description": "The resting secondary action on the mist ground: white capsule on its own soft shadow.",
+      "html": "<button class=\"ds-btn-surface\">Devenir pet-sitter</button>",
+      "css": ".ds-btn-surface{font-family:'Readex Pro Variable',ui-sans-serif,system-ui,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 20px;border:1px solid transparent;border-radius:9999px;background:hsl(var(--card));color:hsl(var(--foreground));font-size:15px;font-weight:600;box-shadow:0 1px 2px hsl(var(--shadow) / 0.06), 0 4px 12px -3px hsl(var(--shadow) / 0.10);cursor:pointer;transition:transform 150ms cubic-bezier(0.23, 1, 0.32, 1),background-color 150ms cubic-bezier(0.23, 1, 0.32, 1);}.ds-btn-surface:hover{background:hsl(var(--secondary));}.ds-btn-surface:active{transform:scale(0.97);}.ds-btn-surface:focus-visible{outline:none;box-shadow:0 0 0 2px hsl(var(--background)),0 0 0 4px hsl(var(--ring));}"
+    },
+    {
+      "name": "Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Filter chip: white with a control-edge ring at rest; teal tint, teal ring and a check when chosen.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" role=\"checkbox\" aria-checked=\"false\">Promenade</button><button class=\"ds-chip ds-chip-on\" role=\"checkbox\" aria-checked=\"true\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg>Garde chez le pet-sitter</button></div>",
+      "css": ".ds-chips{display:flex;flex-wrap:wrap;gap:8px;}.ds-chip{font-family:'Readex Pro Variable',ui-sans-serif,system-ui,sans-serif;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border:1px solid transparent;border-radius:9999px;background:hsl(var(--card));color:hsl(var(--foreground));font-size:15px;box-shadow:inset 0 0 0 1px hsl(var(--input)),0 1px 2px hsl(var(--shadow) / 0.05);cursor:pointer;transition:transform 150ms cubic-bezier(0.23, 1, 0.32, 1),background-color 150ms cubic-bezier(0.23, 1, 0.32, 1);}.ds-chip:hover{background:hsl(var(--secondary));}.ds-chip:active{transform:scale(0.97);}.ds-chip:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:2px;}.ds-chip-on,.ds-chip-on:hover{background:hsl(var(--primary-soft));color:hsl(var(--primary));font-weight:600;box-shadow:inset 0 0 0 1.5px hsl(var(--primary));}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "48px white field, 14px radius, control-edge border; teal border plus soft teal halo on focus.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Commune</span><input class=\"ds-input\" placeholder=\"ex. Bab Ezzouar\"></label>",
+      "css": ".ds-field{font-family:'Readex Pro Variable',ui-sans-serif,system-ui,sans-serif;display:grid;gap:6px;max-width:360px;}.ds-field-label{font-size:15px;font-weight:500;color:hsl(var(--foreground));}.ds-input{font-family:'Readex Pro Variable',ui-sans-serif,system-ui,sans-serif;height:48px;padding:8px 16px;border:1px solid hsl(var(--input));border-radius:14px;background:hsl(var(--card));color:hsl(var(--foreground));font-size:16px;transition:box-shadow 150ms,border-color 150ms;}.ds-input::placeholder{font-weight:300;color:hsl(var(--muted-foreground));}.ds-input:focus-visible{outline:none;border-color:hsl(var(--primary));box-shadow:inset 0 0 0 1px hsl(var(--primary)),0 0 0 4px hsl(var(--primary) / 0.15);}"
+    },
+    {
+      "name": "Sitter Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "One card per sitter on the mist ground: monogram, name, place, headline, provenance byline, then price and the one action.",
+      "html": "<article class=\"ds-card\"><div class=\"ds-card-head\"><span class=\"ds-mono\">Y</span><div><h3 class=\"ds-name\">Youcef H.</h3><p class=\"ds-place\">Bab Ezzouar</p></div></div><p class=\"ds-headline\">Je garde les chiens de toute taille dans un appartement calme avec balcon.</p><p class=\"ds-byline\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"/><circle cx=\"12\" cy=\"7\" r=\"4\"/></svg>Déclaré par le pet-sitter · Exemple</p><div class=\"ds-card-foot\"><div><p class=\"ds-price\">2 500 DA</p><p class=\"ds-unit\">par nuit</p></div><button class=\"ds-btn-primary\">Voir le profil</button></div></article>",
+      "css": ".ds-card{font-family:'Readex Pro Variable',ui-sans-serif,system-ui,sans-serif;display:flex;flex-direction:column;gap:12px;max-width:380px;padding:16px;border-radius:22px;background:hsl(var(--card));color:hsl(var(--card-foreground));box-shadow:0 1px 2px hsl(var(--shadow) / 0.05), 0 8px 24px -6px hsl(var(--shadow) / 0.08);transition:transform 150ms cubic-bezier(0.23, 1, 0.32, 1),box-shadow 150ms cubic-bezier(0.23, 1, 0.32, 1);}.ds-card:hover{box-shadow:0 2px 6px hsl(var(--shadow) / 0.06), 0 18px 40px -10px hsl(var(--shadow) / 0.22);}.ds-card:active{transform:scale(0.98);}.ds-card-head{display:flex;gap:14px;align-items:flex-start;}.ds-mono{display:flex;width:48px;height:48px;flex-shrink:0;align-items:center;justify-content:center;border-radius:9999px;background:hsl(var(--brand-soft));color:hsl(var(--brand));font-size:18px;font-weight:600;}.ds-name{margin:0;font-size:18px;line-height:1.3;letter-spacing:-0.01em;font-weight:600;}.ds-place{margin:2px 0 0;font-size:14px;color:hsl(var(--muted-foreground));}.ds-headline{margin:0;font-size:15px;line-height:1.625;}.ds-byline{display:flex;align-items:center;gap:6px;margin:0;font-size:12px;color:hsl(var(--muted-foreground));}.ds-card-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-top:14px;border-top:1px solid hsl(var(--border));}.ds-price{margin:0;font-size:22px;line-height:1.2;letter-spacing:-0.02em;font-weight:600;font-variant-numeric:tabular-nums;}.ds-unit{margin:0;font-size:12px;color:hsl(var(--muted-foreground));}.ds-card .ds-btn-primary{font-family:'Readex Pro Variable',ui-sans-serif,system-ui,sans-serif;height:44px;padding:0 20px;border:1px solid transparent;border-radius:9999px;background:hsl(var(--primary));color:hsl(var(--primary-foreground));font-size:15px;font-weight:600;box-shadow:0 1px 2px hsl(var(--shadow) / 0.06), 0 4px 12px -3px hsl(var(--shadow) / 0.10);cursor:pointer;}.ds-card .ds-btn-primary:hover{background:hsl(var(--primary-hover));}"
+    },
+    {
+      "name": "Brief Capsule",
+      "kind": "custom",
+      "refersTo": "brief-capsule",
+      "description": "Signature: the owner's brief as one floating pill above results, profile and request, with an inner teal Modifier pill.",
+      "html": "<button class=\"ds-capsule\" aria-label=\"Modifier la recherche, 2 critères\"><span class=\"ds-capsule-pet\" aria-hidden=\"true\"></span><span class=\"ds-capsule-text\"><span class=\"ds-capsule-title\">Grands chiens</span><span class=\"ds-capsule-parts\">Garde chez le pet-sitter · 12–15 mars · Alger</span></span><span class=\"ds-capsule-act\" aria-hidden=\"true\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4\"/></svg>Modifier<span class=\"ds-capsule-count\">2</span></span></button>",
+      "css": ".ds-capsule{font-family:'Readex Pro Variable',ui-sans-serif,system-ui,sans-serif;display:flex;width:100%;max-width:520px;align-items:center;gap:12px;padding:6px;border:1px solid transparent;border-radius:9999px;background:hsl(var(--card));box-shadow:0 2px 6px hsl(var(--shadow) / 0.06), 0 18px 40px -10px hsl(var(--shadow) / 0.22);cursor:pointer;text-align:start;transition:transform 150ms cubic-bezier(0.23, 1, 0.32, 1);}.ds-capsule:active{transform:scale(0.99);}.ds-capsule:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:2px;}.ds-capsule-pet{width:44px;height:44px;flex-shrink:0;border-radius:9999px;background:hsl(var(--sand));}.ds-capsule-text{display:block;min-width:0;flex:1;}.ds-capsule-title{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:15px;font-weight:600;line-height:1.25;color:hsl(var(--foreground));}.ds-capsule-parts{display:block;margin-top:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:13px;line-height:1.25;color:hsl(var(--muted-foreground));}.ds-capsule-act{display:inline-flex;height:40px;flex-shrink:0;align-items:center;gap:6px;padding:0 14px;border-radius:9999px;background:hsl(var(--primary));color:hsl(var(--primary-foreground));font-size:14px;font-weight:600;transition:background-color 150ms;}.ds-capsule:hover .ds-capsule-act{background:hsl(var(--primary-hover));}.ds-capsule-count{display:flex;width:20px;height:20px;align-items:center;justify-content:center;border-radius:9999px;background:hsl(var(--primary-foreground));color:hsl(var(--primary));font-size:11px;font-weight:700;}"
+    },
+    {
+      "name": "Floating Tab Bar",
+      "kind": "nav",
+      "refersTo": "tab-bar",
+      "description": "Mobile navigation: a raised white pill; the current tab sits on a soft teal capsule that slides between tabs.",
+      "html": "<nav class=\"ds-tabs\" aria-label=\"Espace propriétaire\"><span class=\"ds-tabs-ind\" aria-hidden=\"true\"></span><a class=\"ds-tab\" href=\"#\">Accueil</a><a class=\"ds-tab ds-tab-on\" href=\"#\" aria-current=\"page\">Recherche</a><a class=\"ds-tab\" href=\"#\">Demandes</a><a class=\"ds-tab\" href=\"#\">Animaux</a><a class=\"ds-tab\" href=\"#\">Compte</a></nav>",
+      "css": ".ds-tabs{font-family:'Readex Pro Variable',ui-sans-serif,system-ui,sans-serif;position:relative;display:flex;max-width:448px;padding:6px;border-radius:9999px;background:hsl(var(--card));box-shadow:0 2px 6px hsl(var(--shadow) / 0.06), 0 18px 40px -10px hsl(var(--shadow) / 0.22);}.ds-tabs-ind{position:absolute;top:6px;bottom:6px;left:6px;width:calc((100% - 12px) / 5);border-radius:9999px;background:hsl(var(--primary-soft));transform:translateX(100%);transition:transform 250ms cubic-bezier(0.77, 0, 0.175, 1);}.ds-tab{position:relative;display:flex;flex:1;min-height:56px;align-items:center;justify-content:center;border-radius:9999px;font-size:11px;color:hsl(var(--muted-foreground));text-decoration:none;transition:color 150ms;}.ds-tab:hover{color:hsl(var(--foreground));}.ds-tab:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:-2px;}.ds-tab-on{font-weight:600;color:hsl(var(--primary));}"
+    },
+    {
+      "name": "Pending Status",
+      "kind": "chip",
+      "refersTo": "status-pending",
+      "description": "Request status pill: always an icon plus a word. Pending is sand with a clock; never red for declined.",
+      "html": "<span class=\"ds-status\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 6v6l4 2\"/></svg>En attente</span>",
+      "css": ".ds-status{font-family:'Readex Pro Variable',ui-sans-serif,system-ui,sans-serif;display:inline-flex;height:28px;align-items:center;gap:6px;padding:0 12px;border-radius:9999px;background:hsl(var(--sand));color:hsl(var(--foreground));font-size:12px;font-weight:600;}"
+    },
+    {
+      "name": "InfoTip",
+      "kind": "custom",
+      "description": "A grey '!' in a 44px round button opening a popover with the why behind a question. Never hides an error, constraint, privacy fact or demo marker.",
+      "html": "<span class=\"ds-info-row\">Taille du chien <button class=\"ds-infotip\" aria-label=\"Plus d'informations : taille\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7.5v5.5M12 16.5h.01\"/></svg></button></span>",
+      "css": ".ds-info-row{font-family:'Readex Pro Variable',ui-sans-serif,system-ui,sans-serif;display:inline-flex;align-items:center;gap:8px;font-size:15px;font-weight:500;color:hsl(var(--foreground));}.ds-infotip{display:inline-flex;width:44px;height:44px;margin:-12px;align-items:center;justify-content:center;border:0;border-radius:9999px;background:transparent;color:hsl(var(--muted-foreground) / 0.8);cursor:pointer;transition:background-color 150ms,color 150ms;}.ds-infotip:hover{background:hsl(var(--secondary));color:hsl(var(--foreground));}.ds-infotip:focus-visible{outline:2px solid hsl(var(--ring));}"
+    },
+    {
+      "name": "Message Bubbles",
+      "kind": "custom",
+      "refersTo": "message-mine",
+      "description": "Local notes: mine at the inline end on the teal tint, theirs at the start on muted; author and time written in words, never a read receipt.",
+      "html": "<div class=\"ds-thread\"><div class=\"ds-msg\"><p class=\"ds-msg-meta\"><b>Youcef H.</b> · 10:42</p><div class=\"ds-bubble\" dir=\"auto\">Bonjour, Rex peut-il dormir sur le balcon ?</div></div><div class=\"ds-msg ds-mine\"><p class=\"ds-msg-meta\"><b>Vous</b> · écrit sur cet appareil</p><div class=\"ds-bubble\" dir=\"auto\">Non, il dort à l’intérieur.</div></div></div>",
+      "css": ".ds-thread{font-family:'Readex Pro Variable',ui-sans-serif,system-ui,sans-serif;display:grid;gap:12px;max-width:420px;}.ds-msg{display:flex;flex-direction:column;align-items:flex-start;}.ds-mine{align-items:flex-end;}.ds-msg-meta{margin:0 0 4px;padding:0 4px;font-size:12px;color:hsl(var(--muted-foreground));}.ds-msg-meta b{font-weight:600;color:hsl(var(--foreground));}.ds-bubble{max-width:85%;padding:10px 16px;border-radius:28px;border-end-start-radius:14px;background:hsl(var(--muted));color:hsl(var(--foreground));font-size:15px;line-height:1.625;}.ds-mine .ds-bubble{border-end-start-radius:28px;border-end-end-radius:14px;background:hsl(var(--primary-soft));}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Brief Over the Terrain",
+    "overview": "**Creative North Star: \"The Brief Over the Terrain\"**\n\nThe animal is the unit of everything. The owner's question (which animal, what care, when, where) rides above every list as one floating white capsule, and everything under it is an answer to what the capsule says. Each answer, each decision, each fact is one soft white card on a mist ground: a cool green-grey drawn from the brand teal, not the cream the 1.2 audit removed. Warmth comes from the content, the animals and the people, never from a beige page.\n\nColour does exactly two jobs. Deep teal is the only thing you can press, and it is always a pill. Terracotta, its soft tint, sand and sky belong to animals and people: illustration tiles, monograms, the brand paw. The type is one family, Readex Pro, drawn for Latin and Arabic together, set semibold with tight tracking for display roles. Depth is one soft, ink-tinted shadow from a single light source; only things that genuinely float (the capsule, the tab bar, popovers, sheets) get the raised shadow.\n\n**The rule that shapes everything else is honesty.** Nidz is a prototype with no backend, and the interface may not imply a capability that does not exist. Several visual choices exist only because of that: there are no trust badges, star ratings, \"verified\" marks, response-time chips or online dots, because `SitterProfile` carries no such field. Every claim about a sitter wears a provenance byline (`ProvenanceLabel`, `src/components/shared/trust.tsx`), a 14px Lucide icon plus a 12px muted label, and only the \"declared\" category may render; the others throw in development. Simulated behaviour carries a `DemoNotice` card at the same weight as the content it qualifies, never a footnote. Messages show when a note was written on this device and never \"sent\", \"delivered\", \"read\" or \"seen\".",
+    "keyCharacteristics": [
+      "Mist ground, white cards (22px radius) under one soft ink-tinted shadow; never a card inside a card.",
+      "Teal `#0F766E` is the only action colour and every action is a pill.",
+      "Terracotta, sand and sky are non-interactive: animals and people only.",
+      "Readex Pro Variable for Latin and Arabic, self-hosted, semibold display with negative tracking.",
+      "The brief capsule floats above results, the sitter profile and the request review.",
+      "Lucide 2px icons first; a handful of custom icons in Lucide's grammar; flat authored animal illustrations.",
+      "Provenance bylines instead of badges; demo notices at full weight; no read receipts."
+    ],
+    "rules": [
+      {
+        "name": "The One Action Colour Rule",
+        "body": "Teal is the only colour that means \"press this\", and it is always a pill. `primary-deep` shares the hue but is never pressable.",
+        "section": "colors"
+      },
+      {
+        "name": "The Living Things Rule",
+        "body": "Terracotta, `brand-soft`, sand and sky carry animals and people. They never carry a state (hover, focus, selection, error) and never fill an action button. Two exceptions, both recorded in §0.1-A: the **resting** fill of an illustrated animal-category card, whose selection is carried by the 2.5px teal ring and the check badge; and sand on the pending status, always beside its clock.",
+        "section": "colors"
+      },
+      {
+        "name": "The Teal Tile Rule",
+        "body": "An interface icon tile (housing, rates, limits, account rows, empty states) is `primary-soft` with a teal glyph, or `secondary` with an ink glyph. Never terracotta.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Accents Rule",
+        "body": "CSS `--accent` is shadcn's neutral highlight surface (aliased to `primary-soft`); the warm brand colour lives on `--brand`. Never put terracotta in `--accent`.",
+        "section": "colors"
+      },
+      {
+        "name": "The Unsent Is Uncoloured Rule",
+        "body": "A request in preparation never wears a status colour. Nothing has a status until a request exists.",
+        "section": "colors"
+      },
+      {
+        "name": "The Art Constants Rule",
+        "body": "Fur, beak and feather colours are artwork constants in `src/components/illustrations/animals.tsx`, not tokens. Where a token exists (ink, the teal collar) the artwork uses it.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Family Rule",
+        "body": "Readex Pro for everything, both scripts. No display serif, no system display face, no Google Fonts request.",
+        "section": "typography"
+      },
+      {
+        "name": "The Script-Safe Rule",
+        "body": "No uppercase and no letter-spacing on running labels: uppercase is a no-op in Arabic and tracking breaks cursive joining. Negative tracking is a display-role property only.",
+        "section": "typography"
+      },
+      {
+        "name": "The Figures Rule",
+        "body": "Readex Pro's figures are proportional; prices and dates in lists ask for `tabular-nums` at the call site.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Idea Per Card Rule",
+        "body": "One card holds one idea, thumb-sized. Never a card inside a card; inside a card, use a `muted` or tinted tile instead.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Floating Means Raised Rule",
+        "body": "`raised` is reserved for things that float over content. A resting card earns it only as hover feedback.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Forced-Colours Edge Rule",
+        "body": "Pills and chips carry a transparent 1px border so that forced-colours mode, which drops shadows, still draws an edge.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Pill Rule",
+        "body": "Every action is a capsule, the shape of an iOS notification. One shape for everything pressable means the eye learns it once.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Round Tile Rule",
+        "body": "Icons and portraits sit in circles: 40px in list rows, 44px in option rows and the capsule, 48px in sitter cards, 64px in empty states.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "**Do** put every screen on the mist ground (`#EDF2F0`) and every idea in one white `xl` card with the `card` shadow.",
+      "**Do** make every action a pill, and make teal the only filled action colour on a screen.",
+      "**Do** use `surface` (white, `pill` shadow) for the second action on the ground and `outline` for a secondary action inside a white card.",
+      "**Do** mark selection with the teal ring plus a check (chips 1.5px, option rows 2px, animal cards 2.5px).",
+      "**Do** use the brief capsule above any list or decision that answers the owner's brief.",
+      "**Do** give every claim about a sitter a `ProvenanceLabel`, and every simulated step a full-weight `DemoNotice`.",
+      "**Do** keep errors, constraints, formats, privacy facts and honesty statements visible; only the *why* goes behind the \"!\".",
+      "**Do** isolate user text with `<bdi>` or `dir=\"auto\"` and test every screen in Arabic.",
+      "**Do** reach for Lucide first, and draw a custom icon in its grammar only when Lucide lacks the picture.",
+      "**Do** keep artwork colours in `animals.tsx` and interface colours in tokens."
+    ],
+    "donts": [
+      "**Don't** use terracotta, `brand-soft`, sand or sky for a button, a link, a hover, a focus, a selection or an interface icon tile.",
+      "**Don't** put anything pressable on the deep-teal hero field.",
+      "**Don't** nest a card inside a card, or turn a navigation row into a card of its own.",
+      "**Don't** render a badge, star rating, \"verified\" mark, response time, completed-stays count or online dot; there is no mechanism behind any of them.",
+      "**Don't** show \"sent\", \"delivered\", \"read\" or \"seen\" in Messages, or present an unsent request with a status colour.",
+      "**Don't** render \"available\" from a sitter who has not declared themselves busy.",
+      "**Don't** use uppercase or letter-spacing on running labels, or a second typeface.",
+      "**Don't** use destructive red for a declined request; it is a normal outcome.",
+      "**Don't** rely on colour alone for any state, or on a hairline as the only edge of a control.",
+      "**Don't** let an inline link stand on colour alone; underline it."
+    ]
+  }
+}

@@ -581,6 +581,11 @@
     "demo": {
       "title": "An example profile",
       "body": "This person does not exist. Everything on this page, including the care moments and reviews further down, is example content written for this demonstration. Nidz has verified nothing."
+    },
+    "rail": {
+      "fitTitle": "Right for your animal?",
+      "fitBody": "Describe your animal and your dates: this profile will say what fits and what does not.",
+      "fitAction": "Describe my need"
     }
   },
   "ownerRequests": {
@@ -1245,7 +1250,8 @@
     "notFound": {
       "title": "This conversation is not here",
       "body": "It may have been erased with the demo data, or it belongs to another space."
-    }
+    },
+    "youLabel": "You:"
   },
   "notifications": {
     "note": "What Nidz would tell you. Here nothing is sent: no SMS, no e-mail, no notification on your phone.",

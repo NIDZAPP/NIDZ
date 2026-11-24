@@ -262,7 +262,7 @@ export default function MessageThread() {
           </section>
 
           {/* Who, if anyone, could ever read this — at full weight. */}
-          <p className="flex items-start gap-2.5 rounded-xl bg-sand/70 p-3.5 text-sm leading-relaxed text-foreground">
+          <p className="flex items-start gap-2.5 rounded-xl bg-card p-3.5 text-sm leading-relaxed text-foreground shadow-card">
             <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
             <span>{notice}</span>
           </p>

@@ -103,7 +103,7 @@ export default function OwnerRequestDetail() {
                 first, at body size, with the info glyph that marks the honesty
                 layer everywhere else. */}
             <div className="mt-5 flex max-w-[64ch] items-start gap-3 rounded-xl bg-card p-4 text-base leading-relaxed text-foreground shadow-card">
-              <span aria-hidden="true" className="flex size-9 shrink-0 items-center justify-center rounded-full bg-sand">
+              <span aria-hidden="true" className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary">
                 <Info className="size-[1.125rem]" />
               </span>
               <span className="pt-1">{t(`ownerRequests.explain.${request.status}`)}</span>

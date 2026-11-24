@@ -147,11 +147,8 @@ function ConversationList({ conversations, side }: { conversations: Conversation
         const name = side === "owner" ? sitterNameFor(state, c.sitterId) : c.ownerName;
         const last = lastMessage(c);
         const unread = unreadCount(c, side);
-        const preview = last
-          ? last.author === side
-            ? t("messages.youPrefix", { text: last.text })
-            : last.text
-          : t("messages.noMessageYet");
+        const mine = last?.author === side;
+        const preview = last ? last.text : t("messages.noMessageYet");
         return (
           <li key={c.id}>
             <Link to={`/messages/${c.id}`} className={REGISTER_ROW}>
@@ -178,9 +175,14 @@ function ConversationList({ conversations, side }: { conversations: Conversation
                   )}
                 </span>
                 <span className="mt-0.5 flex items-center justify-between gap-3">
-                  <bdi dir="auto" className={cn("truncate text-sm", unread > 0 ? "font-medium text-foreground" : "text-muted-foreground")}>
-                    {preview}
-                  </bdi>
+                  {/* The "Vous :" prefix and the message are isolated apart, so a
+                      French note inside Arabic clips at ITS end. */}
+                  <span className={cn("flex min-w-0 items-baseline gap-1 text-sm", unread > 0 ? "font-medium text-foreground" : "text-muted-foreground")}>
+                    {mine && <span className="shrink-0">{t("messages.youLabel")}</span>}
+                    <bdi dir="auto" className="block min-w-0 truncate">
+                      {preview}
+                    </bdi>
+                  </span>
                   {unread > 0 && (
                     <span className="shrink-0 rounded-full bg-primary px-2 py-0.5 text-[0.6875rem] font-bold text-primary-foreground">
                       {t("messages.unread", { count: unread })}
