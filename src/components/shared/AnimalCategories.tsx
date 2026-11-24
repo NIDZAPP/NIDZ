@@ -38,7 +38,7 @@ function CardBody({ species, label, selected, sub }: { species: Species; label: 
       <AnimalPortrait
         species={species}
         tile={false}
-        className="mx-auto aspect-square w-full max-w-[9rem] transition-transform duration-300 ease-out group-hover:-translate-y-0.5"
+        className="mx-auto aspect-square w-full max-w-[9rem] transition-transform duration-200 ease-out [@media(hover:hover)_and_(pointer:fine)]:group-hover:-translate-y-0.5"
       />
       <span className="flex items-center justify-between gap-1 px-3 pb-3">
         <span className="min-w-0">
@@ -64,7 +64,7 @@ function CardBody({ species, label, selected, sub }: { species: Species; label: 
 const ring = (selected: boolean) =>
   selected
     ? "shadow-[inset_0_0_0_2.5px_hsl(var(--primary)),0_8px_20px_-8px_hsl(var(--shadow)/0.25)]"
-    : "shadow-card hover:shadow-raised";
+    : "shadow-card [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-raised";
 
 type Common = {
   /** Label per species; defaults to `species.<s>` (singular). */

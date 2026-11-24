@@ -220,7 +220,14 @@ export default function MessageThread() {
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[0.9375rem] font-semibold text-foreground">
                   {context.pet
-                    ? [context.pet.name, t(`species.${context.pet.species}`), kindLabel(context.pet, lng)].filter(Boolean).join(" · ")
+                    ? [context.pet.name, t(`species.${context.pet.species}`), kindLabel(context.pet, lng)]
+                        .filter(Boolean)
+                        .map((part, i) => (
+                          <span key={i}>
+                            {i > 0 && <span aria-hidden="true"> · </span>}
+                            <bdi>{part}</bdi>
+                          </span>
+                        ))
                     : t("messages.thread.contextNone")}
                 </p>
                 <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-muted-foreground">
@@ -301,6 +308,7 @@ export default function MessageThread() {
                 <Textarea
                   id="message-field"
                   ref={fieldRef}
+                  dir="auto"
                   rows={1}
                   maxLength={MESSAGE_MAX_LENGTH}
                   value={text}

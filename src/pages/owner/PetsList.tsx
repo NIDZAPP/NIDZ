@@ -87,7 +87,13 @@ export default function PetsList() {
                           <bdi>{pet.name}</bdi>
                         </span>
                         <span className="mt-0.5 block truncate text-sm text-muted-foreground">
-                          {[t(`species.${pet.species}`), kind].filter(Boolean).join(" · ")}
+                          {t(`species.${pet.species}`)}
+                          {kind && (
+                            <>
+                              <span aria-hidden="true"> · </span>
+                              <bdi>{kind}</bdi>
+                            </>
+                          )}
                         </span>
                         {/* Administrative only (§118): what a sitter can still
                             not see — never a score for the animal. */}

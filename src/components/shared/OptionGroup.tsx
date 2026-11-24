@@ -91,7 +91,7 @@ export default function OptionGroup<T extends string>({
                   "cursor-not-allowed border border-dashed border-input/60"
                 : selected
                   ? "bg-card shadow-[inset_0_0_0_2px_hsl(var(--primary)),0_8px_24px_-8px_hsl(var(--shadow)/0.14)]"
-                  : "bg-card shadow-card hover:shadow-raised active:scale-[0.99]",
+                  : "bg-card shadow-card active:scale-[0.99] [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-raised",
             )}
           >
             {option.art ? (

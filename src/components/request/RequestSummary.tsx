@@ -99,8 +99,15 @@ export default function RequestSummary({
               <p className="truncate text-name font-semibold text-foreground">
                 <bdi>{pet.name}</bdi>
               </p>
+              {/* Each part isolated: a breed or an age is the owner's own text
+                  ("3 ans") and may be Latin inside Arabic. */}
               <p className="truncate text-sm text-muted-foreground">
-                {[t(`species.${pet.species}`), kind, pet.age].filter(Boolean).join(" · ")}
+                {[t(`species.${pet.species}`), kind, pet.age].filter(Boolean).map((part, i) => (
+                  <span key={i}>
+                    {i > 0 && <span aria-hidden="true"> · </span>}
+                    <bdi>{part}</bdi>
+                  </span>
+                ))}
               </p>
             </>
           ) : (
@@ -162,7 +169,7 @@ export default function RequestSummary({
           {pet.notes && (
             <div>
               <Heading className="text-[0.9375rem] font-semibold text-foreground">{t("request.summary.needs")}</Heading>
-              <p className="mt-1.5 max-w-[64ch] text-base leading-relaxed text-foreground">{pet.notes}</p>
+              <p dir="auto" className="mt-1.5 max-w-[64ch] text-base leading-relaxed text-foreground">{pet.notes}</p>
             </div>
           )}
         </div>

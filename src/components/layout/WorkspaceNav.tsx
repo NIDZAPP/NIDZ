@@ -15,8 +15,8 @@ import { isNavigable, workspaceDestinations, type NavContext } from "./workspace
  *
  * 1.4 shape: a floating pill, inset from the screen edges, on its own raised
  * shadow — the one thing in the shell that genuinely floats. The current tab
- * sits on a soft teal capsule that SLIDES between tabs (transform only, 280ms
- * ease-out), so moving between spaces reads as one control changing state
+ * sits on a soft teal capsule that SLIDES between tabs (transform only,
+ * 250ms, a strong ease-in-out because it moves ON screen — Emil Kowalski), so moving between spaces reads as one control changing state
  * rather than five links repainting. Three cues mark the current tab, never
  * colour alone (§12.2): the capsule, a heavier label, and `aria-current`.
  *
@@ -60,7 +60,7 @@ export default function WorkspaceNav({
         {active >= 0 && (
           <span
             aria-hidden="true"
-            className="absolute inset-y-1.5 start-1.5 rounded-full bg-primary-soft transition-transform duration-300 ease-out"
+            className="absolute inset-y-1.5 start-1.5 rounded-full bg-primary-soft transition-transform duration-[250ms] ease-in-out"
             style={{
               width: `calc((100% - 0.75rem) / ${count})`,
               /* Logical direction: in Arabic the bar runs right to left, so the

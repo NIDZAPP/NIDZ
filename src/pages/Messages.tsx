@@ -178,9 +178,9 @@ function ConversationList({ conversations, side }: { conversations: Conversation
                   )}
                 </span>
                 <span className="mt-0.5 flex items-center justify-between gap-3">
-                  <span className={cn("truncate text-sm", unread > 0 ? "font-medium text-foreground" : "text-muted-foreground")}>
+                  <bdi dir="auto" className={cn("truncate text-sm", unread > 0 ? "font-medium text-foreground" : "text-muted-foreground")}>
                     {preview}
-                  </span>
+                  </bdi>
                   {unread > 0 && (
                     <span className="shrink-0 rounded-full bg-primary px-2 py-0.5 text-[0.6875rem] font-bold text-primary-foreground">
                       {t("messages.unread", { count: unread })}

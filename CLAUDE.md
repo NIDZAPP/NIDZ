@@ -86,11 +86,11 @@ Stack: **Vite 5 + React 18 + TypeScript** (SWC), **shadcn/ui** (Radix) component
 - **Namespacing**: public profiles are `/sitters/:id`; `/sitter/*` is the sitter's own area. Keeping them apart means no static sitter route can be shadowed by a profile id.
 - **Path alias**: `@/` → `src/` (configured in both `vite.config.ts` and `tsconfig`). shadcn aliases live in `components.json`.
 
-### Existing design tokens (implementation baseline, not a v1.4 constraint)
+### Design tokens (Nidz 1.4, implemented)
 
 `src/index.css` currently defines HSL CSS variables mapped to Tailwind classes in `tailwind.config.ts`. Preserve brand anchors and semantic meanings while evolving the visual system deliberately. Distinguish shadcn's UI `--accent` (highlight/hover) from Nidz's terracotta `--brand`; evaluate any changed role for contrast and hierarchy.
 
-The pre-1.4 code currently uses a white canvas, Inter (with Noto Sans Arabic fallback), a restricted radius scale and specific card/terracotta-placement rules. **These are historical design choices, not requirements for the new art direction.** They remain in the code until the approved redesign is implemented. `DESIGN.md` describes the current UI, not a veto on improvements. Reduced-motion support and RTL remain mandatory.
+**The 1.4 system is implemented** (design system §0.1-A to 0.1-G, branch `nidz-1.4`): a mist ground `#EDF2F0` with white cards and ink-tinted shadows, teal as the only action colour on pill-shaped buttons, terracotta/sand/sky as non-interactive warmth on animals and people, **Readex Pro** (one self-hosted variable family for Latin and Arabic, via `@fontsource-variable/readex-pro` — no Google Fonts request), a radius scale up to `3xl`, Lucide plus custom icons in `src/components/icons/`, and flat animal artwork in `src/components/illustrations/animals.tsx`. The white canvas, Inter and the 24px radius cap are retired. `DESIGN.md` describes the system as built. Reduced-motion support and RTL remain mandatory; colour-role changes still go through `nidz-color-guardian`.
 
 ### Internationalization + RTL (critical for every UI change)
 `src/i18n.ts` configures i18next for three locales — **`en`, `fr`, `ar`** (strings in `src/locales/*.json`), default `en`, detected from localStorage → querystring → navigator.

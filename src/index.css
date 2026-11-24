@@ -214,7 +214,7 @@
     }
   }
 
-  /* A screen's content arriving. Keyed on the route by its caller. */
+  /* A screen's content arriving (6px, 220ms). Keyed on the route by its caller. */
   .page-in {
     @apply animate-page-in;
   }

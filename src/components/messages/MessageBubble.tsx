@@ -29,7 +29,11 @@ export default function MessageBubble({
         <span className="font-semibold text-foreground">{author}</span>
         {meta && <span> · {meta}</span>}
       </p>
+      {/* `dir="auto"`: a message is the writer's own text, in whichever
+          script they wrote it — a French note inside the Arabic interface
+          keeps its punctuation where it belongs. */}
       <div
+        dir="auto"
         className={cn(
           "max-w-[85%] whitespace-pre-line rounded-2xl px-4 py-2.5 text-[0.9375rem] leading-relaxed text-foreground",
           mine ? "rounded-ee-md bg-primary-soft" : "rounded-es-md bg-muted",

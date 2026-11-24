@@ -176,16 +176,16 @@ export default {
 					from: { transform: 'scale(1)', opacity: '1' },
 					to: { transform: 'scale(0.96)', opacity: '0' }
 				},
-				/* A screen arriving: content rises 8px into place. Starts from
+				/* A screen arriving: content rises 6px into place. Starts from
 				   opacity 0.01 rather than 0 so the first frame is never a blank
 				   page if the animation is skipped. */
 				'page-in': {
-					'0%': { opacity: '0.01', transform: 'translateY(8px)' },
+					'0%': { opacity: '0.01', transform: 'translateY(6px)' },
 					'100%': { opacity: '1', transform: 'translateY(0)' }
 				},
 				/* A check or a count appearing inside a control. */
 				pop: {
-					'0%': { opacity: '0', transform: 'scale(0.6)' },
+					'0%': { opacity: '0', transform: 'scale(0.85)' },
 					'100%': { opacity: '1', transform: 'scale(1)' }
 				},
 				'slide-in-right': {
@@ -206,8 +206,9 @@ export default {
 				'fade-out': 'fade-out 0.18s cubic-bezier(0.23, 1, 0.32, 1)',
 				'scale-in': 'scale-in 0.18s cubic-bezier(0.23, 1, 0.32, 1)',
 				'scale-out': 'scale-out 0.15s cubic-bezier(0.23, 1, 0.32, 1)',
-				'page-in': 'page-in 0.28s cubic-bezier(0.23, 1, 0.32, 1) both',
-				pop: 'pop 0.2s cubic-bezier(0.23, 1, 0.32, 1) both',
+				/* Seen on every navigation, so short and small: felt, not watched. */
+				'page-in': 'page-in 0.22s cubic-bezier(0.23, 1, 0.32, 1) both',
+				pop: 'pop 0.18s cubic-bezier(0.23, 1, 0.32, 1) both',
 				'slide-in-right': 'slide-in-right 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
 				'slide-out-right': 'slide-out-right 0.25s cubic-bezier(0.32, 0.72, 0, 1)',
 				enter: 'fade-in 0.22s cubic-bezier(0.23, 1, 0.32, 1), scale-in 0.18s cubic-bezier(0.23, 1, 0.32, 1)',

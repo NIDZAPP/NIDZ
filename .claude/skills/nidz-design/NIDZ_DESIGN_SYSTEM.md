@@ -37,6 +37,37 @@
 
 Examiner la référence et l'écran réel → proposer une direction → faire approuver → implémenter écran par écran → vérifier captures sur mobile et desktop, large texte, i18n/RTL, contrastes et régressions. Une esthétique plus moderne ne justifie jamais de nouvelles promesses produit inventées.
 
+### 0.1-A à 0.1-G — Système 1.4 implémenté (24 novembre 2026)
+
+> Décisions prises de façon autonome à la demande explicite de l'utilisatrice/de l'utilisateur (« Prends les décisions esthétiques autonomement »), sur la branche `nidz-1.4`. Elles **remplacent, pour le visuel**, l'amendement 0.0 (fond blanc, Inter seule) et les tableaux des §12, §13, §16, §17 et §24. Aucun principe de niveau 1 n'est modifié. `DESIGN.md` décrit le système tel que construit ; `src/index.css` et `tailwind.config.ts` en sont la source technique. HaHo n'a **pas** pu être consulté (Figma MCP : aucun accès en édition au fichier communautaire ; Gumroad et Dribbble bloqués par la politique réseau) : aucune décision ci-dessous n'en reprend un élément.
+
+**0.1-A Couleur.** Ancres inchangées : teal `#0F766E` (seule couleur d'action, toujours une capsule) et terracotta `#A84F32` (jamais interactive). Revue par `nidz-color-guardian` (aucun P0 ; P1 corrigés).
+
+| Token | Valeur | Rôle | Contraste mesuré |
+|---|---|---|---|
+| `background` « mist » | `#EDF2F0` | sol ; teinte froide du teal (pas le crème retiré en 1.2) | texte 14,5:1 ; secondaire 5,6:1 ; primary 4,9:1 |
+| `card` | `#FFFFFF` | conteneur par défaut, ombre teintée encre ; jamais de carte dans une carte | — |
+| `primary-soft` (= `--accent`) | `#DFF1EE` | état sélectionné (chip, onglet, nav), surbrillance de menu | primary 4,7:1 |
+| `primary-deep` / `primary-on-deep` | `#0B4B46` / `#CDE4E0` | champ héros **non interactif** et son texte secondaire | blanc 10:1 ; 7,5:1 |
+| `secondary` | `#E4ECE9` | bouton secondaire, survol neutre | — |
+| `muted-foreground` | `#54635F` | texte secondaire | 6,3:1 blanc ; 5,6:1 mist |
+| `border` / `input` | `#DCE5E1` / `#7C8B86` | filet décoratif / limite fonctionnelle des contrôles (chips comprises) | — / 3,5:1 blanc, 3,1:1 mist |
+| `brand-soft` · `sand` · `sky` | `#F7EAE4` · `#F5E7D6` · `#E2EFF8` | carreaux animaux (chat · chien · oiseau), monogrammes ; `sand` = information chaude (DemoNotice, « en attente ») | texte ≥ 13,5:1 ; anneau teal ≥ 4,6:1 |
+
+Règles : (1) le teal est la seule couleur d'action, `primary-deep` partage sa teinte mais n'est jamais pressable ; (2) terracotta, `brand-soft`, `sand` et `sky` ne portent jamais un état ni le fond d'un bouton — seule exception : le fond **au repos** d'une carte-catégorie animale, dont la sélection est portée par l'anneau teal 2,5 px et la pastille coche ; (3) un brouillon non envoyé n'emprunte jamais une couleur de statut ; (4) les couleurs d'illustration sont des constantes d'art (`animals.tsx`), jamais des tokens ; (5) un lien inséré dans une phrase est souligné (teal / texte = 2,97:1).
+
+**0.1-B Typographie.** **Readex Pro** (variable 160–700, licence OFL), une seule famille dessinée pour le latin **et** l'arabe, auto-hébergée (`@fontsource-variable/readex-pro`) — plus aucune requête Google Fonts. Remplace Inter + Noto Sans Arabic ; c'est la « décision de marque multilingue délibérée » que l'amendement 0.0-B réservait. Rôles : `display` 34/52, `h1` 28/36, `title` 20, `name` 18, `price` 22.
+
+**0.1-C Formes et actions.** Toutes les actions sont des capsules (forme des notifications iOS) ; pression = `scale(0.97)` 150 ms ease-out. Rayons : sm 10 · md 14 · lg 18 · xl 22 (cartes) · 2xl 28 · 3xl 36 (héros, sheets). Ombres teintées encre avec décalage : `card`, `pill`, `raised` (ce qui flotte réellement).
+
+**0.1-D Navigation.** Barre d'onglets flottante en capsule (mobile), capsule active qui glisse ; en-tête sur le sol avec navigation segmentée en capsule (md+). Bouton **Messages** dans l'en-tête des deux espaces. Langue : icône seule ouvrant un menu des langues écrites dans leur propre langue, sur l'accueil et dans Compte.
+
+**0.1-E Signature et composants.** La **capsule de recherche** (animal, garde, dates, zone, budget, « Modifier ») flotte au-dessus des résultats à toutes les largeurs. Résultats et profil en cartes ; la demande est un **pass** (animal, segments étiquetés) qui n'affiche jamais rien de « confirmé ». Listes de navigation groupées (lignes dans une carte). Iconographie : Lucide + icônes maison dans la même grammaire (`HomeHeart`, `HomeKey`, `Leash`, `BirdCage`, `Balcony`, `InfoMark`) ; illustrations plates chien, chat, chardonneret.
+
+**0.1-F Formulaires.** Labels visibles, placeholders d'exemple discrets, erreurs avec icône et texte. Les explications « pourquoi » passent derrière un « ! » gris (`InfoTip`, cible 44 px, popover accessible) ; restent toujours visibles : contraintes, confidentialité, format, statements d'honnêteté. Catégories animales en cartes illustrées partagées propriétaires/pet-sitters ; race/espèce (`src/data/animal-kinds.ts`) avec recherche et « Mon animal n'est pas dans la liste » — **détail uniquement, jamais lu par le matching** (test unitaire dédié).
+
+**0.1-G Messages.** Espace local : conversations avec contexte de garde, non-lu **par espace et par appareil** (jamais un accusé de lecture), notifications dérivées de l'état réel et annoncées comme non envoyées. Seul le propre profil du visiteur peut répondre ; un profil d'exemple dit que personne ne lira. Voir `src/data/conversations.ts` (contrat backend documenté).
+
 ---
 
 ## 0.0 Amendements actifs — Audit 1.2 (13 août 2026)
