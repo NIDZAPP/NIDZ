@@ -150,9 +150,16 @@
 
   html {
     background: hsl(var(--background));
-    /* The header is sticky; keep focused targets from landing underneath it
-       (WCAG 2.2 AA — 2.4.11 Focus Not Obscured). */
-    scroll-padding-top: calc(4rem + 1px); /* header h-16 + its bottom border */
+    /* The top bar is sticky; keep focused targets from landing underneath it
+       (WCAG 2.2 AA — 2.4.11 Focus Not Obscured). The bar is `TOP_BAR_ROW`:
+       3.5rem, then 4.5rem from md — plus half a rem of air. */
+    scroll-padding-top: 4rem;
+  }
+
+  @media (min-width: 768px) {
+    html {
+      scroll-padding-top: 5rem;
+    }
   }
 
   body {

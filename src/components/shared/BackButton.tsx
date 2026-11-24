@@ -1,30 +1,37 @@
+import { useContext } from "react";
+import { createPortal } from "react-dom";
 import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { BackSlotContext } from "@/components/shared/top-bar";
 import { useBack } from "@/hooks/use-back";
 import { cn } from "@/lib/utils";
 
 /**
- * The one back control in Nidz (§86).
+ * The one back control in Nidz (§86) — and, since the 1.4 corrections, one
+ * FORM of it: a white round button with an ink arrow, at the inline start of
+ * the sticky top bar, on every secondary screen.
  *
  * Audit 1.2 requires a visible back affordance on every screen that is not a
- * root, on both sides of the marketplace. Before this it existed only inside
- * `FlowScreen`, so a browsable screen reached from a tab — a sitter profile, a
- * request detail — had no way back except the browser's own chrome, which a
- * PWA installed to the home screen does not show at all.
+ * root, on both sides of the marketplace. Until 1.4 it came in three shapes
+ * (a bare glyph, a labelled pill in the page body, a round pill in a bar), and
+ * the labelled one scrolled away with the content. Now:
  *
- * Three things this component is responsible for, so that fifteen screens are
- * not:
- *
+ *  - **One shape.** `size-11` (44px, the Nidz floor for an important mobile
+ *    action, §17), `bg-card` white, `text-foreground` ink (#18211F, 14.5:1 on
+ *    white), the bar-control shadow so it reads on the mist ground.
+ *  - **One place.** Inside the browsable shell the control portals into the
+ *    header's back slot (see `BackSlotContext`); flow steps and conversations
+ *    render it in their own bar, which has the same height and container
+ *    (`TOP_BAR_ROW`). Either way it is at the inline start of a sticky bar —
+ *    top-left, top-right in Arabic (§34) — and never overlaps the content,
+ *    which scrolls under the bar's ground rather than under the button.
  *  - **Direction.** `ArrowLeft` is mirrored under `dir="rtl"`, so it points
- *    back rather than pointing left. Icons whose meaning is spatial get
- *    mirrored; icons whose meaning is not (a paw, a clock) never do.
- *  - **A real target.** `size-11` is 44px, the Nidz floor for an important
- *    mobile action (§17). The negative inline-start margin pulls the glyph back
- *    to the container edge so the target grows inward rather than pushing the
- *    title off the optical grid.
- *  - **An accessible name.** The control is icon-only, so the name is carried
- *    by `sr-only` text rather than left to the glyph.
+ *    back rather than pointing left.
+ *  - **An accessible name.** The control is icon-only; the name is carried by
+ *    `sr-only` text. A screen that can say where back goes ("Retour aux
+ *    résultats") passes it as `label` — it is still the name assistive
+ *    technology announces, and the tooltip a mouse user gets.
  *
  * `fallback` is required, not optional. See `useBack`: a deep link or a guard
  * redirect leaves nothing in history, and a back control that silently does
@@ -34,54 +41,37 @@ import { cn } from "@/lib/utils";
 export default function BackButton({
   fallback,
   label,
-  variant = "bare",
   className,
 }: {
   /** Where back goes when there is no Nidz history to pop — a deep link, a
       fresh tab, or a screen arrived at through `<Navigate replace>`. */
   fallback: string;
   /** Overrides the generic name when a screen can say something better, e.g.
-      "Back to results". Becomes visible text under `variant="labelled"`. */
+      "Back to results". */
   label?: string;
-  /**
-   * `bare` — icon only, name carried by `sr-only` text. Correct inside a top
-   * bar, where the bar itself supplies the context.
-   *
-   * `labelled` — the name is visible. Correct in the body of a browsable
-   * screen, where a lone 44px square above a heading on a white page is an
-   * orphan with no context to inherit. It also doubles as the only breadcrumb
-   * Nidz needs: someone who arrived on a shared profile link learns where the
-   * screen sits from the control that takes them there.
-   */
-  /** `round` — icon only, on a white round pill. The 1.4 top-bar form: a
-      floating control on the mist ground, like every other bar button. */
-  variant?: "bare" | "labelled" | "round";
   className?: string;
 }) {
   const { t } = useTranslation();
   const goBack = useBack(fallback);
+  const slot = useContext(BackSlotContext);
   const name = label ?? t("common.back");
 
-  return (
+  const button = (
     <button
       type="button"
       onClick={goBack}
+      title={name}
       className={cn(
-        "inline-flex shrink-0 items-center transition-[transform,background-color,color] duration-150 ease-out active:scale-[0.97]",
+        "inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-card text-foreground shadow-pill",
+        "transition-[transform,background-color] duration-150 ease-out hover:bg-secondary active:scale-[0.97]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        variant === "round"
-          ? "size-11 justify-center rounded-full bg-card text-foreground shadow-pill hover:bg-secondary"
-          : variant === "labelled"
-            ? /* A pill whose glyph aligns with the column's edge. */
-              "-ms-1 min-h-11 gap-1.5 rounded-full pe-4 ps-2.5 text-sm font-medium text-muted-foreground hover:bg-card hover:text-foreground"
-            : /* The negative inline-start margin pulls the glyph out to the
-                 container edge, so the target grows inward. */
-              "-ms-2 size-11 justify-center rounded-full text-foreground hover:bg-secondary",
         className,
       )}
     >
-      <ArrowLeft className="size-5 rtl:-scale-x-100" aria-hidden="true" />
-      {variant === "labelled" ? <span>{name}</span> : <span className="sr-only">{name}</span>}
+      <ArrowLeft className="size-5 rtl:-scale-x-100" strokeWidth={2.25} aria-hidden="true" />
+      <span className="sr-only">{name}</span>
     </button>
   );
+
+  return slot ? createPortal(button, slot) : button;
 }

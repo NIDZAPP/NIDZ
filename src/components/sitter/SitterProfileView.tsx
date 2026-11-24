@@ -1,4 +1,5 @@
 import { CalendarOff, Heart, MapPin, PawPrint } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { ReactNode } from "react";
 
@@ -8,6 +9,7 @@ import { careLines } from "@/components/sitter/care-lines";
 import { MatchReasonList, MismatchList } from "@/components/sitter/match";
 import { ProvenanceLabel } from "@/components/shared/trust";
 import PortfolioSection from "@/components/sitter/PortfolioSection";
+import { ProfileFold, ProfileFolds } from "@/components/sitter/ProfileFold";
 import ReviewSection from "@/components/sitter/ReviewSection";
 import { sitterPortfolio, sitterReviews } from "@/data/repository";
 import { isAbsenceReason, type MatchReason } from "@/data/criteria";
@@ -36,10 +38,11 @@ import { formatDZD, formatList } from "@/utils/format";
  *   lede       photo or monogram · name · commune · why this fits (when the
  *              visitor searched) · AT A GLANCE: animals and dog sizes taken,
  *              every service with its price and unit · the sitter's sentence
- *   limits     what I cannot accept — right after what I do accept, so the
- *              two read as one answer
- *   narrative  about (experience folded in) · how animals are hosted (home
- *              facts, then the care details)
+ *   folds      (Nidz 1.4 corrections) three sections that open and close,
+ *              closed by default, each with an always-visible summary:
+ *              how animals are hosted (home facts, then the care details) ·
+ *              what I cannot accept — right after, so the two read as one
+ *              answer · about (experience folded in)
  *   facts      declared unavailability
  *   evidence   care moments and reviews — both EXAMPLES on a fixture
  *
@@ -120,6 +123,19 @@ export default function SitterProfileView({
       })();
   const headline = localized(sitter.headline, lng);
   const about = localized(sitter.about, lng);
+  /* Two shapes, because "surtout avec : ." is not a sentence. */
+  const experienceLine =
+    sitter.experience.years > 0
+      ? sitter.experience.species.length > 0
+        ? t("profile.experienceLine", {
+            count: sitter.experience.years,
+            species: sitter.experience.species.map((sp) => t(`speciesPlural.${sp}`)).join(" · "),
+          })
+        : t("profile.experienceYears", { count: sitter.experience.years })
+      : "";
+  const hasProfession = Boolean(sitter.professional.kind && sitter.professional.kind !== "none");
+  /* Every fold starts closed (Nidz 1.4 corrections). */
+  const [openFolds, setOpenFolds] = useState<string[]>([]);
   const residentPets =
     sitter.housing.residentPets.length === 0
       ? t("profile.residentPets.none")
@@ -222,17 +238,28 @@ export default function SitterProfileView({
             {services.length > 0 && (
               <div className="rounded-lg bg-muted p-4">
                 <dt className="text-sm text-muted-foreground">{t("profile.glance.services")}</dt>
-                <dd className="mt-2 space-y-2">
+                <dd className="mt-2 space-y-2.5">
                   {services.map((service) => {
                     const Icon = CARE_ICON[service];
                     return (
-                      <p key={service} className="flex items-center gap-2.5 text-[0.9375rem] text-foreground">
-                        <Icon className="size-[1.125rem] shrink-0 text-primary" aria-hidden="true" />
-                        <span className="min-w-0 flex-1">{t(`care.${service}`)}</span>
-                        <span className="sr-only"> · </span>
-                        <span className="shrink-0 text-end">
-                          <span className="font-semibold tabular-nums">{formatDZD(sitter.rates[service] as number, lng)}</span>{" "}
-                          <span className="text-sm text-muted-foreground">{t(CARE_UNIT_KEY[service])}</span>
+                      /* Service and price share a line while they fit, and
+                         the price drops UNDER the service when they do not
+                         (flex-wrap) — the price used to be `shrink-0`, so in a
+                         narrow tile the service name was squeezed to one word
+                         and "Promenade" ran into "600 DA". The amount and its
+                         unit each stay whole; the unit may wrap after the
+                         amount rather than overflow. */
+                      <p key={service} className="flex items-start gap-2.5 text-[0.9375rem] text-foreground">
+                        <Icon className="mt-0.5 size-[1.125rem] shrink-0 text-primary" aria-hidden="true" />
+                        <span className="flex min-w-0 flex-1 flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+                          <span className="min-w-0 break-words">{t(`care.${service}`)}</span>
+                          <span className="sr-only"> · </span>
+                          <span className="max-w-full">
+                            <span className="whitespace-nowrap font-semibold tabular-nums">
+                              {formatDZD(sitter.rates[service] as number, lng)}
+                            </span>{" "}
+                            <span className="text-sm text-muted-foreground">{t(CARE_UNIT_KEY[service])}</span>
+                          </span>
                         </span>
                       </p>
                     );
@@ -285,120 +312,165 @@ export default function SitterProfileView({
 
       {ledeAside}
 
-      {/* Directly after what the sitter accepts, so the pair reads as one
-          complete answer rather than as a caveat buried at the bottom.
-          Omitted when empty — "aucune limite indiquée" would state that this
-          person accepts everything, which they never said. No red, no warning
-          icon: a sitter declining an animal their home does not suit is the
-          matching working (§12.1). */}
-      {sitter.limits.length > 0 && (
-        <section className={card}>
-          <Section className={sectionTitle}>{t("profile.section.limits")}</Section>
-          <p className="mt-1.5 max-w-[64ch] text-sm text-muted-foreground">{t("profile.limitsIntro")}</p>
-          <ul role="list" className="mt-4 max-w-[64ch] space-y-3">
-            {sitter.limits.map((limit, i) => (
-              <li key={i} className="flex gap-3 text-base leading-relaxed text-foreground">
-                <span aria-hidden="true" className="mt-2.5 size-1.5 shrink-0 rounded-full bg-foreground/40" />
-                <span>{localized(limit, lng)}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      {/* ------------------------------------------------- the three folds
+          Nidz 1.4 corrections: "Comment j'accueille les animaux" (what I can
+          take, and how), "Ce que je ne peux pas accepter" and "À propos" open
+          and close, closed by default. Each keeps its essentials in a summary
+          that is visible while it is closed — the home and how many animals
+          at once, the first thing the sitter cannot accept — so a decisive
+          restriction is never one tap away (see `ProfileFold`). The glance
+          above already carries the animals, dog sizes, services and prices.
 
-      {/* ------------------------------------------------------- narrative */}
-      <section className={card}>
-        <Section className={sectionTitle}>{t("profile.section.about")}</Section>
-        {about && <p className="mt-3 max-w-[64ch] text-base leading-relaxed text-foreground">{about}</p>}
-        {/* Two shapes, because "surtout avec : ." is not a sentence. */}
-        {sitter.experience.years > 0 && (
-          <p className="mt-3 max-w-[64ch] text-base leading-relaxed text-muted-foreground">
-            {sitter.experience.species.length > 0
-              ? t("profile.experienceLine", {
-                  count: sitter.experience.years,
-                  species: sitter.experience.species.map((sp) => t(`speciesPlural.${sp}`)).join(" · "),
-                })
-              : t("profile.experienceYears", { count: sitter.experience.years })}
-          </p>
-        )}
-        {/* A DECLARED profession (§40). The label says who said it, and the
-            wording never upgrades on its own: naming a profession is not a
-            credential, and there is no check behind it in Nidz (§68). */}
-        {sitter.professional.kind && sitter.professional.kind !== "none" && (
-          <div className="mt-4 rounded-lg bg-muted p-4">
-            <p className="max-w-[64ch] text-base font-medium text-foreground">
-              {t(`profession.${sitter.professional.kind}`)}
-              {sitter.professional.years !== null && (
-                <span className="font-normal text-muted-foreground">
-                  {" · "}
-                  {t("profile.professionalYears", { count: sitter.professional.years })}
+          The pair "what I accept / what I cannot accept" stays together and
+          before "À propos", as Audit 1.3 LOT 06 ordered. */}
+      <ProfileFolds value={openFolds} onValueChange={setOpenFolds}>
+        {/* How animals are hosted: the home in facts, then the care details in
+            sentences (§57), under one heading. */}
+        <ProfileFold
+          value="care"
+          open={openFolds.includes("care")}
+          heading={Section}
+          title={t("profile.section.care")}
+          summary={<p className="text-[0.9375rem] leading-relaxed text-muted-foreground">{facts.map((f) => f.value).join(" · ")}</p>}
+        >
+          <dl className="grid gap-3 sm:grid-cols-2">
+            {facts.map(({ key, label, value, icon: Icon }) => (
+              <div key={key} className="flex items-start gap-3 rounded-lg bg-muted p-3.5">
+                <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-card text-primary shadow-pill">
+                  <Icon className="size-5" />
                 </span>
-              )}
-            </p>
-            {localized(sitter.professional.detail, lng) && (
-              <p className="mt-1 max-w-[64ch] text-base leading-relaxed text-muted-foreground">
-                {localized(sitter.professional.detail, lng)}
-              </p>
-            )}
-            <p className="mt-1.5 max-w-[64ch] text-sm text-muted-foreground">{t("profile.professionalUnverified")}</p>
-          </div>
-        )}
-
-        {/* The §54 answers the sitter actually gave ("yes" only). */}
-        {experienceFacts.length > 0 && (
-          <ul role="list" className="mt-4 flex flex-wrap gap-2">
-            {experienceFacts.map((fact) => (
-              <li key={fact} className="rounded-full bg-secondary px-3 py-1.5 text-sm text-foreground">
-                {fact}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {/* How animals are hosted: the home in facts, then the care details in
-          sentences (§57), under one heading. */}
-      <section className={card}>
-        <Section className={sectionTitle}>{t("profile.section.care")}</Section>
-        <dl className="mt-4 grid gap-3 sm:grid-cols-2">
-          {facts.map(({ key, label, value, icon: Icon }) => (
-            <div key={key} className="flex items-start gap-3 rounded-lg bg-muted p-3.5">
-              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-card text-primary shadow-pill">
-                <Icon className="size-5" />
-              </span>
-              <div className="min-w-0">
-                <dt className="text-sm text-muted-foreground">{label}</dt>
-                <dd className="mt-0.5 text-[0.9375rem] font-medium text-foreground">{value}</dd>
+                <div className="min-w-0">
+                  <dt className="text-sm text-muted-foreground">{label}</dt>
+                  <dd className="mt-0.5 text-[0.9375rem] font-medium text-foreground">{value}</dd>
+                </div>
               </div>
+            ))}
+          </dl>
+          {/* Only ANSWERED questions: `careLines` drops the rest rather than
+              printing "not specified" twenty times (§118). */}
+          {careBlocks.length > 0 && (
+            <div className="mt-6 max-w-[64ch] space-y-5">
+              {careBlocks.map((block) => (
+                <div key={block.id}>
+                  <BlockHeading className="text-[0.9375rem] font-semibold text-foreground">{block.title}</BlockHeading>
+                  <ul role="list" className="mt-1.5 space-y-1.5">
+                    {block.lines.map((line, i) => (
+                      <li key={i} className="text-base leading-relaxed text-foreground">
+                        {line}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
-          ))}
-        </dl>
-        {/* Only ANSWERED questions: `careLines` drops the rest rather than
-            printing "not specified" twenty times (§118). */}
-        {careBlocks.length > 0 && (
-          <div className="mt-6 max-w-[64ch] space-y-5">
-            {careBlocks.map((block) => (
-              <div key={block.id}>
-                <BlockHeading className="text-[0.9375rem] font-semibold text-foreground">{block.title}</BlockHeading>
-                <ul role="list" className="mt-1.5 space-y-1.5">
-                  {block.lines.map((line, i) => (
-                    <li key={i} className="text-base leading-relaxed text-foreground">
-                      {line}
-                    </li>
-                  ))}
-                </ul>
+          )}
+          {sitter.housing.conditions && localized(sitter.housing.conditions, lng) && (
+            <p className="mt-5 max-w-[64ch] text-base leading-relaxed text-foreground">
+              {localized(sitter.housing.conditions, lng)}
+            </p>
+          )}
+          {/* One provenance line for the whole section, not one per fact. */}
+          <p className="mt-4 max-w-[64ch] text-sm text-muted-foreground">{t("profile.care.declaredNote")}</p>
+        </ProfileFold>
+
+        {/* Omitted when empty — "aucune limite indiquée" would state that this
+            person accepts everything, which they never said. No red, no
+            warning icon: a sitter declining an animal their home does not
+            suit is the matching working (§12.1). Closed, the FIRST limit is
+            shown whole (never cut mid-sentence: a half restriction reads as a
+            different one) and the rest are counted. */}
+        {sitter.limits.length > 0 && (
+          <ProfileFold
+            value="limits"
+            open={openFolds.includes("limits")}
+            heading={Section}
+            title={t("profile.section.limits")}
+            summary={
+              <div className="max-w-[64ch]">
+                <p className="flex gap-3 text-base leading-relaxed text-foreground">
+                  <span aria-hidden="true" className="mt-2.5 size-1.5 shrink-0 rounded-full bg-foreground/40" />
+                  <span className="min-w-0">{localized(sitter.limits[0], lng)}</span>
+                </p>
+                {sitter.limits.length > 1 && (
+                  <p className="mt-1.5 ps-[1.125rem] text-sm font-medium text-muted-foreground">
+                    {t("profile.moreLimits", { count: sitter.limits.length - 1 })}
+                  </p>
+                )}
               </div>
-            ))}
-          </div>
+            }
+          >
+            <p className="max-w-[64ch] text-sm text-muted-foreground">{t("profile.limitsIntro")}</p>
+            <ul role="list" className="mt-4 max-w-[64ch] space-y-3">
+              {sitter.limits.map((limit, i) => (
+                <li key={i} className="flex gap-3 text-base leading-relaxed text-foreground">
+                  <span aria-hidden="true" className="mt-2.5 size-1.5 shrink-0 rounded-full bg-foreground/40" />
+                  <span className="min-w-0">{localized(limit, lng)}</span>
+                </li>
+              ))}
+            </ul>
+          </ProfileFold>
         )}
-        {sitter.housing.conditions && localized(sitter.housing.conditions, lng) && (
-          <p className="mt-5 max-w-[64ch] text-base leading-relaxed text-foreground">
-            {localized(sitter.housing.conditions, lng)}
-          </p>
+
+        {/* ----------------------------------------------------- narrative
+            Omitted when the sitter has said nothing about themselves: a fold
+            that opens onto nothing is a broken promise. */}
+        {(about || experienceLine || hasProfession || experienceFacts.length > 0) && (
+          <ProfileFold
+            value="about"
+            open={openFolds.includes("about")}
+            heading={Section}
+            title={t("profile.section.about")}
+            summary={
+              (about || experienceLine) && (
+                /* A teaser of the sitter's own words — two lines, the rest a
+                   tap away. Nothing in "À propos" is a restriction, so
+                   clamping it hides no decision. */
+                <p className="line-clamp-2 max-w-[64ch] text-[0.9375rem] leading-relaxed text-muted-foreground">
+                  {about || experienceLine}
+                </p>
+              )
+            }
+          >
+            {about && <p className="max-w-[64ch] text-base leading-relaxed text-foreground">{about}</p>}
+            {experienceLine && (
+              <p className={cn("max-w-[64ch] text-base leading-relaxed text-muted-foreground", about && "mt-3")}>{experienceLine}</p>
+            )}
+            {/* A DECLARED profession (§40). The label says who said it, and the
+                wording never upgrades on its own: naming a profession is not a
+                credential, and there is no check behind it in Nidz (§68). */}
+            {hasProfession && (
+              <div className={cn("rounded-lg bg-muted p-4", (about || experienceLine) && "mt-4")}>
+                <p className="max-w-[64ch] text-base font-medium text-foreground">
+                  {t(`profession.${sitter.professional.kind}`)}
+                  {sitter.professional.years !== null && (
+                    <span className="font-normal text-muted-foreground">
+                      {" · "}
+                      {t("profile.professionalYears", { count: sitter.professional.years })}
+                    </span>
+                  )}
+                </p>
+                {localized(sitter.professional.detail, lng) && (
+                  <p className="mt-1 max-w-[64ch] text-base leading-relaxed text-muted-foreground">
+                    {localized(sitter.professional.detail, lng)}
+                  </p>
+                )}
+                <p className="mt-1.5 max-w-[64ch] text-sm text-muted-foreground">{t("profile.professionalUnverified")}</p>
+              </div>
+            )}
+
+            {/* The §54 answers the sitter actually gave ("yes" only). */}
+            {experienceFacts.length > 0 && (
+              <ul role="list" className={cn("flex flex-wrap gap-2", (about || experienceLine || hasProfession) && "mt-4")}>
+                {experienceFacts.map((fact) => (
+                  <li key={fact} className="rounded-full bg-secondary px-3 py-1.5 text-sm text-foreground">
+                    {fact}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </ProfileFold>
         )}
-        {/* One provenance line for the whole section, not one per fact. */}
-        <p className="mt-4 max-w-[64ch] text-sm text-muted-foreground">{t("profile.care.declaredNote")}</p>
-      </section>
+      </ProfileFolds>
 
       <section className={card}>
         <div className="flex items-center gap-2.5">

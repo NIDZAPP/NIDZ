@@ -43,7 +43,11 @@ const buttonVariants = cva(
       /* Nidz targets ~44px for important actions (design system §17).
          `sm` is for dense, secondary controls — never a page's primary. */
       size: {
-        default: "h-11 px-5 text-[0.9375rem]",
+        /* Wraps like `lg` (Nidz 1.4 corrections): "Address a test request
+           to my profile" ran 9px out of its pill at 320px. A single-line
+           label is unchanged — 44px, centred. */
+        default:
+          "min-h-11 max-w-full whitespace-normal px-5 py-2 text-center text-[0.9375rem] leading-tight [text-wrap:balance]",
         sm: "h-9 px-4 text-sm",
         /* Large pills may wrap: a translated label in a wide face can be
            longer than a 320px screen, and a second line inside the capsule

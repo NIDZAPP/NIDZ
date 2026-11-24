@@ -15,6 +15,7 @@ npm run typecheck  # tsc -b --force — see the warning below
 npm run check:locales  # three-locale parity, plural completeness, key usage
 npm run test:unit  # domain unit tests (node:test via Vite's loader) — tests/unit/
 npm run test:e2e   # Playwright browser checks per Audit 1.3 lot — needs a dev server on :8080
+node e2e/audit-layout.mjs [filter] [--langs=fr] [--widths=320,390]  # overflow / overlap / truncation sweep, every screen 320px→1440px × fr/en/ar
 ```
 
 **`npx tsc --noEmit` type-checks NOTHING in this repo, and never has.** `tsconfig.json` is a solution file: `"files": []` plus project references. Without `-b`, `tsc` compiles the empty file list and exits 0 — so it reports success on a codebase with real type errors in it. Audit 1.2 found this the hard way: it was silently passing while `fields.tsx` referenced a `Select` component whose import had been removed, which would have crashed a live screen. Use **`npm run typecheck`** (`tsc -b --force`). `--force` matters too, because `tsc -b` caches and will skip a project it believes is unchanged.

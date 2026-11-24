@@ -494,6 +494,12 @@
       "size": "هذا الحاضن لا يقبل: {{size}}."
     },
     "limitsIntro": "يذكر الحاضن هذه الحدود لتفادي حضانة لا تناسب حيوانك.",
+    "moreLimits_zero": "لا حدود أخرى",
+    "moreLimits_one": "+ حدّ آخر",
+    "moreLimits_two": "+ حدّان آخران",
+    "moreLimits_few": "+ {{count}} حدود أخرى",
+    "moreLimits_many": "+ {{count}} حدًّا آخر",
+    "moreLimits_other": "+ {{count}} حدّ آخر",
     "unavailableNone": "لم يذكر هذا الحاضن أي فترة عدم توفر.",
     "noPayment": "نيدز لا تتولى أي عملية دفع.",
     "facts": {

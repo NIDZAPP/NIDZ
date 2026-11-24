@@ -61,7 +61,10 @@ export default function Messages() {
 
         {/* A segmented control: two views of one space. Tabs semantics, so
             arrow keys move between them. */}
-        <div role="tablist" aria-label={t("messages.title")} className="mt-5 inline-flex rounded-full bg-card p-1 shadow-pill">
+        {/* `max-w-full` and the tighter inline padding below `sm`: with both
+            counts showing, two 16px-padded tabs were 297px wide — 9px more
+            than a 320px screen has, so the page scrolled sideways. */}
+        <div role="tablist" aria-label={t("messages.title")} className="mt-5 inline-flex max-w-full rounded-full bg-card p-1 shadow-pill">
           {(["conversations", "notifications"] as const).map((key) => {
             const count = key === "conversations" ? conversations.filter((c) => unreadCount(c, side) > 0).length : notifications.length;
             const selected = tab === key;
@@ -83,7 +86,7 @@ export default function Messages() {
                   }
                 }}
                 className={cn(
-                  "inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm transition-colors duration-150",
+                  "inline-flex h-11 items-center gap-1.5 rounded-full px-3 text-sm transition-colors duration-150 sm:gap-2 sm:px-4",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   selected ? "bg-primary-soft font-semibold text-primary" : "text-muted-foreground hover:text-foreground",
                 )}
@@ -167,19 +170,25 @@ function ConversationList({ conversations, side }: { conversations: Conversation
               </span>
               <span className="min-w-0 flex-1">
                 <span className="flex items-baseline justify-between gap-3">
-                  <bdi className={cn("truncate text-[0.9375rem] text-foreground", unread > 0 ? "font-bold" : "font-semibold")}>
+                  <bdi className={cn("min-w-0 break-words text-[0.9375rem] text-foreground", unread > 0 ? "font-bold" : "font-semibold")}>
                     {name}
                   </bdi>
                   {last && (
                     <span className="shrink-0 text-xs text-muted-foreground">{formatRelativeTime(last.createdAt, lng)}</span>
                   )}
                 </span>
-                <span className="mt-0.5 flex items-center justify-between gap-3">
+                {/* The unread pill drops under the preview rather than leave it
+                    a sliver: in Arabic ("رسالة غير مقروءة") the pill alone
+                    took half the row at 320px. */}
+                <span className="mt-0.5 flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
                   {/* The "Vous :" prefix and the message are isolated apart, so a
-                      French note inside Arabic clips at ITS end. */}
-                  <span className={cn("flex min-w-0 items-baseline gap-1 text-sm", unread > 0 ? "font-medium text-foreground" : "text-muted-foreground")}>
+                      French note inside Arabic clips at ITS end. Two lines, not
+                      one: beside the unread pill at 320px a one-line preview
+                      was "Bonjour Lina, av…". Still a preview — the thread
+                      holds the message. */}
+                  <span className={cn("flex min-w-[7rem] flex-1 items-baseline gap-1 text-sm", unread > 0 ? "font-medium text-foreground" : "text-muted-foreground")}>
                     {mine && <span className="shrink-0">{t("messages.youLabel")}</span>}
-                    <bdi dir="auto" className="block min-w-0 truncate">
+                    <bdi dir="auto" className="line-clamp-2 min-w-0 break-words">
                       {preview}
                     </bdi>
                   </span>

@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link, Navigate, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { ArrowUp, CalendarDays, Info, MapPin } from "lucide-react";
+import { ArrowUp, CalendarDays, Info, MapPin, UserRound } from "lucide-react";
 
 import { CARE_ICON } from "@/components/icons/domain-icons";
 import { AnimalPortrait } from "@/components/illustrations/animals";
 import MessageBubble from "@/components/messages/MessageBubble";
 import BackButton from "@/components/shared/BackButton";
+import { TOP_BAR, TOP_BAR_ROW } from "@/components/shared/top-bar";
 import EmptyState from "@/components/shared/EmptyState";
 import { DraftNotice, SaveFeedback } from "@/components/shared/SaveFeedback";
 import { Button } from "@/components/ui/button";
@@ -105,10 +106,12 @@ export default function MessageThread() {
   if (!sitter || (id && !existing)) {
     return (
       <div className="flex min-h-dvh flex-col bg-background">
-        <div className="container py-4">
-          <BackButton fallback="/messages" variant="round" label={t("messages.thread.back")} />
+        <div className={TOP_BAR}>
+          <div className={TOP_BAR_ROW}>
+            <BackButton fallback="/messages" label={t("messages.thread.back")} />
+          </div>
         </div>
-        <main className="container flex-1 pb-10">
+        <main className="container flex-1 pb-10 pt-2 md:pt-6">
           <div className="mx-auto max-w-[640px]">
             <EmptyState headingLevel="h1" title={t("messages.notFound.title")} body={t("messages.notFound.body")} />
           </div>
@@ -183,9 +186,9 @@ export default function MessageThread() {
       </Helmet>
 
       {/* -------------------------------------------------------- top bar */}
-      <header className="sticky top-0 z-30 bg-background/95 supports-[backdrop-filter]:bg-background/85 supports-[backdrop-filter]:backdrop-blur-md">
-        <div className="container flex h-16 items-center gap-3">
-          <BackButton fallback="/messages" variant="round" label={t("messages.thread.back")} />
+      <header className={TOP_BAR}>
+        <div className={TOP_BAR_ROW}>
+          <BackButton fallback="/messages" label={t("messages.thread.back")} />
           <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-soft font-semibold text-brand">
             {otherName.charAt(0)}
           </span>
@@ -198,9 +201,13 @@ export default function MessageThread() {
             </p>
           </div>
           {side === "owner" && (
-            <Button asChild variant="surface" size="sm" className="h-11 shrink-0">
+            /* Round and icon-only below sm, like every other bar control: as a
+               labelled pill it left the name "Lina…" at 320px. The accessible
+               name is the same at every width. */
+            <Button asChild variant="surface" size="sm" className="size-11 shrink-0 px-0 sm:w-auto sm:px-4">
               <Link to={`/sitters/${sitter.id}`} aria-label={t("messages.thread.viewProfile", { name: otherName })}>
-                {t("search.card.viewProfile")}
+                <UserRound className="sm:hidden" aria-hidden="true" />
+                <span className="hidden sm:inline">{t("search.card.viewProfile")}</span>
               </Link>
             </Button>
           )}
@@ -218,7 +225,7 @@ export default function MessageThread() {
                 <span aria-hidden="true" className="size-12 shrink-0 rounded-full bg-secondary" />
               )}
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[0.9375rem] font-semibold text-foreground">
+                <p className="break-words text-[0.9375rem] font-semibold text-foreground">
                   {context.pet
                     ? [context.pet.name, t(`species.${context.pet.species}`), kindLabel(context.pet, lng)]
                         .filter(Boolean)

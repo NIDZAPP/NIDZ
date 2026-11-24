@@ -83,10 +83,10 @@ export default function PetsList() {
                         <AnimalPortrait species={pet.species} className="aspect-square w-full" />
                       )}
                       <span className="flex flex-1 flex-col p-3.5">
-                        <span className="block truncate text-name font-semibold text-foreground">
+                        <span className="block break-words text-name font-semibold text-foreground">
                           <bdi>{pet.name}</bdi>
                         </span>
-                        <span className="mt-0.5 block truncate text-sm text-muted-foreground">
+                        <span className="mt-0.5 block break-words text-sm text-muted-foreground">
                           {t(`species.${pet.species}`)}
                           {kind && (
                             <>

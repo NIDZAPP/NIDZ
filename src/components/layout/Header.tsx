@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 import { useDemo } from "@/state/demo/context";
+import { TOP_BAR, TOP_BAR_ROW } from "@/components/shared/top-bar";
 import { WORKSPACE_ROOT, type Workspace } from "@/data/workspace";
 import BrandMark from "@/components/shared/BrandMark";
 import { isNavigable, workspaceDestinations, type NavContext } from "./workspace-nav";
@@ -25,12 +26,16 @@ export default function Header({
   workspace,
   navContext,
   actions,
+  backSlot,
 }: {
   workspace: Workspace;
   navContext: NavContext;
   /** Extra controls at the inline end, before the account (messages, the
       language chooser on the entry screen). */
   actions?: ReactNode;
+  /** Receives the element a secondary screen's `BackButton` portals into —
+      the inline start of this bar, before the wordmark. */
+  backSlot?: (element: HTMLElement | null) => void;
 }) {
   const { t } = useTranslation();
   const { state, dispatch } = useDemo();
@@ -50,16 +55,22 @@ export default function Header({
   const destinations = navigable ? all.filter((d) => d.to !== "/") : [];
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-background/95 supports-[backdrop-filter]:bg-background/85 supports-[backdrop-filter]:backdrop-blur-md">
-      <div className="container flex h-14 items-center justify-between gap-3 md:h-[4.5rem]">
-        {/* Home means the ACTIVE workspace's root, not `/` (see `home`). */}
-        <Link
-          to={home}
-          aria-label={`${t("common.appName")} — ${t("nav.home")}`}
-          className="-ms-1 flex min-h-11 shrink-0 items-center gap-2 rounded-full pe-2 ps-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        >
-          <BrandMark />
-        </Link>
+    <header className={TOP_BAR}>
+      <div className={cn(TOP_BAR_ROW, "justify-between")}>
+        <div className="flex min-w-0 items-center gap-2">
+          {/* A secondary screen's back control lands here (see `BackButton`):
+              the same spot as on a flow step, held in view by the sticky bar.
+              `contents`, so an empty slot takes no room on a root screen. */}
+          <span ref={backSlot} className="contents" />
+          {/* Home means the ACTIVE workspace's root, not `/` (see `home`). */}
+          <Link
+            to={home}
+            aria-label={`${t("common.appName")} — ${t("nav.home")}`}
+            className="flex min-h-11 shrink-0 items-center gap-2 rounded-full pe-2 ps-1 [span:empty+&]:-ms-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <BrandMark />
+          </Link>
+        </div>
 
         {destinations.length > 0 && (
           <nav

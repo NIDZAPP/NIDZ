@@ -62,12 +62,7 @@ export default function OwnerRequestDetail() {
       </Helmet>
 
       <div className="mx-auto max-w-[720px]">
-        <BackButton
-          variant="labelled"
-          fallback="/owner/requests"
-          label={t("common.backToRequests")}
-          className="mb-3"
-        />
+        <BackButton fallback="/owner/requests" label={t("common.backToRequests")} />
         {!request ? (
           /* No action: the back control above already goes to the only place
              this state can send anyone, and two identical links to one

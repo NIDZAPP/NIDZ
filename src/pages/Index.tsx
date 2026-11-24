@@ -239,7 +239,7 @@ export default function Index() {
               )}
               <span className="min-w-0 flex-1">
                 <span className="block font-semibold text-foreground">{t("nav.pets")}</span>
-                <span className="mt-0.5 block truncate text-sm text-muted-foreground">
+                <span className="mt-0.5 block break-words text-sm text-muted-foreground">
                   {pets.length > 0 ? pets.map((p) => p.name).filter(Boolean).join(" · ") : t("pets.empty.title")}
                 </span>
               </span>

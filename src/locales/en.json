@@ -482,6 +482,8 @@
       "size": "This sitter does not take: {{size}}."
     },
     "limitsIntro": "The sitter states these limits so that a stay that would not suit your animal does not happen.",
+    "moreLimits_one": "+ {{count}} more limit",
+    "moreLimits_other": "+ {{count}} more limits",
     "unavailableNone": "This sitter has not stated any unavailable period.",
     "noPayment": "Nidz handles no payment.",
     "facts": {

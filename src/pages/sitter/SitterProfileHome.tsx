@@ -89,7 +89,7 @@ export default function SitterProfileHome() {
         <meta name="robots" content="noindex" />
       </Helmet>
       <div className="mx-auto max-w-[720px]">
-        {!published && <BackButton variant="labelled" fallback="/" className="mb-3" />}
+        {!published && <BackButton fallback="/" />}
         <h1
           ref={heading}
           tabIndex={-1}

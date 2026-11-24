@@ -68,6 +68,12 @@ Règles : (0) les carreaux d'icône d'interface (logement, tarifs, limites…) s
 
 **0.1-G Messages.** Espace local : conversations avec contexte de garde, non-lu **par espace et par appareil** (jamais un accusé de lecture), notifications dérivées de l'état réel et annoncées comme non envoyées. Seul le propre profil du visiteur peut répondre ; un profil d'exemple dit que personne ne lira. Voir `src/data/conversations.ts` (contrat backend documenté).
 
+**0.1-H Corrections UX/UI (24 novembre 2026).** Demandées explicitement, implémentées sur `nidz-1.4`.
+- **Profil pet-sitter : sections déroulantes.** « Comment j'accueille les animaux » (ce que je peux accepter, et comment), « Ce que je ne peux pas accepter » et « À propos » sont des accordéons **fermés par défaut**, flèche vers le bas qui pivote, animation hauteur + opacité 220/180 ms `ease-out` (instantanée en mouvement réduit). Fermés, ils gardent un **résumé** visible : logement et nombre d'animaux à la fois ; la première limite **entière** (jamais coupée au milieu d'une phrase : une restriction tronquée en devient une autre) et « + n autres limites » ; deux lignes du texte « À propos ». Les titres restent des titres (`h2`/`h3`). Espèces, tailles de chien, services et tarifs restent dans l'aperçu en tête de profil, toujours visibles. `ProfileFold.tsx`.
+- **Bouton retour : une seule forme.** Rond, blanc, flèche encre `#18211F` (14,5:1), 44 px, à l'extrémité de début de la barre supérieure **sticky** et **opaque**, au même point sur les écrans du shell, les étapes de parcours et les conversations (géométrie commune `TOP_BAR_ROW`). Visible pendant le défilement, jamais par-dessus le contenu. La pastille « Retour » libellée dans le corps de page est retirée ; le nom accessible garde la destination.
+- **Tarifs.** Dans « Services et tarifs », le tarif passe **sous** le service quand la largeur manque (plus de tarif `shrink-0` qui écrasait le nom).
+- **Audit responsive.** `node e2e/audit-layout.mjs` mesure débordements, chevauchements (sur les glyphes réels) et textes tronqués sur chaque écran, de 320 px au bureau, en fr/en/ar ; `e2e/lot14-corrections.mjs` garde ces trois corrections.
+
 ---
 
 ## 0.0 Amendements actifs — Audit 1.2 (13 août 2026)

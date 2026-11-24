@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigationType } from "react-router-dom";
 
 import { resolveWorkspace, type Workspace } from "@/data/workspace";
@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useDemo } from "@/state/demo/context";
 
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
+import { BackSlotContext } from "@/components/shared/top-bar";
 import MessagesButton from "./MessagesButton";
 import RouteLoading from "@/components/shared/RouteLoading";
 import Header from "./Header";
@@ -22,16 +23,21 @@ import { isNavigable, workspaceDestinations, type NavContext } from "./workspace
  * header — two competing navigations on one screen is exactly the ambiguity
  * §4.2 warns about, and the bottom bar would compete with the step's action.
  *
- * The shell deliberately does NOT render a back control. Only the page knows
+ * The shell deliberately does NOT decide a back control. Only the page knows
  * what its parent is, which is why `useBack` makes the fallback a required
  * argument; a shell-level guess would send a visitor somewhere plausible and
- * wrong. Browsable screens place `BackButton` themselves, as the first element
- * of their content column.
+ * wrong. Browsable screens render `BackButton` themselves; the shell only
+ * provides WHERE it lands — a slot at the inline start of the sticky header
+ * (`BackSlotContext`), so the control has the same place as on a flow step and
+ * stays in view while the page scrolls (Nidz 1.4 corrections).
  */
 export default function Layout() {
   const { pathname } = useLocation();
   const navigationType = useNavigationType();
   const { state } = useDemo();
+  /* The header's back slot, as state so screens re-render into it once the
+     header has mounted. */
+  const [backSlot, setBackSlot] = useState<HTMLElement | null>(null);
 
   /* A new screen starts at its top. React Router resets nothing, so a tab
      tapped from far down a long list opened its destination part-way down
@@ -96,6 +102,7 @@ export default function Layout() {
       <Header
         workspace={workspace}
         navContext={navContext}
+        backSlot={setBackSlot}
         actions={
           <>
             {pathname === "/" && <LanguageSwitcher />}
@@ -112,9 +119,11 @@ export default function Layout() {
             so each arrival plays the one entrance (`page-in`: 8px rise, 280ms
             ease-out, from an almost-visible first frame). */}
         <div key={pathname} className="page-in">
-          <Suspense fallback={<RouteLoading />}>
-            <Outlet />
-          </Suspense>
+          <BackSlotContext.Provider value={backSlot}>
+            <Suspense fallback={<RouteLoading />}>
+              <Outlet />
+            </Suspense>
+          </BackSlotContext.Provider>
         </div>
       </main>
       {/* Below md, when the bottom bar is there, the footer would be a second

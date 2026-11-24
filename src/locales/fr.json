@@ -485,6 +485,9 @@
       "size": "Ce pet-sitter n'accepte pas : {{size}}."
     },
     "limitsIntro": "Ces limites sont indiquées par le pet-sitter pour éviter une garde qui ne conviendrait pas à votre animal.",
+    "moreLimits_one": "+ {{count}} autre limite",
+    "moreLimits_many": "+ {{count}} autres limites",
+    "moreLimits_other": "+ {{count}} autres limites",
     "unavailableNone": "Ce pet-sitter n'a indiqué aucune période d'indisponibilité.",
     "noPayment": "Nidz ne gère aucun paiement.",
     "facts": {

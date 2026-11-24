@@ -390,9 +390,13 @@ grid system.
 - **Rhythm:** 10px between stacked cards and option rows, 12px in card grids,
   32 to 40px between home sections, 16 to 20px inside a card (28px on the
   profile from md).
-- **Header:** sticky, 56px tall (72px from md), on the mist ground at 95%
-  (85% with backdrop blur). No rule, no fill: the first card below it is the
-  first object on the page.
+- **Top bar:** sticky, 56px tall (72px from md), on the opaque mist ground —
+  one geometry (`TOP_BAR` / `TOP_BAR_ROW`, `src/components/shared/top-bar.ts`)
+  shared by the browsable header, every flow step and a conversation, so the
+  back button sits at the same point on all of them. No rule, no fill: the
+  first card below it is the first object on the page. Opaque rather than the
+  former 85% + blur, because scrolled cards showing through read as text
+  colliding with the back button.
 - **Pinned layers:** flow action bars and the message composer sit on mist
   with the upward `chrome-t` shadow. The sitter profile's price-and-action bar
   is a white raised pill below xl, sitting above the tab bar. Every pinned
@@ -510,6 +514,24 @@ the ground and must say why, never a faded copy.
   name, place, headline (3 lines max), match reasons, one provenance byline
   (with the demo tag for fixtures), then a hairline and the closing line of
   price plus one action. The whole card is one stretched link with one tab stop.
+- **Profile folds** (`src/components/sitter/ProfileFold.tsx`): on the sitter
+  profile (and the sitter's preview, which is the same component), "Comment
+  j'accueille les animaux", "Ce que je ne peux pas accepter" and "À propos" are
+  cards that open and close, **closed by default** (Radix Accordion, several
+  may be open). The card head is the section heading (still an `h2`/`h3`)
+  wrapping a full-width button: title, then a 36px `primary-soft` tile with a
+  teal `ChevronDown` that turns half a turn when open (fills teal on hover with
+  a fine pointer only). Closed, a **summary** under the title keeps the
+  essentials in view: the home facts and how many animals at once; the first
+  limit, whole, plus "+ n autres limites"; two clamped lines of the sitter's
+  own words. Opening collapses the summary row (grid `1fr → 0fr`) on the same
+  curve as the content grows (`accordion-down` 220ms / `accordion-up` 180ms,
+  `ease-out`), so the card moves once. A tap on the summary also opens it.
+- **Service and price rows** (profile glance, "Services et tarifs"): service
+  and price share a line while they fit and the price wraps **under** the
+  service when they do not (`flex-wrap`, the amount never broken, its unit
+  allowed to wrap after it). A `shrink-0` price beside a squeezable name is
+  what made "Promenade" run into "600 DA" at 360px.
 - **Grouped list** (`LIST_GROUP` / `REGISTER_ROW` / `ROW_ICON`,
   `src/components/shared/register.ts`): navigable rows inside one card, divided
   by hairlines, 64px minimum, a `primary-soft` round icon tile at the start,
@@ -614,13 +636,24 @@ a check. Declined: `secondary` with muted text and a cross. Never red.
 - **Flow screens** (`FlowScreen.tsx`): no site chrome; a sticky mist bar with
   back, a 6px teal progress pill on the track, and the account button; the
   action bar pinned at the bottom.
+- **Back button** (`src/components/shared/BackButton.tsx`): ONE form on every
+  secondary screen — a 44px white round pill (`card`, `pill` shadow) with a
+  20px ink `ArrowLeft` at 2.25 stroke, mirrored in Arabic, at the inline start
+  of the sticky top bar (x 16px, y 6px on a phone, in all three shells). On a
+  browsable screen the page renders `<BackButton fallback=… />` and it portals
+  into the header's back slot, before the brand mark, so it stays in view
+  while the page scrolls and never sits over content. Its accessible name is
+  the destination when the screen knows it ("Retour aux résultats"). Root
+  screens (the tabs, Messages) have none. The former labelled pill in the
+  page body is retired.
 
 ### Messages
 `src/pages/Messages.tsx`, `src/pages/MessageThread.tsx`,
 `src/components/messages/MessageBubble.tsx`. A local space: conversations
 carry their care context (animal portrait, sitter or owner monogram). The list
 is a grouped list; an unread conversation has a bold name, a darker preview and
-a teal "n nouveaux" pill. Unread is **per space and per device**, never a read
+a teal "n nouveaux" pill. The preview runs to two lines, and the pill drops
+under it when the row is too narrow for both (the Arabic label is long). Unread is **per space and per device**, never a read
 receipt. Bubbles: mine at the inline end on `primary-soft`, theirs at the
 inline start on `muted`, `2xl` radius, author named in words above each one
 with the time it was written on this device. The composer is a `3xl`-rounded

@@ -102,7 +102,7 @@ export default function Settings() {
       </Helmet>
 
       <div className="mx-auto max-w-[720px]">
-        {fromFlow && <BackButton variant="labelled" fallback="/" className="mb-3" />}
+        {fromFlow && <BackButton fallback="/" />}
         <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">{t("settings.title")}</h1>
 
         {/* The two spaces of ONE account. The current one is stated, not

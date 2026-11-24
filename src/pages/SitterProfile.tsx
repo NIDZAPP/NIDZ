@@ -213,7 +213,6 @@ export default function SitterProfile() {
               fallback reconstructs that result set from the URL for anyone who
               arrived cold. */}
           <BackButton
-            variant="labelled"
             fallback={hasCriteria ? `/search?${paramKey}` : "/search"}
             /* Named only when the URL actually carries a result set. `useBack`
                pops real history first, so a profile opened from Home, from a
@@ -221,7 +220,6 @@ export default function SitterProfile() {
                otherwise read "Back to results" and go somewhere else. A control
                that states a destination has to keep the promise. */
             label={hasCriteria ? t("profile.backToResults") : undefined}
-            className="mb-3"
           />
           {capsule && <div className="mb-3 xl:hidden">{capsule}</div>}
 
@@ -312,11 +310,12 @@ export default function SitterProfile() {
             never shows through the gap between the two floating layers. */}
         <div className="container bg-gradient-to-t from-background from-60% to-transparent pb-2 pt-5 md:pb-4">
           <div className="pointer-events-auto mx-auto flex max-w-[720px] items-center gap-2 rounded-full bg-card p-1.5 ps-4 shadow-raised">
+            {/* The price keeps its own width (`shrink-0`): squeezed to a
+                fixed minimum, "DZD 1,200" ran under the message button at
+                320px. The action is what gives way — its label wraps. */}
             {rate ? (
-              <QuotedRate amount={rate.amount} careType={rate.careType} isFrom={rate.isFrom} compact className="min-w-[4.75rem] flex-1" />
-            ) : (
-              <span className="flex-1" />
-            )}
+              <QuotedRate amount={rate.amount} careType={rate.careType} isFrom={rate.isFrom} compact className="shrink-0" />
+            ) : null}
             {!isOwnProfile && (
               <Button asChild variant="secondary" size="icon" className="size-12 shrink-0">
                 <Link to={askHref} aria-label={t("messages.askName", { name: sitter.publicName })}>
@@ -324,9 +323,11 @@ export default function SitterProfile() {
                 </Link>
               </Button>
             )}
-            {/* May shrink: at 320px the action's label wraps inside its pill
-                rather than pushing the page sideways. */}
-            <div className="min-w-0 shrink [&>*]:w-full [&>*]:px-4 [&>*]:text-[0.9375rem]">{cta}</div>
+            {/* Takes what is left: at 320px the action's label wraps inside
+                its pill rather than pushing the price or the page sideways. */}
+            <div className="min-w-0 flex-1 [&>*]:w-full [&>*]:whitespace-normal [&>*]:px-3 [&>*]:text-[0.9375rem] [&>*]:leading-tight min-[360px]:[&>*]:px-4">
+              {cta}
+            </div>
           </div>
         </div>
       </div>

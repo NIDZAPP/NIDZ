@@ -77,16 +77,16 @@ export default function OwnerRequests() {
                     >
                       <AnimalPortrait species={request.pet.species} className="size-12 shrink-0 rounded-full" />
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-name font-semibold text-foreground">
+                        <span className="block break-words text-name font-semibold text-foreground">
                           <bdi>{request.pet.name}</bdi>
                           <span className="text-muted-foreground"> · </span>
                           <bdi className="font-normal text-muted-foreground">
                             {sitterNameFor(state, request.sitterId)}
                           </bdi>
                         </span>
-                        <span className="mt-0.5 flex items-center gap-1.5 text-sm text-muted-foreground">
-                          <CareIcon className="size-4 shrink-0" aria-hidden="true" />
-                          <span className="truncate">
+                        <span className="mt-0.5 flex items-start gap-1.5 text-sm text-muted-foreground">
+                          <CareIcon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                          <span className="min-w-0 break-words">
                             {t(`care.${request.careType}`)}
                             <span aria-hidden="true"> · </span>
                             <bdi>{formatDateRange(request.dates, lng)}</bdi>

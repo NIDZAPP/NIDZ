@@ -29,7 +29,7 @@ export default function NotAvailable() {
         <meta name="robots" content="noindex" />
       </Helmet>
       <div className="mx-auto max-w-[720px]">
-        <BackButton variant="labelled" fallback="/" className="mb-3" />
+        <BackButton fallback="/" />
         <EmptyState
           headingLevel="h1"
           title={t("notAvailable.title")}

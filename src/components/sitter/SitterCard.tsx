@@ -129,11 +129,13 @@ export default function SitterCard({
               <h2 className="text-name font-semibold text-foreground">
                 <bdi>{sitter.publicName}</bdi>
               </h2>
-              <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
-                <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
+              <p className="mt-0.5 flex items-start gap-1 text-sm text-muted-foreground">
+                <MapPin className="mt-[0.1875rem] size-3.5 shrink-0" aria-hidden="true" />
                 {/* The commune when the sitter gave one, else their wilaya —
-                    never a raw id, never a commune they did not state. */}
-                <bdi className="truncate">
+                    never a raw id, never a commune they did not state.
+                    Wraps rather than truncating: in the 13rem column of a
+                    wide row "Bab Ezzouar" was cut to "Bab Ezzo…". */}
+                <bdi className="min-w-0 break-words">
                   {communeName(sitter.communeCode, lng) ??
                     t("location.wilayaOnly", { name: wilayaName(wilayaOfPlace(sitter), lng) ?? "" })}
                 </bdi>

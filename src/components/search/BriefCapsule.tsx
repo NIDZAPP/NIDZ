@@ -64,8 +64,13 @@ export default function BriefCapsule({
         </span>
       )}
       <span id={`${id}-summary`} className="min-w-0 flex-1 text-start">
-        <bdi className="block truncate text-[0.9375rem] font-semibold leading-tight text-foreground">{title}</bdi>
-        <span className="mt-0.5 block truncate text-[0.8125rem] leading-tight text-muted-foreground">
+        {/* Both lines wrap rather than truncate (Nidz 1.4 corrections): the
+            brief is what the page is read against, and "Garde chez le
+            pet-sitter · Al…" hid the very part that decides the results. The
+            capsule grows to a stadium; the portrait and the action stay
+            centred at its ends. */}
+        <bdi className="block break-words text-[0.9375rem] font-semibold leading-tight text-foreground">{title}</bdi>
+        <span className="mt-0.5 block break-words text-[0.8125rem] leading-snug text-muted-foreground">
           {parts.length === 0
             ? emptyText
             : parts.map((part, i) => (

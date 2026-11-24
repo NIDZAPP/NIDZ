@@ -5,6 +5,7 @@ import { SlidersHorizontal } from "lucide-react";
 import type { ReactNode } from "react";
 
 import BackButton from "@/components/shared/BackButton";
+import { TOP_BAR, TOP_BAR_ROW } from "@/components/shared/top-bar";
 import { cn } from "@/lib/utils";
 
 /**
@@ -91,10 +92,12 @@ export default function FlowScreen({
        pinned action bar needs the room under it. */
     <div className="has-pinned-action flex min-h-dvh flex-col bg-background">
       {hasTopBar && (
-        <div className="sticky top-0 z-30 bg-background/95 supports-[backdrop-filter]:bg-background/85 supports-[backdrop-filter]:backdrop-blur-md">
-          <div className="container flex h-16 items-center gap-3">
+        /* The same bar geometry as the browsable header (`TOP_BAR_ROW`), so
+           the back control does not move between a flow step and a profile. */
+        <div className={TOP_BAR}>
+          <div className={TOP_BAR_ROW}>
             {backTo ? (
-              <BackButton fallback={backTo} label={backLabel} variant="round" />
+              <BackButton fallback={backTo} label={backLabel} />
             ) : (
               <span className="size-11 shrink-0" aria-hidden="true" />
             )}

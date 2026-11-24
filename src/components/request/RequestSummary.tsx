@@ -96,12 +96,14 @@ export default function RequestSummary({
         <div className="min-w-0 flex-1">
           {pet ? (
             <>
-              <p className="truncate text-name font-semibold text-foreground">
+              <p className="break-words text-name font-semibold text-foreground">
                 <bdi>{pet.name}</bdi>
               </p>
               {/* Each part isolated: a breed or an age is the owner's own text
-                  ("3 ans") and may be Latin inside Arabic. */}
-              <p className="truncate text-sm text-muted-foreground">
+                  ("3 ans") and may be Latin inside Arabic. Wraps rather than
+                  truncating: beside the status badge at 320px it read
+                  "Chien · …". */}
+              <p className="break-words text-sm text-muted-foreground">
                 {[t(`species.${pet.species}`), kind, pet.age].filter(Boolean).map((part, i) => (
                   <span key={i}>
                     {i > 0 && <span aria-hidden="true"> · </span>}
@@ -113,8 +115,11 @@ export default function RequestSummary({
           ) : (
             <p className="text-sm text-muted-foreground">{t("request.summary.pet")}</p>
           )}
+          {/* Under the animal on a phone, where beside it the badge left the
+              name a 60px column; at the end of the row from sm. */}
+          {showStatus && <StatusBadge status={request.status} className="mt-2 sm:hidden" />}
         </div>
-        {showStatus && <StatusBadge status={request.status} className="shrink-0" />}
+        {showStatus && <StatusBadge status={request.status} className="hidden shrink-0 sm:inline-flex" />}
       </div>
 
       {/* The tear line of a pass: a dashed rule with a notch at each end. */}
