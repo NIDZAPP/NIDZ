@@ -1,11 +1,12 @@
 ---
 name: nidz-design
-description: Nidz product truth, brand anchors, UX constraints and accessibility. Use as project context for Nidz UI work; Impeccable leads design and emil-design-eng leads interaction craft.
+disable-model-invocation: true
+description: Nidz product truth, brand anchors, UX constraints and accessibility. Manual reference only; do not invoke automatically for UI tasks. Impeccable leads design and emil-design-eng leads interaction craft.
 ---
 
 # Nidz Design — v1.7 workflow / v1.4 visual baseline
 
-Read `NIDZ_DESIGN_SYSTEM.md`, **starting with §0.2 (Nidz 1.7 workflow) and §0.1 (Nidz 1.4 baseline)** and then the relevant product/trust sections. Historical visual prescriptions in §0.0 and elsewhere describe the previous implementation; §0.1 supersedes them for the 1.4 redesign.
+When explicitly invoked, read the relevant sections of `NIDZ_DESIGN_SYSTEM.md`, including §0.2 (Nidz 1.7 workflow) and §0.1 (Nidz 1.4 baseline) as applicable. This reference does not precede the primary skills. Historical visual prescriptions in §0.0 and elsewhere describe the previous implementation; §0.1 supersedes them for the 1.4 redesign.
 
 ## Always preserve
 

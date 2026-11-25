@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## UI tasks — mandatory startup order (Nidz 1.7)
+
+For an actionable UI design, redesign or polish request, invoke the `impeccable` skill with the actual task/target (not an empty invocation) as the first skill, then invoke `emil-design-eng` with that same concrete task before implementation for substantial UI work. For a narrowly interaction-only task, Emil may lead. Do not invoke `nidz-design` automatically or before the primary design skills: it is a reference, not an execution workflow. Read the relevant product constraints directly as needed. Briefly inspect the requested screen, supplied references and its direct dependencies; expand inspection only when needed for the task or a real regression risk. Do not start an unrelated whole-repository audit. Proceed with the applicable Impeccable playbook and real visual checks; report blockers honestly. Preserve the teal `#0F766E` and terracotta `#A84F32` anchors and all mandatory product safeguards.
+
 ## Commands
 
 ```sh
@@ -36,7 +40,7 @@ For any UI design or refinement, use **Impeccable** as the primary design lead (
 
 ## Nidz design rules — v1.4 baseline
 
-**Read `.claude/skills/nidz-design/NIDZ_DESIGN_SYSTEM.md` §0.2 and §0.1 first** and use the `nidz-design` skill for UI tasks. `PRODUCT.md` is authoritative for product truth.
+**Project context, not a competing skill:** consult only relevant sections of `.claude/skills/nidz-design/NIDZ_DESIGN_SYSTEM.md` (§0.2 and §0.1 as applicable) after starting the primary skill workflow. Do not invoke `nidz-design` automatically. `PRODUCT.md` is authoritative for product truth.
 
 **Preserve:** Nidz's logo/name, brand anchors **teal `#0F766E` + terracotta `#A84F32`**, real marketplace journeys, accessibility, privacy, safety, trust provenance, i18n (fr/en/ar) and RTL. Never imply an unimplemented feature (verification, payment, insurance, booking, availability, reviews or real messaging) is functional.
 
