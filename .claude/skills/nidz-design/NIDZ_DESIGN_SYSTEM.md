@@ -4,11 +4,20 @@
 
 ---
 
+## 0.2 Amendement actif — Nidz 1.7 : autonomie et hiérarchie des skills
+
+Cet amendement prévaut sur les consignes de **workflow et de validation esthétique** des versions précédentes. Le niveau 1 (vérité produit, sécurité, confidentialité, accessibilité, i18n/RTL, parcours et matching réels) reste inchangé.
+
+- Impeccable dirige la conception, la composition, l'UX et la qualité visuelle. emil-design-eng dirige les interactions, les animations et les finitions. Les autres skills sont des spécialistes ponctuels, pas des autorités concurrentes. Voir la hiérarchie dans `CLAUDE.md`.
+- Une demande d'implémentation ou de refonte autorise les décisions esthétiques autonomes dans son périmètre : composition, typographie, formes, espaces, surfaces, illustrations et motion. Respecter les contraintes explicites et maquettes fournies. Le système implémenté est une base, pas un veto sur une refonte autorisée.
+- Demander une validation seulement pour une modification métier non décidée, un changement des ancres de marque, une extension du périmètre, une action irréversible, une dépendance payante ou si l'utilisateur demande une validation préalable. Respecter les véritables étapes de validation d'un workflow Impeccable fondé sur une maquette approuvée ; ne jamais inventer une approbation. Pour le travail autonome, choisir le parcours code-led lorsque pertinent.
+- Le color guardian vérifie les ancres, rôles sémantiques et contrastes ; les agents de revue vérifient les défauts concrets, pas les préférences esthétiques. Documenter les évolutions cohérentes du système, conserver les exigences de qualité et vérifier les écrans réels. Le fond mist et Readex Pro de 1.4 restent la base actuelle, sans obligation de conserver l'ancienne esthétique.
+
 ## 0.1 Amendements actifs — Nidz 1.4 (23 novembre 2026)
 
 > **Niveau 1 inchangé :** sécurité, confidentialité, vérité produit, provenance des preuves de confiance, accessibilité, i18n/RTL, matching et parcours réels restent obligatoires.
 >
-> **Niveau 2 libéré :** le système visuel des audits 1.0–1.3 est une photographie du code existant, **pas une limite créative pour 1.4**. Cet amendement prévaut sur l'amendement 0.0 et les sections ci-dessous **uniquement pour leurs prescriptions visuelles** (fonds, typographie, rayons, cartes, espacements, mise en page, emploi décoratif des couleurs, iconographie et animation). Les modifications de design sont proposées et validées avant leur implémentation ; elles ne modifient pas à elles seules le code actuel.
+> **Niveau 2 libéré :** le système visuel des audits 1.0–1.3 est une photographie du code existant, **pas une limite créative pour 1.4**. Cet amendement prévaut sur l'amendement 0.0 et les sections ci-dessous **uniquement pour leurs prescriptions visuelles** (fonds, typographie, rayons, cartes, espacements, mise en page, emploi décoratif des couleurs, iconographie et animation). Les décisions visuelles suivent désormais les limites d'autonomie et de validation de §0.2 ; une proposition ne constitue pas à elle seule une implémentation.
 
 ### Identité à préserver
 
@@ -19,7 +28,7 @@
 ### Liberté de refonte visuelle
 
 - **Layouts, composition, navigation visuelle, composants, cartes, surfaces, ombres, espacements, typographies, illustrations et animations peuvent être totalement repensés** en s'appuyant sur Impeccable et les skills d'Emil Kowalski lorsqu'ils sont disponibles. Ne pas conserver une forme simplement parce qu'elle figure dans `DESIGN.md` ou dans un composant existant.
-- Le blanc `#FFFFFF` est le fond **actuellement implémenté**, non une obligation de laisser de grands espaces blancs ou de conserver exclusivement un fond blanc ; un nouveau système de surfaces/fonds cohérent peut être proposé et validé.
+- Le blanc `#FFFFFF` était le fond historique avant 1.4 (voir le fond mist implémenté en §0.1-A), non une obligation de laisser de grands espaces blancs ou de conserver exclusivement un fond blanc ; un nouveau système de surfaces/fonds cohérent peut être proposé et validé.
 - **Inter n'est plus une obligation de marque pour la refonte** : proposer une typographie plus convaincante est autorisé, à condition de vérifier licences, lisibilité et prise en charge correcte du français, de l'anglais et de l'arabe (RTL). La pile de polices actuelle reste telle quelle jusqu'à une décision d'implémentation.
 - **Boutons d'action principaux et secondaires en forme capsule (pill shape)** comme direction globale approuvée ; leurs états, cibles tactiles et niveaux de priorité restent explicites. L'ancien plafond de rayon 24 px et l'interdiction des pills hors chips ne s'appliquent plus à cette refonte.
 - Les cartes, surfaces colorées, bordures, dégradés, ombres et animations ne sont **ni interdits ni obligatoires**. Leurs choix doivent servir une composition premium, chaleureuse, mobile-first et accessible, sans surcharge ni effets gratuits.
@@ -35,7 +44,7 @@
 
 ### Méthode de validation
 
-Examiner la référence et l'écran réel → proposer une direction → faire approuver → implémenter écran par écran → vérifier captures sur mobile et desktop, large texte, i18n/RTL, contrastes et régressions. Une esthétique plus moderne ne justifie jamais de nouvelles promesses produit inventées.
+Examiner la référence et l'écran réel → établir une direction → appliquer §0.2 pour les éventuelles validations → implémenter écran par écran → vérifier captures sur mobile et desktop, large texte, i18n/RTL, contrastes et régressions. Une esthétique plus moderne ne justifie jamais de nouvelles promesses produit inventées.
 
 ### 0.1-A à 0.1-G — Système 1.4 implémenté (24 novembre 2026)
 
@@ -1765,7 +1774,7 @@ Non engagée.
 Information pouvant changer et devant être actualisée.
 
 Exemple :
-- « Inter est la police UI » → décision design active.
+- « Inter est la police UI » → décision historique remplacée par Readex Pro (§0.1-B).
 - « Nidz prend 15 % de commission » → ne pas considérer comme fait.
 - « Identité vérifiée » → fait seulement si processus existant.
 - nombre de wilayas → donnée externe actualisable.

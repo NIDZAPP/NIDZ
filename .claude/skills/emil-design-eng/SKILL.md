@@ -1,9 +1,13 @@
 ---
 name: emil-design-eng
-description: Emil Kowalski's design-engineering philosophy for UI polish, component design, animation decisions, and the invisible details that make software feel great. Use when building or reviewing a UI component's interactions and polish (press and hover states, popover origin, tooltip timing, transitions vs keyframes, clip-path techniques, drag details) and no narrower skill fits.
+description: Emil Kowalski's design-engineering philosophy for UI polish, component design, animation decisions, and the invisible details that make software feel great. Use when building or reviewing a UI component's interactions and polish (press and hover states, popover origin, tooltip timing, transitions vs keyframes, clip-path techniques, drag details) as the primary interaction and motion specialist for Nidz, alongside Impeccable for overall visual direction. Narrower skills support it when relevant.
 ---
 
 # Design Engineering
+
+## Nidz routing (local integration)
+
+For Nidz UI work, this skill leads interaction craft alongside Impeccable's visual design lead. Consult narrower Emil skills as needed; they complement rather than displace this role. Follow the scoped aesthetic autonomy and product/brand boundaries in `CLAUDE.md`. Do not invent approval or override an explicit user brief.
 
 ## Initial Response
 
