@@ -277,12 +277,17 @@ values recorded there and in §0.1-A.
 - **Warm Terracotta** (`brand`): the brand paw and the monogram letter of a
   person. 4.6:1 on its soft tint.
 - **Terracotta Tint** (`brand-soft`): monogram tiles (sitter card, profile,
-  message lists) and the cat tile.
-- **Sand** (`sand`): the dog tile, and the "en attente" (pending) request
-  status, always with the clock icon.
-- **Sky** (`sky`): the bird tile, kept visibly apart from the selected tint.
-  On all three tiles text is at least 13.5:1 and the teal selection ring at
-  least 4.6:1.
+  message lists).
+- **Sand** (`sand`): the "en attente" (pending) status with its clock, and the
+  "publiée" (open post) status with its megaphone — never without the icon.
+- **Sky** (`sky`): kept for illustration accents; no longer an animal tile.
+- **Art ground** (`ART_GROUND`, `#EADA9E`, ≈ HSL 47 64% 77%, Nidz 1.7): the
+  sand ground of the supplied animal pictures, and of the « Autre » paw tile
+  (paw `#8A6A3A`, 3.57:1). An art constant in
+  `src/components/illustrations/art-ground.ts`, not a token: it belongs to the
+  pictures. The teal selection ring measures 3.92:1 against it (3.13:1 against
+  the darkest picture edge) — above the 3:1 required of a UI boundary, below
+  the 4.6:1 the flat 1.4 tiles had.
 
 ### Neutral
 - **Mist** (`mist`, `--background`): the ground of every screen, the header and
@@ -319,7 +324,7 @@ animals and people. They never carry a state (hover, focus, selection, error)
 and never fill an action button. Two exceptions, both recorded in §0.1-A: the
 **resting** fill of an illustrated animal-category card, whose selection is
 carried by the 2.5px teal ring and the check badge; and sand on the pending
-status, always beside its clock.
+and open statuses, always beside their icon (clock, megaphone).
 
 **The Teal Tile Rule.** An interface icon tile (housing, rates, limits, account
 rows, empty states) is `primary-soft` with a teal glyph, or `secondary` with an
@@ -557,20 +562,39 @@ question, how an answer is used. **May never hide:** an error, a constraint, a
 format, a privacy fact about who sees the answer, an honesty statement or a
 demo marker. Those stay visible.
 
-### Animal categories
-`src/components/shared/AnimalCategories.tsx`: dog, cat and bird as three
-illustrated cards in a three-column grid, the **same** cards, order and words
-on both sides of the marketplace (owner's need, sitter's accepted animals, the
-home's quick start). Tiles: dog `sand`, cat `brand-soft`, bird `sky`
-(`SPECIES_TILE`). Selected: a 2.5px inset teal ring plus a teal check badge at
-the top end. Three honest roles: `pick` (buttons), `single` (radio group),
-`multi` (checkboxes).
+### Animal categories (Nidz 1.7)
+`src/components/shared/AnimalCategories.tsx`: the thirteen animals of the
+catalogue (`src/data/animal-catalogue.ts`) — dog, cat and bird first — then
+« Autre », three to a row, the **same** cards, order and words on both sides
+of the marketplace. The pictures are the supplied images, served as WebP at
+192 and 384 px through `srcset` (`AnimalPortrait`), lazy below the first rows;
+« Autre » is a paw on the art ground. Selected: a 2.5px teal ring drawn on an
+`::after` overlay (an inset shadow would paint under the picture) plus a teal
+check badge at the top end.
 
-### Kind picker
-`src/components/shared/KindPicker.tsx`: breed or species after the category,
-with a search field, the six most common as chips, the rest on demand, and
-"Mon animal n'est pas dans la liste". Optional, and it says so. It is detail
-about one animal and is **never read by matching**; its "!" says so plainly.
+- `single` (the owner's « Pour quel animal ? »): toggle buttons
+  (`aria-pressed`); tapping the chosen one again deselects it. Once one is
+  chosen the others **recede**: the button scales to 0.97 and only its
+  picture dims and blurs (`opacity .55`, `blur 2px`, `saturate .7`, 200ms
+  ease-out). The label stays sharp in the muted ink (6.3:1) and the button
+  itself is never filtered, so its focus ring keeps full contrast; a receded
+  card under keyboard focus shows its picture at full strength. Reduced
+  motion: no scale, no transition.
+- `multi` (the sitter's accepted animals): checkboxes, labelled in the plural,
+  no receding.
+
+### Kind list (Nidz 1.7)
+`src/components/shared/KindList.tsx`: the breed or species list of one
+category (`src/data/animal-kinds.ts`, searchable in the three languages and
+by alias, accents ignored), as a radio group for an owner and a checkbox
+group for a sitter's « certaines races uniquement ». Practical order, never a
+popularity claim. « Autre » opens a text field; « Je ne sais pas » moves on.
+Optional for the owner, and skipped for categories where the classification
+does not change the care (mouse, ferret). Since 1.7 it **is** read, by one
+module only — `src/data/compatibility.ts` — and only against a sitter who
+restricts kinds: a listed kind can be confirmed or excluded; an unknown or
+free-text kind is never matched automatically, it is « à confirmer ». A breed
+never says anything about behaviour, and the screens say so.
 
 ### The brief capsule (signature)
 `src/components/search/BriefCapsule.tsx`: one white pill with the `raised`
@@ -595,8 +619,49 @@ a request that exists.
 
 ### Status badges
 `src/components/shared/StatusBadge.tsx`: 28px pills, 12px semibold, always an
-icon plus a word. Pending: `sand` with a clock. Accepted: success at 10% with
-a check. Declined: `secondary` with muted text and a cross. Never red.
+icon plus a word. Pending: `sand` with a clock. Open (a published request):
+`sand` with a megaphone. Accepted: success at 10% with a check — two people
+agreed, nothing was booked. The ended states share one neutral family,
+`secondary` with muted text (5.23:1), told apart by icon and word: declined
+and not chosen (cross), withdrawn (undo), cancelled (ban), past (calendar
+cross) and, since the review of 1.7, outdated — the owner changed the request
+after the proposal (pencil). Never red.
+
+### Segmented views (Nidz 1.7)
+`src/components/shared/Segmented.tsx`: the one control for two or three views
+of one place — Mes animaux / Explorer, Reçues / Envoyées / Validées,
+Conversations / Notifications. A white pill with one `primary-soft` capsule
+that slides under the selected label (transform and width, 200ms ease-out,
+retargetable; it jumps under reduced motion); the selected label is teal and
+semibold (4.68:1 on the capsule). Tabs semantics, arrow keys mirrored in
+Arabic. The view always lives in the address, so Back returns to it.
+
+### Welcome and first choice (Nidz 1.7)
+`src/pages/onboarding/Welcome.tsx` and `Start.tsx`: the supplied welcome
+picture, the promise, and exactly two pill actions of equal size (teal
+« Ouvrir un compte » / white « Se connecter »; then « Trouver une garde » /
+« Devenir pet-sitter »). One viewport down to 320×568 in the three
+languages: the picture is the only flexible part — an absolutely positioned
+layer inside a `flex-1` box (a percentage height does not resolve in a
+`min-h-dvh` column, nor do container units in Chromium), the image itself
+square under `max-width`/`max-height`, 26rem at most. With enlarged text the
+page scrolls; nothing is clipped.
+
+### Drafts, posts and one-tap decisions (Nidz 1.7)
+- **DraftCards** (`src/components/requests/DraftCards.tsx`): « Brouillon »
+  rows under Demandes' controls, only when a draft exists — neutral
+  `secondary` tile with a pencil, never a status colour: nothing was sent.
+  Discarding asks first and never deletes a saved animal.
+- **PostCard / CompatLine / KindTag** (`src/components/posts/post-ui.tsx`):
+  a published request as a sitter reads it, its fit stated as confirmed
+  (success), to confirm (ink) or excluded (muted) — always in words — and
+  the kind of item (published request, direct request, proposal) as a quiet
+  tag.
+- **ConfirmAction** (`src/components/shared/ConfirmAction.tsx`): an action
+  that ends something (withdraw, cancel, block, discard) opens an alert
+  dialog that states its consequence. Its result is saved through `useAction`
+  (`src/hooks/use-action.ts`) and shown with `SaveFeedback`: a refused write
+  keeps the screen and offers a retry.
 
 ### Honesty components
 - **ProvenanceLabel:** the byline described in the Overview. Not a badge.

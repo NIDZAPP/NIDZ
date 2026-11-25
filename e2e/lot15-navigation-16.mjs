@@ -1,7 +1,12 @@
 /* Nidz 1.6 — the navigation refactoring.
    Guards the five defects of the 1.5 navigation audit (NAV-01…05) and the
    approved structure: four tabs per side, search under Accueil, animals and
-   Paramètres under Compte, Messages as a tab with notifications inside. */
+   Paramètres under Compte, Messages as a tab with notifications inside.
+   Updated for Nidz 1.7 (§15–§22): the SAME four tabs in both spaces
+   (Accueil · Demandes · Messages · Compte); the owner's Accueil is « Mes
+   animaux » / « Explorer les pet-sitters »; « Mon profil pet-sitter » moved
+   into Compte; the space switch lives in Compte only. NAV-01…05 keep their
+   guards. */
 import { ACCOUNT, BASE, check, clean, done, isoIn, open, publishedSitter, seedState, storedState } from "./lib.mjs";
 
 const pet = { id: "pet-rex", name: "Rex", age: "3 ans", sex: "unknown", notes: "", species: "dog", details: { size: "medium" } };
@@ -36,34 +41,38 @@ const current = async (page) =>
     "Messages is a tab, not a header icon: one visible way to it",
     (await page.locator("a[href='/messages']:visible").count()) === 1 && (await page.locator(`${BAR} a[href='/messages']`).count()) === 1,
   );
-  check("Accueil leads with the search", await page.getByRole("link", { name: "Trouver une garde" }).isVisible());
-  await page.getByRole("link", { name: "Voir tous les pet-sitters" }).click();
-  await page.waitForURL(/\/search$/);
-  check("free browsing: every sitter, no account and no brief needed", (await page.locator("main").innerText()).includes("Exemples de pet-sitters"));
+  /* Retired in Nidz 1.7: « Accueil leads with the search » and « Voir tous
+     les pet-sitters ». Accueil is now Mes animaux / Explorer (§16). */
+  check("Accueil: « Mes animaux » and « Explorer les pet-sitters »", (await page.getByRole("tab", { name: "Mes animaux" }).count()) === 1 && (await page.getByRole("tab", { name: "Explorer les pet-sitters" }).count()) === 1);
+  await page.getByRole("tab", { name: "Explorer les pet-sitters" }).click();
+  await page.waitForURL(/view=explore/);
+  check("free browsing: the example sitters, no brief needed", (await page.locator("main ul[role=list] > li").count()) > 0);
+  await page.getByRole("link", { name: "Recherche détaillée" }).click();
+  await page.waitForURL(/\/search/);
   check("results sit under Accueil (tab stays current)", (await current(page)) === "Accueil");
   await page.getByRole("button", { name: "Retour" }).click();
-  await page.waitForURL(`${BASE}/`);
-  check("results have a Back to Accueil", page.url() === `${BASE}/`);
+  await page.waitForURL(/view=explore/);
+  check("results have a Back to the same Explore view", /view=explore/.test(page.url()));
 
   await page.getByRole("link", { name: "Compte" }).click();
   await page.waitForURL(/\/account$/);
   check("Compte: the person first", (await page.locator("main").innerText()).includes("Lina Kaci"));
-  check("Compte: the animals are here", (await page.getByRole("link", { name: /1 animal/ }).count()) === 1);
-  await page.getByRole("link", { name: /1 animal/ }).click();
-  await page.waitForURL(/\/owner\/pets$/);
-  check("Mes animaux sits under Compte", (await current(page)) === "Compte");
+  check("Compte: a way to the animals", (await page.getByRole("link", { name: /Mes animaux/ }).count()) === 1);
+  await page.getByRole("link", { name: /Mes animaux/ }).click();
+  await page.waitForURL((u) => u.pathname === "/");
+  check("Mes animaux is the owner's Accueil", (await current(page)) === "Accueil" && (await page.getByRole("tab", { name: "Mes animaux" }).getAttribute("aria-selected")) === "true");
   await page.goBack();
   await page.getByRole("link", { name: "Paramètres" }).click();
   await page.waitForURL(/\/settings$/);
   const settings = clean(await page.locator("main").innerText());
-  check("Paramètres: language, and security & privacy together", settings.includes("Langue") && settings.includes("Sécurité et confidentialité") && settings.includes("Recommencer à zéro"));
+  check("Paramètres: categories, security & privacy and account management among them", settings.includes("Sécurité et confidentialité") && settings.includes("Préférences") && settings.includes("Gestion du compte"));
   check("Paramètres sits under Compte", (await current(page)) === "Compte");
   await page.getByRole("button", { name: "Retour", exact: true }).click();
   await page.waitForURL(/\/account$/);
   check("Back from Paramètres returns to Compte", page.url().endsWith("/account"));
 
   /* Editing the account from Compte comes back to Compte. */
-  await page.getByRole("link", { name: "Modifier mes informations personnelles" }).click();
+  await page.getByRole("link", { name: /Informations personnelles/ }).click();
   await page.waitForURL(/\/owner\/account/);
   await page.getByRole("button", { name: /Enregistrer|Continuer|Créer/ }).last().click();
   await page.waitForURL(/\/account$/);
@@ -74,12 +83,22 @@ const current = async (page) =>
 
 /* Deep links into Help land back on Compte, not on the old settings. */
 {
-  const { page, context } = await open({ lang: "fr", state: seedState({}) });
+  const { page, context } = await open({ lang: "fr", state: seedState({ account: ACCOUNT, capabilities: { owner: true, sitter: false } }) });
   await page.goto(`${BASE}/help`);
   await page.getByRole("button", { name: "Retour" }).click();
   await page.waitForURL(/\/account$/);
   check("Help deep link: Back goes to Compte", page.url().endsWith("/account"));
-  check("browsing without an account is a normal state in Compte", (await page.locator("main").innerText()).includes("Vous naviguez sans compte"));
+  await context.close();
+}
+{
+  /* Retired in Nidz 1.7: « browsing without an account is a normal state in
+     Compte ». Without a session, Compte opens the welcome screen (§2). */
+  const { page, context } = await open({ lang: "fr", state: seedState({}) });
+  await page.goto(`${BASE}/account`);
+  await page.waitForURL(/\/welcome/);
+  check("no account: Compte opens the welcome screen", page.url().endsWith("/welcome"));
+  await page.goto(`${BASE}/help`);
+  check("…while Help stays readable", (await page.locator("h1").count()) === 1 && page.url().endsWith("/help"));
   await context.close();
 }
 
@@ -87,17 +106,25 @@ const current = async (page) =>
 {
   const state = seedState({ account: ACCOUNT, capabilities: { owner: true, sitter: true }, activeWorkspace: "owner", sitter: draftSitter() });
   const { page, context } = await open({ lang: "fr", state });
-  await page.goto(`${BASE}/`);
-  await page.getByRole("button", { name: "Passer à mon espace pet-sitter" }).click();
+  /* Retired in Nidz 1.7: the switch on the owner's Accueil — the space
+     switch lives in Compte (§22). */
+  await page.goto(`${BASE}/account`);
+  await page.getByRole("button", { name: /Espace pet-sitter/ }).click();
   await page.waitForURL(/\/sitter\//);
-  check("NAV-01 Home switch resumes the draft at Mon profil", page.url().endsWith("/sitter/profile"));
-  check("the draft has the sitter bar, Mon profil current", (await current(page)) === "Mon profil" && (await tabs(page)).length === 4);
+  check("NAV-01 the switch resumes the draft at Mon profil pet-sitter", page.url().endsWith("/sitter/profile"));
+  check("the draft has the sitter bar; the profile sits under Compte", (await current(page)) === "Compte" && (await tabs(page)).length === 4);
   check("…and says it is not published yet", (await page.locator("main").innerText()).includes("Pas encore publié"));
+  /* Nidz 1.7: the wordmark is « Accueil » and goes where that tab goes —
+     the feed, which offers to resume the profile (never the sign-up start). */
   await page.getByRole("link", { name: /^Nidz/ }).click();
-  await page.waitForURL(/\/sitter\/profile$/);
-  check("NAV-01 the logo resumes the same place", page.url().endsWith("/sitter/profile"));
+  await page.waitForURL(/\/sitter\/feed/);
+  check("NAV-01 the logo leads to Accueil, as its name says", page.url().includes("/sitter/feed"));
+  /* §17: the sitter's Accueil (the feed) offers to finish the profile. */
+  await page.getByRole("link", { name: "Accueil", exact: true }).click();
+  await page.waitForURL(/\/sitter\/feed/);
+  check("the feed offers to resume the unfinished profile", (await page.getByRole("link", { name: "Compléter mon profil" }).count()) >= 1);
   await page.getByRole("link", { name: "Demandes" }).click();
-  await page.waitForURL(/\/sitter\/requests$/);
+  await page.waitForURL(/\/sitter\/requests/);
   check("the inbox says the profile is not visible yet", (await page.locator("main").innerText()).includes("pas encore visible"));
   await page.getByRole("link", { name: "Continuer mon profil" }).click();
   await page.waitForURL(/\/sitter\//);
@@ -185,7 +212,8 @@ const current = async (page) =>
   await page.getByRole("tab", { name: /Notifications/ }).click();
   await page.waitForURL(/tab=notifications/);
   check("NAV-03 the view is in the address", page.url().includes("tab=notifications"));
-  await page.locator("[role=tabpanel] a").first().click();
+  /* 1.7: the panel also links to the notification preferences. */
+  await page.locator("[role=tabpanel] a[href='/messages/conv-1']").first().click();
   await page.waitForURL(/\/messages\/conv-1/);
   await page.getByRole("button", { name: /Retour/ }).click();
   await page.waitForURL(/\/messages/);
@@ -246,7 +274,7 @@ const current = async (page) =>
   const state = seedState({ account: ACCOUNT, capabilities: { owner: true, sitter: true }, activeWorkspace: "sitter", sitter: publishedSitter(), requests: [request()] });
   const { page, context } = await open({ lang: "fr", state });
   await page.goto(`${BASE}/sitter/profile`);
-  { const t = (await tabs(page)).map((x) => x.replace(/\d+\s*/g, "").trim()); check("sitter bar: Demandes · Mon profil · Messages · Compte", JSON.stringify(t) === JSON.stringify(["Demandes", "Mon profil", "Messages", "Compte"]), t.join("|")); }
+  { const t = (await tabs(page)).map((x) => x.replace(/\d+\s*/g, "").trim()); check("sitter bar: Accueil · Demandes · Messages · Compte", JSON.stringify(t) === JSON.stringify(["Accueil", "Demandes", "Messages", "Compte"]), t.join("|")); }
   check("sitter Demandes: a request to decide, in words", (await page.getByRole("link", { name: "Demandes, 1 demande attend votre décision" }).count()) === 1);
   await context.close();
 }

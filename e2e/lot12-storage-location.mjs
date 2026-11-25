@@ -1,6 +1,8 @@
 /* Audit 1.3.1 — A-01 drafts that outlive the screen, A-02 saves that are
    confirmed or refused out loud, A-19 tabs that do not overwrite each other,
    and the sitter's wilaya / commune.
+   Updated for Nidz 1.7: the animal form's grid, name and age fields; saving
+   lands on My animals (`/`); a saved animal enters the need flow at « where ».
 
    Several checks need TWO tabs on one storage, which `open()` in lib.mjs
    cannot give: it reseeds on every new tab. `tabs()` below seeds once per
@@ -50,7 +52,7 @@ const repairStorage = (page) =>
   });
 
 const sitterDraft = () => {
-  const s = publishedSitter({ services: [], rates: {}, acceptedSpecies: [], acceptedDogSizes: [] });
+  const s = publishedSitter({ services: [], rates: {}, acceptedSpecies: [], acceptedKinds: {} });
   s.published = false;
   return s;
 };
@@ -105,23 +107,21 @@ const sitterState = (sitter = sitterDraft()) =>
   /* Owner forms: the animal form and the need flow. */
   const { context, newTab } = await tabs({ state: seedState({ account: ACCOUNT, capabilities: { owner: true, sitter: false } }) });
   let page = await newTab("/owner/pets/new");
-  await page.getByRole("radio", { name: "Cat", exact: true }).click();
-  await page.getByLabel("Its name").fill("Mimi");
+  await page.getByRole("button", { name: "Cat", exact: true }).click();
+  await page.getByLabel("What is your animal called?").fill("Mimi");
   await page.close();
   page = await newTab("/owner/pets/new");
-  check("owner animal form: survives closing and reopening", (await page.getByLabel("Its name").inputValue()) === "Mimi" && (await page.getByRole("radio", { name: "Cat", exact: true }).getAttribute("aria-checked")) === "true");
+  check("owner animal form: survives closing and reopening", (await page.getByLabel("What is your animal called?").inputValue()) === "Mimi" && (await page.getByRole("button", { name: "Cat", exact: true }).getAttribute("aria-pressed")) === "true");
   await page.getByRole("button", { name: "Save" }).click();
-  await page.waitForURL(/\/owner\/pets$/);
+  await page.waitForURL((u) => u.pathname === "/");
   const st = await storedState(page);
   const mimi = st.pets.find((p) => p.name === "Mimi");
   check("…and saves once, under one id", st.pets.filter((p) => p.name === "Mimi").length === 1 && mimi?.species === "cat");
 
-  /* Need flow: wilaya chosen, not yet continued. */
-  await page.goto(`${BASE}/owner/need/pet`);
+  /* Need flow: wilaya chosen, not yet continued. (Nidz 1.7: a saved animal
+     enters the journey from its card on My animals, at « where ».) */
+  await page.goto(`${BASE}/owner/need/location?pet=${encodeURIComponent(mimi.id)}`);
   await page.waitForSelector("h1");
-  await page.getByRole("radio", { name: "Mimi" }).click();
-  await page.getByRole("button", { name: "Continue" }).click();
-  await page.waitForURL(/\/need\/location/);
   await pickCombobox(page, "Wilaya", "Oran");
   await page.reload();
   await page.waitForSelector("h1");
@@ -142,14 +142,14 @@ const sitterState = (sitter = sitterDraft()) =>
 {
   const { context, newTab } = await tabs({ state: seedState({ account: ACCOUNT, capabilities: { owner: true, sitter: false } }) });
   const page = await newTab("/owner/pets/new");
-  await page.getByLabel("Its name").fill("Rex");
+  await page.getByLabel("What is your animal called?").fill("Rex");
   await breakStorage(page);
   await page.getByRole("button", { name: "Save" }).click();
   await page.waitForTimeout(300);
   const alert = page.locator("[data-save-failure=storage]");
   check("refused write: the form stays", page.url().includes("/owner/pets/new"));
   check("…says nothing was saved", (await alert.isVisible()) && /Couldn't save this information\./.test(clean(await alert.innerText())));
-  check("…keeps what was typed", (await page.getByLabel("Its name").inputValue()) === "Rex");
+  check("…keeps what was typed", (await page.getByLabel("What is your animal called?").inputValue()) === "Rex");
   check("…stores nothing", ((await storedState(page)).pets ?? []).length === 0);
   check("…offers a retry", await page.getByRole("button", { name: "Try again" }).isVisible());
   /* Mobile: the action bar is pinned; the message must be on screen. */
@@ -163,7 +163,7 @@ const sitterState = (sitter = sitterDraft()) =>
   check("…and the repeated failure is announced again (focus back on the message)", await page.evaluate(() => document.activeElement?.hasAttribute("data-save-failure")));
   await repairStorage(page);
   await page.getByRole("button", { name: "Try again" }).click();
-  await page.waitForURL(/\/owner\/pets$/);
+  await page.waitForURL((u) => u.pathname === "/");
   check("retry once storage works: saved and moved on", (await storedState(page)).pets.some((p) => p.name === "Rex"));
   await context.close();
 }
@@ -204,12 +204,12 @@ const sitterState = (sitter = sitterDraft()) =>
   const { context, newTab } = await tabs({ state: seedState({ account: ACCOUNT, capabilities: { owner: true, sitter: false } }) });
   const tabA = await newTab("/owner/pets/new");
   const tabB = await newTab("/owner/pets/new");
-  await tabA.getByLabel("Its name").fill("Mimi");
-  await tabB.getByLabel("Its name").fill("Rex");
+  await tabA.getByLabel("What is your animal called?").fill("Mimi");
+  await tabB.getByLabel("What is your animal called?").fill("Rex");
   await tabA.getByRole("button", { name: "Save" }).click();
-  await tabA.waitForURL(/\/owner\/pets$/);
+  await tabA.waitForURL((u) => u.pathname === "/");
   await tabB.getByRole("button", { name: "Save" }).click();
-  await tabB.waitForURL(/\/owner\/pets$/);
+  await tabB.waitForURL((u) => u.pathname === "/");
   const names = (await storedState(tabB)).pets.map((p) => p.name).sort();
   check("two tabs adding animals: both are kept", JSON.stringify(names) === JSON.stringify(["Mimi", "Rex"]), names.join(","));
   await tabA.waitForTimeout(300);
@@ -221,21 +221,21 @@ const sitterState = (sitter = sitterDraft()) =>
   await tabA.waitForSelector("h1");
   await tabB.goto(`${BASE}/owner/pets/${rex.id}`);
   await tabB.waitForSelector("h1");
-  await tabB.getByLabel("Its name").fill("Rexy");
+  await tabB.getByLabel("What is your animal called?").fill("Rexy");
   await tabB.getByRole("button", { name: "Save" }).click();
-  await tabB.waitForURL(/\/owner\/pets$/);
-  await tabA.getByLabel("Its age").fill("3 years");
+  await tabB.waitForURL((u) => u.pathname === "/");
+  await tabA.getByLabel("Years").selectOption({ label: "3 years" });
   await tabA.getByRole("button", { name: "Save" }).click();
   await tabA.waitForTimeout(300);
   check("same animal edited in two tabs: the second save is a conflict", (await tabA.locator("[data-save-failure=conflict]").isVisible()) && tabA.url().includes(rex.id));
   check("…the other tab's change is still saved", (await storedState(tabA)).pets.find((p) => p.id === rex.id).name === "Rexy");
   await tabA.getByRole("button", { name: "Use the saved version" }).click();
-  check("…'use the saved version' shows it", (await tabA.getByLabel("Its name").inputValue()) === "Rexy");
-  await tabA.getByLabel("Its age").fill("3 years");
+  check("…'use the saved version' shows it", (await tabA.getByLabel("What is your animal called?").inputValue()) === "Rexy");
+  await tabA.getByLabel("Years").selectOption({ label: "3 years" });
   await tabA.getByRole("button", { name: "Save" }).click();
-  await tabA.waitForURL(/\/owner\/pets$/);
+  await tabA.waitForURL((u) => u.pathname === "/");
   const final = (await storedState(tabA)).pets.find((p) => p.id === rex.id);
-  check("…and both edits end up kept", final.name === "Rexy" && final.age === "3 years");
+  check("…and both edits end up kept", final.name === "Rexy" && final.ageInfo?.years === 3);
   check("no page errors (two tabs)", tabA.errors.length === 0 && tabB.errors.length === 0, [...tabA.errors, ...tabB.errors].join(" | "));
   await context.close();
 }
@@ -245,10 +245,10 @@ const sitterState = (sitter = sitterDraft()) =>
   const { context, newTab } = await tabs({ state: sitterState(publishedSitter()) });
   const stale = await newTab("/settings");
   const fresh = await newTab("/owner/pets/new");
-  await fresh.getByLabel("Its name").fill("Kiwi");
-  await fresh.getByRole("radio", { name: "Bird", exact: true }).click();
+  await fresh.getByLabel("What is your animal called?").fill("Kiwi");
+  await fresh.getByRole("button", { name: "Bird", exact: true }).click();
   await fresh.getByRole("button", { name: "Save" }).click();
-  await fresh.waitForURL(/\/owner\/pets$/);
+  await fresh.waitForURL((u) => u.pathname === "/");
   await stale.getByRole("radio", { name: /Sitter/ }).first().click().catch(() => {});
   await stale.goto(`${BASE}/sitter/profile/limits`);
   await stale.waitForSelector("h1");
@@ -335,7 +335,7 @@ const sitterState = (sitter = sitterDraft()) =>
 {
   /* Owner need flow: wilaya only continues, as before, in every wilaya. */
   const { context, newTab } = await tabs({
-    state: seedState({ account: ACCOUNT, capabilities: { owner: true, sitter: false }, pets: [{ id: "pet-rex", name: "Rex", age: "", sex: "unknown", notes: "", species: "dog", details: { size: "medium" } }], need: { species: "dog", petId: "pet-rex", dogSize: "medium", wilayaCode: null, communeCode: null, dates: null, careType: null, maxPrice: null } }),
+    state: seedState({ account: ACCOUNT, capabilities: { owner: true, sitter: false }, pets: [{ id: "pet-rex", name: "Rex", age: "", sex: "unknown", notes: "", species: "dog", details: { size: "medium" } }], need: { species: "dog", petId: "pet-rex", wilayaCode: null, communeCode: null, dates: null, careType: null, maxPrice: null } }),
   });
   const page = await newTab("/owner/need/location");
   await pickCombobox(page, "Wilaya", "El Abiodh Sidi Cheikh");

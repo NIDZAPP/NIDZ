@@ -1,5 +1,7 @@
 /* Audit 1.3 LOT 06 — a profile readable in a few seconds, one component for
-   the owner's page and the sitter's preview. */
+   the owner's page and the sitter's preview.
+   Nidz 1.7: dog sizes are retired from the search (§9); the glance states
+   the animals accepted and, where a sitter restricts them, the breeds. */
 import { ACCOUNT, BASE, check, clean, done, open, publishedSitter, seedState } from "./lib.mjs";
 
 const inFirstScreen = (locator) =>
@@ -10,19 +12,19 @@ const inFirstScreen = (locator) =>
 
 {
   const { page, context } = await open({ state: seedState() });
-  await page.goto(`${BASE}/sitters/amina-b?species=dog&size=large&care=boarding&wilaya=alger`);
+  await page.goto(`${BASE}/sitters/amina-b?species=dog&care=boarding&wilaya=alger`);
   await page.waitForSelector("h1");
   const main = page.locator("main");
   check("first screen: the name", await inFirstScreen(page.locator("h1")));
   check("first screen: the commune", await inFirstScreen(main.getByText("Hydra, Algiers").first()));
-  check("first screen: a concrete reason", await inFirstScreen(main.getByText("Accepts large dogs").first()));
-  check("first screen: animals and dog sizes", await inFirstScreen(main.getByText("Dogs of every size").first()));
+  check("first screen: the animals accepted", await inFirstScreen(main.getByText("Dogs", { exact: true }).first()));
   check("first screen: a service with its price and unit", await inFirstScreen(main.getByText(/Boarding at the sitter's home · DZD\s?1,200 per night/).first()));
   const ctas = page.getByRole("link", { name: "Request care" });
   let visible = 0;
   for (let i = 0; i < (await ctas.count()); i++) if (await ctas.nth(i).isVisible()) visible += 1;
   check("exactly one visible 'Request care', on the first screen", visible === 1 && (await inFirstScreen(ctas.filter({ visible: true }).first())));
   const text = clean(await main.innerText());
+  check("a concrete reason, stated as matching the search", text.includes("Accepts dogs") && !/(small|medium|large) dogs/i.test(text));
   check("limits come right after the glance, before 'About'", text.indexOf("What I cannot accept") > 0 && text.indexOf("What I cannot accept") < text.indexOf("About"));
   check("example reviews say they are examples in the heading", text.includes("Reviews — examples"));
   check("the page says the person does not exist", text.includes("This person does not exist"));

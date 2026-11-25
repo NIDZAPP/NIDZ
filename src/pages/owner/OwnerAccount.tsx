@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 
 import { Chip } from "@/components/shared/Chip";
 import { SPECIES_ICON } from "@/components/shared/species";
@@ -13,6 +13,7 @@ import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { checkLocation } from "@/data/algeria";
+import { REGISTER_PATH } from "@/data/navigation";
 import { PHONE_PREFIX, SPECIES, type Species } from "@/data/types";
 import { useFormDraft } from "@/hooks/use-form-draft";
 import { useSave } from "@/hooks/use-save";
@@ -125,6 +126,12 @@ export default function OwnerAccount() {
   const fromAccount = Boolean(state.account) || next === ACCOUNT_PATH;
   const destination = next ?? (state.account ? ACCOUNT_PATH : "/");
   const backTo = fromAccount ? (next ?? ACCOUNT_PATH) : next ? `/auth?next=${encodeURIComponent(next)}` : "/auth";
+
+  /* Since 1.7 an account is OPENED only through `/register` (§3): its number,
+     its simulated code step and its one-account-per-device rule. This screen
+     edits an account that exists; without one it forwards there, with `next`,
+     as `/auth` does. */
+  if (!account) return <Navigate to={`${REGISTER_PATH}${next ? `?next=${encodeURIComponent(next)}` : ""}`} replace />;
 
   const toggleSpecies = (value: Species) =>
     set({ species: species.includes(value) ? species.filter((s) => s !== value) : [...species, value] });

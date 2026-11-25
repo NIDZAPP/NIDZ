@@ -1,10 +1,12 @@
 /* Audit 1.3 LOT 05 — "Pour publier" vs "Enrichir mon profil", honestly
    counted; no publication without the essentials; preview = public profile;
-   edit after publication; Back never re-opens a saved form. */
+   edit after publication; Back never re-opens a saved form.
+   Nidz 1.7: a sitter states, per category, « all breeds » or « certain
+   breeds only » (§18–19) — the counterpart of the retired dog sizes. */
 import { ACCOUNT, BASE, check, clean, done, open, publishedSitter, seedState, storedState } from "./lib.mjs";
 
 const text = async (page) => clean(await page.locator("main").innerText());
-const draft = publishedSitter({ services: [], rates: {}, acceptedSpecies: [], acceptedDogSizes: [], housing: { type: null, outdoor: null, residentPets: [], canSeparateAnimals: "unknown", conditions: null } });
+const draft = publishedSitter({ services: [], rates: {}, acceptedSpecies: [], acceptedKinds: {}, housing: { type: null, outdoor: null, residentPets: [], canSeparateAnimals: "unknown", conditions: null } });
 draft.published = false;
 const state = seedState({ account: ACCOUNT, capabilities: { owner: true, sitter: true }, sitter: draft });
 
@@ -37,13 +39,16 @@ const state = seedState({ account: ACCOUNT, capabilities: { owner: true, sitter:
   await page.waitForTimeout(300);
   check("Back from the dashboard does not reopen the saved form", !page.url().includes("/services"), page.url());
 
-  /* Animals: a dog without sizes is not enough. */
+  /* Animals: « certain breeds only » needs the breeds. (Retired in Nidz
+     1.7: « a dog without sizes is refused ».) */
   await page.goto(`${BASE}/sitter/profile`);
   await page.getByRole("link", { name: /Animals you accept/ }).first().click();
-  await page.getByRole("checkbox", { name: "Dogs" }).click();
+  await page.getByRole("checkbox", { name: "Dogs", exact: true }).click();
+  check("ticking dogs asks which breeds, « All breeds » preselected", (await page.getByRole("radio", { name: "All breeds" }).getAttribute("aria-checked")) === "true");
+  await page.getByRole("radio", { name: "Certain breeds only" }).click();
   await page.getByRole("button", { name: "Save" }).click();
-  check("dog without sizes is refused", await page.getByText("State the dog sizes you can take.").isVisible());
-  await page.getByRole("checkbox", { name: "Large dogs" }).click();
+  check("« certain breeds only » with none chosen is refused", await page.getByText("Choose at least one breed or species, or “All”.").first().isVisible());
+  await page.getByRole("checkbox", { name: "Sloughi" }).click();
   await page.getByRole("button", { name: "Save" }).click();
   await page.waitForURL(/\/sitter\/profile$/);
 
@@ -60,7 +65,7 @@ const state = seedState({ account: ACCOUNT, capabilities: { owner: true, sitter:
   await page.getByRole("link", { name: /what owners would see/i }).click();
   await page.waitForURL(/\/sitter\/preview/);
   const preview = clean(await page.locator("main").innerText());
-  check("preview shows the declared facts", preview.includes("Lina K.") && /Dogs: large/.test(preview) && /per night/.test(preview));
+  check("preview shows the declared facts", preview.includes("Lina K.") && /Dogs \(Sloughi only\)/.test(preview) && /per night/.test(preview), preview.slice(0, 300));
   check("preview never calls the profile verified", !/\bverified (profile|sitter)\b|profil vérifié/i.test(preview));
   await page.getByRole("button", { name: "Publish my profile" }).click();
   await page.waitForURL(/\/sitter\/published/);
@@ -91,7 +96,7 @@ const state = seedState({ account: ACCOUNT, capabilities: { owner: true, sitter:
    reachable by link or requestable; the preview's outline never jumps up;
    "Edit" on the preview returns by history. */
 {
-  const lost = publishedSitter({ services: ["boarding"], rates: { boarding: 900 }, acceptedSpecies: ["dog"], acceptedDogSizes: ["large"], housing: { type: null, outdoor: null, residentPets: [], canSeparateAnimals: "unknown", conditions: null } });
+  const lost = publishedSitter({ services: ["boarding"], rates: { boarding: 900 }, acceptedSpecies: ["dog"], acceptedKinds: {}, housing: { type: null, outdoor: null, residentPets: [], canSeparateAnimals: "unknown", conditions: null } });
   const { page, context } = await open({ state: seedState({ account: ACCOUNT, capabilities: { owner: true, sitter: true }, sitter: lost }) });
   await page.goto(`${BASE}/sitters/sitter-local`);
   check("lost essential: public profile is not served", (await text(page)).includes("This profile does not exist"));

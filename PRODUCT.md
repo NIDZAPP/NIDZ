@@ -8,7 +8,7 @@ web
 
 ## Users
 
-**Pet owners** — people in Algeria who own dogs, cats or birds and need someone to care for their animal while they are away or unavailable. An owner may have several animals, and they will not all have the same needs. Their situation is one of uncertainty rather than scarcity: the hard question is not "where do I find someone?" but **"is this the right person for my animal, and do I have enough information to trust them?"** They arrive anxious about handing over a family member to a stranger.
+**Pet owners** — people in Algeria who own a pet — dogs, cats and cage birds first, and since Nidz 1.7 also parrots, rabbits, guinea pigs, hamsters, pet mice, ferrets, aquarium fish, tortoises and turtles, snakes and chameleons, or an animal outside that list — and need someone to care for their animal while they are away or unavailable. An owner may have several animals, and they will not all have the same needs. Their situation is one of uncertainty rather than scarcity: the hard question is not "where do I find someone?" but **"is this the right person for my animal, and do I have enough information to trust them?"** They arrive anxious about handing over a family member to a stranger.
 
 **Pet-sitters** — individuals offering pet-care services in their own home or at the owner's. Their job is to present how they actually care for animals, receive requests that genuinely fit their limits and environment, build a reputation, and win further opportunities.
 
@@ -16,7 +16,7 @@ Both sides are Algerian, mobile-first, and read **French, Arabic, or English** (
 
 ## Product Purpose
 
-Nidz is an **Algerian pet-sitting marketplace** connecting dog, cat and bird owners with pet-sitters nearby. It must not behave as a plain classifieds catalogue. "Nearby" is a matching input, not a claim of national coverage: administrative geography data covering the whole country never licenses a promise of supply everywhere.
+Nidz is an **Algerian pet-sitting marketplace** connecting pet owners with pet-sitters nearby. The animals it knows are one central catalogue (`src/data/animal-catalogue.ts`: thirteen categories plus « Autre », each with its breeds or species, its services and its acceptance rules); a sitter states, per category, every breed or only some. It must not behave as a plain classifieds catalogue. "Nearby" is a matching input, not a claim of national coverage: administrative geography data covering the whole country never licenses a promise of supply everywhere.
 
 Owner-side value chain: **find → understand → trust → hand over the animal with peace of mind.**
 
@@ -32,6 +32,7 @@ Success is a hand-over the owner felt calm and informed about, and a sitter who 
 - Trilingual `en` / `fr` / `ar` with full RTL for Arabic. All user-facing copy passes through i18n keys present in all three locale files.
 - Mobile-first usage; PWA installable (`vite-plugin-pwa`, `registerType: 'autoUpdate'`).
 - Two primary journeys documented in the design system: owner (discovery → need definition → results → sitter profile → request → after the stay) and sitter (intro → identity → location → profile creation → services, animals accepted, housing).
+- Since Nidz 1.7, two ways to find care: the owner searches and asks one sitter (a direct request), or publishes the request so that sitters propose (a published request and its proposals; the owner accepts one). Neither books or pays anything. One account holds both spaces; it is opened through a sign-up journey whose Google, Apple and SMS steps are prototypes that contact nobody.
 
 ## Capabilities and Constraints
 

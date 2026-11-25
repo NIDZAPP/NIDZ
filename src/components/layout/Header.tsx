@@ -52,14 +52,16 @@ export default function Header({
   const choose = () => {
     if (state.activeWorkspace !== workspace) dispatch({ type: "setWorkspace", workspace });
   };
-  /* The wordmark goes where this space begins — the one answer the switch and
-     Compte give too (NAV-01). */
-  const home = workspaceHome(state, workspace);
-
   /* Home leaves the DESKTOP nav only: the wordmark beside it is already a link
      to the same place (§4.2). It stays in the mobile bar, which has no
      wordmark. */
   const navigable = isNavigable(all);
+  /* So the wordmark goes EXACTLY where the « Accueil » tab goes — its label
+     says so. Since 1.7 a draft sitter's Accueil is the feed, which offers to
+     finish the profile (§17); sending the wordmark to the profile instead
+     left the feed with no way in on desktop. Without a bar, where the space
+     begins (NAV-01). */
+  const home = (navigable && all.find((d) => d.labelKey === "nav.home")?.to) || workspaceHome(state, workspace);
   const destinations = navigable ? all.filter((d) => d.labelKey !== "nav.home") : [];
   const signedIn = hasSession(state);
 

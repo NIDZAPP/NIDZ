@@ -19,7 +19,9 @@ const owner = seedState({ account: ACCOUNT, capabilities: { owner: true, sitter:
 {
   const { context, page } = await open({ lang: "fr", state: owner });
   await page.goto(`${BASE}/sitters/amina-b`);
-  const triggers = page.locator("main button[aria-expanded]");
+  /* Folds only: since 1.7 the profile also has a dialog trigger (« Ne plus
+     voir ce pet-sitter »), which carries aria-expanded as well. */
+  const triggers = page.locator("main button[aria-expanded]:not([aria-haspopup])");
   const names = await triggers.allInnerTexts();
   check(
     "profile: the three sections are folds, in order",

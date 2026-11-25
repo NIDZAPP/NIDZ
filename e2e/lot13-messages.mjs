@@ -1,7 +1,9 @@
 /* Nidz 1.4 step 5 — Messages before a request, local and honest.
    A conversation is notes kept in this browser: never "sent", "delivered" or
    "read"; unread is per space; only the visitor's own sitter profile can
-   answer; an example profile says nobody will read it. */
+   answer; an example profile says nobody will read it.
+   Nidz 1.7: the test tools sit in Paramètres › Gestion du compte, and the
+   sitter space opens on its feed. */
 import { ACCOUNT, BASE, check, clean, done, open, publishedSitter, seedState, storedState } from "./lib.mjs";
 
 const FAKE = /\b(sent|delivered|seen|read by|envoyé|délivré|vu par|lu par)\b|message envoyé|a lu votre/i;
@@ -20,7 +22,7 @@ await page.goto(`${BASE}/sitters/amina-b`);
 check("another sitter's profile offers « Poser une question »", (await page.getByRole("link", { name: /Poser une question/ }).count()) > 0);
 await page.goto(`${BASE}/sitters/sitter-local`);
 check("your own profile does not", (await page.getByRole("link", { name: /Poser une question/ }).count()) === 0);
-await page.goto(`${BASE}/settings`);
+await page.goto(`${BASE}/settings/account`);
 await page.getByRole("link", { name: "M'écrire un message d'essai" }).click();
 await page.waitForURL(/\/messages\/to\/sitter-local/);
 let text = clean(await page.locator("body").innerText());
@@ -43,8 +45,8 @@ check("one thread per sitter", st.conversations.length === 1);
 /* 3. The sitter space sees it unread, opens it, answers. */
 await page.goto(`${BASE}/account`);
 await page.getByRole("button", { name: /Espace pet-sitter/ }).click();
-await page.waitForURL(/\/sitter\/requests/);
-check("sitter header: 1 unread conversation, in words", await page.getByRole("link", { name: /Messages, 1 conversation non lue/ }).isVisible());
+await page.waitForURL(/\/sitter\/feed/);
+check("sitter bar: 1 unread conversation, in words", await page.getByRole("link", { name: /Messages, 1 conversation non lue/ }).isVisible());
 await page.getByRole("link", { name: /Messages, 1 conversation non lue/ }).click();
 await page.waitForURL(/\/messages$/);
 check("the list says it is unread in words", (await page.locator("main").innerText()).includes("1 non lu"));

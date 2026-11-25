@@ -1,4 +1,7 @@
-/* Audit 1.3 LOT 07 — a question before a decision, local and honest. */
+/* Audit 1.3 LOT 07 — a question before a decision, local and honest.
+   Nidz 1.7: the sitter space opens on the feed (Requests is its second
+   tab), the status badge reads « Waiting », and the test tools sit in
+   Paramètres › Account management. */
 import { ACCOUNT, BASE, check, clean, done, isoIn, open, publishedSitter, seedState, storedState } from "./lib.mjs";
 
 const pet = { id: "pet-rex", name: "Rex", age: "3 ans", sex: "unknown", notes: "", species: "dog", details: { size: "medium" } };
@@ -39,7 +42,7 @@ await page.getByRole("button", { name: "Add to the request" }).click();
 let st = await storedState(page);
 check("question stored on the same request", st.requests[0].thread?.length === 1 && st.requests[0].thread[0].author === "sitter");
 check("asking leaves the request pending", st.requests[0].status === "pending");
-check("sitter sees the question and that it accepts nothing", (await page.getByText("asking accepts nothing").isVisible()) && (await page.getByText("Awaiting a reply").first().isVisible()));
+check("sitter sees the question and that it accepts nothing", (await page.getByText(/asking accepts nothing/).isVisible()) && (await page.getByText("Waiting", { exact: true }).first().isVisible()));
 let text = clean(await page.locator("main").innerText());
 check("no claim of delivery, notification or confirmed meeting (sitter)", !FAKE.test(text));
 check("context kept: animal, dates and sitter unchanged", st.requests[0].pet.name === "Rex" && st.requests[0].dates.start === request.dates.start && st.requests[0].sitterId === "sitter-local");
@@ -68,7 +71,8 @@ check("no claim of delivery, notification or confirmed meeting (owner)", !FAKE.t
 /* Only a decision changes the status; after it, no more questions. */
 await page.goto(`${BASE}/account`);
 await page.getByRole("button", { name: /Sitter space/ }).click();
-await page.waitForURL(/\/sitter\/requests/);
+await page.waitForURL(/\/sitter\/feed/);
+await page.goto(`${BASE}/sitter/requests`);
 await page.getByRole("button", { name: "Accept the request" }).click();
 st = await storedState(page);
 check("accepting is what changes the status", st.requests[0].status === "accepted");
@@ -78,7 +82,7 @@ check("no 'Ask a question' once decided", (await page.getByRole("button", { name
 await page.goto(`${BASE}/sitters/sitter-local`);
 await page.waitForSelector("h1");
 check("own public profile no longer carries test instructions", !(await page.getByText(/test request|send yourself/i).count()));
-await page.goto(`${BASE}/settings`);
+await page.goto(`${BASE}/settings/account`);
 check("Paramètres holds the test tool, labelled as such", (await page.getByText("Test tools for this demonstration").isVisible()) && (await page.getByRole("link", { name: "Address a test request to my profile" }).isVisible()));
 check("no page errors", page.errors.length === 0, page.errors.join(" | "));
 await context.close();
