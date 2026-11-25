@@ -596,6 +596,11 @@ restricts kinds: a listed kind can be confirmed or excluded; an unknown or
 free-text kind is never matched automatically, it is « à confirmer ». A breed
 never says anything about behaviour, and the screens say so.
 
+`src/components/shared/KindPicker.tsx` is the same choice inside the full
+animal form (`/owner/pets/*`): the first kinds as chips, a search field, the
+rest on demand, « Autre » and « Je ne sais pas ». Same catalogue, same rule,
+same note.
+
 ### The brief capsule (signature)
 `src/components/search/BriefCapsule.tsx`: one white pill with the `raised`
 shadow and 6px padding. At the start, the animal's 44px portrait (a paw on the

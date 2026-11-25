@@ -71,8 +71,10 @@ const text = (s) => ({ en: s, fr: s, ar: s });
 const richSitter = publishedSitter({
   services: ["boarding", "atOwner", "walk"],
   rates: { boarding: 12500, atOwner: 11200, walk: 600 },
-  acceptedSpecies: ["dog", "cat", "bird"],
-  acceptedDogSizes: ["small", "medium"],
+  acceptedSpecies: ["dog", "cat", "bird", "parrot", "rabbit"],
+  /* Nidz 1.7: breeds instead of sizes — a long « only some » list is the
+     worst case for the glance. */
+  acceptedKinds: { dog: { mode: "some", ids: ["dog.sloughi", "dog.labrador", "dog.german-shepherd"], others: ["Lévrier afghan"] } },
   maxAnimals: 3,
   limits: [text("Pas de mâles non castrés."), text("Pas d'animaux réactifs avec les enfants.")],
   about: text("J'ai grandi avec des animaux et je garde ceux de mes voisins depuis des années, dans un appartement calme."),
@@ -82,7 +84,7 @@ const owner = seedState({
   capabilities: { owner: true, sitter: false },
   activeWorkspace: "owner",
   pets: [rex],
-  need: { species: "dog", dogSize: "medium", petId: "pet-rex", wilayaCode: "alger", communeCode: null, careType: "boarding", dates: null, maxPrice: null },
+  need: { species: "dog", petId: "pet-rex", wilayaCode: "alger", communeCode: null, careType: "boarding", dates: null, maxPrice: null, step: "care", updatedAt: new Date().toISOString() },
 });
 const ago = (minutes) => new Date(Date.now() - minutes * 60000).toISOString();
 const both = seedState({
@@ -107,13 +109,65 @@ const both = seedState({
     },
   ],
 });
+/* Nidz 1.7: a published request with a proposal on it, from this device. */
+const post = {
+  id: "post-own",
+  createdAt: "2026-11-20T10:00:00.000Z",
+  updatedAt: "2026-11-20T10:00:00.000Z",
+  pet: { ...petCopy, kindId: "dog.sloughi", needsStatus: null, notes: "Il tire en laisse et n'aime pas les ascenseurs. Deux promenades longues par jour, le matin tôt." },
+  petId: "pet-rex",
+  careType: "boarding",
+  dates: { start: isoIn(9), end: isoIn(14) },
+  wilayaCode: "alger",
+  communeCode: "hydra",
+  ownerName: "Lina K.",
+  status: "open",
+  acceptedProposalId: null,
+  isDemoFixture: false,
+};
+const proposal = {
+  id: "prop-1",
+  postId: "post-own",
+  sitterId: "nadia-l",
+  createdAt: ago(30),
+  message: "Bonjour, j'ai un grand jardin clos et je travaille de chez moi : Rex ne resterait jamais seul plus d'une heure.",
+  displayedRate: { amount: 1500, careType: "boarding" },
+  status: "pending",
+  respondedAt: null,
+  simulated: true,
+};
+both.posts = [post];
+both.proposals = [proposal];
 const sitter = { ...both, activeWorkspace: "sitter" };
 const fresh = seedState();
+/* A draft as `useFormDraft` stores it. */
+const draft = (fields) => ({ v: 2, fields: { __form: fields }, base: null, savedAt: new Date().toISOString() });
+const animal = (over) => ({ category: "parrot", otherCategory: "", kindMode: "", kindId: "", kindOther: "", name: "", ageMode: "", ageYears: 0, ageMonths: 0, photo: "", notes: "", needs: "", ...over });
 const req = `care=boarding&from=${isoIn(5)}&to=${isoIn(7)}&pet=pet-rex`;
 
-/* name, path, state, open every fold after load */
+/* name, path, state, open every fold after load, drafts to seed */
 const SCREENS = [
   ["welcome", "/welcome", null],
+  /* Nidz 1.7 */
+  ["register", "/register", fresh],
+  ["register-phone", "/register/phone", fresh, false, { registration: draft({ method: "phone", firstName: "", lastName: "", phone: "", code: "", photo: "", reached: "" }) }],
+  ["register-code", "/register/code", fresh, false, { registration: draft({ method: "phone", firstName: "", lastName: "", phone: "550123456", code: "", photo: "", reached: "code" }) }],
+  ["register-name", "/register/name", fresh, false, { registration: draft({ method: "google", firstName: "", lastName: "", phone: "", code: "", photo: "", reached: "name" }) }],
+  ["register-photo", "/register/photo", fresh, false, { registration: draft({ method: "phone", firstName: "Lina", lastName: "Kaci", phone: "550123456", code: "123456", photo: "", reached: "photo" }) }],
+  ["login", "/login", { ...owner, signedIn: false }],
+  ["start", "/start", owner],
+  ["home-explore", "/?view=explore", owner],
+  ["need-breed", "/owner/need/breed", owner, false, { "need-animal": draft(animal({})) }],
+  ["need-about", "/owner/need/about", owner, false, { "need-animal": draft(animal({ kindMode: "unknown" })) }],
+  ["need-needs", "/owner/need/needs", owner, false, { "need-animal": draft(animal({ kindMode: "unknown", name: "Coco", ageMode: "unknown" })) }],
+  ["need-publish", "/owner/need/publish", { ...owner, need: { ...owner.need, dates: { start: isoIn(20), end: isoIn(24) } } }],
+  ["owner-requests-received", "/owner/requests?tab=received", both],
+  ["owner-post", "/owner/posts/post-own", both],
+  ["sitter-feed", "/sitter/feed", sitter],
+  ["sitter-post", "/sitter/posts/post-demo-mimi", sitter],
+  ["sitter-propose", "/sitter/posts/post-demo-noisette/propose", sitter],
+  ["sitter-requests-sent", "/sitter/requests?tab=sent", sitter],
+  ...["security", "notifications", "preferences", "location", "help", "legal", "account"].map((section) => [`settings-${section}`, `/settings/${section}`, both]),
   ["home", "/", fresh],
   ["home-owner", "/", owner],
   ["need-pet", "/owner/need/pet", fresh],
@@ -121,17 +175,16 @@ const SCREENS = [
   ["need-care", "/owner/need/care", owner],
   ["search", "/search?species=dog&size=medium&care=boarding&wilaya=alger", owner],
   ["search-empty", "/search", fresh],
-  ["profile", "/sitters/amina-b?species=dog&size=medium&care=boarding&wilaya=alger", owner],
+  ["profile", "/sitters/amina-b?species=dog&care=boarding&wilaya=alger", owner],
   ["profile-open", "/sitters/amina-b", owner, true],
   ["profile-karim", "/sitters/karim-t", owner, true],
   ["profile-own", "/sitters/sitter-local", both, true],
   ["request-when", "/owner/request/amina-b/when", owner],
   ["request-review", `/owner/request/amina-b?${req}`, owner],
-  ["request-sent", `/owner/request/amina-b/sent?${req}`, both],
+  ["request-sent", "/owner/request/sitter-local/sent?id=req-1", both],
   ["owner-requests", "/owner/requests", both],
   ["owner-request", "/owner/requests/req-1", both],
-  ["pets", "/owner/pets", owner],
-  ["pet-new", "/owner/pets/new", owner],
+    ["pet-new", "/owner/pets/new", owner],
   ["pet-edit", "/owner/pets/pet-rex", owner],
   ["auth", "/auth", fresh],
   ["owner-account", "/owner/account", fresh],
@@ -325,17 +378,18 @@ let next = 0;
 async function worker() {
   while (next < jobs.length) {
     const { lang, width, screen } = jobs[next++];
-    const [name, path, state, openFolds] = screen;
+    const [name, path, state, openFolds, drafts] = screen;
     const context = await browser.newContext({ viewport: { width, height: 900 }, deviceScaleFactor: 1, reducedMotion: "reduce" });
     await context.addInitScript(
-      ({ lang, state }) => {
+      ({ lang, state, drafts }) => {
         if (sessionStorage.getItem("__seeded")) return;
         sessionStorage.setItem("__seeded", "1");
         localStorage.clear();
         localStorage.setItem("nidz.lang", lang);
         if (state) localStorage.setItem("nidz.demo", JSON.stringify(state));
+        for (const [scope, value] of Object.entries(drafts ?? {})) localStorage.setItem(`nidz.draft.${scope}`, JSON.stringify(value));
       },
-      { lang, state },
+      { lang, state, drafts },
     );
     const page = await context.newPage();
     try {
@@ -349,6 +403,10 @@ async function worker() {
         }
       }
       await page.waitForTimeout(150);
+      /* A screen that redirected was not measured: say where it landed, so
+         « 0 problems » is never a screen that was never drawn. */
+      const landed = new URL(page.url()).pathname;
+      if (landed !== new URL(`${BASE}${path}`).pathname) findings.push({ kind: "redirect", lang, width, name, item: `→ ${landed}` });
       const out = await page.evaluate(measure);
       for (const [kind, list] of Object.entries(out)) {
         for (const item of list) findings.push({ kind, lang, width, name, item });
@@ -371,9 +429,10 @@ for (const f of findings) {
   g.where.add(`${f.lang}@${f.width}`);
   grouped.set(key, g);
 }
-const order = ["error", "overflow", "overlap", "spill", "truncated"];
+const order = ["error", "overflow", "overlap", "spill", "truncated", "redirect"];
 const rows = [...grouped.values()].sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind) || a.name.localeCompare(b.name));
 for (const g of rows) console.log(`${g.kind.toUpperCase().padEnd(9)} ${g.name.padEnd(20)} ${g.item}\n          at ${[...g.where].join(" ")}`);
-const blocking = rows.filter((g) => g.kind !== "truncated").length;
-console.log(`\n${jobs.length} renders · ${blocking} layout problem(s) · ${rows.length - blocking} truncation(s)`);
+const blocking = rows.filter((g) => g.kind !== "truncated" && g.kind !== "redirect").length;
+const redirects = rows.filter((g) => g.kind === "redirect").length;
+console.log(`\n${jobs.length} renders · ${blocking} layout problem(s) · ${rows.length - blocking - redirects} truncation(s) · ${redirects} redirected screen(s)`);
 process.exitCode = blocking ? 1 : 0;

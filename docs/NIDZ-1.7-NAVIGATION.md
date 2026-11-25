@@ -130,4 +130,23 @@ L'authentification Google / Apple, le SMS et sa vérification ; l'envoi d'une de
 
 Environnement : Chromium (Playwright, sans tête), serveur de dev Vite `127.0.0.1:8080`, Node 22.
 
-<!-- RESULTS -->
+| Contrôle | 1.6 (référence) | 1.7 |
+|---|---|---|
+| `npm run typecheck` | 0 erreur | 0 erreur |
+| `npm run lint` | 0 erreur, 8 avertissements | 0 erreur, 7 avertissements (tous dans `src/components/ui/*`, fast refresh) |
+| `npm run check:locales` | OK | OK (fr/en/ar, pluriels complets) |
+| `npm run test:unit` | 98/98 | **139/139** (dont `publications.test.ts` et `review-17.test.ts`) |
+| `npm run test:e2e` | 406/406 sur 14 fichiers | **523/523 sur 15 fichiers** (nouveau `lot16-nidz-17.mjs` : 78) |
+| `node e2e/audit-layout.mjs` (tous les écrans × fr/en/ar × 320→1440 px) | 1 113 rendus, 0 problème | balayage complet en cours au moment de ce commit — résultat ajouté au commit suivant |
+| Détecteur Impeccable (57 fichiers d'interface modifiés) | — | 0 constat bloquant ; 8 avis « taille hors de l'échelle typographique » (chiffres de badges à 11 px, deux libellés à 13 px) |
+| Build de production | OK, chunk principal 241,0 kB gzip | OK, **268,3 kB gzip** (+27 kB : surtout le texte des trois langues, ≈ +29 kB gzip à elles trois ; puis le catalogue des races et les exemples). Les vignettes 192 px sont intégrées au chunk des illustrations ; les 384 px et l'illustration d'accueil sont des fichiers à part |
+
+Les lots 01 à 15 ont été mis à jour : ils vérifiaient des comportements retirés volontairement (formulaire de compte local, tailles de chien, engrenage des étapes, recherche en tête de l'Accueil, barre pet-sitter « Mon profil »). Leur intention est conservée ; chaque contrôle retiré porte « Retired in Nidz 1.7 » et sa raison. `lot11` (parcours complet en français) a été réécrit à travers l'inscription, le parcours de l'animal et le fil.
+
+**Mouvement réduit :** vérifié par le réglage du système (`prefers-reduced-motion`) et par la préférence « Réduire les animations » : aucune transition ni aucun agrandissement ; sans eux, les transitions de 200 ms jouent.
+
+**Captures examinées :** 390 px en français et en arabe (accueil, inscription, premier choix, grille et recul, race, nom et âge, besoins, lieu, garde, publication, Accueil propriétaire, Explorer, Demandes, détail d'une demande publiée, fil, détail, proposition, Messages, Compte, Paramètres) ; 320×568 (accueil en fr/en/ar) ; 1 366 px en français (accueil, premier choix, Mes animaux, Explorer, Demandes, Compte, Paramètres, Notifications, fil, détail, Messages).
+
+**Proposition liée aux mesures :** charger à la demande les deux langues inactives retirerait du chunk principal environ 55 kB gzip (chaque fichier de langue pèse 27 à 32 kB gzip) ; non fait ici (changement de l'initialisation i18n, hors du périmètre).
+
+**Non vérifié :** appareils physiques, Safari et Firefox, lecteurs d'écran réels, installation PWA, géolocalisation sur un vrai téléphone (simulée dans Chromium : accordée, refusée).
