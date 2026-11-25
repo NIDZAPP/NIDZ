@@ -1,4 +1,4 @@
-import { Ban, CalendarX, Check, Clock, Megaphone, Undo2, X } from "lucide-react";
+import { Ban, CalendarX, Check, Clock, Megaphone, PencilLine, Undo2, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -26,7 +26,8 @@ export type StatusKey =
   | "cancelled"
   | "expired"
   | "open"
-  | "notRetained";
+  | "notRetained"
+  | "outdated";
 
 const STYLES: Record<StatusKey, { className: string; icon: typeof Check }> = {
   pending: { className: "bg-sand text-foreground", icon: Clock },
@@ -37,6 +38,9 @@ const STYLES: Record<StatusKey, { className: string; icon: typeof Check }> = {
   withdrawn: { className: "bg-secondary text-muted-foreground", icon: Undo2 },
   cancelled: { className: "bg-secondary text-muted-foreground", icon: Ban },
   expired: { className: "bg-secondary text-muted-foreground", icon: CalendarX },
+  /* The owner changed the request after this proposal: neutral, like the
+     other ended states — it says what happened, not a fault. */
+  outdated: { className: "bg-secondary text-muted-foreground", icon: PencilLine },
 };
 
 export default function StatusBadge({ status, className }: { status: StatusKey; className?: string }) {

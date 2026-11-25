@@ -79,7 +79,7 @@ export function PostCard({
           </p>
           {needs.kind === "text" && (
             <p className="mt-1.5 line-clamp-2 text-sm text-foreground">
-              <span className="font-medium">{t("needs.label")} : </span>
+              <span className="font-medium">{t("needs.labelInline")} </span>
               {needs.text}
             </p>
           )}

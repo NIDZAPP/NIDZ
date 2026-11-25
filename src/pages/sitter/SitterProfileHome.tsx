@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
+import { ACCOUNT_PATH } from "@/components/layout/workspace-nav";
+import BackButton from "@/components/shared/BackButton";
 import { ACTION_LINK } from "@/components/shared/link-styles";
 import { LIST_GROUP, REGISTER_ROW } from "@/components/shared/register";
 import { DemoNotice } from "@/components/shared/trust";
@@ -96,6 +98,9 @@ export default function SitterProfileHome() {
         <meta name="robots" content="noindex" />
       </Helmet>
       <div className="mx-auto max-w-[720px]">
+        {/* Since 1.7 « Mon profil pet-sitter » is reached from Compte (§22),
+            no longer a tab of its own: a secondary screen, so it has Back. */}
+        <BackButton fallback={ACCOUNT_PATH} />
         <h1
           ref={heading}
           tabIndex={-1}

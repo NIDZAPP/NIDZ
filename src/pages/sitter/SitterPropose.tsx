@@ -15,7 +15,7 @@ import { compatibility } from "@/data/compatibility";
 import { petRef } from "@/data/criteria";
 import { SITTER_HOME, hasSession, postPath, sitterVisibility } from "@/data/navigation";
 import { offeredServices, rateFor } from "@/data/offer";
-import { PROPOSAL_MESSAGE_MAX, acceptsProposals, liveProposal, type Proposal } from "@/data/publications";
+import { PROPOSAL_MESSAGE_MAX, acceptsProposals, standingProposal, type Proposal } from "@/data/publications";
 import { findPost } from "@/data/repository";
 import { CARE_UNIT_KEY } from "@/data/types";
 import { useDraftField } from "@/hooks/use-form-draft";
@@ -52,7 +52,7 @@ export default function SitterPropose() {
   const eligible =
     sitterVisibility(state) === "listed" &&
     acceptsProposals(post, toISODate(today())) &&
-    !liveProposal(state.proposals, post.id, profile.id) &&
+    !standingProposal(state.proposals, post.id, profile.id) &&
     compatibility(profile, petRef(post.pet)).level !== "incompatible" &&
     offeredServices(profile).includes(post.careType);
   if (!eligible) return <Navigate to={postPath("sitter", post.id)} replace />;

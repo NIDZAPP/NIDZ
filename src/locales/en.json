@@ -545,6 +545,7 @@
       "unavailable": "Periods stated as unavailable"
     },
     "mismatchTitle": "Does not match what you are looking for",
+    "uncertainTitle": "To confirm with this sitter",
     "mismatch": {
       "species": "This sitter does not take this species: {{species}}.",
       "care": "This sitter does not offer: {{care}}.",
@@ -709,7 +710,8 @@
     "draftTitle": "Your profile is not visible yet",
     "draftBody": "Owners can only send you a request once your profile is published.",
     "hiddenTitle": "Your profile no longer appears in results",
-    "hiddenBody": "Something it needs to be published was removed. Complete it and owners will find you again."
+    "hiddenBody": "Something it needs to be published was removed. Complete it and owners will find you again.",
+    "expiredNote": "These dates are past: this request can no longer be answered."
   },
   "notAvailable": {
     "title": "This screen is not part of the demonstration",
@@ -1497,7 +1499,8 @@
     "proposalDecision": {
       "accepted": "{{name}} accepted your proposal for {{pet}}",
       "declined": "{{name}} declined your proposal for {{pet}}",
-      "notRetained": "{{name}} chose another sitter for {{pet}}"
+      "notRetained": "{{name}} chose another sitter for {{pet}}",
+      "outdated": "{{name}} changed the request for {{pet}}: your proposal no longer applies — you can propose again"
     },
     "cancelled": "The arrangement for {{pet}} was cancelled",
     "withdrawn": "{{name}} withdrew the request for {{pet}}",
@@ -1581,7 +1584,8 @@
     "cancelled": "Cancelled",
     "expired": "Past",
     "open": "Published",
-    "notRetained": "Not chosen"
+    "notRetained": "Not chosen",
+    "outdated": "Request changed"
   },
   "requestKind": {
     "post": "Published request",
@@ -1774,6 +1778,7 @@
   },
   "needs": {
     "label": "Needs",
+    "labelInline": "Needs:",
     "none": "Not filled in by the owner",
     "nothing": "Nothing to report, says the owner"
   },

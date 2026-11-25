@@ -10,8 +10,10 @@ import BackButton from "@/components/shared/BackButton";
 import EmptyState from "@/components/shared/EmptyState";
 import { Button } from "@/components/ui/button";
 import ConfirmAction from "@/components/shared/ConfirmAction";
+import { SaveFeedback } from "@/components/shared/SaveFeedback";
 import { awaitingReplyFrom, canClarify } from "@/data/clarification";
 import { findRequest, requestsReceived, requestsSent, sitterNameFor } from "@/data/repository";
+import { useAction } from "@/hooks/use-action";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useDemo } from "@/state/demo/context";
 import { formatDate, toISODate } from "@/utils/dates";
@@ -29,7 +31,10 @@ export default function OwnerRequestDetail() {
   const lng = useAppLocale();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
-  const { state, commit } = useDemo();
+  const { state } = useDemo();
+  /* Withdrawing and cancelling are saved like a form (A-02), checked against
+     a decision the sitter's side may have recorded meanwhile. */
+  const action = useAction((s) => s.requests.find((r) => r.id === id)?.status ?? null);
   const [asking, setAsking] = useState(false);
   const askRef = useRef<HTMLButtonElement>(null);
   const restoreAsk = useRef(false);
@@ -156,7 +161,7 @@ export default function OwnerRequestDetail() {
                   title={t("ownerRequests.withdrawTitle")}
                   body={t("ownerRequests.withdrawBody")}
                   confirm={t("ownerRequests.withdrawConfirm")}
-                  onConfirm={() => commit({ type: "withdrawRequest", id: request.id })}
+                  onConfirm={() => action.run({ type: "withdrawRequest", id: request.id })}
                 />
               )}
               {request.status === "accepted" && (
@@ -165,10 +170,11 @@ export default function OwnerRequestDetail() {
                   title={t("arrangement.cancelTitle")}
                   body={t("arrangement.cancelBody")}
                   confirm={t("arrangement.cancelConfirm")}
-                  onConfirm={() => commit({ type: "cancelRequest", id: request.id, by: "owner" })}
+                  onConfirm={() => action.run({ type: "cancelRequest", id: request.id, by: "owner" })}
                 />
               )}
             </div>
+            <SaveFeedback className="mt-4" save={action.save} onRetry={action.retry} />
           </>
         )}
       </div>

@@ -30,9 +30,19 @@ import { petRef } from "@/data/criteria";
 import { WELCOME_PATH, hasSession, requestsPath } from "@/data/navigation";
 import { offeredServices, overlapsDeclaredUnavailable, rateFor } from "@/data/offer";
 import { kindLabel } from "@/data/pets";
-import { acceptsProposals, canEditPost, liveProposal, proposalsFor, type Proposal } from "@/data/publications";
+import { SaveFeedback } from "@/components/shared/SaveFeedback";
+import {
+  acceptsProposals,
+  canEditPost,
+  proposalAwaitsOwner,
+  proposalsFor,
+  standingProposal,
+  type CarePost,
+  type Proposal,
+} from "@/data/publications";
 import { findPost, publicSitters, sitterNameFor } from "@/data/repository";
 import { CARE_UNIT_KEY } from "@/data/types";
+import { useAction } from "@/hooks/use-action";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useDemo } from "@/state/demo/context";
 import { formatDateRange, formatRelativeTime, toISODate, today } from "@/utils/dates";
@@ -60,9 +70,15 @@ export default function OwnerPostDetail() {
   const locale = useAppLocale();
   const { id } = useParams();
   const [params] = useSearchParams();
-  const { state, commit } = useDemo();
+  const { state } = useDemo();
   const post = findPost(state, id);
   const needs = useNeedsText(post);
+  /* Every decision here is saved like a form (A-02) and checked against
+     what another tab may have done to this post meanwhile. */
+  const action = useAction((s) => {
+    const p = s.posts.find((x) => x.id === id);
+    return [p?.status ?? null, p?.careType ?? null, p?.dates ?? null, s.proposals.filter((x) => x.postId === id).map((x) => [x.id, x.status])];
+  });
 
   if (!hasSession(state)) return <Navigate to={WELCOME_PATH} replace />;
   if (!post || post.isDemoFixture) return <Navigate to={requestsPath("owner", "sent")} replace />;
@@ -87,14 +103,14 @@ export default function OwnerPostDetail() {
       compatibility(s, petRef(post.pet)).level !== "incompatible" &&
       offeredServices(s).includes(post.careType) &&
       !overlapsDeclaredUnavailable(s, post.dates) &&
-      !liveProposal(state.proposals, post.id, s.id) &&
+      !standingProposal(state.proposals, post.id, s.id) &&
       !proposals.some((p) => p.sitterId === s.id),
   );
 
   const simulate = () => {
     if (!simulatable) return;
     const rate = rateFor(simulatable, [post.careType]);
-    commit({
+    action.run({
       type: "addProposal",
       proposal: {
         id: `proposal-sim-${Date.now().toString(36)}`,
@@ -155,7 +171,7 @@ export default function OwnerPostDetail() {
           <p className="mt-1 text-[0.9375rem] text-foreground">{formatDateRange(post.dates, locale)}</p>
           <p className="mt-1 text-sm text-muted-foreground">{t("postDetail.area", { area: isolate(area ?? "") })}</p>
           <p className="mt-3 text-sm text-foreground">
-            <span className="font-medium">{t("needs.label")} : </span>
+            <span className="font-medium">{t("needs.labelInline")} </span>
             {needs.text}
           </p>
           {editable && (
@@ -183,7 +199,13 @@ export default function OwnerPostDetail() {
           ) : (
             <ul role="list" className="mt-3 grid gap-3">
               {[...pending, ...others].map((proposal) => (
-                <ProposalCard key={proposal.id} proposal={proposal} canDecide={open && proposal.status === "pending"}>
+                <ProposalCard
+                  key={proposal.id}
+                  proposal={proposal}
+                  post={post}
+                  canDecide={proposalAwaitsOwner(proposal, post, todayISO)}
+                  onDecide={(status) => action.run({ type: "respondToProposal", id: proposal.id, status })}
+                >
                   <StatusBadge status={proposalStatusKey(proposal, post)} />
                 </ProposalCard>
               ))}
@@ -192,6 +214,7 @@ export default function OwnerPostDetail() {
         </section>
 
         {/* ---------------------------------------------------- actions */}
+        <SaveFeedback className="mt-6" save={action.save} onRetry={action.retry} />
         <div className="mt-8 flex flex-wrap gap-2">
           {post.status === "open" && (
             <Confirm
@@ -199,7 +222,7 @@ export default function OwnerPostDetail() {
               title={t("ownerPost.withdrawTitle")}
               body={t("ownerPost.withdrawBody", { count: pending.length })}
               confirm={t("ownerPost.withdrawConfirm")}
-              onConfirm={() => commit({ type: "withdrawPost", id: post.id })}
+              onConfirm={() => action.run({ type: "withdrawPost", id: post.id })}
             />
           )}
           {post.status === "accepted" && (
@@ -208,7 +231,7 @@ export default function OwnerPostDetail() {
               title={t("arrangement.cancelTitle")}
               body={t("arrangement.cancelBody")}
               confirm={t("arrangement.cancelConfirm")}
-              onConfirm={() => commit({ type: "cancelPostArrangement", postId: post.id, by: "owner" })}
+              onConfirm={() => action.run({ type: "cancelPostArrangement", postId: post.id, by: "owner" })}
             />
           )}
         </div>
@@ -231,63 +254,81 @@ export default function OwnerPostDetail() {
       </div>
     </div>
   );
+}
 
-  function ProposalCard({ proposal, canDecide, children }: { proposal: Proposal; canDecide: boolean; children: ReactNode }) {
-    const sitter = publicSitters(state).find((s) => s.id === proposal.sitterId) ?? null;
-    const name = sitterNameFor(state, proposal.sitterId);
-    const compat = sitter ? compatibility(sitter, petRef(post!.pet)) : null;
-    return (
-      <li className="surface p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="font-semibold text-foreground">
-              <bdi>{name}</bdi>
-            </p>
-            <p className="mt-0.5 text-sm text-muted-foreground">{formatRelativeTime(proposal.createdAt, locale)}</p>
-          </div>
-          {children}
-        </div>
-        {proposal.displayedRate && (
-          <p className="mt-2 text-sm text-foreground">
-            {formatDZD(proposal.displayedRate.amount, locale)} / {t(CARE_UNIT_KEY[proposal.displayedRate.careType])}
+/* A top-level component: defined inside the screen, every render made it a
+   NEW component type, remounting each card — focus fell to the page after
+   Accept or Decline. */
+function ProposalCard({
+  proposal,
+  post,
+  canDecide,
+  onDecide,
+  children,
+}: {
+  proposal: Proposal;
+  post: CarePost;
+  canDecide: boolean;
+  onDecide: (status: "accepted" | "declined") => void;
+  children: ReactNode;
+}) {
+  const { t } = useTranslation();
+  const locale = useAppLocale();
+  const { state } = useDemo();
+  const sitter = publicSitters(state).find((s) => s.id === proposal.sitterId) ?? null;
+  const name = sitterNameFor(state, proposal.sitterId);
+  const compat = sitter ? compatibility(sitter, petRef(post.pet)) : null;
+  return (
+    <li className="surface p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-semibold text-foreground">
+            <bdi>{name}</bdi>
           </p>
-        )}
-        {proposal.message && <p className="mt-2 whitespace-pre-line text-[0.9375rem] text-foreground">{proposal.message}</p>}
-        {compat && <CompatLine compat={compat} perspective="owner" className="mt-2" />}
-        {proposal.simulated && <p className="mt-2 text-xs font-semibold text-muted-foreground">{t("proposals.simulated")}</p>}
-        <div className="mt-3 flex flex-wrap gap-2">
-          {canDecide && (
-            <>
-              <Confirm
-                variant="default"
-                trigger={t("ownerPost.accept")}
-                title={t("ownerPost.acceptTitle", { name })}
-                body={t("ownerPost.acceptBody")}
-                confirm={t("ownerPost.acceptConfirm")}
-                onConfirm={() => commit({ type: "respondToProposal", id: proposal.id, status: "accepted" })}
-              />
-              <Button type="button" variant="surface" onClick={() => commit({ type: "respondToProposal", id: proposal.id, status: "declined" })}>
-                {t("ownerPost.decline")}
-              </Button>
-            </>
-          )}
-          {sitter && (
-            <Button asChild variant="ghost">
-              <Link to={`/sitters/${encodeURIComponent(sitter.id)}`}>{t("ownerPost.viewProfile")}</Link>
-            </Button>
-          )}
-          {sitter && (
-            <Button asChild variant="ghost">
-              <Link to={`/messages/to/${encodeURIComponent(sitter.id)}`}>
-                <MessageCircle aria-hidden="true" />
-                {t("ownerPost.write")}
-              </Link>
-            </Button>
-          )}
+          <p className="mt-0.5 text-sm text-muted-foreground">{formatRelativeTime(proposal.createdAt, locale)}</p>
         </div>
-      </li>
-    );
-  }
+        {children}
+      </div>
+      {proposal.displayedRate && (
+        <p className="mt-2 text-sm text-foreground">
+          {formatDZD(proposal.displayedRate.amount, locale)} / {t(CARE_UNIT_KEY[proposal.displayedRate.careType])}
+        </p>
+      )}
+      {proposal.message && <p className="mt-2 whitespace-pre-line text-[0.9375rem] text-foreground">{proposal.message}</p>}
+      {compat && <CompatLine compat={compat} perspective="owner" className="mt-2" />}
+      {proposal.simulated && <p className="mt-2 text-xs font-semibold text-muted-foreground">{t("proposals.simulated")}</p>}
+      <div className="mt-3 flex flex-wrap gap-2">
+        {canDecide && (
+          <>
+            <Confirm
+              variant="default"
+              trigger={t("ownerPost.accept")}
+              title={t("ownerPost.acceptTitle", { name })}
+              body={t("ownerPost.acceptBody")}
+              confirm={t("ownerPost.acceptConfirm")}
+              onConfirm={() => onDecide("accepted")}
+            />
+            <Button type="button" variant="surface" onClick={() => onDecide("declined")}>
+              {t("ownerPost.decline")}
+            </Button>
+          </>
+        )}
+        {sitter && (
+          <Button asChild variant="ghost">
+            <Link to={`/sitters/${encodeURIComponent(sitter.id)}`}>{t("ownerPost.viewProfile")}</Link>
+          </Button>
+        )}
+        {sitter && (
+          <Button asChild variant="ghost">
+            <Link to={`/messages/to/${encodeURIComponent(sitter.id)}`}>
+              <MessageCircle aria-hidden="true" />
+              {t("ownerPost.write")}
+            </Link>
+          </Button>
+        )}
+      </div>
+    </li>
+  );
 }
 
 function Confirm({

@@ -47,7 +47,7 @@ export default function Start() {
     <div className="flex min-h-dvh flex-col bg-background">
       <Helmet>
         <title>
-          {t("common.appName")} — {t("start.title")}
+          {t("common.appName")} — {t("start.title", { name: state.account?.firstName ?? "" })}
         </title>
       </Helmet>
       <header className="container">
@@ -58,9 +58,12 @@ export default function Start() {
 
       <main className="container flex flex-1 flex-col pb-[max(1.25rem,env(safe-area-inset-bottom))]">
         <div className="mx-auto flex w-full max-w-[520px] flex-1 flex-col">
-          <div className="relative flex min-h-[9rem] flex-1 items-center justify-center">
-            <div className="aspect-square h-full max-h-[24rem] max-w-full overflow-hidden rounded-3xl shadow-card">
-              <WelcomeArt className="size-full" />
+          {/* Sized like the welcome screen's: an absolutely positioned layer
+              is the only thing a `min-h` column lets a percentage height
+              resolve against; the picture keeps its square under max sizes. */}
+          <div className="relative min-h-[9rem] flex-1">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <WelcomeArt className="h-auto max-h-full w-auto max-w-full rounded-3xl shadow-card md:max-h-[24rem]" />
             </div>
           </div>
           <div className="pt-6 text-center">

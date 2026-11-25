@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Navigate } from "react-router-dom";
@@ -586,6 +586,9 @@ export function StepAnimals() {
     one and removable. Never matched automatically (§19.2). */
 function OtherKinds({ values, label, onChange }: { values: string[]; label: string; onChange: (next: string[]) => void }) {
   const { t } = useTranslation();
+  /* One id per field: the label text is shared by several animals (« Une
+     race absente de la liste »), so it cannot make an id. */
+  const inputId = useId();
   const [text, setText] = useState("");
   const add = () => {
     const value = text.trim().slice(0, 40);
@@ -595,12 +598,12 @@ function OtherKinds({ values, label, onChange }: { values: string[]; label: stri
   };
   return (
     <div className="mt-4">
-      <label className="mb-1.5 block text-sm font-medium text-foreground" htmlFor={`other-${label}`}>
+      <label className="mb-1.5 block text-sm font-medium text-foreground" htmlFor={inputId}>
         {label}
       </label>
       <div className="flex gap-2">
         <Input
-          id={`other-${label}`}
+          id={inputId}
           value={text}
           maxLength={40}
           autoComplete="off"

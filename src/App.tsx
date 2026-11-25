@@ -6,6 +6,7 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from "
 import { useTranslation } from "react-i18next";
 
 import Layout from "@/components/layout/Layout";
+import SessionGate from "@/components/layout/SessionGate";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import DemoProvider from "@/state/demo/DemoProvider";
 
@@ -170,6 +171,7 @@ const App = () => {
       <BrowserRouter>
         <DemoProvider>
           <Suspense fallback={<RouteLoading />}>
+          <SessionGate>
           <Routes>
             {/* Flow screens: full viewport, own back control, own action bar,
                 no site chrome. */}
@@ -299,6 +301,7 @@ const App = () => {
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
+          </SessionGate>
           </Suspense>
         </DemoProvider>
       </BrowserRouter>

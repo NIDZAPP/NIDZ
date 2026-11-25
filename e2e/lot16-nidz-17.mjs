@@ -115,6 +115,10 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }
   check("the account is saved, signed in, method recorded, number kept", s?.signedIn === true && s?.account?.signInMethod === "google" && s?.account?.phoneNumber === "550123456");
   check("first choice: exactly two actions, no sign-in", (await page.locator("main a, main button").count()) === 2 && (await page.getByText("Sign in").count()) === 0);
   check("first choice: no « one account for both » line", (await page.getByText(/one account for both/i).count()) === 0);
+  /* The finished steps are not left behind the destination (§25). */
+  await page.goBack();
+  await page.waitForLoadState();
+  check("Back after signing up does not reopen a sign-up step", !/\/register/.test(page.url()), page.url());
   await context.close();
 }
 
@@ -148,6 +152,16 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }
   await page.waitForURL(/\/welcome/);
   const out = await stored(page);
   check("signing out keeps every record", out?.signedIn === false && out?.account && out?.sitter);
+  /* Signing out locks the account's screens (review 1.7): Back, a bookmark
+     or a typed address leads to « Sign in », which returns there. */
+  await page.goBack();
+  await page.waitForURL(/\/login\?next=/);
+  check("Back after signing out does not reopen an account screen", /\/login\?next=/.test(page.url()));
+  await page.goto(`${BASE}/messages`);
+  await page.waitForURL(/\/login\?next=%2Fmessages/);
+  check("a signed-out device cannot open Messages", true);
+  await page.goto(`${BASE}/sitters/amina-b`);
+  check("public profiles stay readable signed out", /\/sitters\/amina-b/.test(page.url()));
   await page.goto(`${BASE}/register`);
   check("one account per device: opening another offers to sign in", await page.getByText(/An account already exists on this device/).isVisible());
   await page.goto(`${BASE}/login`);
@@ -169,13 +183,20 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }
   check("Continue is disabled with nothing chosen", await btn(page, "Continue").isDisabled());
   check("no settings gear on the step", (await page.getByRole("link", { name: "Settings" }).count()) === 0);
   await btn(page, "Rabbit").click();
-  const blurred = await page.evaluate(() => [...document.querySelectorAll('button[aria-pressed="false"]')].every((e) => getComputedStyle(e).filter.includes("blur")));
-  check("choosing one: it is pressed, the others recede (blur)", (await btn(page, "Rabbit").getAttribute("aria-pressed")) === "true" && blurred);
+  /* Only the PICTURE of the others recedes; their label stays legible. */
+  await page.waitForTimeout(300);
+  const receded = await page.evaluate(() =>
+    [...document.querySelectorAll('button[aria-pressed="false"]')].every((e) => {
+      const art = getComputedStyle(e.firstElementChild);
+      return art.filter.includes("blur") && Number(art.opacity) < 1 && !getComputedStyle(e).filter.includes("blur");
+    }),
+  );
+  check("choosing one: it is pressed, the others' pictures recede (blur), not their labels", (await btn(page, "Rabbit").getAttribute("aria-pressed")) === "true" && receded);
   check("the receded cards keep their accessible names", (await btn(page, "Cat").count()) === 1);
   await btn(page, "Rabbit").click();
   /* The blur eases out over 200ms: read it once the transition is over. */
   const restored = await page
-    .waitForFunction(() => [...document.querySelectorAll("button[aria-pressed]")].every((e) => !getComputedStyle(e).filter.includes("blur")), null, { timeout: 2000 })
+    .waitForFunction(() => [...document.querySelectorAll("button[aria-pressed]")].every((e) => !getComputedStyle(e.firstElementChild).filter.includes("blur")), null, { timeout: 2000 })
     .then(() => true, () => false);
   check("tapping it again deselects and restores the grid", (await page.locator('button[aria-pressed="true"]').count()) === 0 && restored);
   await btn(page, "Other").click();

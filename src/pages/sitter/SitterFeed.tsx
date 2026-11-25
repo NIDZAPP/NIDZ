@@ -13,7 +13,7 @@ import { compareProximity, petRef, proximity } from "@/data/criteria";
 import { compatibility, compatibilityRank, type Compatibility } from "@/data/compatibility";
 import { WELCOME_PATH, hasSession, postPath, sitterResumePath, sitterVisibility } from "@/data/navigation";
 import { offeredServices, overlapsDeclaredUnavailable } from "@/data/offer";
-import { acceptsProposals, liveProposal, type CarePost } from "@/data/publications";
+import { acceptsProposals, standingProposal, type CarePost } from "@/data/publications";
 import { feedPosts } from "@/data/repository";
 import { CARE_TYPES, type CareType, type SitterProfile } from "@/data/types";
 import { cn } from "@/lib/utils";
@@ -107,7 +107,7 @@ export default function SitterFeed() {
     setParams(value ? { care: value } : {}, { replace: true, preventScrollReset: true });
 
   const card = (entry: Entry) => {
-    const mine = liveProposal(state.proposals, entry.post.id, myId);
+    const mine = standingProposal(state.proposals, entry.post.id, myId);
     return (
       <PostCard
         key={entry.post.id}
@@ -192,18 +192,20 @@ export default function SitterFeed() {
 
         {outside.length > 0 && (
           <section aria-labelledby="feed-outside" className="mt-8">
-            <button
-              type="button"
-              aria-expanded={showOutside}
-              aria-controls="feed-outside-list"
-              onClick={() => setShowOutside((v) => !v)}
-              className="-ms-2 inline-flex min-h-11 items-center gap-1.5 rounded-full px-2 text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <h2 id="feed-outside" className="text-title font-semibold text-foreground">
+            {/* The disclosure pattern: the button INSIDE the heading, so the
+                heading stays in the outline and the control keeps its role. */}
+            <h2 id="feed-outside" className="text-title font-semibold text-foreground">
+              <button
+                type="button"
+                aria-expanded={showOutside}
+                aria-controls="feed-outside-list"
+                onClick={() => setShowOutside((v) => !v)}
+                className="-ms-2 inline-flex min-h-11 items-center gap-1.5 rounded-full px-2 text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
                 {t("feed.outsideTitle", { count: outside.length })}
-              </h2>
-              <ChevronDown className={cn("size-5 transition-transform duration-200 ease-out", showOutside && "rotate-180")} aria-hidden="true" />
-            </button>
+                <ChevronDown className={cn("size-5 transition-transform duration-200 ease-out", showOutside && "rotate-180")} aria-hidden="true" />
+              </button>
+            </h2>
             <div id="feed-outside-list" hidden={!showOutside}>
               {showOutside && <ul role="list" className="mt-3 grid gap-3 animate-fade-in">{outside.map(card)}</ul>}
             </div>

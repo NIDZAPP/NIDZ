@@ -551,6 +551,7 @@
       "unavailable": "Périodes indiquées comme indisponibles"
     },
     "mismatchTitle": "Ne correspond pas à ce que vous cherchez",
+    "uncertainTitle": "À confirmer avec ce pet-sitter",
     "mismatch": {
       "species": "Ce pet-sitter n'accueille pas cette espèce : {{species}}.",
       "care": "Ce pet-sitter ne propose pas : {{care}}.",
@@ -729,7 +730,8 @@
     "draftTitle": "Votre profil n'est pas encore visible",
     "draftBody": "Les propriétaires ne peuvent vous adresser une demande qu'une fois votre profil publié.",
     "hiddenTitle": "Votre profil n'apparaît plus dans les résultats",
-    "hiddenBody": "Une rubrique nécessaire à la publication a été retirée. Complétez-la pour que les propriétaires vous retrouvent."
+    "hiddenBody": "Une rubrique nécessaire à la publication a été retirée. Complétez-la pour que les propriétaires vous retrouvent.",
+    "expiredNote": "Ces dates sont passées : cette demande ne peut plus recevoir de réponse."
   },
   "notAvailable": {
     "title": "Cet écran ne fait pas partie de la démonstration",
@@ -1527,7 +1529,8 @@
     "proposalDecision": {
       "accepted": "{{name}} a accepté votre proposition pour {{pet}}",
       "declined": "{{name}} a refusé votre proposition pour {{pet}}",
-      "notRetained": "{{name}} a choisi un autre pet-sitter pour {{pet}}"
+      "notRetained": "{{name}} a choisi un autre pet-sitter pour {{pet}}",
+      "outdated": "{{name}} a modifié la demande pour {{pet}} : votre proposition ne s'applique plus — vous pouvez en faire une nouvelle"
     },
     "cancelled": "La garde de {{pet}} a été annulée",
     "withdrawn": "{{name}} a retiré la demande pour {{pet}}",
@@ -1613,7 +1616,8 @@
     "cancelled": "Annulée",
     "expired": "Passée",
     "open": "Publiée",
-    "notRetained": "Non retenue"
+    "notRetained": "Non retenue",
+    "outdated": "Demande modifiée"
   },
   "requestKind": {
     "post": "Demande publiée",
@@ -1808,6 +1812,7 @@
   },
   "needs": {
     "label": "Besoins",
+    "labelInline": "Besoins :",
     "none": "Non renseigné par le propriétaire",
     "nothing": "Rien à signaler, selon le propriétaire"
   },

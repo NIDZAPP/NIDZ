@@ -42,30 +42,52 @@ const CARD = cn(
   "motion-reduce:transition-none motion-reduce:active:scale-100",
 );
 
+/* The selection ring is drawn on an overlay: an inset shadow on the button
+   paints BELOW its children, so the full-width picture hid it everywhere
+   but the label strip (colour review 1.7). Teal on the sand ground ≥ 3.1:1. */
 const ring = (selected: boolean) =>
   selected
-    ? "shadow-[inset_0_0_0_2.5px_hsl(var(--primary)),0_10px_24px_-10px_hsl(var(--shadow)/0.35)]"
+    ? "shadow-[0_10px_24px_-10px_hsl(var(--shadow)/0.35)] after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:shadow-[inset_0_0_0_2.5px_hsl(var(--primary))]"
     : "shadow-card [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-raised";
 
-/** The receded state of the cards around a chosen one. */
-const RECEDED = "opacity-[0.55] blur-[2px] saturate-[0.7] scale-[0.97] motion-reduce:scale-100";
+/** The cards around a chosen one step back — a little smaller. Only their
+    PICTURE dims and blurs (`RECEDED_ART`): the label stays sharp in the muted
+    ink (6.3:1), and the button itself is never filtered, so its focus ring
+    keeps full contrast. These cards are still live: tapping one chooses it. */
+const RECEDED = "scale-[0.97] motion-reduce:scale-100";
+const RECEDED_ART =
+  "opacity-[0.55] blur-[2px] saturate-[0.7] group-focus-visible:opacity-100 group-focus-visible:blur-0 group-focus-visible:saturate-100";
 
 function CardBody({
   category,
   label,
   selected,
+  receded = false,
   eager,
 }: {
   category: PetCategory;
   label: string;
   selected?: boolean;
+  receded?: boolean;
   eager?: boolean;
 }) {
   return (
     <>
-      <AnimalPortrait species={category} eager={eager} className="aspect-square w-full" />
+      <AnimalPortrait
+        species={category}
+        eager={eager}
+        className={cn(
+          "aspect-square w-full transition-[filter,opacity] duration-200 ease-out motion-reduce:transition-none",
+          receded && RECEDED_ART,
+        )}
+      />
       <span className="flex min-h-[2.75rem] items-center px-2.5 py-2">
-        <span className="line-clamp-2 text-[0.875rem] font-semibold leading-tight text-foreground sm:text-[0.9375rem]">
+        <span
+          className={cn(
+            "line-clamp-2 text-[0.875rem] font-semibold leading-tight transition-colors duration-200 sm:text-[0.9375rem]",
+            receded ? "text-muted-foreground" : "text-foreground",
+          )}
+        >
           {label}
         </span>
       </span>
@@ -171,6 +193,7 @@ export function AnimalGridSingle({
               category={category}
               label={category === "other" ? t("catalogue.other") : t(`species.${category}`)}
               selected={selected}
+              receded={value !== null && !selected}
               eager={index < eagerCount}
             />
           </button>

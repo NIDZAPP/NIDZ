@@ -23,6 +23,7 @@ import { PHONE_PREFIX } from "@/data/types";
 import { SUPPORTED_LOCALES, hasExplicitLocale, setLocale, type AppLocale } from "@/i18n";
 import { clearFormDrafts } from "@/hooks/use-form-draft";
 import { useAppLocale } from "@/hooks/use-locale";
+import { useAction } from "@/hooks/use-action";
 import { useSave } from "@/hooks/use-save";
 import { cn } from "@/lib/utils";
 import { useDemo } from "@/state/demo/context";
@@ -164,7 +165,8 @@ function usePermission(name: "geolocation"): "granted" | "denied" | "prompt" | "
 
 function Security() {
   const { t } = useTranslation();
-  const { state, commit } = useDemo();
+  const { state } = useDemo();
+  const action = useAction();
   const account = state.account;
   const geo = usePermission("geolocation");
   const visibility = sitterVisibility(state);
@@ -187,6 +189,7 @@ function Security() {
 
   return (
     <>
+      <SaveFeedback save={action.save} onRetry={action.retry} />
       <Block id="sec-account" title={t("settings.security.accountTitle")}>
         <div className={LIST_GROUP}>
           <LinkRow
@@ -220,7 +223,7 @@ function Security() {
               }
               checked={!state.sitter.hidden}
               disabled={!state.sitter.published}
-              onChange={(visible) => commit({ type: "setSitterHidden", hidden: !visible })}
+              onChange={(visible) => action.run({ type: "setSitterHidden", hidden: !visible })}
             />
           )}
           <InfoRow label={t("settings.security.location")} line={t(`settings.security.locationLine.${geo}`)} />
@@ -235,7 +238,7 @@ function Security() {
             {state.blockedSitters.map((id) => (
               <li key={id} className={cn(REGISTER_ROW, "hover:bg-transparent")}>
                 <bdi className="min-w-0 flex-1 font-medium text-foreground">{sitterNameFor(state, id)}</bdi>
-                <Button type="button" variant="surface" onClick={() => commit({ type: "unblockSitter", id })}>
+                <Button type="button" variant="surface" onClick={() => action.run({ type: "unblockSitter", id })}>
                   {t("settings.security.unblock")}
                 </Button>
               </li>
@@ -274,14 +277,17 @@ function Security() {
 
 function Notifications() {
   const { t } = useTranslation();
-  const { state, commit } = useDemo();
+  const { state } = useDemo();
   const side = state.activeWorkspace;
+  const action = useAction();
+  /* Only the topic that changed: the reducer merges it into what is stored. */
   const set = (topic: NotificationTopic, value: boolean) =>
-    commit({ type: "setPreferences", patch: { notifications: { ...state.preferences.notifications, [topic]: value } } });
+    action.run({ type: "setPreferences", patch: { notifications: { [topic]: value } } });
   const optional = OPTIONAL_TOPICS.filter((topic) => topic !== "opportunities" || state.sitter);
 
   return (
     <>
+      <SaveFeedback save={action.save} onRetry={action.retry} />
       <DemoNotice title={t("settings.notifications.demoTitle")} body={t("settings.notifications.demoBody")} />
       <Block id="notif-essential" title={t("settings.notifications.essentialTitle")} note={t("settings.notifications.essentialNote")}>
         <div className={LIST_GROUP}>
@@ -320,10 +326,12 @@ function Notifications() {
 function Preferences() {
   const { t } = useTranslation();
   const locale = useAppLocale();
-  const { state, commit } = useDemo();
+  const { state } = useDemo();
+  const action = useAction();
   const explicit = hasExplicitLocale();
   return (
     <>
+      <SaveFeedback save={action.save} onRetry={action.retry} />
       <Block
         id="pref-language"
         title={t("settings.language.title")}
@@ -343,7 +351,7 @@ function Preferences() {
             label={t("settings.preferences.reduceMotion")}
             line={t("settings.preferences.reduceMotionLine")}
             checked={state.preferences.reduceMotion}
-            onChange={(value) => commit({ type: "setPreferences", patch: { reduceMotion: value } })}
+            onChange={(value) => action.run({ type: "setPreferences", patch: { reduceMotion: value } })}
           />
         </div>
         <p className="mt-3 px-1 text-sm text-muted-foreground">{t("settings.preferences.appearanceNote")}</p>

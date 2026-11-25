@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { parseCriteria, petFit, reasonsFor } from "@/data/criteria";
 import { hasSession } from "@/data/navigation";
 import ConfirmAction from "@/components/shared/ConfirmAction";
+import { SaveFeedback } from "@/components/shared/SaveFeedback";
+import { useAction } from "@/hooks/use-action";
 import { compatibility } from "@/data/compatibility";
 import { getKind } from "@/data/animal-kinds";
 import { isPubliclyListed } from "@/data/repository";
@@ -354,22 +356,28 @@ export default function SitterProfile() {
     dialog, and reversible here or in Paramètres › Sécurité et confidentialité. */
 function BlockControl({ sitterId, name }: { sitterId: string; name: string }) {
   const { t } = useTranslation();
-  const { state, commit } = useDemo();
+  const { state } = useDemo();
+  const action = useAction();
+  const feedback = <SaveFeedback className="mt-3" save={action.save} onRetry={action.retry} />;
   if (state.blockedSitters.includes(sitterId)) {
     return (
-      <p className="text-sm text-muted-foreground">
-        {t("profile.block.blocked")}{" "}
-        <button
-          type="button"
-          className="inline-flex min-h-11 items-center font-semibold text-primary underline underline-offset-4"
-          onClick={() => commit({ type: "unblockSitter", id: sitterId })}
-        >
-          {t("settings.security.unblock")}
-        </button>
-      </p>
+      <>
+        <p className="text-sm text-muted-foreground">
+          {t("profile.block.blocked")}{" "}
+          <button
+            type="button"
+            className="inline-flex min-h-11 items-center font-semibold text-primary underline underline-offset-4"
+            onClick={() => action.run({ type: "unblockSitter", id: sitterId })}
+          >
+            {t("settings.security.unblock")}
+          </button>
+        </p>
+        {feedback}
+      </>
     );
   }
   return (
+    <>
     <ConfirmAction
       variant="ghost"
       className="-ms-3 text-muted-foreground"
@@ -382,7 +390,9 @@ function BlockControl({ sitterId, name }: { sitterId: string; name: string }) {
       title={t("profile.block.title", { name })}
       body={t("profile.block.body")}
       confirm={t("profile.block.confirm")}
-      onConfirm={() => commit({ type: "blockSitter", id: sitterId })}
+      onConfirm={() => action.run({ type: "blockSitter", id: sitterId })}
     />
+    {feedback}
+    </>
   );
 }

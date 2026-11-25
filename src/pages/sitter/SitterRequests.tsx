@@ -32,6 +32,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { REQUEST_TABS, hasSession, postPath, requestsTabFrom, type RequestsTab } from "@/data/navigation";
+import { isPast, requestAwaitsSitter } from "@/data/publications";
+import { toISODate, today } from "@/utils/dates";
 import { findPost, proposalsSent } from "@/data/repository";
 
 /**
@@ -70,7 +72,7 @@ export default function SitterRequests() {
   const tab = requestsTabFrom(params, "received");
   const setTab = (next: RequestsTab) => setParams({ tab: next }, { replace: true, preventScrollReset: true });
   const sent = proposalsSent(state);
-  const waiting = requests.filter((r) => r.status === "pending" && awaitingReplyFrom(r) !== "owner").length;
+  const waiting = requests.filter((r) => requestAwaitsSitter(r, toISODate(today())) && awaitingReplyFrom(r) !== "owner").length;
 
   /* No sitter side on this device: nothing to receive, and the introduction
      is where one starts. */
@@ -222,6 +224,9 @@ function IncomingRequest({
      request that is still pending as stored — a second tab that still shows
      the buttons cannot turn an acceptance into a refusal (A-02 / A-19). */
   const save = useSave({ watch: (s) => s.requests.find((r) => r.id === request.id)?.status ?? null });
+  const cancelArrangement = () => {
+    save.save({ type: "cancelRequest", id: request.id, by: "sitter" });
+  };
   const decide = (status: "accepted" | "declined") => {
     answeredRef.current = request.id;
     if (!save.save({ type: "respondToRequest", id: request.id, status })) answeredRef.current = null;
@@ -271,7 +276,11 @@ function IncomingRequest({
 
       {/* Announced and focusable: answering removes the buttons from the DOM,
           which would otherwise drop focus to the body with nothing said. */}
-      {request.status === "pending" ? (
+      {request.status === "pending" && !requestAwaitsSitter(request, toISODate(today())) ? (
+        /* Past and never answered: shown in the history, with no decision
+           left to make — accepting a stay that is over would mean nothing. */
+        <p className="px-1 text-sm text-muted-foreground">{t("sitterRequests.expiredNote")}</p>
+      ) : request.status === "pending" ? (
         <>
           {waitingForOwner && (
             <p className="px-1 text-sm font-medium text-foreground">{t("clarify.waitingOwner")}</p>
@@ -323,7 +332,7 @@ function IncomingRequest({
           {t(`sitterRequests.answered.${request.status}`)}
         </p>
       )}
-      {request.status === "accepted" && (
+      {request.status === "accepted" && !isPast(request.dates, toISODate(today())) && (
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button type="button" variant="surface">
@@ -337,13 +346,14 @@ function IncomingRequest({
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
-              <AlertDialogAction onClick={() => save.save({ type: "cancelRequest", id: request.id, by: "sitter" })}>
-                {t("arrangement.cancelConfirm")}
-              </AlertDialogAction>
+              <AlertDialogAction onClick={cancelArrangement}>{t("arrangement.cancelConfirm")}</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
       )}
+      {/* The cancellation's own outcome: the decision's feedback above is
+          only drawn while the request is pending. */}
+      {request.status !== "pending" && <SaveFeedback save={save} onRetry={cancelArrangement} />}
     </li>
   );
 }

@@ -9,6 +9,8 @@ import { CompatLine } from "@/components/posts/post-ui";
 import { postStatusKey, proposalStatusKey, useNeedsText } from "@/components/posts/post-status";
 import { categoryText, petFacts } from "@/components/request/pet-facts";
 import BackButton from "@/components/shared/BackButton";
+import ConfirmAction from "@/components/shared/ConfirmAction";
+import { SaveFeedback } from "@/components/shared/SaveFeedback";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { DemoNotice } from "@/components/shared/trust";
 import {
@@ -29,8 +31,9 @@ import { petRef } from "@/data/criteria";
 import { SITTER_HOME, WELCOME_PATH, hasSession, requestsPath, sitterVisibility } from "@/data/navigation";
 import { offeredServices, overlapsDeclaredUnavailable } from "@/data/offer";
 import { kindLabel } from "@/data/pets";
-import { acceptsProposals, liveProposal } from "@/data/publications";
+import { acceptsProposals, isPast, standingProposal } from "@/data/publications";
 import { findPost } from "@/data/repository";
+import { useAction } from "@/hooks/use-action";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useDemo } from "@/state/demo/context";
 import { formatDateRange, toISODate, today } from "@/utils/dates";
@@ -53,9 +56,14 @@ export default function SitterPostDetail() {
   const locale = useAppLocale();
   const { id } = useParams();
   const [params] = useSearchParams();
-  const { state, commit } = useDemo();
+  const { state } = useDemo();
   const post = findPost(state, id);
   const needs = useNeedsText(post);
+  /* Withdrawing and cancelling are saved like a form (A-02), checked
+     against what another tab may have decided meanwhile. */
+  const action = useAction((s) =>
+    s.proposals.filter((p) => p.postId === id && p.sitterId === s.sitter?.profile.id).map((p) => [p.id, p.status]),
+  );
 
   if (!hasSession(state)) return <Navigate to={WELCOME_PATH} replace />;
   if (!state.sitter) return <Navigate to="/sitter/start" replace />;
@@ -67,7 +75,8 @@ export default function SitterPostDetail() {
   const serviceOk = offeredServices(profile).includes(post.careType);
   const declaredBusy = overlapsDeclaredUnavailable(profile, post.dates);
   const open = acceptsProposals(post, toISODate(today()));
-  const mine = liveProposal(state.proposals, post.id, profile.id);
+  /* Pending, accepted — or declined, which is final for this post. */
+  const mine = standingProposal(state.proposals, post.id, profile.id);
   const own = !post.isDemoFixture;
   const canPropose = listed && open && !mine && compat.level !== "incompatible" && serviceOk;
 
@@ -77,7 +86,7 @@ export default function SitterPostDetail() {
   const area = placeName({ wilayaCode: post.wilayaCode, communeCode: post.communeCode }, locale);
 
   const withdraw = () => {
-    if (mine) commit({ type: "withdrawProposal", id: mine.id });
+    if (mine) action.run({ type: "withdrawProposal", id: mine.id });
   };
 
   return (
@@ -90,7 +99,7 @@ export default function SitterPostDetail() {
       </Helmet>
       <BackButton fallback={SITTER_HOME} />
       <div className="mx-auto max-w-[720px]">
-        {params.get("proposed") === "1" && mine && (
+        {params.get("proposed") === "1" && mine?.status === "pending" && (
           <div role="status" className="surface mb-5 flex items-start gap-3 p-4">
             <CircleCheck className="mt-0.5 size-5 shrink-0 text-success" aria-hidden="true" />
             <div>
@@ -180,6 +189,7 @@ export default function SitterPostDetail() {
         {post.isDemoFixture && <DemoNotice className="mt-6" title={t("postDetail.exampleTitle")} body={t("postDetail.exampleBody")} />}
         {own && <DemoNotice className="mt-6" title={t("postDetail.ownTitle")} body={t("postDetail.ownBody")} />}
 
+        <SaveFeedback className="mt-8" save={action.save} onRetry={action.retry} />
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
           {mine ? (
             <>
@@ -204,6 +214,17 @@ export default function SitterPostDetail() {
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
+              )}
+              {/* The sitter can leave an arrangement too, as on a direct
+                  request — the owner is told it was cancelled. */}
+              {mine.status === "accepted" && post.status === "accepted" && !isPast(post.dates, toISODate(today())) && (
+                <ConfirmAction
+                  trigger={t("arrangement.cancel")}
+                  title={t("arrangement.cancelTitle")}
+                  body={t("arrangement.cancelBody")}
+                  confirm={t("arrangement.cancelConfirm")}
+                  onConfirm={() => action.run({ type: "cancelPostArrangement", postId: post.id, by: "sitter" })}
+                />
               )}
               <Button asChild variant="ghost">
                 <Link to={requestsPath("sitter", "sent")}>{t("postDetail.seeSent")}</Link>

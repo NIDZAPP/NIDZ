@@ -11,7 +11,9 @@ import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
 import { REQUEST_TABS, WELCOME_PATH, hasSession, postPath, requestsTabFrom, type RequestsTab } from "@/data/navigation";
 import { findPost, postsPublished, proposalsReceived, requestsSent } from "@/data/repository";
+import { proposalAwaitsOwner } from "@/data/publications";
 import { useDemo } from "@/state/demo/context";
+import { toISODate, today } from "@/utils/dates";
 
 const LIVE = new Set(["pending", "open", "accepted"]);
 
@@ -41,7 +43,8 @@ export default function OwnerRequests() {
   const direct = requestsSent(state);
   const posts = postsPublished(state);
 
-  const pendingProposals = proposals.filter((p) => p.status === "pending").length;
+  /* Only what the owner can still decide (the same rule as the badge). */
+  const pendingProposals = proposals.filter((p) => proposalAwaitsOwner(p, findPost(state, p.postId), toISODate(today()))).length;
   const fallback: RequestsTab = pendingProposals > 0 || (direct.length === 0 && posts.length === 0) ? "received" : "sent";
   const tab = requestsTabFrom(params, fallback);
   const setTab = (next: RequestsTab) => setParams({ tab: next }, { replace: true, preventScrollReset: true });

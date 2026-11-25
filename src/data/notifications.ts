@@ -20,7 +20,7 @@ import { compatibility } from "./compatibility";
 import { unreadCount, lastMessage, type ConversationSide } from "./conversations";
 import { offeredServices, overlapsDeclaredUnavailable } from "./offer";
 import { topicEnabled, type NotificationTopic } from "./preferences";
-import { acceptsProposals } from "./publications";
+import { acceptsProposals, proposalAwaitsOwner, requestAwaitsSitter } from "./publications";
 import {
   conversationsOf,
   feedPosts,
@@ -93,10 +93,11 @@ export function allNotificationsFor(state: DemoState, side: ConversationSide): L
     }
   }
 
+  const todayISO = toISODate(today());
   const requests = side === "owner" ? requestsSent(state) : requestsReceived(state);
   for (const r of requests) {
     const detail = side === "owner" ? `/owner/requests/${r.id}` : "/sitter/requests?tab=received";
-    if (r.status === "pending" && awaitingReplyFrom(r) === side) {
+    if (requestAwaitsSitter(r, todayISO) && awaitingReplyFrom(r) === side) {
       push({
         id: `question-${r.id}`,
         kind: "question",
@@ -118,7 +119,7 @@ export function allNotificationsFor(state: DemoState, side: ConversationSide): L
         text: { key: `notifications.decision.${r.status}`, values: { name: sitterNameFor(state, r.sitterId), pet: r.pet.name } },
       });
     }
-    if (side === "sitter" && r.status === "pending") {
+    if (side === "sitter" && requestAwaitsSitter(r, todayISO)) {
       push({
         id: `incoming-${r.id}`,
         kind: "incoming",
@@ -158,7 +159,7 @@ export function allNotificationsFor(state: DemoState, side: ConversationSide): L
     for (const p of proposalsReceived(state)) {
       const post = findPost(state, p.postId);
       if (!post) continue;
-      if (p.status === "pending") {
+      if (proposalAwaitsOwner(p, post, todayISO)) {
         push({
           id: `proposal-${p.id}`,
           kind: "proposal",
@@ -185,7 +186,7 @@ export function allNotificationsFor(state: DemoState, side: ConversationSide): L
     for (const p of proposalsSent(state)) {
       const post = findPost(state, p.postId);
       if (!post || !p.respondedAt) continue;
-      if (p.status === "accepted" || p.status === "declined" || p.status === "notRetained") {
+      if (p.status === "accepted" || p.status === "declined" || p.status === "notRetained" || p.status === "outdated") {
         push({
           id: `proposal-decision-${p.id}`,
           kind: "proposalDecision",
@@ -213,7 +214,6 @@ export function allNotificationsFor(state: DemoState, side: ConversationSide): L
   /* Reminders: an agreed care starting within the next three days. Derived
      from the dates the two people agreed on — not a booking engine. */
   const soon = toISODate(addDays(today(), 3));
-  const todayISO = toISODate(today());
   const agreed =
     side === "owner"
       ? [

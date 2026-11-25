@@ -294,7 +294,11 @@ export default function SitterProfileView({
         <section className={card}>
           <Section className={sectionTitle}>
             {!reasons.some((r) => !isAbsenceReason(r))
-              ? t("profile.mismatchTitle")
+              ? /* Only « à confirmer » underneath (Nidz 1.7 §19): unknown is
+                   not a mismatch, so it is not titled as one. */
+                mismatches.length === 0 && uncertain.length > 0
+                ? t("profile.uncertainTitle")
+                : t("profile.mismatchTitle")
               : petName
                 ? t("profile.section.fitNamed", { name: petName })
                 : t("profile.section.fit")}

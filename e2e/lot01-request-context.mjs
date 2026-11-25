@@ -1,8 +1,12 @@
 /* Audit 1.3 LOT 01 — the chosen sitter is never lost.
    Amina → service and dates → account → add an animal → back to "Your
    request to Amina B." with the same data; then Back, reload, edit, resume,
-   and the incompatible-animal cases. */
-import { ACCOUNT, BASE, check, clean, done, isoIn, loose, open, pickCombobox, seedState, storedState } from "./lib.mjs";
+   and the incompatible-animal cases.
+   Nidz 1.7: the account is opened through the sign-up journey (phone), the
+   animal form has the 13-animal grid and no dog size, the unsent request is
+   resumed from its Draft card in Requests, and compatibility is by category
+   and breed (confirmed / to confirm / incompatible). */
+import { ACCOUNT, BASE, check, clean, done, isoIn, loose, open, seedState, storedState } from "./lib.mjs";
 
 const FROM = isoIn(3);
 const TO = isoIn(6);
@@ -15,14 +19,20 @@ const h1 = async (page) => clean(await page.locator("h1").innerText());
   const { page, context } = await open({ state: seedState() });
   await page.goto(`${BASE}/sitters/amina-b?${Q}`);
   await page.getByRole("link", { name: "Request care" }).first().click();
-  await page.waitForURL(/\/auth\?next=/);
-  check("no account → sign-in gateway, carrying the request as next", page.url().includes(encodeURIComponent("/owner/request/amina-b")));
+  await page.waitForURL(/\/register\?next=/);
+  check("no account → sign-up, carrying the request as next", page.url().includes(encodeURIComponent("/owner/request/amina-b")));
 
-  await page.getByRole("link", { name: "Create a local account" }).click();
+  /* Retired in Nidz 1.7: the « Create a local account » form (name + wilaya).
+     The same detour now goes through the phone sign-up journey. */
+  await page.getByRole("button", { name: "Continue with a phone number" }).click();
+  await page.getByLabel("Mobile number").fill("550123456");
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page.locator('input[autocomplete="one-time-code"]').fill("123456");
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
   await page.getByLabel("First name").fill("Lina");
   await page.getByLabel("Last name").fill("Kaci");
-  await pickCombobox(page, "Wilaya", "Algiers");
-  await page.getByRole("button", { name: "Create my account" }).click();
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page.getByRole("button", { name: "Skip this step" }).click();
   await page.waitForURL(/\/owner\/request\/amina-b/);
   check("after the account: back on the request to Amina", (await h1(page)).includes(AMINA_TITLE), await h1(page));
   check("not sent through the generic need flow", !page.url().includes("/owner/need"));
@@ -30,9 +40,10 @@ const h1 = async (page) => clean(await page.locator("h1").innerText());
   /* No animal yet: the one action is to add it. */
   await page.getByRole("link", { name: "Add my animal" }).click();
   await page.waitForURL(/\/owner\/pets\/new/);
-  check("add-animal screen starts on dog (the request's species)", await page.getByRole("radio", { name: "Dog", exact: true }).isChecked());
-  await page.getByLabel("Its name").fill("Milo");
-  await page.getByRole("radio", { name: "Large dogs" }).click();
+  check("add-animal screen starts on dog (the request's species)", (await page.getByRole("button", { name: "Dog", exact: true }).getAttribute("aria-pressed")) === "true");
+  /* Retired in Nidz 1.7: the dog-size question (§9). */
+  check("no size question on the animal form", (await page.getByRole("radio", { name: /dogs$/ }).count()) === 0);
+  await page.getByLabel("What is your animal called?").fill("Milo");
   await page.getByRole("button", { name: "Save" }).click();
   await page.waitForURL(/\/owner\/request\/amina-b\?/);
   await page.waitForFunction(() => location.search.includes("pet="));
@@ -51,7 +62,7 @@ const h1 = async (page) => clean(await page.locator("h1").innerText());
   /* Edit the animal from the request. */
   await page.getByRole("link", { name: loose("Edit Milo") }).click();
   await page.waitForURL(/\/owner\/pets\/pet-/);
-  await page.getByLabel("Its name").fill("Milo II");
+  await page.getByLabel("What is your animal called?").fill("Milo II");
   await page.getByRole("button", { name: "Save" }).click();
   await page.waitForURL(/\/owner\/request\/amina-b/);
   await page.waitForSelector("h1");
@@ -64,10 +75,10 @@ const h1 = async (page) => clean(await page.locator("h1").innerText());
   await page.waitForURL(/\/sitters\/amina-b/);
   check("Back from the summary → Amina's profile", page.url().includes("/sitters/amina-b") && page.url().includes("care=boarding"));
 
-  /* Resume from Home. */
-  await page.goto(`${BASE}/`);
+  /* Resume from its Draft card (Nidz 1.7 §20.3: drafts live in Requests). */
+  await page.goto(`${BASE}/owner/requests`);
   const resume = page.getByRole("link", { name: loose("Your request to Amina B.") });
-  check("Home offers to resume the request to Amina", await resume.isVisible());
+  check("Requests offers to resume the request to Amina", await resume.isVisible());
   await resume.click();
   await page.waitForURL(/\/owner\/request\/amina-b/);
   check("resume → same sitter, same animal", (await h1(page)).includes(AMINA_TITLE) && (await page.getByRole("radio", { name: /Milo II/ }).isChecked()));
@@ -106,28 +117,34 @@ const h1 = async (page) => clean(await page.locator("h1").innerText());
   await context.close();
 }
 
-/* 3. Incompatible animals are shown with the reason and cannot be sent. */
+/* 3. Incompatible animals are shown with the reason and cannot be sent.
+   Retired in Nidz 1.7: the size cases (Youcef, small dogs only; a dog with no
+   size). Size left the owner's journey (§9); the same guarantee now holds for
+   breeds — Mehdi S. takes only two kinds of parrot. */
 {
-  const big = { id: "pet-big", name: "Titan", age: "", sex: "unknown", notes: "", care: {}, species: "dog", details: { size: "large" } };
-  const unsized = { id: "pet-nos", name: "Flou", age: "", sex: "unknown", notes: "", care: {}, species: "dog", details: { size: null } };
+  const macaw = { id: "pet-mac", name: "Kiwi", age: "", sex: "unknown", notes: "", care: {}, species: "parrot", kindId: "parrot.macaw", details: {} };
+  const unknownKind = { id: "pet-coco", name: "Coco", age: "", sex: "unknown", notes: "", care: {}, species: "parrot", kindId: null, details: {} };
+  const ringneck = { id: "pet-ring", name: "Zaza", age: "", sex: "unknown", notes: "", care: {}, species: "parrot", kindId: "parrot.ringneck", details: {} };
   const cat = { id: "pet-cat", name: "Mimi", age: "", sex: "unknown", notes: "", care: {}, species: "cat", details: {} };
   const need = { species: "cat", petId: "pet-cat", wilayaCode: null, communeCode: null, dates: null, careType: null, maxPrice: null };
-  const { page, context } = await open({ state: seedState({ account: ACCOUNT, capabilities: { owner: true, sitter: false }, pets: [big, unsized, cat], need }) });
+  const { page, context } = await open({ state: seedState({ account: ACCOUNT, capabilities: { owner: true, sitter: false }, pets: [macaw, unknownKind, ringneck, cat], need }) });
 
-  await page.goto(`${BASE}/owner/request/youcef-h?species=dog&care=boarding&from=${FROM}&to=${TO}`);
+  await page.goto(`${BASE}/owner/request/mehdi-s?species=parrot&care=boarding&from=${FROM}&to=${TO}`);
   await page.waitForSelector("h1");
-  check("Youcef: large dog shown but disabled", await page.getByRole("radio", { name: /Titan/ }).isDisabled());
-  check("Youcef: reason names the accepted size", clean(await page.getByRole("radio", { name: /Titan/ }).innerText()).toLowerCase().includes("small dogs"));
-  check("Youcef: the need-flow cat is not silently selected", !(await page.getByRole("radio", { name: /Mimi/ }).isChecked()));
-  await page.getByRole("radio", { name: /Flou/ }).click();
-  check("unsized dog → asks for the size", await page.getByRole("link", { name: loose("Give Flou's size") }).isVisible());
-  await page.getByRole("button", { name: "Send my request" }).click();
+  check("Mehdi: a macaw is shown but disabled", await page.getByRole("radio", { name: /Kiwi/ }).isDisabled());
+  check("Mehdi: the reason says only certain breeds", clean(await page.getByRole("radio", { name: /Kiwi/ }).innerText()).includes("accepts only certain breeds, and not"));
+  check("Mehdi: an accepted breed is selectable", !(await page.getByRole("radio", { name: /Zaza/ }).isDisabled()));
+  check("Mehdi: the need-flow cat is not silently selected", !(await page.getByRole("radio", { name: /Mimi/ }).isChecked()));
+  await page.getByRole("radio", { name: /Coco/ }).click();
+  check("a parrot with no breed is « to confirm », with what to give", await page.getByText(/accepts only certain breeds: give/).first().isVisible());
+  await page.getByRole("radio", { name: /Kiwi/ }).click({ force: true }).catch(() => {});
+  check("the macaw cannot become the selected animal", !(await page.getByRole("radio", { name: /Kiwi/ }).isChecked()));
   const st = await storedState(page);
-  check("unsized dog cannot be sent to a small-dogs-only sitter", (st.requests ?? []).length === 0);
+  check("nothing was sent", (st.requests ?? []).length === 0);
 
   await page.goto(`${BASE}/owner/request/amina-b?care=boarding&from=${FROM}&to=${TO}`);
   await page.waitForSelector("h1");
-  check("Amina: the cat is disabled with a reason", (await page.getByRole("radio", { name: /Mimi/ }).isDisabled()) && clean(await page.getByRole("radio", { name: /Mimi/ }).innerText()).includes("does not take cats"));
+  check("Amina: the cat is disabled with a reason", (await page.getByRole("radio", { name: /Mimi/ }).isDisabled()) && clean(await page.getByRole("radio", { name: /Mimi/ }).innerText()).includes("does not accept this kind of animal"));
   check("no page errors", page.errors.length === 0, page.errors.join(" | "));
   await context.close();
 }
@@ -136,7 +153,7 @@ const h1 = async (page) => clean(await page.locator("h1").innerText());
    a walk is judged on its one visible day; crafted `next` values are inert. */
 {
   const dog = { id: "pet-rex", name: "Rex", age: "", sex: "unknown", notes: "", care: {}, species: "dog", details: { size: "medium" } };
-  const need = { species: "dog", dogSize: null, petId: null, wilayaCode: null, communeCode: null, dates: null, careType: "walk", maxPrice: null };
+  const need = { species: "dog", petId: null, wilayaCode: null, communeCode: null, dates: null, careType: "walk", maxPrice: null };
   const { page, context } = await open({ state: seedState({ account: ACCOUNT, capabilities: { owner: true, sitter: false }, pets: [dog], need }) });
   await page.goto(`${BASE}/sitters/amina-b`);
   await page.goto(`${BASE}/owner/request/amina-b?care=boarding&from=${FROM}&to=${TO}`);
@@ -161,17 +178,18 @@ const h1 = async (page) => clean(await page.locator("h1").innerText());
 
   await page.goto(`${BASE}/auth?next=%2Fowner%2Frequest%2F%25E0%25A4%25A`);
   await page.waitForSelector("h1");
-  check("malformed next does not crash the gateway", !(await page.getByText("Something went wrong").isVisible()));
+  check("malformed next does not crash the gateway (now sign-up)", !(await page.getByText("Something went wrong").isVisible()));
   await page.goto(`${BASE}/owner/pets/new?next=%2F.%2F%2Fexample.org`);
-  await page.getByLabel("Its name").fill("Nox");
+  await page.getByLabel("What is your animal called?").fill("Nox");
   await page.getByRole("button", { name: "Save" }).click();
-  await page.waitForURL(/\/owner\/pets$/);
-  check("'/.//host' next is ignored; save lands on My pets", page.url().endsWith("/owner/pets"));
+  /* Nidz 1.7: My animals is the owner's Home (/owner/pets redirects there). */
+  await page.waitForURL((u) => u.pathname === "/");
+  check("'/.//host' next is ignored; save lands on My animals", new URL(page.url()).pathname === "/" && new URL(page.url()).host === new URL(BASE).host);
   await page.goto(`${BASE}/owner/pets/pet-rex?next=/owner/pets/new`);
   await page.getByRole("button", { name: "Save" }).click();
-  await page.waitForURL(/\/owner\/pets$/);
+  await page.waitForURL((u) => u.pathname === "/");
   await page.goto(`${BASE}/owner/pets/new`);
-  check("'add an animal' never opens pre-filled with an existing one", (await page.getByLabel("Its name").inputValue()) === "");
+  check("'add an animal' never opens pre-filled with an existing one", (await page.getByLabel("What is your animal called?").inputValue()) === "");
   check("no page errors", page.errors.length === 0, page.errors.join(" | "));
   await context.close();
 }

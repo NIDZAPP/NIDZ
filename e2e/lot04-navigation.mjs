@@ -1,7 +1,10 @@
 /* Audit 1.3 LOT 04 — one account, two spaces, no dead tab.
    Updated for Nidz 1.6: four tabs per side (Home · Requests · Messages ·
    Account / Requests · My profile · Messages · Account), Compte at /account
-   with Paramètres behind its gear, and the sitter bar from the first draft. */
+   with Paramètres behind its gear, and the sitter bar from the first draft.
+   Updated for Nidz 1.7 (§15): the SAME four tabs in both spaces — Home ·
+   Requests · Messages · Account; the sitter's Home is the feed of published
+   requests, and « My sitter profile » moved into Compte. */
 import { ACCOUNT, BASE, check, clean, done, isoIn, open, publishedSitter, seedState, storedState } from "./lib.mjs";
 
 const DEAD = "This screen is not part of the demonstration";
@@ -41,9 +44,9 @@ const owner = seedState({
   await page.goto(`${BASE}/account`);
   check("Compte (tab root) shows no Back control", (await page.getByRole("button", { name: "Back" }).count()) === 0);
   await page.getByRole("button", { name: /Sitter space/ }).click();
-  await page.waitForURL(/\/sitter\/requests/);
+  await page.waitForURL(/\/sitter\/feed/);
   const sitterLabels = (await barLinks(page).allInnerTexts()).map((s) => s.trim());
-  check("sitter bar: Requests · My profile · Messages · Account", sitterLabels.join("|") === "Requests|My profile|Messages|Account", sitterLabels.join("|"));
+  check("sitter bar: Home · Requests · Messages · Account", sitterLabels.join("|") === "Home|Requests|Messages|Account", sitterLabels.join("|"));
   await visitEach(page, barLinks(page), "sitter");
   await page.goto(`${BASE}/account`);
   await page.getByRole("button", { name: /Owner space/ }).click();
@@ -68,31 +71,36 @@ const owner = seedState({
 }
 
 /* 3. A sitter whose profile is not published: the sitter bar from the first
-   draft (1.6) — Mon profil is a tab root, so no Back control. */
+   draft (1.6). Nidz 1.7: « My sitter profile » is under Compte, so it has
+   Back (it was a tab root in 1.6). */
 {
   const draft = publishedSitter();
   draft.published = false;
   const { page, context } = await open({ state: seedState({ account: ACCOUNT, capabilities: { owner: true, sitter: true }, sitter: draft }) });
   await page.goto(`${BASE}/sitter/profile`);
   await page.waitForSelector("h1");
-  check("unpublished dashboard: a tab root, no Back control", (await page.getByRole("button", { name: "Back" }).count()) === 0);
+  check("unpublished profile: a screen under Compte, with Back", (await page.getByRole("button", { name: "Back" }).count()) === 1);
   const draftLabels = (await barLinks(page).allInnerTexts()).map((s) => s.trim());
-  check("unpublished dashboard: the sitter bar is there", draftLabels.join("|") === "Requests|My profile|Messages|Account", draftLabels.join("|"));
+  check("unpublished profile: the sitter bar is there", draftLabels.join("|") === "Home|Requests|Messages|Account", draftLabels.join("|"));
+  check("unpublished profile: Account is the lit tab", (await barLinks(page).filter({ hasText: "Account" }).getAttribute("aria-current")) === "page");
   await context.close();
 }
 
-/* 4. Settings opened from a full-screen step (its gear) offers Back into
-   that step. */
+/* 4. Retired in Nidz 1.7: « Settings opened from a full-screen step (its
+   gear) offers Back into that step » — §22 removed the gear from the
+   journeys. Settings is reached from Compte's gear, and Back returns there. */
 {
   const { page, context } = await open({ state: owner });
   await page.goto(`${BASE}/owner/request/amina-b?care=boarding&from=${isoIn(3)}&to=${isoIn(5)}`);
   await page.waitForSelector("h1");
+  check("no settings gear on a request step", (await page.getByRole("link", { name: "Settings" }).count()) === 0);
+  await page.goto(`${BASE}/account`);
   await page.getByRole("link", { name: "Settings" }).click();
   await page.waitForURL(/\/settings/);
-  check("Settings from a flow shows Back", await page.getByRole("button", { name: "Back", exact: true }).isVisible());
+  check("Settings from Compte shows Back", await page.getByRole("button", { name: "Back", exact: true }).isVisible());
   await page.getByRole("button", { name: "Back", exact: true }).click();
-  await page.waitForURL(/\/owner\/request\/amina-b/);
-  check("…and Back returns to the same request", true);
+  await page.waitForURL(/\/account/);
+  check("…and Back returns to Compte", true);
   await context.close();
 }
 
@@ -100,15 +108,17 @@ const owner = seedState({
    top; an unpublished sitter's Compte is not a dead end. */
 {
   const { page, context } = await open({ state: owner });
-  await page.goto(`${BASE}/sitter/profile`);
+  await page.goto(`${BASE}/account`);
+  await page.evaluate(() => { const x = JSON.parse(localStorage.getItem("nidz.demo")); x.activeWorkspace = "sitter"; localStorage.setItem("nidz.demo", JSON.stringify(x)); });
+  await page.goto(`${BASE}/sitter/feed`);
   await page.waitForSelector("h1");
   await barLinks(page).filter({ hasText: "Account" }).click();
   await page.waitForURL(/\/account/);
   const labels = (await barLinks(page).allInnerTexts()).map((x) => x.trim());
-  check("Account from the sitter bar keeps the sitter bar", labels.join("|") === "Requests|My profile|Messages|Account", labels.join("|"));
+  check("Account from the sitter bar keeps the sitter space", labels.join("|") === "Home|Requests|Messages|Account" && (await page.getByRole("heading", { name: "My sitter profile" }).isVisible()), labels.join("|"));
   check("…and Compte names the sitter space as current", /Sitter space\s*The space you are using now/.test(clean(await page.locator("main").innerText())));
 
-  await page.goto(`${BASE}/search`);
+  await page.goto(`${BASE}/sitter/feed`);
   await page.waitForSelector("h1");
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   await barLinks(page).filter({ hasText: "Account" }).click();

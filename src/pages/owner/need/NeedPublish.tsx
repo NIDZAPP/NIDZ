@@ -79,7 +79,13 @@ export default function NeedPublish() {
       isDemoFixture: false,
     };
     const saved = save.save({ type: "publishPost", post });
-    if (saved) navigate(`${postPath("owner", post.id)}?published=1`, { replace: true });
+    if (!saved) return;
+    /* Another tab may have published the same request meanwhile: the
+       reducer then kept that one, and this screen goes to it. */
+    const kept = saved.posts.some((p) => p.id === post.id)
+      ? post.id
+      : duplicateOpenPost(saved.posts, { petId: post.petId, petName: post.pet.name, careType: post.careType, dates: post.dates })?.id;
+    if (kept) navigate(`${postPath("owner", kept)}${kept === post.id ? "?published=1" : ""}`, { replace: true });
   };
 
   const area = placeName({ wilayaCode: need.wilayaCode, communeCode: need.communeCode }, locale);

@@ -19,7 +19,11 @@ import type { CareRequest } from "./types";
 import type { Workspace } from "./workspace";
 import { awaitingReplyFrom } from "./clarification";
 import { unreadThreads } from "./notifications";
-import { isPubliclyListed, proposalsReceived, requestsReceived, requestsSent } from "./repository";
+import { proposalAwaitsOwner, requestAwaitsSitter } from "./publications";
+import { findPost, isPubliclyListed, proposalsReceived, requestsReceived, requestsSent } from "./repository";
+import { toISODate, today } from "@/utils/dates";
+
+const todayISO = () => toISODate(today());
 import { SITTER_DASHBOARD, SITTER_SECTIONS } from "./sitter-sections";
 
 /* ------------------------------------------------------- sitter side */
@@ -91,6 +95,44 @@ export function hasSession(state: DemoState): boolean {
   return Boolean(state.account && state.signedIn);
 }
 
+/* Addresses anyone may read without being signed in: the way in, the public
+   directory and profiles, and the help and policies. Everything else holds
+   the account's own data — its animals, requests, messages, profile and
+   settings. An ALLOW-list: a route added later is private by default. */
+const PUBLIC_PATHS: readonly RegExp[] = [
+  /^\/$/,
+  /^\/welcome$/,
+  /^\/register(\/[^/]+)?$/,
+  /^\/login$/,
+  /^\/auth$/,
+  /^\/start$/,
+  /^\/search$/,
+  /^\/sitters\/[^/]+$/,
+  /^\/help$/,
+  /^\/policies$/,
+];
+/* `/sitter/:id` is the pre-1.3 address of a public profile (it redirects);
+   these first segments are the sitter's own area, not profile ids. */
+const SITTER_AREA = new Set(["feed", "posts", "requests", "profile", "join", "preview", "published", "trust", "start", "register", "dashboard"]);
+
+export function isPublicPath(pathname: string): boolean {
+  const path = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+  if (PUBLIC_PATHS.some((re) => re.test(path))) return true;
+  const legacy = /^\/sitter\/([^/]+)$/.exec(path);
+  return Boolean(legacy && !SITTER_AREA.has(legacy[1]));
+}
+
+/**
+ * Where a signed-out device is sent instead of a private address: « Se
+ * connecter », carrying the address so signing in returns to it. Null when
+ * the address may be shown — a session, no account at all (those screens
+ * explain what an account allows), or a public address.
+ */
+export function signedOutRedirect(state: DemoState, pathname: string, search = ""): string | null {
+  if (!state.account || state.signedIn || isPublicPath(pathname)) return null;
+  return `${LOGIN_PATH}?next=${encodeURIComponent(pathname + search)}`;
+}
+
 /**
  * Where an account goes once it exists: a brand-new account chooses its first
  * activity (`/start`); a returning one goes back to where it left off — the
@@ -125,12 +167,15 @@ export function navBadge(state: DemoState, workspace: Workspace, to: string): nu
     case "/owner/requests":
       /* A sitter's question waiting on the owner, and proposals on the
          owner's published requests still waiting for a decision. */
+      /* Only what can still be decided: a past stay or a closed post is
+         history, and a badge that can never clear teaches people to ignore
+         it. */
       return (
-        requestsSent(state).filter((r) => awaitingReplyFrom(r) === "owner").length +
-        proposalsReceived(state).filter((p) => p.status === "pending").length
+        requestsSent(state).filter((r) => awaitingReplyFrom(r) === "owner" && requestAwaitsSitter(r, todayISO())).length +
+        proposalsReceived(state).filter((p) => proposalAwaitsOwner(p, findPost(state, p.postId), todayISO())).length
       );
     case "/sitter/requests":
-      return requestsReceived(state).filter((r) => r.status === "pending" && awaitingReplyFrom(r) !== "owner")
+      return requestsReceived(state).filter((r) => requestAwaitsSitter(r, todayISO()) && awaitingReplyFrom(r) !== "owner")
         .length;
     case MESSAGES_PATH:
       return unreadThreads(state, workspace);

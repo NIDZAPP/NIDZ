@@ -31,7 +31,7 @@
    not delivered to anybody. Every screen says so.
    ------------------------------------------------------------------------ */
 
-import type { CareType, DateRange, SharedPet } from "./types";
+import { CARE_TYPES, type CareType, type DateRange, type SharedPet } from "./types";
 
 export type PostStatus = "open" | "accepted" | "withdrawn" | "cancelled";
 export const POST_STATUSES: readonly PostStatus[] = ["open", "accepted", "withdrawn", "cancelled"];
@@ -60,7 +60,10 @@ export type CarePost = {
   isDemoFixture: boolean;
 };
 
-export type ProposalStatus = "pending" | "accepted" | "declined" | "withdrawn" | "notRetained" | "cancelled";
+/** `outdated`: the owner changed the service or the dates after this
+    proposal was made — it was an answer to another request, so it can no
+    longer be accepted; the sitter may propose again. */
+export type ProposalStatus = "pending" | "accepted" | "declined" | "withdrawn" | "notRetained" | "cancelled" | "outdated";
 export const PROPOSAL_STATUSES: readonly ProposalStatus[] = [
   "pending",
   "accepted",
@@ -68,6 +71,7 @@ export const PROPOSAL_STATUSES: readonly ProposalStatus[] = [
   "withdrawn",
   "notRetained",
   "cancelled",
+  "outdated",
 ];
 
 export type Proposal = {
@@ -127,6 +131,35 @@ export function liveProposal(proposals: readonly Proposal[], postId: string, sit
   );
 }
 
+/** A request the sitter can still answer: waiting, and its dates not past.
+    Once past, nothing can come of an acceptance, so it is neither offered
+    nor counted as « waiting for you ». */
+export function requestAwaitsSitter(request: { status: string; dates: DateRange }, todayISO: string): boolean {
+  return request.status === "pending" && !isPast(request.dates, todayISO);
+}
+
+/** A proposal the owner can still decide on: waiting, on a post still open
+    and not past. The same rule for the button, the badge and the count. */
+export function proposalAwaitsOwner(proposal: Proposal, post: CarePost | null | undefined, todayISO: string): boolean {
+  return proposal.status === "pending" && Boolean(post) && post!.status === "open" && !isPast(post!.dates, todayISO);
+}
+
+/** The proposal that stops this sitter proposing again on this post: one
+    still waiting or accepted, or one the owner DECLINED — a decline is the
+    owner's answer to this sitter, final for this post. A proposal the sitter
+    withdrew, or one that became outdated when the owner changed the request,
+    does not stop a new one. */
+export function standingProposal(proposals: readonly Proposal[], postId: string, sitterId: string): Proposal | null {
+  return (
+    proposals.find(
+      (p) =>
+        p.postId === postId &&
+        p.sitterId === sitterId &&
+        (p.status === "pending" || p.status === "accepted" || p.status === "declined"),
+    ) ?? null
+  );
+}
+
 /** The same animal, service and dates already published and still open —
     publishing it again would be a duplicate (§13.2). */
 export function duplicateOpenPost(
@@ -164,11 +197,18 @@ export function restoreProposal(value: unknown): Proposal | null {
     createdAt,
     message: typeof value.message === "string" ? value.message.slice(0, PROPOSAL_MESSAGE_MAX) : "",
     displayedRate:
-      rate && typeof rate.amount === "number" && typeof rate.careType === "string"
+      rate &&
+      typeof rate.amount === "number" &&
+      Number.isFinite(rate.amount) &&
+      rate.amount >= 0 &&
+      (CARE_TYPES as readonly unknown[]).includes(rate.careType)
         ? { amount: rate.amount, careType: rate.careType as CareType }
         : null,
     status: status as ProposalStatus,
-    respondedAt: typeof value.respondedAt === "string" ? value.respondedAt : null,
+    /* Read back as a notification's time: an unparseable date would throw
+       in the relative-time formatter. */
+    respondedAt:
+      typeof value.respondedAt === "string" && Number.isFinite(Date.parse(value.respondedAt)) ? value.respondedAt : null,
     simulated: value.simulated === true,
     cancelledBy: value.cancelledBy === "owner" || value.cancelledBy === "sitter" ? value.cancelledBy : undefined,
   };

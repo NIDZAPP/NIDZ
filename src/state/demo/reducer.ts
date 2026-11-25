@@ -40,7 +40,10 @@ import { normalizeAcceptance } from "@/data/compatibility";
 import { getKind } from "@/data/animal-kinds";
 import {
   POST_STATUSES,
-  liveProposal,
+  duplicateOpenPost,
+  proposalAwaitsOwner,
+  requestAwaitsSitter,
+  standingProposal,
   restoreProposal,
   type CarePost,
   type Proposal,
@@ -57,7 +60,7 @@ import {
   type ConversationMessage,
   type ConversationSide,
 } from "@/data/conversations";
-import { isISODate } from "@/utils/dates";
+import { isISODate, toISODate, today } from "@/utils/dates";
 import { getWilayaOfCommune, normalizeCommuneId, normalizeWilayaId } from "@/data/algeria";
 import {
   NO_CAPABILITIES,
@@ -329,7 +332,9 @@ export type DemoAction =
   | { type: "respondToProposal"; id: string; status: "accepted" | "declined" }
   | { type: "cancelPostArrangement"; postId: string; by: "owner" | "sitter" }
   /* Nidz 1.7 — preferences and safety */
-  | { type: "setPreferences"; patch: Partial<Preferences> }
+  /* A patch of what changed — one topic at a time — so a tab never sends
+     back the other topics as it last rendered them. */
+  | { type: "setPreferences"; patch: { notifications?: Partial<Preferences["notifications"]>; reduceMotion?: boolean } }
   | { type: "blockSitter"; id: string }
   | { type: "unblockSitter"; id: string }
   | { type: "reset" };
@@ -390,7 +395,9 @@ export function reducer(state: DemoState, action: DemoAction): DemoState {
         ...state,
         account: { ...action.account, photoUrl: action.account.photoUrl ?? state.account?.photoUrl },
         capabilities: { ...state.capabilities, owner: true },
-        signedIn: true,
+        /* Creating the account signs this device in; editing it later never
+           does — a signed-out device is signed in only by « Se connecter ». */
+        signedIn: state.account ? state.signedIn : true,
         entered: true,
       };
 
@@ -512,7 +519,8 @@ export function reducer(state: DemoState, action: DemoAction): DemoState {
       /* Only a PENDING request can be decided. The screen never offered a
          second decision, but a second tab still showing the buttons could
          have flipped an acceptance into a refusal (Audit 1.3.1 A-19). */
-      if (!state.requests.some((r) => r.id === action.id && r.status === "pending")) return state;
+      /* Nor once its dates are past: nothing can come of it any more. */
+      if (!state.requests.some((r) => r.id === action.id && requestAwaitsSitter(r, toISODate(today())))) return state;
       return {
         ...state,
         requests: state.requests.map((r) =>
@@ -549,6 +557,18 @@ export function reducer(state: DemoState, action: DemoAction): DemoState {
          tap — or a second tab replaying the same confirmation — cannot
          publish the same request twice (§13.2). */
       if (state.posts.some((p) => p.id === action.post.id)) return state;
+      /* Nor the same request under another id — a second tab mints its own.
+         Checked HERE because a commit is rebased on the freshest stored
+         record: the screen's own check only sees what it rendered. */
+      if (
+        duplicateOpenPost(state.posts, {
+          petId: action.post.petId,
+          petName: action.post.pet.name,
+          careType: action.post.careType,
+          dates: action.post.dates,
+        })
+      )
+        return state;
       return {
         ...state,
         posts: [action.post, ...state.posts],
@@ -558,11 +578,23 @@ export function reducer(state: DemoState, action: DemoAction): DemoState {
     case "updatePost": {
       const post = state.posts.find((p) => p.id === action.id);
       if (!post || post.status !== "open") return state;
+      const at = new Date().toISOString();
+      const next = { ...post, ...action.patch, updatedAt: at };
+      /* A proposal answered the request as it was. Once the service or the
+         dates change it answers another one, so it can no longer be
+         accepted: it becomes outdated, and the sitter may propose again. */
+      const changed =
+        next.careType !== post.careType ||
+        next.dates.start !== post.dates.start ||
+        next.dates.end !== post.dates.end;
       return {
         ...state,
-        posts: state.posts.map((p) =>
-          p.id === action.id ? { ...p, ...action.patch, updatedAt: new Date().toISOString() } : p,
-        ),
+        posts: state.posts.map((p) => (p.id === action.id ? next : p)),
+        proposals: changed
+          ? state.proposals.map((p) =>
+              p.postId === post.id && p.status === "pending" ? { ...p, status: "outdated", respondedAt: at } : p,
+            )
+          : state.proposals,
       };
     }
 
@@ -585,7 +617,7 @@ export function reducer(state: DemoState, action: DemoAction): DemoState {
       /* One live proposal per sitter per post (§14.2), and only on a post
          still open. Fixture posts are open by construction. */
       if (state.proposals.some((p) => p.id === proposal.id)) return state;
-      if (liveProposal(state.proposals, proposal.postId, proposal.sitterId)) return state;
+      if (standingProposal(state.proposals, proposal.postId, proposal.sitterId)) return state;
       const own = state.posts.find((p) => p.id === proposal.postId);
       if (own && own.status !== "open") return state;
       return { ...state, proposals: [proposal, ...state.proposals] };
@@ -603,8 +635,9 @@ export function reducer(state: DemoState, action: DemoAction): DemoState {
     case "respondToProposal": {
       const target = state.proposals.find((p) => p.id === action.id && p.status === "pending");
       const post = target && state.posts.find((p) => p.id === target.postId);
-      /* Only the owner of an OPEN post decides, and only once. */
-      if (!target || !post || post.status !== "open") return state;
+      /* Only the owner of an OPEN post decides, only once, and not once its
+         dates are past. */
+      if (!target || !post || !proposalAwaitsOwner(target, post, toISODate(today()))) return state;
       const at = new Date().toISOString();
       if (action.status === "declined") {
         return {
@@ -1090,7 +1123,8 @@ function restore(parsed: Record<string, unknown>): DemoState {
        account there was using it, so they stay signed in rather than being
        shown a welcome screen for an account they never left. */
     signedIn: account !== null && (typeof parsed.signedIn === "boolean" ? parsed.signedIn : true),
-    posts: ((arrayOfObjects(parsed.posts) as Record<string, unknown>[] | null) ?? []).flatMap(restorePost),
+    /* Per post, like the animals: one corrupt entry costs that entry. */
+    posts: (Array.isArray(parsed.posts) ? parsed.posts.filter(isObject) : []).flatMap(restorePost),
     proposals: Array.isArray(parsed.proposals)
       ? parsed.proposals.map(restoreProposal).filter((p): p is Proposal => p !== null)
       : [],
@@ -1278,13 +1312,17 @@ export function clearStoredState(): void {
  * never moved onto a different animal.
  */
 export function carryTransientFields(fresh: DemoState, current: DemoState): DemoState {
-  const photos = new Map(current.pets.flatMap((p) => (p.photoUrl ? [[p.id, p.photoUrl] as const] : [])));
+  /* Only `blob:` URLs are transient. Since 1.7 a photo can be a stored data
+     URL: then storage is the truth, and a photo another tab REMOVED must not
+     come back from this tab's memory. */
+  const transient = (url: string | undefined): url is string => Boolean(url?.startsWith("blob:"));
+  const photos = new Map(current.pets.flatMap((p) => (transient(p.photoUrl) ? [[p.id, p.photoUrl] as const] : [])));
   const requestPhotos = new Map(
-    current.requests.flatMap((r) => (r.pet.photoUrl ? [[r.id, r.pet.photoUrl] as const] : [])),
+    current.requests.flatMap((r) => (transient(r.pet.photoUrl) ? [[r.id, r.pet.photoUrl] as const] : [])),
   );
   const sitterPhoto =
-    current.sitter?.profile.photoUrl && current.sitter.profile.id === fresh.sitter?.profile.id
-      ? current.sitter.profile.photoUrl
+    transient(current.sitter?.profile.photoUrl) && current.sitter!.profile.id === fresh.sitter?.profile.id
+      ? current.sitter!.profile.photoUrl
       : undefined;
   if (!photos.size && !requestPhotos.size && !sitterPhoto) return fresh;
   return {

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -33,6 +33,16 @@ import { useSave } from "@/hooks/use-save";
 import { useDemo } from "@/state/demo/context";
 import { isolate } from "@/utils/format";
 import { sameOriginPath } from "@/utils/safe-path";
+
+import {
+  afterJourney,
+  endJourney,
+  historyIndex,
+  markJourneyStart,
+  markJourneyStep,
+  setAfterJourney,
+  stepsBackToStart,
+} from "./register-history";
 
 /* ---------------------------------------------------------------------------
    OPENING AN ACCOUNT (Nidz 1.7 §3) — three journeys, one account.
@@ -110,10 +120,23 @@ export function RegisterStart() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const next = sameOriginPath(params.get("next"));
-  const { state, dispatch } = useDemo();
+  const { state } = useDemo();
   const [draft, setDraft] = useRegistration();
+  const signedIn = hasSession(state);
+  /* Erasing is a write like any other (A-02): reported if storage refuses. */
+  const erase = useSave();
+  const eraseAll = () => {
+    if (!erase.save({ type: "reset" })) return;
+    clearFormDrafts();
+  };
 
-  if (hasSession(state)) return <Navigate to={next ?? afterSignInPath(state)} replace />;
+  /* This entry is where a finished journey comes back to (register-history). */
+  useEffect(() => {
+    if (signedIn) endJourney();
+    else markJourneyStart(historyIndex());
+  }, [signedIn]);
+
+  if (signedIn) return <Navigate to={afterJourney() ?? next ?? afterSignInPath(state)} replace />;
 
   const method = methodOf(draft);
   /* An interrupted sign-up: offer to resume where it stopped. */
@@ -160,25 +183,27 @@ export function RegisterStart() {
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => {
-                        clearFormDrafts();
-                        dispatch({ type: "reset" });
-                      }}
-                    >
-                      {t("register.existing.eraseConfirm")}
-                    </AlertDialogAction>
+                    <AlertDialogAction onClick={eraseAll}>{t("register.existing.eraseConfirm")}</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
             </div>
+            <SaveFeedback
+              className="mt-3"
+              save={erase}
+              onRetry={eraseAll}
+              failedTitle={t("settings.reset.failedTitle")}
+              failedBody={t("settings.reset.failedBody")}
+            />
           </div>
         )}
 
         {!existing && method && resumeStep && draft.reached && (
           <div className="surface mb-6 flex flex-wrap items-center justify-between gap-3 p-4">
             <p className="text-sm text-foreground">{t("register.resume", { method: t(`register.method.${method}`) })}</p>
-            <Button asChild variant="surface">
+            {/* `outline`, not `surface`: a white pill on a white card has only
+                its shadow for an edge (button.tsx). */}
+            <Button asChild variant="outline">
               <Link to={`${REGISTER_PATH}/${resumeStep}${nextQuery(next)}`}>{t("register.resumeAction")}</Link>
             </Button>
           </div>
@@ -255,11 +280,18 @@ export function RegisterStepScreen() {
   const firstRef = useRef<HTMLInputElement>(null);
   const lastRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
+  /* Set while going back to `/register` after the account was saved: this
+     step must not also redirect, or the destination would flash first. */
+  const finishing = useRef(false);
+
+  useEffect(() => {
+    if (!finishing.current) markJourneyStep(historyIndex());
+  }, [rawStep]);
 
   const method = methodOf(draft);
   const step = REGISTER_STEP_IDS.find((s) => s === rawStep) ?? null;
 
-  if (hasSession(state)) return <Navigate to={next ?? afterSignInPath(state)} replace />;
+  if (hasSession(state)) return finishing.current ? null : <Navigate to={next ?? afterSignInPath(state)} replace />;
   if (!method || !step || !stepsOf(method).includes(step)) return <Navigate to={`${REGISTER_PATH}${nextQuery(next)}`} replace />;
 
   const steps = stepsOf(method);
@@ -276,7 +308,10 @@ export function RegisterStepScreen() {
     if (following) navigate(`${REGISTER_PATH}/${following}${nextQuery(next)}`);
   };
 
-  const finish = () => {
+  /* `photo` is passed when the choice was made in this same tap (« Passer »):
+     the draft state it was written to is not read back until the next
+     render, and would still hold the photo that was skipped. */
+  const finish = ({ photo = draft.photo }: { photo?: string } = {}) => {
     const digits = draft.phone.replace(/\s+/g, "");
     const saved = save.save({
       type: "setAccount",
@@ -291,13 +326,23 @@ export function RegisterStepScreen() {
         accountComplete: true,
         createdAt: new Date().toISOString(),
         signInMethod: method,
-        photoUrl: draft.photo || undefined,
+        photoUrl: photo || undefined,
       },
     });
     if (!saved) return;
     clearRegistration();
     clearDraft(SCOPE);
-    navigate(next ?? START_PATH, { replace: true });
+    /* Leave no finished step behind the destination (register-history). */
+    const destination = next ?? START_PATH;
+    const back = stepsBackToStart(historyIndex());
+    if (back) {
+      finishing.current = true;
+      setAfterJourney(destination);
+      navigate(-back);
+    } else {
+      endJourney();
+      navigate(destination, { replace: true });
+    }
   };
 
   const progress = { current: index + 1, total: steps.length, label: t("register.progress", { current: index + 1, total: steps.length }) };
@@ -370,7 +415,7 @@ export function RegisterStepScreen() {
               variant="ghost"
               onClick={() => {
                 setDraft((d) => ({ ...d, photo: "" }));
-                finish();
+                finish({ photo: "" });
               }}
             >
               {t("register.photo.skip")}

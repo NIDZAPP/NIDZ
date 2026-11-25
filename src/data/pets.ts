@@ -425,15 +425,15 @@ export function restorePet(raw: unknown): Pet | null {
 
   /* A grey parrot or a conure saved as a « bird » before 1.7 is a parrot:
      the owner's own answer says so (see `MOVED_KINDS`). Its bird questions
-     have no parrot counterpart and are left behind, except the habitat,
-     which is carried into the open habitat line. */
+     have no parrot counterpart and are left behind, except the owner's own
+     words about its cage, carried into the open habitat line. The cage /
+     aviary CHOICE is not turned into text: written once into storage it
+     would stay in one language whatever the reader's (review 1.7). */
   const moved = MOVED_KINDS[str(raw.kindId)];
   let carriedHabitat = "";
   if (moved && species === moved.from) {
     species = moved.to;
-    carriedHabitat = [detail.housing === "aviary" ? "volière" : detail.housing === "cage" ? "cage" : "", str(detail.outOfCageNotes)]
-      .filter(Boolean)
-      .join(" — ");
+    carriedHabitat = str(detail.outOfCageNotes);
   }
 
   const common = {
