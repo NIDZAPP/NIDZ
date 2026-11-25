@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 
 import ClarificationThread from "@/components/request/ClarificationThread";
 import RequestSummary from "@/components/request/RequestSummary";
@@ -15,9 +15,24 @@ import type { CareRequest } from "@/data/types";
 import { SaveFeedback } from "@/components/shared/SaveFeedback";
 import { useSave } from "@/hooks/use-save";
 import { useDemo } from "@/state/demo/context";
-import { ACTION_LINK } from "@/components/shared/link-styles";
 import { sitterResumePath, sitterVisibility } from "@/data/navigation";
 import { Inbox } from "lucide-react";
+import { proposalStatusKey, requestStatusKey } from "@/components/posts/post-status";
+import { ProposalRow, RowGroup } from "@/components/requests/rows";
+import Segmented, { SegmentPanel } from "@/components/shared/Segmented";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { REQUEST_TABS, hasSession, postPath, requestsTabFrom, type RequestsTab } from "@/data/navigation";
+import { findPost, proposalsSent } from "@/data/repository";
 
 /**
  * "Demandes reçues" — the sitter's side of the same records.
@@ -51,16 +66,29 @@ export default function SitterRequests() {
      Accept and Decline on somebody else's behalf. */
   const requests = requestsReceived(state);
   const visibility = sitterVisibility(state);
+  const [params, setParams] = useSearchParams();
+  const tab = requestsTabFrom(params, "received");
+  const setTab = (next: RequestsTab) => setParams({ tab: next }, { replace: true, preventScrollReset: true });
+  const sent = proposalsSent(state);
+  const waiting = requests.filter((r) => r.status === "pending" && awaitingReplyFrom(r) !== "owner").length;
 
   /* No sitter side on this device: nothing to receive, and the introduction
      is where one starts. */
+  if (!hasSession(state)) return <Navigate to="/welcome" replace />;
   if (!state.sitter) return <Navigate to="/sitter/start" replace />;
+
+  const incoming = (list: CareRequest[]) =>
+    list.map((request) => <IncomingRequest key={request.id} request={request} answeredRef={answeredRef} />);
+  const proposalRow = (p: (typeof sent)[number]) => (
+    <ProposalRow key={p.id} proposal={p} post={findPost(state, p.postId)} to={postPath("sitter", p.postId)} who="owner" />
+  );
+  const proposalKey = (p: (typeof sent)[number]) => proposalStatusKey(p, findPost(state, p.postId));
 
   return (
     <div className="container pb-10 pt-4 md:pb-16 md:pt-8">
       <Helmet>
         <title>
-          {t("common.appName")} — {t("sitterRequests.title")}
+          {t("common.appName")} — {t("ownerRequests.title")}
         </title>
       </Helmet>
 
@@ -68,19 +96,26 @@ export default function SitterRequests() {
         {/* No back control: this is the ROOT of the sitter workspace (§86).
             The way to the other side is the switch in Compte, a tab of this
             bar. */}
-        <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">{t("sitterRequests.title")}</h1>
+        <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">{t("ownerRequests.title")}</h1>
 
-        {/* What owners see — only while they can see it (NAV-02). It points at
-            the PUBLIC profile, not at the builder's preview: "view my
-            profile" is what an owner sees. */}
-        {visibility === "listed" && state.sitter && (
-          <p className="mt-2">
-            <Link to={`/sitters/${state.sitter.profile.id}`} className={ACTION_LINK}>
-              {t("sitterFlow.published.viewProfile")}
-            </Link>
-          </p>
-        )}
+        <Segmented
+          className="mt-5 w-full"
+          stretch
+          idPrefix="sitter-requests"
+          label={t("sitterRequests.title")}
+          value={tab}
+          onChange={setTab}
+          items={REQUEST_TABS.map((key) => ({
+            key,
+            label: t(`requestsHub.tabs.${key}`),
+            count: key === "received" ? waiting : undefined,
+            countLabel: key === "received" ? t("requestsHub.waitingCount", { count: waiting }) : undefined,
+          }))}
+        />
 
+        <SegmentPanel idPrefix="sitter-requests" activeKey={tab}>
+          {tab === "received" && (
+            <>
         {/* Above the branch: the first thing a new sitter reads must not be an
             unqualified promise that owners will write to them. Not shown while
             the profile is not visible and nothing has arrived — there are no
@@ -88,7 +123,7 @@ export default function SitterRequests() {
             owner can write yet. */}
         {(visibility === "listed" || requests.length > 0) && (
           <DemoNotice
-            className="mt-5"
+            className="mt-6"
             title={t("sitterRequests.demoTitle")}
             body={t("sitterRequests.demoBody")}
           />
@@ -115,22 +150,60 @@ export default function SitterRequests() {
           />
         )}
 
-        {requests.length === 0 ? (
-          visibility === "listed" && (
-            <EmptyState
-              className="mt-6"
-              icon={Inbox}
-              title={t("sitterRequests.emptyTitle")}
-              body={t("sitterRequests.emptyBody")}
-            />
-          )
-        ) : (
-          <ul role="list" className="mt-6 space-y-10">
-            {requests.map((request) => (
-              <IncomingRequest key={request.id} request={request} answeredRef={answeredRef} />
+            </>
+          )}
+          {tab === "received" &&
+            (requests.length === 0 ? (
+              visibility === "listed" && (
+                <EmptyState className="mt-6" icon={Inbox} title={t("sitterRequests.emptyTitle")} body={t("sitterRequests.emptyBody")} />
+              )
+            ) : (
+              <>
+                <ul role="list" className="mt-6 space-y-10">
+                  {incoming(requests.filter((r) => requestStatusKey(r) === "pending"))}
+                </ul>
+                {requests.some((r) => requestStatusKey(r) !== "pending" && r.status !== "accepted") && (
+                  <RowGroup rows={[]} history={incoming(requests.filter((r) => requestStatusKey(r) !== "pending" && r.status !== "accepted"))} />
+                )}
+              </>
             ))}
-          </ul>
-        )}
+
+          {tab === "sent" && (
+            <RowGroup
+              rows={sent.filter((p) => proposalKey(p) === "pending").map(proposalRow)}
+              history={sent.filter((p) => !["pending", "accepted"].includes(proposalKey(p))).map(proposalRow)}
+              empty={
+                <div className="surface mt-6 p-5">
+                  <p className="font-semibold text-foreground">{t("requestsHub.sitter.sentEmpty.title")}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{t("requestsHub.sitter.sentEmpty.body")}</p>
+                  <Button asChild className="mt-4">
+                    <Link to="/sitter/feed">{t("requestsHub.sitter.toFeed")}</Link>
+                  </Button>
+                </div>
+              }
+            />
+          )}
+
+          {tab === "validated" && (
+            <>
+              <ul role="list" className="mt-6 space-y-10">
+                {incoming(requests.filter((r) => r.status === "accepted"))}
+              </ul>
+              <RowGroup
+                rows={sent.filter((p) => p.status === "accepted").map(proposalRow)}
+                history={[...incoming(requests.filter((r) => r.status === "cancelled")), ...sent.filter((p) => p.status === "cancelled").map(proposalRow)]}
+                empty={
+                  requests.some((r) => r.status === "accepted") ? undefined : (
+                    <div className="surface mt-6 p-5">
+                      <p className="font-semibold text-foreground">{t("requestsHub.validatedEmpty.title")}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">{t("requestsHub.validatedEmpty.body")}</p>
+                    </div>
+                  )
+                }
+              />
+            </>
+          )}
+        </SegmentPanel>
       </div>
     </div>
   );
@@ -175,7 +248,7 @@ function IncomingRequest({
             <bdi>{request.ownerName}</bdi>
           </span>
         </h2>
-        <StatusBadge status={request.status} />
+        <StatusBadge status={requestStatusKey(request)} />
       </div>
 
       {/* The same summary the owner confirmed — everything the sitter needs in
@@ -249,6 +322,27 @@ function IncomingRequest({
         >
           {t(`sitterRequests.answered.${request.status}`)}
         </p>
+      )}
+      {request.status === "accepted" && (
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button type="button" variant="surface">
+              {t("arrangement.cancel")}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("arrangement.cancelTitle")}</AlertDialogTitle>
+              <AlertDialogDescription>{t("arrangement.cancelBody")}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+              <AlertDialogAction onClick={() => save.save({ type: "cancelRequest", id: request.id, by: "sitter" })}>
+                {t("arrangement.cancelConfirm")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
     </li>
   );

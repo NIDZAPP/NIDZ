@@ -35,20 +35,64 @@ export function asLocalized(text: string): Localized {
 }
 
 /**
- * The animals Nidz handles.
+ * The animal categories Nidz handles (Nidz 1.7 — thirteen, from the supplied
+ * catalogue). The order is the catalogue's: dog, cat and bird first, then the
+ * other cage birds, the small mammals, fish and the reptiles. The full
+ * description of each category (illustration, classification, compatible
+ * services) lives in `animal-catalogue.ts`; this union is only the id.
  *
- * Audit 1.2 adds `bird` (§16-19). It is a real third species, not a dog with
- * different copy: a bird has a cage or an aviary rather than a garden, is let
- * out rather than walked, and escapes in a way a dog does not. Every form that
- * asks about an animal has to branch on this rather than assume four legs —
- * "number of daily walks" must never appear for a bird.
+ * Categories are DISJOINT on purpose. A grey parrot is a `parrot`, never also
+ * a `bird`, so a sitter who accepts small cage birds is never presented as
+ * accepting parrots and the two answers cannot contradict each other.
  *
- * Adding a species to this list does NOT create supply. No demo sitter
- * currently declares that they accept birds, so a bird search finds nobody —
- * which is the honest zero state §33 asks for, not a bug to paper over.
+ * Adding a category does NOT create supply. A search for a category nobody
+ * accepts finds nobody — the honest zero state §33 asks for.
  */
-export type Species = "dog" | "cat" | "bird";
-export const SPECIES: readonly Species[] = ["dog", "cat", "bird"];
+export type Species =
+  | "dog"
+  | "cat"
+  | "bird"
+  | "parrot"
+  | "rabbit"
+  | "guineaPig"
+  | "hamster"
+  | "mouse"
+  | "ferret"
+  | "fish"
+  | "turtle"
+  | "snake"
+  | "chameleon";
+export const SPECIES: readonly Species[] = [
+  "dog",
+  "cat",
+  "bird",
+  "parrot",
+  "rabbit",
+  "guineaPig",
+  "hamster",
+  "mouse",
+  "ferret",
+  "fish",
+  "turtle",
+  "snake",
+  "chameleon",
+];
+
+export function isSpecies(value: unknown): value is Species {
+  return typeof value === "string" && (SPECIES as readonly string[]).includes(value);
+}
+
+/**
+ * What an OWNER may say their animal is: one of the categories, or « Autre »
+ * with their own words. « Autre » is never a category a sitter accepts —
+ * nobody is assumed to take an animal Nidz cannot name (Nidz 1.7 §6.3).
+ */
+export type PetCategory = Species | "other";
+export const PET_CATEGORIES: readonly PetCategory[] = [...SPECIES, "other"];
+
+export function isPetCategory(value: unknown): value is PetCategory {
+  return value === "other" || isSpecies(value);
+}
 
 export type CareType = "boarding" | "atOwner" | "walk";
 export const CARE_TYPES: readonly CareType[] = ["boarding", "atOwner", "walk"];
@@ -61,6 +105,11 @@ export const CARE_UNIT_KEY: Record<CareType, string> = {
   walk: "care.unit.walk",
 };
 
+/** RETIRED from matching and from every form in Nidz 1.7. Kept as a type
+    because stored records may still carry it: an owner's earlier answer is
+    shown back as what they said, and a sitter's earlier size restriction is
+    carried forward as one of their declared limits (see the reducer's
+    `restoreSitter`) — never silently deleted, never asked again. */
 export type DogSize = "small" | "medium" | "large";
 export const DOG_SIZES: readonly DogSize[] = ["small", "medium", "large"];
 
@@ -221,8 +270,11 @@ export type SitterProfile = {
   /** A rate exists only for a service the sitter actually offers. */
   rates: Partial<Record<CareType, number>>;
   acceptedSpecies: Species[];
-  /** Only meaningful when `acceptedSpecies` includes "dog". */
-  acceptedDogSizes: DogSize[];
+  /** Per accepted category, whether every breed / species is accepted or only
+      some (Nidz 1.7 §19). A category with no entry, or one whose
+      classification Nidz does not ask about, is accepted whole — that is what
+      a pre-1.7 « j'accepte les chiens » declared. */
+  acceptedKinds: Partial<Record<Species, KindAcceptance>>;
   maxAnimals: number;
   housing: SitterHousing;
   /** How care actually happens in this home (§57). Declared, never observed. */
@@ -257,6 +309,17 @@ export type SitterProfile = {
   isDemoFixture: boolean;
 };
 
+/**
+ * Which breeds / species a sitter accepts within ONE category.
+ *
+ *   all   every breed or species of the category;
+ *   some  only the listed ids (`animal-kinds.ts`), plus `others` — names the
+ *         sitter typed for something the list does not carry. A free-text
+ *         name is never matched automatically (§19.2): it is shown, and a
+ *         request it might fit is « à confirmer », never « compatible ».
+ */
+export type KindAcceptance = { mode: "all" } | { mode: "some"; ids: string[]; others: string[] };
+
 /* -------------------------------------------------------------------- need */
 
 /**
@@ -272,10 +335,13 @@ export type SitterProfile = {
  * the owner's, not a shareable query.
  */
 export type OwnerNeed = {
-  species: Species | null;
-  /** The dog's size when the animal is a dog and the owner gave it. A hard
-      matching constraint (Audit 1.3 LOT 03); null when unknown. */
-  dogSize: DogSize | null;
+  /** The category asked about. « other » only through a saved animal of that
+      kind — a search cannot be narrowed to « anything else ». */
+  species: PetCategory | null;
+  /** The listed breed / species asked about, when known (Nidz 1.7). Detail
+      that decides compatibility with a sitter who accepts only some kinds;
+      null means not given, which is never read as a match. */
+  kindId: string | null;
   petId: string | null;
   wilayaCode: string | null;
   communeCode: string | null;
@@ -284,17 +350,29 @@ export type OwnerNeed = {
   /** Not asked for in the flow — it is a filter, added from the results. Kept
       here so the brief and the URL round-trip without losing it. */
   maxPrice: number | null;
+  /** The last step of the owner's care journey that was reached, so an
+      interrupted request can be resumed where it stopped (Nidz 1.7 §20.3).
+      View state about the journey, never a request. */
+  step: NeedStep | null;
+  /** When the journey was last touched; null when nothing is in progress. */
+  updatedAt: string | null;
 };
+
+/** The owner's care journey, in order. `pet` covers the animal steps. */
+export type NeedStep = "pet" | "location" | "care";
+export const NEED_STEPS: readonly NeedStep[] = ["pet", "location", "care"];
 
 export const EMPTY_NEED: OwnerNeed = {
   species: null,
-  dogSize: null,
+  kindId: null,
   petId: null,
   wilayaCode: null,
   communeCode: null,
   dates: null,
   careType: null,
   maxPrice: null,
+  step: null,
+  updatedAt: null,
 };
 
 /* ----------------------------------------------------------------- request */
@@ -305,7 +383,13 @@ export const EMPTY_NEED: OwnerNeed = {
  * fabricated lifecycle (Audit p.304 — "Terminée uniquement si ce cycle existe
  * réellement").
  */
-export type RequestStatus = "pending" | "accepted" | "declined";
+export type RequestStatus = "pending" | "accepted" | "declined" | "withdrawn" | "cancelled";
+/* Nidz 1.7 adds two endings, both decided by a person and both final:
+   `withdrawn` — the owner took back a request still waiting for an answer;
+   `cancelled` — either side called off an arrangement that had been accepted.
+   « Expired » is not stored: it is derived from the dates (`isPast`), because
+   nothing happens at the moment a date passes. */
+export const REQUEST_STATUSES: readonly RequestStatus[] = ["pending", "accepted", "declined", "withdrawn", "cancelled"];
 
 export type CareRequest = {
   id: string;
@@ -335,6 +419,8 @@ export type CareRequest = {
   displayedRate: { amount: number; careType: CareType } | null;
   status: RequestStatus;
   respondedAt: string | null;
+  /** Who ended an accepted arrangement, when one was cancelled. */
+  cancelledBy?: "owner" | "sitter";
   /** Questions exchanged BEFORE a decision (Audit 1.3 LOT 07). Local to this
       browser; never a delivered message. Absent on requests stored before it
       existed, which read as an empty thread. Changing it never changes

@@ -12,19 +12,21 @@ import BriefCapsule from "@/components/search/BriefCapsule";
 import { SaveFeedback } from "@/components/shared/SaveFeedback";
 import { DemoLine } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
-import { parseCriteria, petFit, type PetFit } from "@/data/criteria";
+import { parseCriteria, petFit } from "@/data/criteria";
+import type { Compatibility } from "@/data/compatibility";
 import { offeredServices, overlapsDeclaredUnavailable } from "@/data/offer";
 import { forSharing, type Pet } from "@/data/pets";
 import { FROM_REQUEST, profilePathForRequest, requestPath, requestWhenPath } from "@/data/request-draft";
 import { requestSentPath } from "@/data/navigation";
 import { isPubliclyListed } from "@/data/repository";
-import type { CareRequest, Species } from "@/data/types";
+import { isSpecies, type CareRequest, type PetCategory } from "@/data/types";
+import { categoryText } from "@/components/request/pet-facts";
 import { useAppLocale } from "@/hooks/use-locale";
 import { useSave } from "@/hooks/use-save";
 import { useSitter } from "@/hooks/use-sitter";
 import { useDemo } from "@/state/demo/context";
 import { formatDateRange, toISODate, today } from "@/utils/dates";
-import { formatList, isolate } from "@/utils/format";
+import { isolate } from "@/utils/format";
 import { ACTION_LINK } from "@/components/shared/link-styles";
 
 /**
@@ -94,7 +96,7 @@ export default function RequestReview() {
     () => (sitter ? state.pets.map((pet) => ({ pet, fit: petFit(pet, sitter) })) : []),
     [sitter, state.pets],
   );
-  const selectable = candidates.filter((c) => c.fit.fits !== false);
+  const selectable = candidates.filter((c) => c.fit.level !== "incompatible");
   /* What may be chosen FOR the owner, as opposed to by them: an animal this
      sitter can take AND of the species the owner was searching for. Youcef
      takes cats, but an owner who arrived from a dog search did not ask about
@@ -167,23 +169,23 @@ export default function RequestReview() {
 
   const sitterName = isolate(sitter.publicName);
 
-  const fitMessage = (fit: PetFit, pet: Pet): string | null => {
-    if (fit.fits === true) return null;
-    if (fit.reason === "species") return t(`request.review.fitSpecies.${pet.species}`, { sitter: sitterName });
-    const sizes = formatList(
-      fit.accepted.map((size) => t(`dogSize.${size}`).toLocaleLowerCase(lng)),
-      lng,
-    );
-    return fit.reason === "size"
-      ? t("request.review.fitSize", { sitter: sitterName, sizes })
-      : t("request.review.fitSizeUnknown", { name: isolate(pet.name), sitter: sitterName, sizes });
+  /* Nidz 1.7: three-valued. Incompatible cannot be sent; « à confirmer »
+     can, and says what the sitter will have to check. */
+  const fitMessage = (fit: Compatibility, pet: Pet): string | null => {
+    if (fit.level === "confirmed") return null;
+    if (fit.level === "incompatible") {
+      return fit.reason === "category"
+        ? t("request.review.fitCategory", { sitter: sitterName, animal: categoryText(pet, t).toLocaleLowerCase(lng) })
+        : t("request.review.fitKind", { sitter: sitterName, name: isolate(pet.name) });
+    }
+    return t(`request.review.fitUnknown.${fit.reason}`, { sitter: sitterName, name: isolate(pet.name) });
   };
 
   /* The species a new animal starts as: what the search asked for if this
      sitter takes it, otherwise this sitter's only species. A live choice on the
      animal screen either way — never recorded unless the owner saves it. */
-  const startSpecies: Species | null =
-    criteria.species && sitter.acceptedSpecies.includes(criteria.species)
+  const startSpecies: PetCategory | null =
+    criteria.species && isSpecies(criteria.species) && sitter.acceptedSpecies.includes(criteria.species)
       ? criteria.species
       : sitter.acceptedSpecies.length === 1
         ? sitter.acceptedSpecies[0]
@@ -192,7 +194,7 @@ export default function RequestReview() {
   const addHref = `/owner/pets/new?${addParams.toString()}`;
   const editHref = selected ? `/owner/pets/${selected.pet.id}?next=${encodeURIComponent(here)}` : null;
 
-  const canSend = selected?.fit.fits === true;
+  const canSend = Boolean(selected) && selected!.fit.level !== "incompatible";
   const selectedFitMessage = selected ? fitMessage(selected.fit, selected.pet) : null;
 
   /* One record. The preview below is this object; sending stamps it with an
@@ -345,7 +347,7 @@ export default function RequestReview() {
                   label: pet.name,
                   description: fitMessage(fit, pet) ?? t(`species.${pet.species}`),
                   art: <AnimalPortrait species={pet.species} className="size-11" />,
-                  disabled: fit.fits === false,
+                  disabled: fit.level === "incompatible",
                 }))}
               />
 
@@ -369,8 +371,8 @@ export default function RequestReview() {
                     className={ACTION_LINK}
                   >
                     <Pencil className="size-4" aria-hidden="true" />
-                    {selected.fit.fits === "unknown"
-                      ? t("request.review.specifySize", { name: isolate(selected.pet.name) })
+                    {selected.fit.level === "unknown" && selected.fit.reason === "kindNotGiven"
+                      ? t("request.review.specifyKind", { name: isolate(selected.pet.name) })
                       : t("request.review.editPet", { name: isolate(selected.pet.name) })}
                   </Link>
                 )}

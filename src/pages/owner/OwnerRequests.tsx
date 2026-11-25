@@ -1,38 +1,61 @@
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 
-import { Inbox, MessageCircleQuestion } from "lucide-react";
-
-import { CARE_ICON } from "@/components/icons/domain-icons";
-import { AnimalPortrait } from "@/components/illustrations/animals";
-import EmptyState from "@/components/shared/EmptyState";
-import StatusBadge from "@/components/shared/StatusBadge";
-import { awaitingReplyFrom } from "@/data/clarification";
-import { Button } from "@/components/ui/button";
+import { PostCard } from "@/components/posts/post-ui";
+import { postStatusKey, proposalStatusKey, requestStatusKey } from "@/components/posts/post-status";
+import DraftCards from "@/components/requests/DraftCards";
+import { DirectRequestRow, ProposalRow, RowGroup } from "@/components/requests/rows";
+import Segmented, { SegmentPanel } from "@/components/shared/Segmented";
 import { DemoLine } from "@/components/shared/trust";
-import { findRequest, requestsReceived, requestsSent, sitterNameFor } from "@/data/repository";
-import { useAppLocale } from "@/hooks/use-locale";
+import { Button } from "@/components/ui/button";
+import { REQUEST_TABS, WELCOME_PATH, hasSession, postPath, requestsTabFrom, type RequestsTab } from "@/data/navigation";
+import { findPost, postsPublished, proposalsReceived, requestsSent } from "@/data/repository";
 import { useDemo } from "@/state/demo/context";
-import { formatDateRange } from "@/utils/dates";
+
+const LIVE = new Set(["pending", "open", "accepted"]);
 
 /**
- * "Mes demandes".
+ * DEMANDES, owner side (Nidz 1.7 §20.1): three sections in the address
+ * (`?tab=`), the same three words as on the sitter side.
  *
- * A register of the owner's own requests — the only screen in the product
- * whose contents are entirely the user's own data, and therefore the only one
- * that can honestly show a count.
+ *   Reçues    proposals sitters made on the owner's PUBLISHED requests — the
+ *             new thing to decide on;
+ *   Envoyées  direct requests to one sitter, and the published requests
+ *             themselves, each labelled as what it is;
+ *   Validées  what was accepted, on either path — an agreement between two
+ *             people, never a reservation or a payment.
  *
- * Statuses are the three the demo lifecycle actually implements. There is no
- * "Terminée": nothing here can observe that a stay happened, so that state
- * would be a fabricated lifecycle (Audit p.304).
+ * Unfinished care requests are « Brouillon » cards under the controls, only
+ * when one exists. Declined, withdrawn, past and cancelled items are kept,
+ * folded into each section's « Historique » — no fifth tab.
  */
 export default function OwnerRequests() {
   const { t } = useTranslation();
-  const lng = useAppLocale();
   const { state } = useDemo();
+  const [params, setParams] = useSearchParams();
 
+  if (!hasSession(state)) return <Navigate to={WELCOME_PATH} replace />;
 
+  const proposals = proposalsReceived(state);
+  const direct = requestsSent(state);
+  const posts = postsPublished(state);
+
+  const pendingProposals = proposals.filter((p) => p.status === "pending").length;
+  const fallback: RequestsTab = pendingProposals > 0 || (direct.length === 0 && posts.length === 0) ? "received" : "sent";
+  const tab = requestsTabFrom(params, fallback);
+  const setTab = (next: RequestsTab) => setParams({ tab: next }, { replace: true, preventScrollReset: true });
+
+  const directRow = (r: (typeof direct)[number]) => <DirectRequestRow key={r.id} request={r} to={`/owner/requests/${r.id}`} who="sitter" />;
+  const postRow = (p: (typeof posts)[number]) => <PostCard key={p.id} post={p} to={postPath("owner", p.id)} />;
+  const proposalRow = (p: (typeof proposals)[number]) => (
+    <ProposalRow key={p.id} proposal={p} post={findPost(state, p.postId)} to={postPath("owner", p.postId)} who="sitter" />
+  );
+
+  const live = <T,>(items: T[], key: (item: T) => string) => items.filter((i) => LIVE.has(key(i)) && key(i) !== "accepted");
+  const ended = <T,>(items: T[], key: (item: T) => string) => items.filter((i) => !LIVE.has(key(i)));
+
+  const proposalKey = (p: (typeof proposals)[number]) => proposalStatusKey(p, findPost(state, p.postId));
 
   return (
     <div className="container pb-10 pt-4 md:pb-16 md:pt-8">
@@ -45,71 +68,80 @@ export default function OwnerRequests() {
       <div className="mx-auto max-w-[720px]">
         <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">{t("ownerRequests.title")}</h1>
 
-        {requestsSent(state).length === 0 ? (
-          <EmptyState
-            className="mt-6"
-            icon={Inbox}
-            title={t("ownerRequests.emptyTitle")}
-            body={t("ownerRequests.emptyBody")}
-            action={
-              <Button asChild>
-                <Link to="/owner/need/pet">{t("entry.findSitter")}</Link>
-              </Button>
-            }
-          />
-        ) : (
-          <>
-            <p className="mt-3 text-sm text-muted-foreground">
-              {t("ownerRequests.count", { count: requestsSent(state).length })}
-            </p>
-            {/* This list is deep-linkable and is where an owner returns, so it
-                carries the marker rather than relying on the success screen
-                they passed through once. */}
-            <DemoLine className="mt-4">{t("ownerRequests.demoNote")}</DemoLine>
-            <ul role="list" className="mt-5 space-y-3">
-              {requestsSent(state).map((request) => {
-                const CareIcon = CARE_ICON[request.careType];
-                return (
-                  <li key={request.id}>
-                    <Link
-                      to={`/owner/requests/${request.id}`}
-                      className="surface surface-press flex items-center gap-3.5 p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    >
-                      <AnimalPortrait species={request.pet.species} className="size-12 shrink-0 rounded-full" />
-                      <span className="min-w-0 flex-1">
-                        <span className="block break-words text-name font-semibold text-foreground">
-                          <bdi>{request.pet.name}</bdi>
-                          <span className="text-muted-foreground"> · </span>
-                          <bdi className="font-normal text-muted-foreground">
-                            {sitterNameFor(state, request.sitterId)}
-                          </bdi>
-                        </span>
-                        <span className="mt-0.5 flex items-start gap-1.5 text-sm text-muted-foreground">
-                          <CareIcon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                          <span className="min-w-0 break-words">
-                            {t(`care.${request.careType}`)}
-                            <span aria-hidden="true"> · </span>
-                            <bdi>{formatDateRange(request.dates, lng)}</bdi>
-                          </span>
-                        </span>
-                        {/* A question waiting for this owner — said in words,
-                            and still "En attente": a question is not a decision. */}
-                        {awaitingReplyFrom(request) === "owner" && (
-                          <span className="mt-1.5 inline-flex items-center gap-1.5 text-sm font-semibold text-foreground">
-                            <MessageCircleQuestion className="size-4 shrink-0 text-primary" aria-hidden="true" />
-                            {t("clarify.questionForYouShort")}
-                          </span>
-                        )}
-                      </span>
-                      <StatusBadge status={request.status} className="shrink-0" />
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </>
-        )}
+        <Segmented
+          className="mt-5 w-full"
+          stretch
+          idPrefix="requests"
+          label={t("ownerRequests.title")}
+          value={tab}
+          onChange={setTab}
+          items={REQUEST_TABS.map((key) => ({
+            key,
+            label: t(`requestsHub.tabs.${key}`),
+            count: key === "received" ? pendingProposals : undefined,
+            countLabel: key === "received" ? t("requestsHub.waitingCount", { count: pendingProposals }) : undefined,
+          }))}
+        />
+
+        <DraftCards />
+
+        <SegmentPanel idPrefix="requests" activeKey={tab}>
+          {tab === "received" && (
+            <RowGroup
+              rows={live(proposals, proposalKey).map(proposalRow)}
+              history={ended(proposals, proposalKey).map(proposalRow)}
+              empty={<Empty title={t("requestsHub.owner.receivedEmpty.title")} body={t("requestsHub.owner.receivedEmpty.body")} />}
+            />
+          )}
+
+          {tab === "sent" && (
+            <>
+              <RowGroup
+                title={t("requestsHub.owner.directTitle")}
+                rows={live(direct, requestStatusKey).map(directRow)}
+                history={ended(direct, requestStatusKey).map(directRow)}
+                empty={<p className="mt-2 text-sm text-muted-foreground">{t("requestsHub.owner.directEmpty")}</p>}
+              />
+              <RowGroup
+                title={t("requestsHub.owner.postsTitle")}
+                rows={live(posts, postStatusKey).map(postRow)}
+                history={ended(posts, postStatusKey).map(postRow)}
+                empty={<p className="mt-2 text-sm text-muted-foreground">{t("requestsHub.owner.postsEmpty")}</p>}
+              />
+              <div className="mt-6 flex flex-wrap gap-2">
+                <Button asChild>
+                  <Link to="/">{t("requestsHub.owner.start")}</Link>
+                </Button>
+              </div>
+            </>
+          )}
+
+          {tab === "validated" && (
+            <RowGroup
+              rows={[
+                ...direct.filter((r) => r.status === "accepted").map(directRow),
+                ...posts.filter((p) => p.status === "accepted").map(postRow),
+              ]}
+              history={[
+                ...direct.filter((r) => r.status === "cancelled").map(directRow),
+                ...posts.filter((p) => p.status === "cancelled").map(postRow),
+              ]}
+              empty={<Empty title={t("requestsHub.validatedEmpty.title")} body={t("requestsHub.validatedEmpty.body")} />}
+            />
+          )}
+        </SegmentPanel>
+
+        <DemoLine className="mt-8">{t("ownerRequests.demoNote")}</DemoLine>
       </div>
+    </div>
+  );
+}
+
+function Empty({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="surface p-5">
+      <p className="font-semibold text-foreground">{title}</p>
+      <p className="mt-1 text-sm text-muted-foreground">{body}</p>
     </div>
   );
 }

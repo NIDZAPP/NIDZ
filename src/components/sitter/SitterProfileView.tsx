@@ -1,3 +1,5 @@
+import { acceptanceOf } from "@/data/compatibility";
+import { getKind } from "@/data/animal-kinds";
 import { CalendarOff, Heart, MapPin, PawPrint } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -146,13 +148,17 @@ export default function SitterProfileView({
   /* AT A GLANCE — the animals, with the dog sizes folded in where they
      belong ("Chiens : petits et moyens"), so the size limit that decides most
      dog requests is never three sections down. */
-  const dogSizes = DOG_SIZES.filter((size) => sitter.acceptedDogSizes.includes(size));
+  /* Nidz 1.7: per category, every breed / species or only the named ones —
+     « Chiens (certaines races : Sloughi, Berger allemand) ». */
   const acceptsLine = sitter.acceptedSpecies
     .map((sp) => {
-      if (sp !== "dog" || dogSizes.length === 0) return t(`speciesPlural.${sp}`);
-      return dogSizes.length === DOG_SIZES.length
-        ? t("profile.glance.dogsAllSizes")
-        : t("profile.glance.dogsSizes", { sizes: formatList(dogSizes.map((size) => t(`sizeShort.${size}`)), lng) });
+      const acceptance = acceptanceOf(sitter, sp);
+      if (!acceptance || acceptance.mode === "all") return t(`speciesPlural.${sp}`);
+      const names = [
+        ...acceptance.ids.map((id) => getKind(id, sp)?.name[lng]).filter((n): n is string => Boolean(n)),
+        ...acceptance.others,
+      ];
+      return t("profile.glance.someKinds", { animals: t(`speciesPlural.${sp}`), kinds: formatList(names, lng) });
     })
     .join(" · ");
 

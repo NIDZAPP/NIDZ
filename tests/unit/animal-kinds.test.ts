@@ -2,25 +2,37 @@ import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-import { ANIMAL_KINDS, getKind, searchKinds } from "@/data/animal-kinds";
+import { classificationOf } from "@/data/animal-catalogue";
+import { ANIMAL_KINDS, MOVED_KINDS, getKind, searchKinds, speciesOfKind } from "@/data/animal-kinds";
 import { EMPTY_CRITERIA, matchSitters, petFit, type SearchCriteria } from "@/data/criteria";
 import { DEMO_SITTERS } from "@/data/demo-sitters";
 import { emptyPet, kindLabel, restorePet, withSpecies, type Pet } from "@/data/pets";
 import { SPECIES } from "@/data/types";
 
-/* Nidz 1.4 step 3 — the animal classification has two levels: the category
-   (dog, cat, bird), which matching reads, and the kind (breed, species),
-   which it never does. These tests hold the second half of that sentence. */
+/* Two levels: the category (13 since Nidz 1.7), and the kind (breed,
+   species). Since 1.7 a kind decides compatibility ONLY with a sitter who
+   accepts some kinds, and only through `compatibility.ts`; with a sitter who
+   accepts the whole category it changes nothing. */
 
 const c = (patch: Partial<SearchCriteria>): SearchCriteria => ({ ...EMPTY_CRITERIA, ...patch });
 const ids = (criteria: SearchCriteria) => matchSitters(DEMO_SITTERS, criteria).map((r) => r.sitter.id);
 
 describe("animal kinds", () => {
-  test("every category has kinds, and every id is unique and prefixed by its category", () => {
+  test("every classified category has kinds; ids are unique and prefixed by category — or moved, keeping their id", () => {
     const all = SPECIES.flatMap((s) => ANIMAL_KINDS[s].map((k) => ({ s, id: k.id })));
     assert.equal(new Set(all.map((k) => k.id)).size, all.length);
-    for (const { s, id } of all) assert.ok(id.startsWith(`${s}.`), id);
-    for (const s of SPECIES) assert.ok(ANIMAL_KINDS[s].length > 0);
+    const prefix = (s: string) => (s === "guineaPig" ? "guinea-pig" : s);
+    for (const { s, id } of all) {
+      const moved = MOVED_KINDS[id];
+      assert.ok(moved ? moved.to === s && id.startsWith(`${moved.from}.`) : id.startsWith(`${prefix(s)}.`), id);
+    }
+    for (const s of SPECIES) assert.equal(ANIMAL_KINDS[s].length > 0, classificationOf(s) !== null, s);
+  });
+
+  test("bird and parrot are disjoint: no kind belongs to both", () => {
+    for (const k of ANIMAL_KINDS.parrot) assert.equal(getKind(k.id, "bird"), null, k.id);
+    for (const k of ANIMAL_KINDS.bird) assert.equal(getKind(k.id, "parrot"), null, k.id);
+    assert.equal(speciesOfKind("bird.grey-parrot"), "parrot");
   });
 
   test("every kind is named in all three languages", () => {
@@ -42,22 +54,27 @@ describe("animal kinds", () => {
     assert.equal(searchKinds("dog", "zzzz").length, 0);
   });
 
-  test("matching never reads the kind: the same sitters, with or without a breed", () => {
+  test("with sitters who accept a whole category, the kind changes nothing", () => {
     for (const species of SPECIES) {
       const base = ids(c({ species }));
       for (const kind of ANIMAL_KINDS[species]) {
         const pet = { ...emptyPet("p", species), kindId: kind.id } as Pet;
-        assert.deepEqual(ids(c({ species })), base, kind.id);
-        for (const sitter of DEMO_SITTERS) {
+        for (const sitter of DEMO_SITTERS.filter((s) => !s.acceptedKinds[species])) {
           assert.deepEqual(petFit(pet, sitter), petFit(emptyPet("p", species), sitter), `${kind.id} / ${sitter.id}`);
+        }
+        /* Only sitters restricting this category can drop out. */
+        const withKind = ids(c({ species, kind: kind.id }));
+        for (const id of base.filter((id) => !withKind.includes(id))) {
+          assert.ok(DEMO_SITTERS.find((s) => s.id === id)?.acceptedKinds[species], `${kind.id} dropped ${id}`);
         }
       }
     }
   });
 
-  test("the matching module does not import the kinds at all", () => {
+  test("a kind decides only through compatibility.ts", () => {
     const source = readFileSync(new URL("../../src/data/criteria.ts", import.meta.url), "utf8");
-    assert.ok(!/animal-kinds/.test(source));
+    assert.ok(/from "\.\/compatibility"/.test(source));
+    assert.ok(!/acceptedKinds/.test(source), "criteria.ts must not read acceptedKinds directly");
   });
 });
 
@@ -68,6 +85,12 @@ describe("pets carry their kind", () => {
     const cat = withSpecies(dog, "cat");
     assert.equal(cat.kindId, null);
     assert.equal(cat.kindOther, "");
+  });
+
+  test("a 1.4 grey parrot saved as a bird is a parrot now, with the same id", () => {
+    const pet = restorePet({ id: "p", species: "bird", name: "Coco", kindId: "bird.grey-parrot", details: { housing: "cage" } });
+    assert.equal(pet?.species, "parrot");
+    assert.equal(pet?.kindId, "bird.grey-parrot");
   });
 
   test("a stored id from another category is dropped, not shown as a breed", () => {

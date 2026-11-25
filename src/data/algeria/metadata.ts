@@ -80,6 +80,18 @@ export const GEOGRAPHY_METADATA = {
  */
 export const KNOWN_GAPS = {
   /**
+   * Nidz 1.7 — chef-lieu positions (`positions.ts`). Approximate town-centre
+   * coordinates for the 69 chefs-lieux, compiled from general geographic
+   * knowledge and NOT checked against a primary source. Used only to order
+   * results from other wilayas nearest-first and to suggest the wilaya nearest
+   * a device position for the person to confirm; never displayed as a
+   * distance or a location, and never stored with anybody's record. No commune
+   * has a position, so nothing is ordered within a wilaya by distance.
+   */
+  chefLieuPositions:
+    "Approximate, unverified chef-lieu coordinates; ordering and suggestion only, never displayed (Nidz 1.7).",
+
+  /**
    * THE CODES OF THE ELEVEN NEW WILAYAS ARE NOT INCLUDED, DELIBERATELY.
    *
    * The eleven names are concordant across every source consulted. The code

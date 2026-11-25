@@ -30,9 +30,12 @@ export function isoIn(days) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-/** The smallest stored state that skips the introduction. */
+/** The smallest stored state that skips the introduction (Nidz 1.7: a v4
+    record; a seed carrying an account is a signed-in session unless the
+    caller says otherwise). */
 export function seedState(extra = {}) {
-  return { version: 3, entered: true, ...extra };
+  const session = extra.account ? { signedIn: true } : {};
+  return { version: 4, entered: true, ...session, ...extra };
 }
 
 export const ACCOUNT = {
@@ -142,7 +145,7 @@ export function publishedSitter(extra = {}) {
       services: ["boarding"],
       rates: { boarding: 900 },
       acceptedSpecies: ["dog"],
-      acceptedDogSizes: ["small", "medium", "large"],
+      acceptedKinds: {},
       maxAnimals: 1,
       limits: [],
       declaredUnavailable: [],
@@ -151,6 +154,7 @@ export function publishedSitter(extra = {}) {
       ...extra,
     },
     published: true,
+    hidden: false,
     idDocument: null,
   };
 }

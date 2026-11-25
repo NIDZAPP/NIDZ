@@ -1,84 +1,44 @@
 import { useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, House, ListChecks, PawPrint, Search, Wallet } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { Link, Navigate } from "react-router-dom";
 
-import HomeHero from "@/components/home/HomeHero";
-import { HomeHeart } from "@/components/icons/nidz-icons";
-import { AnimalCategoryPicker } from "@/components/shared/AnimalCategories";
+import { WelcomeArt } from "@/components/illustrations/animals";
 import BrandMark from "@/components/shared/BrandMark";
-import InfoTip from "@/components/shared/InfoTip";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
-import { ACTION_LINK_END } from "@/components/shared/link-styles";
-import type { Species } from "@/data/types";
+import { LOGIN_PATH, REGISTER_PATH, afterSignInPath, hasSession } from "@/data/navigation";
 import { useDemo } from "@/state/demo/context";
 
-/* Four of the profile's sections, named. Rates is here because it is the thing
-   a prospective sitter most wants to know they control. */
-const SITTER_PREVIEW: { key: string; icon: LucideIcon }[] = [
-  { key: "home", icon: House },
-  { key: "animals", icon: PawPrint },
-  { key: "limits", icon: ListChecks },
-  { key: "rates", icon: Wallet },
-];
-
 /**
- * The entry screen — the first "Accueil" (Nidz 1.4, step 2).
+ * The first screen without a session (Nidz 1.7 §2.1).
  *
- * BOTH DOORS ON THE FIRST SCREEN (Audit 1.3 LOT 02, kept). The deep-teal
- * card carries the approved title and subtitle over the three animals; the
- * two actions sit directly under it — "Trouver une garde" (teal pill, the
- * more frequent path) and "Devenir pet-sitter" (white pill, same size, so it
- * is as findable without competing as a second primary). Everything else
- * explains the two paths and comes after them. e2e lot02 holds both actions
- * inside the first screen down to 320×568.
+ * Brand and language at the top; the supplied welcome illustration; the
+ * approved promise; two actions — « Ouvrir un compte » (teal, the first-time
+ * path) and « Se connecter » (white, same size, so a returning person finds
+ * it as fast). Nothing under them: the 1.6 explanations, the animal grid and
+ * the sitter preview are gone. Each later screen explains itself when it is
+ * reached.
  *
- * No splash, no timed reveal: the screen is ready on first paint.
+ * ONE VIEWPORT. The column is the full dynamic height; the picture is the
+ * only flexible part and gives up height first, so on a 320×568 phone the
+ * actions are still on the first screen. With enlarged text the page simply
+ * scrolls: nothing is clipped.
  *
- * WHAT THE PICTURES ARE. Illustrations of a dog, a cat and a goldfinch — the
- * categories Nidz handles — and never anything that could pass for a sitter,
- * a member or a review (§21, §40). Each world is previewed by its own real
- * first control (the animal cards) or by the real list of what it asks (the
- * sitter's four sections).
- *
- * Choosing records no role — see `src/data/workspace.ts`; the line under the
- * actions says so, and the "!" beside it explains.
+ * Someone already signed in never sees this screen: `/welcome` sends them
+ * to the home of the space they last used (§2.2).
  */
 export default function Welcome() {
   const { t } = useTranslation();
-  const { dispatch } = useDemo();
-  const navigate = useNavigate();
+  const { state } = useDemo();
   const heading = useRef<HTMLHeadingElement>(null);
 
-  /* What `FlowScreen` does for every other screen. React Router resets neither
-     scroll nor focus, and `/start` — still the back target of
-     `/owner/need/pet` and `/sitter/start` — redirects here. No visible ring:
-     `:focus-visible` also matches programmatic focus. */
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
     heading.current?.focus({ preventScroll: true });
   }, []);
 
-  /* Acting on this screen is what "has been introduced" means: after it, `/`
-     is the home rather than the introduction again. */
-  const enter = () => dispatch({ type: "enter" });
-
-  const findCare = () => {
-    enter();
-    navigate("/owner/need/pet");
-  };
-
-  const chooseSpecies = (species: Species) => {
-    enter();
-    /* Carried into the need flow so the first step arrives already answered.
-       `petId: null` because choosing a species here is the start of describing
-       an animal, not a filter over one already chosen. */
-    dispatch({ type: "setNeed", patch: { species, petId: null } });
-    navigate("/owner/need/pet");
-  };
+  if (hasSession(state)) return <Navigate to={afterSignInPath(state)} replace />;
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
@@ -89,91 +49,47 @@ export default function Welcome() {
         <meta name="description" content={t("entry.subtitle")} />
       </Helmet>
 
-      {/* No back control: a root screen. Language is reachable from the very
-          first screen of a trilingual product — detection can land an
-          Algerian visitor in English (§34). */}
       <header className="container">
-        <div className="mx-auto flex h-16 max-w-[1080px] items-center justify-between gap-4 md:h-[4.5rem]">
+        <div className="mx-auto flex h-16 max-w-[520px] items-center justify-between gap-4">
           <BrandMark />
           <LanguageSwitcher />
         </div>
       </header>
 
-      <main className="flex-1 pb-14">
-        <div className="container">
-          <div className="mx-auto max-w-[1080px]">
-            <HomeHero ref={heading} />
-
-            <div className="mt-4 grid gap-2.5 sm:flex sm:flex-wrap sm:gap-3">
-              <Button type="button" size="lg" onClick={findCare} className="w-full sm:w-auto sm:min-w-60">
-                <Search aria-hidden="true" />
-                {t("entry.findCare")}
-              </Button>
-              {/* White, not a second filled primary — but the same size and
-                  width, so it is as findable as the owner's path. */}
-              <Button asChild size="lg" variant="surface" className="w-full sm:w-auto sm:min-w-60">
-                <Link to="/sitter/start" onClick={enter}>
-                  <HomeHeart aria-hidden="true" />
-                  {t("entry.becomeSitter")}
-                </Link>
-              </Button>
+      <main className="container flex flex-1 flex-col pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+        <div className="mx-auto flex w-full max-w-[520px] flex-1 flex-col">
+          {/* The flexible part: it shrinks on a short screen so the actions
+              stay in view, and never grows past a square. The column only
+              has a MIN height, so a percentage height inside it does not
+              resolve (nor do container units, in Chromium); an absolutely
+              positioned layer does — it is sized by the box the column gave.
+              The picture is a replaced element: under max-width and
+              max-height it keeps its square ratio, so it is the smaller of
+              the two sides, capped at 26rem, and it carries its own corners. */}
+          <div className="relative min-h-[9rem] flex-1">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <WelcomeArt className="h-auto max-h-full w-auto max-w-full rounded-3xl shadow-card md:max-h-[26rem]" />
             </div>
-            <p className="mt-3 flex items-center gap-1.5 px-1 text-sm text-muted-foreground">
-              {t("entry.bothSides")}
-              <InfoTip topic={t("entry.bothSides")}>{t("entry.bothSidesInfo")}</InfoTip>
-            </p>
+          </div>
 
-            <div className="mt-10 grid gap-10 md:mt-14 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:gap-8">
-              {/* ------------------------------------------- owner: discovery */}
-              <section aria-labelledby="entry-animals">
-                <div className="flex items-end justify-between gap-4">
-                  <h2 id="entry-animals" className="text-title font-semibold text-foreground">
-                    {t("entry.animalsTitle")}
-                  </h2>
-                  {/* The no-commitment path (§15): browsing needs no account
-                      and no brief. */}
-                  <Link
-                    to="/search"
-                    onClick={enter}
-                    className={ACTION_LINK_END}
-                  >
-                    {t("entry.browse")}
-                    <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden="true" />
-                  </Link>
-                </div>
-                {/* Buttons that navigate — the choice IS the action, and it
-                    answers the need flow's first question. */}
-                <AnimalCategoryPicker className="mt-4" labelledBy="entry-animals" onPick={chooseSpecies} />
-                <p className="mt-3 px-1 text-sm text-muted-foreground">{t("entry.animalsHint")}</p>
-              </section>
+          <div className="pt-6 text-center">
+            <h1
+              ref={heading}
+              tabIndex={-1}
+              className="mx-auto max-w-[18ch] text-[clamp(1.625rem,7.4vw,2.125rem)] font-semibold leading-[1.1] tracking-[-0.03em] text-foreground focus:outline-none"
+            >
+              {t("entry.title")}
+            </h1>
+            <p className="mx-auto mt-3 max-w-[34ch] text-base leading-relaxed text-muted-foreground">{t("entry.subtitle")}</p>
+          </div>
 
-              {/* ------------------------------------------ sitter: the activity */}
-              <section aria-labelledby="entry-sitter" className="surface flex flex-col p-5 md:p-6">
-                <h2 id="entry-sitter" className="text-title font-semibold text-foreground">
-                  {t("entry.sitterTitle")}
-                </h2>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{t("entry.sitterBody")}</p>
-                {/* The actual sections of the sitter profile, named. */}
-                <ul role="list" className="mt-5 grid gap-3">
-                  {SITTER_PREVIEW.map(({ key, icon: Icon }) => (
-                    <li key={key} className="flex items-center gap-3 text-sm text-foreground">
-                      <span aria-hidden="true" className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
-                        <Icon className="size-[1.125rem]" />
-                      </span>
-                      <span>{t(`entry.sitterPreview.${key}`)}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  to="/sitter/start"
-                  onClick={enter}
-                  className="-ms-2 mt-5 inline-flex min-h-11 items-center gap-1 self-start rounded-full px-2 text-sm font-semibold text-primary hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  {t("entry.sitterCta")}
-                  <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden="true" />
-                </Link>
-              </section>
-            </div>
+          <div className="mt-6 grid gap-2.5">
+            <Button asChild size="lg" className="w-full">
+              <Link to={REGISTER_PATH}>{t("welcome.createAccount")}</Link>
+            </Button>
+            <Button asChild size="lg" variant="surface" className="w-full">
+              <Link to={LOGIN_PATH}>{t("welcome.signIn")}</Link>
+            </Button>
           </div>
         </div>
       </main>

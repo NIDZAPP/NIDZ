@@ -81,7 +81,13 @@ function readRecord(scope: string): DraftRecord | null {
   return null;
 }
 
+/** Draft scopes written since this page loaded. A draft in one of them is
+    the person's work in progress in THIS visit — moving between the steps of
+    one journey — not « something found from an earlier visit ». */
+const writtenThisVisit = new Set<string>();
+
 function writeField(scope: string, field: string, value: unknown): void {
+  writtenThisVisit.add(scope);
   const ls = storage();
   if (!ls) return;
   try {
@@ -95,6 +101,14 @@ function writeField(scope: string, field: string, value: unknown): void {
        does not outlive the screen. A draft is not a save, so this is not the
        A-02 failure path — submitting is, and it reports its own result. */
   }
+}
+
+/** A draft left by an EARLIER visit (a reload, the app closed and reopened),
+    which is what « Nous avons retrouvé… » announces (Nidz 1.7: a multi-step
+    journey shares one draft, and stepping from one screen to the next must
+    not announce the person's own last keystrokes as a recovered draft). */
+export function hasDraftFromEarlierVisit(scope: string | null): boolean {
+  return Boolean(scope) && !writtenThisVisit.has(scope as string) && hasDraft(scope);
 }
 
 /** Whether this form has an unsaved draft on disk. */

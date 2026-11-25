@@ -1,280 +1,323 @@
 import { useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
-import { Link, Navigate } from "react-router-dom";
-import { ArrowRight, Inbox, Search, X } from "lucide-react";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
+import { ArrowRight, Megaphone, Plus, Search, SlidersHorizontal } from "lucide-react";
 
-import HomeHero from "@/components/home/HomeHero";
-import { HomeHeart } from "@/components/icons/nidz-icons";
+import { AnimalPortrait } from "@/components/illustrations/animals";
+import { ageText, categoryText } from "@/components/request/pet-facts";
+import NativeSelect from "@/components/shared/NativeSelect";
+import Segmented, { SegmentPanel } from "@/components/shared/Segmented";
+import { LocationFields } from "@/components/shared/fields";
 import SitterCard from "@/components/sitter/SitterCard";
 import { Button } from "@/components/ui/button";
-import { getWilaya } from "@/data/algeria";
+import { servicesFor } from "@/data/animal-catalogue";
 import {
-  activeCriteriaCount,
-  criteriaFromNeed,
+  EMPTY_CRITERIA,
   criteriaToParams,
   matchSitters,
+  normalizeCriteria,
   partitionReasons,
-  EMPTY_CRITERIA,
+  splitByDistance,
   type SearchCriteria,
 } from "@/data/criteria";
-import { findSitter, publicSitters } from "@/data/repository";
-import { workspaceHome } from "@/data/navigation";
-import { requestPath } from "@/data/request-draft";
-import { localized } from "@/data/types";
+import { HOME_VIEWS, WELCOME_PATH, hasSession, homeViewFrom, workspaceHome, type HomeView } from "@/data/navigation";
+import { kindLabel, needsAnswered, type Pet } from "@/data/pets";
+import { publicSitters } from "@/data/repository";
+import { CARE_TYPES, SPECIES, isSpecies, type CareType } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
-import { useSwitchWorkspace } from "@/hooks/use-workspace";
 import { useDemo } from "@/state/demo/context";
-import { isolate } from "@/utils/format";
-import { ACTION_LINK, ACTION_LINK_END } from "@/components/shared/link-styles";
-
-/** How many suggestions the home page shows before sending people to the full
-    results. Enough to be useful, few enough that the page stays a home rather
-    than becoming a second search screen. */
-const SUGGESTION_LIMIT = 3;
+import { cn } from "@/lib/utils";
 
 /**
- * The OWNER home (Nidz 1.4, step 2).
+ * THE OWNER'S ACCUEIL (Nidz 1.7 §16) — two views of one tab, in the address:
  *
- * The same promise as the entry screen — the approved title, subtitle and
- * the three animals on the deep-teal card — then the person's own things as
- * cards, one idea each. Not a dashboard (§127). Every section here is either the
- * person's own data or a real match against the fixtures, and **each one is
- * absent entirely when there is nothing behind it** — an empty placeholder is
- * how a home page starts inventing activity.
+ *   Mes animaux             every animal the owner registered, each its own
+ *                           card: tap the information to read, complete or
+ *                           edit it; two actions start care FOR THAT ANIMAL —
+ *                           « Trouver un pet-sitter » and « Publier une
+ *                           demande » — reusing what is already known and
+ *                           asking only what is missing (its needs if never
+ *                           answered, then where and when). « Ajouter un
+ *                           animal » saves and comes back here.
+ *   Explorer les pet-sitters the sitters, without describing an animal
+ *                           first: three plain filters (animal, service,
+ *                           wilaya), nearest first, and the full search one
+ *                           tap away.
  *
- * The suggestions are the part most at risk of overclaiming, so they are
- * constrained hard:
- *
- *   - The heading states the FILTER that produced them ("in Alger", "who
- *     accept cats"), never a judgement about the animal. §21 forbids
- *     pretending to know pet compatibility, and §117 forbids showing a claim
- *     any part of which is unsupported.
- *   - Every reason on a card is re-derived from the sitter's own declarations
- *     by `reasonsFor`, not echoed back from the query.
- *   - No section appears at all until Nidz knows where the owner is, because
- *     "near you" without a location is not a claim it can make.
- *
- * `/` belongs to whichever workspace is active, so an account currently on the
- * sitter side is sent to where that side begins rather than shown the owner
- * home under sitter chrome.
- *
- * NIDZ 1.6 — SEARCH LIVES HERE. There is no Search tab any more: the first
- * action of Accueil is the search (start a brief, or pick up the one in
- * progress), and "Voir tous les pet-sitters" opens the results with no
- * criteria — discovery never requires an account, an animal or the brief.
- * The animals and the requests rows left: Mes animaux is in Compte and
- * Demandes is a tab with its own count, so Accueil keeps to finding care.
+ * `/` belongs to whichever space is active, so an account on the sitter side
+ * is sent to where that side begins.
  */
 export default function Index() {
   const { t } = useTranslation();
-  const lng = useAppLocale();
-  const { state, dispatch } = useDemo();
-  const switchWorkspace = useSwitchWorkspace();
+  const { state } = useDemo();
+  const [params, setParams] = useSearchParams();
+  const view = homeViewFrom(params);
 
-  const account = state.account;
-  const pets = state.pets;
-
-  /* Where to look, and for what. Only the owner's declared wilaya and — when
-     they have an animal — its species. Both are facts they gave; nothing is
-     inferred from behaviour. */
-  const suggestionCriteria: SearchCriteria | null = useMemo(() => {
-    if (!account?.wilayaId) return null;
-    return {
-      ...EMPTY_CRITERIA,
-      wilaya: account.wilayaId,
-      /* One saved animal narrows the suggestions to it. With none — the state
-         every new account is in — fall back to the species the owner declared
-         on the account, which is the one case `ownerAccount.speciesHelp`
-         promises to handle and which nothing was reading. With several, no
-         species: guessing which animal they meant would be a claim. */
-      species:
-        pets.length === 1
-          ? pets[0].species
-          : pets.length === 0 && account?.ownedSpecies.length === 1
-            ? account.ownedSpecies[0]
-            : null,
-      /* The one dog's size, when it is known: a large dog must not be offered
-         a sitter who only takes small ones (Audit 1.3 LOT 03). */
-      size: pets.length === 1 && pets[0].species === "dog" ? pets[0].details.size : null,
-    };
-  }, [account?.wilayaId, account?.ownedSpecies, pets]);
-
-  const suggestions = useMemo(() => {
-    if (!suggestionCriteria) return [];
-    /* Suggestions to an owner never include their own sitter profile. */
-    return matchSitters(publicSitters(state, { excludeOwn: true }), suggestionCriteria, account?.communeId ?? null, lng).slice(
-      0,
-      SUGGESTION_LIMIT,
-    );
-  }, [suggestionCriteria, account?.communeId, lng, state]);
-
-  const { perResult } = useMemo(() => partitionReasons(suggestions), [suggestions]);
-
-  /* A first-time visitor belongs on the introduction, which is a full-screen
-     route outside the site chrome. */
-  if (!state.entered) return <Navigate to="/welcome" replace />;
-
-  /* Not a redirect loop: where the sitter side begins is always a `/sitter/…`
-     address, never `/`. Guarded on the profile as well as the preference, so a
-     stale `activeWorkspace` in storage can never strand someone on a side
-     they have nothing on. */
+  if (!hasSession(state)) return <Navigate to={WELCOME_PATH} replace />;
   if (state.activeWorkspace === "sitter" && state.sitter) {
     return <Navigate to={workspaceHome(state, "sitter")} replace />;
   }
 
-  /* The request the owner was preparing, by name. Resolved against the real
-     directory: a bookmark to a sitter that no longer exists is not offered. */
-  const draft = state.requestDraft;
-  const draftSitter = draft ? findSitter(state, draft.sitterId).sitter : null;
-  const criteria = criteriaFromNeed(state.need);
-  /* Same definition of "has a brief" the search contract uses, so a saved
-     wilaya or a saved date range is not quietly treated as nothing. */
-  const hasNeed = Boolean(state.need.petId) || activeCriteriaCount(criteria) > 0;
-  const resume = new URLSearchParams(criteriaToParams(criteria)).toString();
-
-  const wilayaName = suggestionCriteria?.wilaya
-    ? localized(getWilaya(suggestionCriteria.wilaya)?.name ?? { en: "", fr: "", ar: "" }, lng)
-    : "";
-  const suggestionSearch = suggestionCriteria
-    ? new URLSearchParams(criteriaToParams(suggestionCriteria)).toString()
-    : "";
+  const setView = (next: HomeView) =>
+    setParams(next === "explore" ? { view: "explore" } : {}, { replace: true, preventScrollReset: true });
 
   return (
-    <div className="container pb-10 pt-1 md:pb-16 md:pt-4">
+    <div className="container pb-10 pt-4 md:pb-16 md:pt-8">
       <Helmet>
         <title>
-          {t("common.appName")} — {t("entry.title")}
+          {t("common.appName")} — {t("nav.home")}
         </title>
         <meta name="description" content={t("entry.subtitle")} />
       </Helmet>
-
       <div className="mx-auto max-w-[1080px]">
-        <HomeHero />
-
-        <div className="mt-4 grid gap-2.5 sm:flex sm:flex-wrap sm:gap-3">
-          <Button asChild size="lg" className="w-full sm:w-auto sm:min-w-60">
-            {hasNeed ? (
-              <Link to={{ pathname: "/search", search: resume }}>
-                <Search aria-hidden="true" />
-                {t("entry.resume")}
-              </Link>
-            ) : (
-              <Link to="/owner/need/pet">
-                <Search aria-hidden="true" />
-                {t("entry.findCare")}
-              </Link>
-            )}
-          </Button>
-          {/* The other side, as the second door. With no sitter side yet it is
-              an invitation phrased as an activity; with one, it is the SWITCH
-              — having a sitter profile does not stop you being an owner, and
-              nothing is discarded by moving. It lands where Compte's switch
-              and the logo land (`workspaceHome`). */}
-          {state.sitter ? (
-            <Button type="button" size="lg" variant="surface" className="w-full sm:w-auto sm:min-w-60" onClick={() => switchWorkspace("sitter")}>
-              <HomeHeart aria-hidden="true" />
-              {t("workspace.toSitter")}
-            </Button>
-          ) : (
-            <Button asChild size="lg" variant="surface" className="w-full sm:w-auto sm:min-w-60">
-              <Link to="/sitter/start">
-                <HomeHeart aria-hidden="true" />
-                {t("entry.becomeSitter")}
-              </Link>
-            </Button>
-          )}
-        </div>
-
-        {/* Free discovery, one tap from Accueil: every sitter, no criteria,
-            no account (the approved "public discovery" rule). */}
-        <p className="mt-3 flex justify-center sm:justify-start">
-          <Link to="/search" className={ACTION_LINK}>
-            {t("home.browseAll")}
-            <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden="true" />
-          </Link>
-        </p>
-
-        {/* An unsent request, named after its sitter (Audit 1.3 LOT 01). It
-            says "not sent yet" in words: a request in preparation must never
-            read as one that was sent. Discarding forgets the bookmark only. */}
-        {draft && draftSitter && (
-          <div className="surface mt-8 flex items-center gap-1 p-1.5">
-            <Link
-              to={requestPath(draft.sitterId, draft.search)}
-              className="flex min-w-0 flex-1 items-center gap-3.5 rounded-lg p-2.5 transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              {/* Neutral, never a status colour: nothing has been sent. */}
-              <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary text-foreground">
-                <Inbox className="size-5" />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block font-semibold text-foreground">
-                  {t("request.review.titleFor", { sitter: isolate(draftSitter.publicName) })}
-                </span>
-                <span className="mt-0.5 block text-sm text-muted-foreground">{t("home.draft.body")}</span>
-              </span>
-              <ArrowRight className="size-5 shrink-0 text-muted-foreground rtl:-scale-x-100" aria-hidden="true" />
-            </Link>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="shrink-0 text-muted-foreground"
-              onClick={() => dispatch({ type: "discardRequestDraft" })}
-            >
-              <X className="size-5" aria-hidden="true" />
-              <span className="sr-only">
-                {t("home.draft.discard", { sitter: isolate(draftSitter.publicName) })}
-              </span>
-            </Button>
-          </div>
-        )}
-
-        {/* Only with a location, and only with real matches. The heading names
-            the filter that produced the list — not a verdict about the animal. */}
-        {suggestions.length > 0 && (
-          <section aria-labelledby="home-nearby" className="mt-10">
-            <div className="flex items-end justify-between gap-4">
-              <h2 id="home-nearby" className="text-title font-semibold text-foreground">
-                {suggestionCriteria?.species
-                  ? t("home.nearby.titleSpecies", {
-                      wilaya: wilayaName,
-                      species: t(`speciesPlural.${suggestionCriteria.species}`).toLocaleLowerCase(lng),
-                    })
-                  : t("home.nearby.title", { wilaya: wilayaName })}
-              </h2>
-              <Link
-                to={{ pathname: "/search", search: suggestionSearch }}
-                className={ACTION_LINK_END}
-              >
-                {t("home.nearby.seeAll")}
-                <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden="true" />
-              </Link>
-            </div>
-
-            <ul role="list" className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {suggestions.map(({ sitter, rate }) => (
-                <SitterCard
-                  key={sitter.id}
-                  sitter={sitter}
-                  rate={rate}
-                  reasons={perResult.get(sitter.id) ?? []}
-                  askedSpecies={suggestionCriteria?.species ?? null}
-                  askedSize={suggestionCriteria?.size ?? null}
-                  askedCare={null}
-                  search={suggestionSearch}
-                  actionVariant="outline"
-                  layout="stack"
-                  /* The heading already says "who accept cats"; repeating it on
-                     every card discriminates nothing. Same rule /search applies. */
-                  showSpeciesEyebrow={!suggestionCriteria?.species}
-                />
-              ))}
-            </ul>
-          </section>
-        )}
+        <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">
+          {state.account ? t("home.hello", { name: state.account.firstName }) : t("nav.home")}
+        </h1>
+        <Segmented
+          className="mt-4 w-full sm:w-auto"
+          stretch
+          equal={false}
+          idPrefix="home"
+          label={t("nav.home")}
+          value={view}
+          onChange={setView}
+          items={HOME_VIEWS.map((key) => ({ key, label: t(`home.views.${key}`) }))}
+        />
+        <SegmentPanel idPrefix="home" activeKey={view} className="mt-6">
+          {view === "animals" ? <MyAnimals pets={state.pets} /> : <Explore params={params} setParams={setParams} />}
+        </SegmentPanel>
       </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------ Mes animaux */
+
+function careStart(pet: Pet, intent: "search" | "publish"): string {
+  const q = `?pet=${encodeURIComponent(pet.id)}&intent=${intent}`;
+  return needsAnswered(pet) ? `/owner/need/location${q}` : `/owner/need/needs${q}`;
+}
+
+function MyAnimals({ pets }: { pets: Pet[] }) {
+  const { t } = useTranslation();
+  const locale = useAppLocale();
+
+  if (pets.length === 0) {
+    return (
+      <div className="surface flex flex-col items-center gap-4 p-6 text-center md:p-10">
+        <div className="grid grid-cols-3 gap-2" aria-hidden="true">
+          {(["dog", "cat", "bird"] as const).map((s) => (
+            <AnimalPortrait key={s} species={s} className="size-16 rounded-xl" sizes="64px" eager />
+          ))}
+        </div>
+        <div>
+          <h2 className="text-title font-semibold text-foreground">{t("home.animals.emptyTitle")}</h2>
+          <p className="mx-auto mt-1 max-w-[42ch] text-sm text-muted-foreground">{t("home.animals.emptyBody")}</p>
+        </div>
+        <Button asChild size="lg">
+          <Link to="/owner/need/pet?then=pets">
+            <Plus aria-hidden="true" />
+            {t("home.animals.add")}
+          </Link>
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <ul role="list" className="grid gap-3 md:grid-cols-2">
+        {pets.map((pet) => {
+          const kind = kindLabel(pet, locale);
+          const age = ageText(pet, t);
+          const missing = [!pet.ageInfo && !pet.age.trim(), !needsAnswered(pet), !pet.photoUrl].filter(Boolean).length;
+          return (
+            <li key={pet.id} className="surface flex flex-col p-3">
+              <Link
+                to={`/owner/pets/${encodeURIComponent(pet.id)}`}
+                className="flex items-center gap-3.5 rounded-lg p-1.5 transition-colors hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {pet.photoUrl ? (
+                  <img src={pet.photoUrl} alt="" className="size-[4.5rem] shrink-0 rounded-xl object-cover" />
+                ) : (
+                  <AnimalPortrait species={pet.species} className="size-[4.5rem] shrink-0 rounded-xl" sizes="72px" />
+                )}
+                <span className="min-w-0 flex-1">
+                  <span className="block text-name font-semibold text-foreground">
+                    <bdi>{pet.name}</bdi>
+                  </span>
+                  <span className="mt-0.5 block text-sm text-muted-foreground">
+                    {[categoryText(pet, t), kind, age].filter(Boolean).join(" · ")}
+                  </span>
+                  <span className={cn("mt-1 block text-sm", missing ? "font-medium text-foreground" : "text-muted-foreground")}>
+                    {missing ? t("home.animals.toComplete", { count: missing }) : t("home.animals.seeInfo")}
+                  </span>
+                </span>
+                <ArrowRight className="size-5 shrink-0 text-muted-foreground rtl:-scale-x-100" aria-hidden="true" />
+              </Link>
+              <div className="mt-2 grid gap-2 border-t border-border pt-3 min-[480px]:grid-cols-2">
+                <Button asChild variant="default" className="min-w-0 px-3">
+                  <Link to={careStart(pet, "search")}>
+                    <Search aria-hidden="true" />
+                    <span className="truncate">{t("home.animals.find")}</span>
+                  </Link>
+                </Button>
+                <Button asChild variant="surface" className="min-w-0 px-3">
+                  <Link to={careStart(pet, "publish")}>
+                    <Megaphone aria-hidden="true" />
+                    <span className="truncate">{t("home.animals.publish")}</span>
+                  </Link>
+                </Button>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+      <Button asChild variant="surface" size="lg" className="mt-4 w-full sm:w-auto">
+        <Link to="/owner/need/pet?then=pets">
+          <Plus aria-hidden="true" />
+          {t("home.animals.add")}
+        </Link>
+      </Button>
+    </>
+  );
+}
+
+/* ----------------------------------------------------------------- Explore */
+
+function Explore({ params, setParams }: { params: URLSearchParams; setParams: ReturnType<typeof useSearchParams>[1] }) {
+  const { t } = useTranslation();
+  const locale = useAppLocale();
+  const { state } = useDemo();
+
+  const speciesParam = params.get("species");
+  const careParam = params.get("care");
+  const criteria: SearchCriteria = normalizeCriteria({
+    ...EMPTY_CRITERIA,
+    species: isSpecies(speciesParam) ? speciesParam : null,
+    care: (CARE_TYPES as readonly string[]).includes(careParam ?? "") ? (careParam as CareType) : null,
+    wilaya: params.get("wilaya"),
+  });
+
+  const update = (patch: Partial<SearchCriteria>) => {
+    const next = normalizeCriteria({ ...criteria, ...patch });
+    const query: Record<string, string> = { view: "explore" };
+    if (next.species) query.species = next.species;
+    if (next.care) query.care = next.care;
+    if (next.wilaya) query.wilaya = next.wilaya;
+    setParams(query, { replace: true, preventScrollReset: true });
+  };
+
+  const home = state.account ? { wilayaCode: state.account.wilayaId, communeCode: state.account.communeId } : null;
+  const results = useMemo(
+    () => matchSitters(publicSitters(state, { excludeOwn: true }), criteria, home, locale),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [state, criteria.species, criteria.care, criteria.wilaya, locale],
+  );
+  const { perResult } = partitionReasons(results);
+  const { near, farther, unplaced } = splitByDistance(results);
+  const search = new URLSearchParams(criteriaToParams(criteria)).toString();
+  const services = CARE_TYPES.filter((c) => servicesFor(criteria.species).includes(c));
+
+  const card = (r: (typeof results)[number]) => (
+    <SitterCard
+      key={r.sitter.id}
+      sitter={r.sitter}
+      rate={r.rate}
+      reasons={perResult.get(r.sitter.id) ?? []}
+      askedSpecies={criteria.species}
+      compat={r.compat}
+      askedCare={criteria.care}
+      search={search}
+      layout="stack"
+      showSpeciesEyebrow={!criteria.species}
+    />
+  );
+
+  return (
+    <div>
+      <div className="surface grid gap-3 p-4 md:grid-cols-[1fr_1fr_1.4fr] md:items-end">
+        <div>
+          <label htmlFor="explore-animal" className="mb-1.5 block text-sm font-medium text-foreground">
+            {t("explore.animal")}
+          </label>
+          <NativeSelect
+            id="explore-animal"
+            value={criteria.species ?? ""}
+            onChange={(e) => update({ species: isSpecies(e.target.value) ? e.target.value : null })}
+          >
+            <option value="">{t("explore.anyAnimal")}</option>
+            {SPECIES.map((s) => (
+              <option key={s} value={s}>
+                {t(`species.${s}`)}
+              </option>
+            ))}
+          </NativeSelect>
+        </div>
+        <div>
+          <label htmlFor="explore-care" className="mb-1.5 block text-sm font-medium text-foreground">
+            {t("explore.care")}
+          </label>
+          <NativeSelect
+            id="explore-care"
+            value={criteria.care ?? ""}
+            onChange={(e) => update({ care: (CARE_TYPES as readonly string[]).includes(e.target.value) ? (e.target.value as CareType) : null })}
+          >
+            <option value="">{t("explore.anyCare")}</option>
+            {services.map((c) => (
+              <option key={c} value={c}>
+                {t(`care.${c}`)}
+              </option>
+            ))}
+          </NativeSelect>
+        </div>
+        <LocationFields
+          locale={locale}
+          wilayaCode={criteria.wilaya}
+          communeCode={null}
+          onChange={(next) => update({ wilaya: next.wilayaCode, commune: null })}
+          wilayaLabel={t("explore.near")}
+          anyWilayaLabel={t("explore.anyWilaya")}
+          anyCommuneLabel={t("need.location.anyCommune")}
+          communeLabel=""
+          wilayaOnly
+        />
+      </div>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm text-muted-foreground" role="status">
+          {t("explore.count", { count: results.length })} ·{" "}
+          {unplaced ? t("explore.orderAlpha") : t("explore.orderNear")}
+        </p>
+        <Link to={{ pathname: "/search", search }} className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-primary">
+          <SlidersHorizontal className="size-4" aria-hidden="true" />
+          {t("explore.detailed")}
+        </Link>
+      </div>
+
+      {results.length === 0 ? (
+        <div className="surface mt-4 p-5">
+          <p className="font-semibold text-foreground">{t("explore.emptyTitle")}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t("explore.emptyBody")}</p>
+        </div>
+      ) : (
+        <>
+          <ul role="list" className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {near.map(card)}
+          </ul>
+          {farther.length > 0 && (
+            <section aria-labelledby="explore-farther" className="mt-8">
+              <h2 id="explore-farther" className="text-title font-semibold text-foreground">
+                {t("explore.fartherTitle")}
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">{t("explore.fartherNote")}</p>
+              <ul role="list" className="mt-3 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                {farther.map(card)}
+              </ul>
+            </section>
+          )}
+        </>
+      )}
     </div>
   );
 }

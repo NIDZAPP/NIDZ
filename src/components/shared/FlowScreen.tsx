@@ -1,7 +1,5 @@
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
-import { Settings } from "lucide-react";
 import type { ReactNode } from "react";
 
 import BackButton from "@/components/shared/BackButton";
@@ -43,7 +41,16 @@ export default function FlowScreen({
   /** Changes to this value re-run the scroll-and-focus reset. Pass the step
       key when several steps share one mounted FlowScreen. */
   stepKey,
+  topEnd,
+  titleAdornment,
+  introId,
 }: {
+  /** An id on the intro, for a group the question labels. */
+  introId?: string;
+  /** A control at the inline end of the top bar (e.g. the language). */
+  topEnd?: ReactNode;
+  /** Beside the title — an « ! » that explains why the step asks. */
+  titleAdornment?: ReactNode;
   /** Where back goes. Omit on a root screen: the audit is explicit that root
       screens carry no back control (Audit p.23).
 
@@ -84,7 +91,7 @@ export default function FlowScreen({
   }, [stepKey, title]);
 
   const measure = wide ? "max-w-[720px]" : "max-w-[560px]";
-  const hasTopBar = Boolean(backTo || progress);
+  const hasTopBar = Boolean(backTo || progress || topEnd);
 
   return (
     /* `has-pinned-action` is what src/index.css keys the bottom scroll padding
@@ -123,17 +130,11 @@ export default function FlowScreen({
               <span className="flex-1" />
             )}
 
-            {/* Flow screens carry no header, so this is the route to the
-                settings — the language above all — without leaving the step
-                for good: Back on Paramètres pops straight back here. The same
-                gear as at the top of Compte, so it means one thing. */}
-            <Link
-              to="/settings"
-              className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-card text-foreground shadow-pill transition-[transform,background-color] duration-150 ease-out hover:bg-secondary active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              <Settings className="size-5" aria-hidden="true" />
-              <span className="sr-only">{t("nav.settings")}</span>
-            </Link>
+            {/* Nidz 1.7 §22.4: no settings gear on journey steps any more — a
+                focused step keeps to its question. Paramètres lives behind
+                the gear of Compte; a step that needs something at the end of
+                the bar (the language, on the account steps) passes it. */}
+            {topEnd ?? <span className="size-11 shrink-0" aria-hidden="true" />}
           </div>
         </div>
       )}
@@ -141,14 +142,21 @@ export default function FlowScreen({
       <main className="flex-1">
         <div className={cn("container pb-10 md:pb-16", hasTopBar ? "pt-2 md:pt-6" : "pt-8 md:pt-12")}>
           <div key={stepKey ?? title} className={cn("page-in mx-auto", measure)}>
-            <h1
-              ref={heading}
-              tabIndex={-1}
-              className="text-h1 font-semibold text-foreground focus:outline-none md:text-h1-lg"
-            >
-              {title}
-            </h1>
-            {intro && <p className="mt-3 text-base leading-relaxed text-muted-foreground md:text-lg">{intro}</p>}
+            <div className="flex items-start gap-1.5">
+              <h1
+                ref={heading}
+                tabIndex={-1}
+                className="text-h1 font-semibold text-foreground focus:outline-none md:text-h1-lg"
+              >
+                {title}
+              </h1>
+              {titleAdornment && <span className="mt-0.5 shrink-0">{titleAdornment}</span>}
+            </div>
+            {intro && (
+              <p id={introId} className="mt-3 text-base leading-relaxed text-muted-foreground md:text-lg">
+                {intro}
+              </p>
+            )}
             {headerExtra}
             {children && <div className="mt-7 md:mt-9">{children}</div>}
           </div>

@@ -9,6 +9,7 @@ import RequestSummary from "@/components/request/RequestSummary";
 import BackButton from "@/components/shared/BackButton";
 import EmptyState from "@/components/shared/EmptyState";
 import { Button } from "@/components/ui/button";
+import ConfirmAction from "@/components/shared/ConfirmAction";
 import { awaitingReplyFrom, canClarify } from "@/data/clarification";
 import { findRequest, requestsReceived, requestsSent, sitterNameFor } from "@/data/repository";
 import { useAppLocale } from "@/hooks/use-locale";
@@ -28,7 +29,7 @@ export default function OwnerRequestDetail() {
   const lng = useAppLocale();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
-  const { state } = useDemo();
+  const { state, commit } = useDemo();
   const [asking, setAsking] = useState(false);
   const askRef = useRef<HTMLButtonElement>(null);
   const restoreAsk = useRef(false);
@@ -139,10 +140,34 @@ export default function OwnerRequestDetail() {
 
 
 
-            <div className="mt-6">
+            <div className="mt-6 flex flex-wrap gap-2">
               <Button asChild variant="surface">
                 <Link to={`/sitters/${request.sitterId}`}>{t("ownerRequests.viewSitter")}</Link>
               </Button>
+              <Button asChild variant="ghost">
+                <Link to={`/messages/to/${encodeURIComponent(request.sitterId)}`}>{t("ownerPost.write")}</Link>
+              </Button>
+              {/* Nidz 1.7 §14.1 / §20.4: take back a request still waiting, or
+                  call off an accepted one — both confirmed, both kept in the
+                  history with what happened. */}
+              {request.status === "pending" && (
+                <ConfirmAction
+                  trigger={t("ownerRequests.withdraw")}
+                  title={t("ownerRequests.withdrawTitle")}
+                  body={t("ownerRequests.withdrawBody")}
+                  confirm={t("ownerRequests.withdrawConfirm")}
+                  onConfirm={() => commit({ type: "withdrawRequest", id: request.id })}
+                />
+              )}
+              {request.status === "accepted" && (
+                <ConfirmAction
+                  trigger={t("arrangement.cancel")}
+                  title={t("arrangement.cancelTitle")}
+                  body={t("arrangement.cancelBody")}
+                  confirm={t("arrangement.cancelConfirm")}
+                  onConfirm={() => commit({ type: "cancelRequest", id: request.id, by: "owner" })}
+                />
+              )}
             </div>
           </>
         )}

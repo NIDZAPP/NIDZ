@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   clearDraft,
   discardDraft,
-  hasDraft,
+  hasDraftFromEarlierVisit,
   onDraftReset,
   readDraftBase,
   registerDraftBase,
@@ -58,7 +58,7 @@ export function useSave({
   const [expected, setExpected] = useState<string | null>(() => readDraftBase(scope) ?? snapshot(state));
   const [failure, setFailure] = useState<SaveFailureReason | null>(null);
   const [attempt, setAttempt] = useState(0);
-  const [restored, setRestored] = useState(() => hasDraft(scope));
+  const [restored, setRestored] = useState(() => hasDraftFromEarlierVisit(scope));
 
   /* Written with the draft's first field, so it survives a reload. */
   useEffect(() => {

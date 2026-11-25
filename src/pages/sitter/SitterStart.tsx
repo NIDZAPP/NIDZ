@@ -56,7 +56,7 @@ export default function SitterStart() {
       navigate(
         sitterResumePath({
           ...state,
-          sitter: state.sitter ?? { profile: emptySitterProfile("my-profile"), published: false, idDocument: null },
+          sitter: state.sitter ?? { profile: emptySitterProfile("my-profile"), published: false, hidden: false, idDocument: null },
         }),
       );
     }

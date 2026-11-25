@@ -99,7 +99,7 @@ describe("where the sitter space begins (NAV-01)", () => {
     assert.equal(workspaceHome({ ...INITIAL_STATE }, "sitter"), "/sitter/start");
   });
   test("listed profiles start at their requests; a hidden one where the work is", () => {
-    assert.equal(workspaceHome(withSitter(publishable(), true), "sitter"), "/sitter/requests");
+    assert.equal(workspaceHome(withSitter(publishable(), true), "sitter"), "/sitter/feed");
     const lost = { ...publishable(), services: [], rates: {} };
     assert.equal(workspaceHome(withSitter(lost, true), "sitter"), "/sitter/profile");
   });
@@ -141,33 +141,40 @@ describe("tab badges", () => {
   });
 });
 
-describe("tab bars (approved 1.6 model)", () => {
+describe("tab bars (Nidz 1.7: the same four on both sides)", () => {
   const paths = (ws: "owner" | "sitter", sitterSpace: boolean) =>
     workspaceDestinations(ws, { entered: true, sitterSpace }).map((d) => d.to);
 
   test("owner: Home, Requests, Messages, Account", () => {
     assert.deepEqual(paths("owner", false), ["/", "/owner/requests", "/messages", "/account"]);
   });
-  test("sitter: Requests, My profile, Messages, Account — once a profile exists", () => {
-    assert.deepEqual(paths("sitter", true), ["/sitter/requests", "/sitter/profile", "/messages", "/account"]);
+  test("sitter: Home (the feed), Requests, Messages, Account — once a profile exists", () => {
+    assert.deepEqual(paths("sitter", true), ["/sitter/feed", "/sitter/requests", "/messages", "/account"]);
     assert.deepEqual(paths("sitter", false), []);
+  });
+  test("same labels in the same order on both sides", () => {
+    const labels = (ws: "owner" | "sitter") => workspaceDestinations(ws, { entered: true, sitterSpace: true }).map((d) => d.labelKey);
+    assert.deepEqual(labels("owner"), labels("sitter"));
   });
   test("nothing before the introduction", () => {
     assert.deepEqual(workspaceDestinations("owner", { entered: false, sitterSpace: false }), []);
   });
-  test("search and profiles belong to Home; pets, settings and help to Account", () => {
+  test("search, profiles and animals belong to Home; settings, help and the sitter profile to Account", () => {
     const [home, requests, , accountTab] = workspaceDestinations("owner", { entered: true, sitterSpace: false });
     assert.ok(isDestinationActive(home, "/search"));
     assert.ok(isDestinationActive(home, "/sitters/amina-b"));
     assert.ok(!isDestinationActive(home, "/owner/requests"));
     assert.ok(isDestinationActive(requests, "/owner/requests/req-1"));
-    for (const path of ["/account", "/settings", "/owner/pets", "/help", "/policies"]) {
+    assert.ok(isDestinationActive(home, "/owner/pets"));
+    assert.ok(isDestinationActive(requests, "/owner/posts/post-1"));
+    for (const path of ["/account", "/settings", "/settings/security", "/help", "/policies", "/sitter/profile"]) {
       assert.ok(isDestinationActive(accountTab, path), path);
     }
   });
-  test("the sitter profile tab is not lit by the public profiles list", () => {
-    const [, profile] = workspaceDestinations("sitter", { entered: true, sitterSpace: true });
-    assert.ok(isDestinationActive(profile, "/sitter/profile"));
-    assert.ok(!isDestinationActive(profile, "/sitters/me"));
+  test("the sitter's Home holds the feed and each request's detail; not the public profiles", () => {
+    const [home] = workspaceDestinations("sitter", { entered: true, sitterSpace: true });
+    assert.ok(isDestinationActive(home, "/sitter/feed"));
+    assert.ok(isDestinationActive(home, "/sitter/posts/post-1"));
+    assert.ok(!isDestinationActive(home, "/sitters/me"));
   });
 });

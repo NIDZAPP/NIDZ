@@ -28,6 +28,8 @@ import { publicItemsFor } from "./portfolio";
 import { reviewsFor } from "./reviews";
 import { canPublish } from "./sitter-sections";
 import type { CareRequest, SitterProfile } from "./types";
+import { DEMO_POSTS } from "./demo-posts";
+import type { CarePost, Proposal } from "./publications";
 import type { DemoState } from "@/state/demo/reducer";
 import { conversationsFor, type Conversation, type ConversationSide } from "./conversations";
 
@@ -43,7 +45,10 @@ import { conversationsFor, type Conversation, type ConversationSide } from "./co
 export function publicSitters(state: DemoState, { excludeOwn = false } = {}): SitterProfile[] {
   const own = state.sitter;
   const ownListed = !excludeOwn && own && isPubliclyListed(state, own.profile) ? [own.profile] : [];
-  return [...DEMO_SITTERS, ...ownListed];
+  /* A sitter this person blocked is not offered to them again (Nidz 1.7
+     §24). Local to this device, like the block itself. */
+  const blocked = new Set(state.blockedSitters);
+  return [...DEMO_SITTERS, ...ownListed].filter((s) => !blocked.has(s.id));
 }
 
 /**
@@ -56,7 +61,9 @@ export function publicSitters(state: DemoState, { excludeOwn = false } = {}): Si
 export function isPubliclyListed(state: DemoState, sitter: SitterProfile): boolean {
   if (sitter.isDemoFixture) return true;
   const own = state.sitter;
-  return Boolean(own && own.profile.id === sitter.id && own.published && canPublish(own.profile));
+  /* `hidden` is the sitter's own choice in Paramètres to stop being found,
+     without unpublishing or losing anything (Nidz 1.7 §23.1). */
+  return Boolean(own && own.profile.id === sitter.id && own.published && !own.hidden && canPublish(own.profile));
 }
 
 /**
@@ -160,4 +167,47 @@ export function conversationWith(state: DemoState, sitterId: string): Conversati
     visitor's own profile. */
 export function sitterCanAnswer(state: DemoState, sitterId: string): boolean {
   return state.sitter?.profile.id === sitterId;
+}
+
+/* ------------------------------------------------ published requests (1.7) */
+
+/**
+ * Every published request a sitter can see: the examples, and the ones the
+ * visitor published from their owner space on this device.
+ *
+ * Server: `GET /posts?near=…` — open posts in the sitter's area, without any
+ * owner contact detail.
+ */
+export function feedPosts(state: DemoState): CarePost[] {
+  return [...state.posts, ...DEMO_POSTS];
+}
+
+/** The posts this account published, as an owner. Server: `GET /me/posts`. */
+export function postsPublished(state: DemoState): CarePost[] {
+  return state.posts;
+}
+
+/** Server: `GET /posts/:id`. */
+export function findPost(state: DemoState, id: string | null | undefined): CarePost | null {
+  if (!id) return null;
+  return state.posts.find((p) => p.id === id) ?? DEMO_POSTS.find((p) => p.id === id) ?? null;
+}
+
+/** Proposals on the visitor's own posts — what the owner received.
+    Server: `GET /me/posts/proposals`. */
+export function proposalsReceived(state: DemoState): Proposal[] {
+  const mine = new Set(state.posts.map((p) => p.id));
+  return state.proposals.filter((p) => mine.has(p.postId));
+}
+
+/** Proposals the visitor's sitter profile sent. Simulated proposals are
+    written on behalf of example sitters and are never « sent » by anybody
+    here. Server: `GET /me/proposals`. */
+export function proposalsSent(state: DemoState): Proposal[] {
+  const myId = state.sitter?.profile.id;
+  return myId ? state.proposals.filter((p) => p.sitterId === myId && !p.simulated) : [];
+}
+
+export function findProposal(state: DemoState, id: string | null | undefined): Proposal | null {
+  return id ? (state.proposals.find((p) => p.id === id) ?? null) : null;
 }

@@ -146,7 +146,7 @@ describe("storage hardening (LOT 05–07 review)", () => {
             services: [],
             rates: {},
             acceptedSpecies: [],
-            acceptedDogSizes: [],
+            acceptedKinds: {},
             limits: ["one limit"],
             declaredUnavailable: [],
             housing: {},

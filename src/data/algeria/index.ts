@@ -20,6 +20,7 @@ import { WILAYAS, type Wilaya } from "./wilayas";
 export type { Commune, Wilaya };
 export { COMMUNES, WILAYAS };
 export { GEOGRAPHY_METADATA, KNOWN_GAPS } from "./metadata";
+export { nearestWilaya, wilayaDistanceKm } from "./positions";
 
 /* ------------------------------------------------------------------ indexes */
 

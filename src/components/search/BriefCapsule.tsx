@@ -3,7 +3,7 @@ import { Link, type To } from "react-router-dom";
 import { useId } from "react";
 
 import { AnimalPortrait } from "@/components/illustrations/animals";
-import type { Species } from "@/data/types";
+import type { PetCategory } from "@/data/types";
 import { cn } from "@/lib/utils";
 
 /**
@@ -33,7 +33,7 @@ export default function BriefCapsule({
   state,
   className,
 }: {
-  species: Species | null;
+  species: PetCategory | null;
   /** The animal, in words: "Grands chiens", "Chat", "Tous les animaux". */
   title: string;
   /** What else is asked, each part isolated for bidi. */

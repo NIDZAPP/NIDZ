@@ -1,3 +1,4 @@
+import { getKind } from "@/data/animal-kinds";
 import { useTranslation } from "react-i18next";
 
 import { communeName, getWilaya } from "@/data/algeria";
@@ -25,8 +26,10 @@ export function useReasonLabel() {
     switch (reason.kind) {
       case "species":
         return t(`accepts.${reason.species}`);
-      case "size":
-        return t(`acceptsSize.${reason.size}`);
+      case "kind": {
+        const kind = reason.species === "other" ? null : getKind(reason.kindId, reason.species);
+        return kind ? t("search.reason.kind", { kind: kind.name[lng] }) : t(`accepts.${reason.species}`);
+      }
       case "care":
         return t(`care.${reason.care satisfies CareType}`);
       case "zone": {

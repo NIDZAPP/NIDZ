@@ -1,9 +1,9 @@
-import { Home, Inbox, MessageCircle, PawPrint, UserRound } from "lucide-react";
+import { Home, Inbox, MessageCircle, UserRound } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { matchPath } from "react-router-dom";
 
 import type { Workspace } from "@/data/workspace";
-import { MESSAGES_PATH } from "@/data/navigation";
+import { MESSAGES_PATH, SITTER_HOME } from "@/data/navigation";
 
 /**
  * The navigation model for both workspaces, in one place.
@@ -19,25 +19,25 @@ import { MESSAGES_PATH } from "@/data/navigation";
  *   INCLUDING its genuine empty state. It is not listed while it would render
  *   `NotAvailable`.
  *
- * NIDZ 1.6 — FOUR TABS ON EACH SIDE (the approved model).
+ * NIDZ 1.7 — THE SAME FOUR TABS, IN THE SAME ORDER, ON BOTH SIDES (§15).
  *
  *   owner   Accueil · Demandes · Messages · Compte
- *   sitter  Demandes · Mon profil · Messages · Compte
+ *   sitter  Accueil · Demandes · Messages · Compte
  *
- * What moved, and where to:
- *   - Search is part of Accueil. Results and public profiles are screens
- *     UNDER Accueil — the tab stays lit there — the way Explore holds both
- *     the search and the listing in the marketplaces owners already use.
- *   - Mes animaux is part of Compte: the animals are the household's, set up
- *     once and chosen per request. The list is a screen under Compte.
- *   - Messages is a tab on both sides (it was an icon in the header), and
- *     holds the notifications as its second view.
- *   - Paramètres (language, security and privacy, the reset, the test tools)
- *     is under Compte, behind the gear at its top-right.
+ * What each holds:
+ *   - Accueil. Owner: « Mes animaux » and « Explorer les pet-sitters » (the
+ *     search, results and public profiles are screens under it, and so is the
+ *     animal sheet). Sitter: the feed of published requests nearby, and each
+ *     request's detail.
+ *   - Demandes. Reçues · Envoyées · Validées on both sides, with drafts and
+ *     history inside — never a fifth tab.
+ *   - Messages. Conversations and Notifications; the header carries no
+ *     second door to it.
+ *   - Compte. The person, the space switch and — on the sitter side — « Mon
+ *     profil pet-sitter », which replaced the 1.6 « Mon profil » tab. Its
+ *     section editors and Paramètres are screens under it.
  *
- * Each side's tabs are the same four slots, so the bar keeps its shape when
- * the space changes: the two shared tabs (Messages, Compte) sit in the same
- * place on both sides.
+ * The bar keeps its shape when the space changes: same slots, same words.
  */
 export type NavDestination = {
   to: string;
@@ -70,33 +70,31 @@ const ACCOUNT: NavDestination = {
   to: ACCOUNT_PATH,
   labelKey: "nav.account",
   icon: UserRound,
-  owns: [SETTINGS_PATH, "/owner/pets", "/help", "/policies"],
+  owns: [SETTINGS_PATH, `${SETTINGS_PATH}/*`, "/account/*", "/help", "/policies", "/sitter/profile"],
 };
 
 const OWNER: NavDestination[] = [
-  { to: "/", labelKey: "nav.home", icon: Home, owns: ["/search", "/sitters/:id"] },
+  { to: "/", labelKey: "nav.home", icon: Home, owns: ["/search", "/sitters/:id", "/owner/pets"] },
   {
     to: "/owner/requests",
     labelKey: "nav.myRequests",
     badgeLabelKey: "nav.ownerRequestsBadge",
     icon: Inbox,
-    owns: ["/owner/requests/:id"],
+    owns: ["/owner/requests/:id", "/owner/posts/:id"],
   },
   MESSAGES,
   ACCOUNT,
 ];
 
 const SITTER: NavDestination[] = [
+  { to: SITTER_HOME, labelKey: "nav.home", icon: Home, owns: ["/sitter/posts/:id"] },
   {
     to: "/sitter/requests",
     labelKey: "nav.myRequests",
     badgeLabelKey: "nav.sitterRequestsBadge",
     icon: Inbox,
+    owns: ["/sitter/requests/:id"],
   },
-  /* The sitter's own profile, as the sections dashboard — what they keep up to
-     date, including the periods they declare unavailable. The section editors
-     under `/sitter/profile/…` are full-screen steps without the bar. */
-  { to: "/sitter/profile", labelKey: "nav.sitterProfile", icon: PawPrint },
   MESSAGES,
   ACCOUNT,
 ];

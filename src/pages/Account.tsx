@@ -1,16 +1,26 @@
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
-import { ArrowRight, Check, Eye, FileText, LifeBuoy, Plus, Search, Settings as SettingsIcon } from "lucide-react";
+import { Link, Navigate } from "react-router-dom";
+import {
+  ArrowRight,
+  CalendarX,
+  Check,
+  Eye,
+  FileText,
+  LifeBuoy,
+  PawPrint,
+  Search,
+  Settings as SettingsIcon,
+  UserRound,
+} from "lucide-react";
 import type { ReactNode } from "react";
 
 import { HomeHeart } from "@/components/icons/nidz-icons";
-import { AnimalPortrait } from "@/components/illustrations/animals";
 import { LIST_GROUP, REGISTER_ROW, ROW_ICON } from "@/components/shared/register";
 import { SETTINGS_PATH, ACCOUNT_PATH } from "@/components/layout/workspace-nav";
 import { Button } from "@/components/ui/button";
 import { communeWithWilaya, getWilaya } from "@/data/algeria";
-import { sitterVisibility } from "@/data/navigation";
+import { WELCOME_PATH, hasSession, sitterVisibility } from "@/data/navigation";
 import { localized } from "@/data/types";
 import type { Workspace } from "@/data/workspace";
 import { useAppLocale } from "@/hooks/use-locale";
@@ -43,9 +53,11 @@ export default function Account() {
   const lng = useAppLocale();
   const { state } = useDemo();
   const switchWorkspace = useSwitchWorkspace();
-  const active = state.activeWorkspace;
+  const active = state.activeWorkspace === "sitter" && state.sitter ? "sitter" : "owner";
   const account = state.account;
   const visibility = sitterVisibility(state);
+
+  if (!hasSession(state)) return <Navigate to={WELCOME_PATH} replace />;
 
   const place = account
     ? (communeWithWilaya(account.communeId, lng) ??
@@ -62,8 +74,8 @@ export default function Account() {
       </Helmet>
 
       <div className="mx-auto max-w-[720px]">
-        {/* The title row carries the gear at its inline end — top-right, and
-            top-left in Arabic — the place people look for settings. */}
+        {/* The gear at the top end — top-left in Arabic — where people look
+            for settings. Paramètres is its own screen (§22.4). */}
         <div className="flex items-center justify-between gap-3">
           <h1 className="text-h1 font-semibold text-foreground md:text-h1-lg">{t("account.title")}</h1>
           <Link
@@ -76,99 +88,64 @@ export default function Account() {
           </Link>
         </div>
 
-        {/* ------------------------------------------------------ identity */}
-        <section aria-label={t("account.identity.title")} className="mt-5">
-          {account ? (
-            <div className="surface flex items-center gap-3.5 p-4">
+        {account && (
+          <section aria-label={t("account.identity.title")} className="surface mt-5 flex items-center gap-4 p-4">
+            {account.photoUrl ? (
+              <img src={account.photoUrl} alt="" className="size-16 shrink-0 rounded-full object-cover" />
+            ) : (
               <span
                 aria-hidden="true"
-                className="flex size-12 shrink-0 items-center justify-center rounded-full bg-brand-soft text-lg font-semibold text-brand"
+                className="flex size-16 shrink-0 items-center justify-center rounded-full bg-brand-soft text-2xl font-semibold text-brand"
               >
                 {account.firstName.charAt(0).toUpperCase()}
               </span>
-              <span className="min-w-0 flex-1">
-                <bdi className="block break-words font-semibold text-foreground">
-                  {account.firstName} {account.lastName}
-                </bdi>
-                <span className="mt-0.5 block break-words text-sm text-muted-foreground">
-                  {place ? <bdi>{place}</bdi> : t("account.identity.noPlace")}
-                </span>
+            )}
+            <span className="min-w-0 flex-1">
+              <bdi className="block break-words text-name font-semibold text-foreground">
+                {account.firstName} {account.lastName}
+              </bdi>
+              <span className="mt-0.5 block break-words text-sm text-muted-foreground">
+                {place ? <bdi>{place}</bdi> : t("account.identity.noPlace")}
               </span>
-              <Button asChild variant="outline" className="shrink-0">
-                <Link to={EDIT_ACCOUNT} aria-label={t("account.identity.editLabel")}>
-                  {t("account.identity.edit")}
-                </Link>
-              </Button>
-            </div>
-          ) : (
-            <div className="surface p-5">
-              <p className="text-name font-semibold text-foreground">{t("account.guest.title")}</p>
-              <p className="mt-1.5 max-w-[64ch] text-base leading-relaxed text-muted-foreground">
-                {t("account.guest.body")}
-              </p>
-              <Button asChild className="mt-4 w-full sm:w-auto">
-                <Link to={EDIT_ACCOUNT}>{t("account.guest.cta")}</Link>
-              </Button>
-            </div>
-          )}
-        </section>
-
-        {/* ------------------------------------------------------- animals */}
-        {/* The household, on the owner side: chosen for each request, so kept
-            with the person rather than as a tab of its own. Not shown on the
-            sitter side, where "animals" means the ones the sitter accepts. */}
-        {active === "owner" && (
-          <section aria-labelledby="account-pets" className="mt-8">
-            <h2 id="account-pets" className="text-title font-semibold text-foreground">
-              {t("nav.pets")}
-            </h2>
-            <div className={cn("mt-3", LIST_GROUP)}>
-              <Link to="/owner/pets" className={REGISTER_ROW}>
-                {state.pets.length > 0 ? (
-                  <span aria-hidden="true" className="flex shrink-0 -space-x-3 rtl:space-x-reverse">
-                    {state.pets.slice(0, 3).map((p) => (
-                      <AnimalPortrait key={p.id} species={p.species} className="size-10 rounded-full ring-2 ring-card" />
-                    ))}
-                  </span>
-                ) : (
-                  <span aria-hidden="true" className={ROW_ICON}>
-                    <Plus className="size-5" />
-                  </span>
-                )}
-                <span className="min-w-0 flex-1">
-                  <span className="block font-medium text-foreground">
-                    {state.pets.length > 0
-                      ? t("account.pets.count", { count: state.pets.length })
-                      : t("pets.add")}
-                  </span>
-                  <span className="mt-0.5 block break-words text-sm text-muted-foreground">
-                    {state.pets.length > 0
-                      ? state.pets.map((p) => p.name).filter(Boolean).join(" · ")
-                      : t("account.pets.empty")}
-                  </span>
-                </span>
-                <Chevron />
-              </Link>
-            </div>
+            </span>
           </section>
         )}
 
-        {/* -------------------------------------------------------- spaces */}
-        {/* The two spaces of ONE account. The current one is stated, not
-            offered; the other is a real switch, landing where that side
-            begins (`workspaceHome`, NAV-01) — or the honest first step when
-            that side does not exist yet. */}
+        <div className={cn("mt-3", LIST_GROUP)}>
+          <Row
+            to={EDIT_ACCOUNT}
+            icon={<UserRound className="size-5" />}
+            label={t("account.personal.title")}
+            line={t("account.personal.line")}
+          />
+          {active === "owner" && (
+            <Row
+              to="/"
+              icon={<PawPrint className="size-5" />}
+              label={t("home.views.animals")}
+              line={
+                state.pets.length > 0
+                  ? state.pets.map((p) => p.name).filter(Boolean).join(" · ")
+                  : t("account.pets.empty")
+              }
+            />
+          )}
+        </div>
+
+        {/* The switch: one row per space, the current one marked. The other
+            lands where that side begins (`workspaceHome`, NAV-01) — or its
+            first step when it does not exist yet, or the step where an
+            unfinished profile stopped. Nothing is erased by switching. */}
         <section aria-labelledby="account-spaces" className="mt-8">
           <h2 id="account-spaces" className="text-title font-semibold text-foreground">
             {t("account.spaces.title")}
           </h2>
-          <p className="mt-1.5 max-w-[64ch] text-sm text-muted-foreground">{t("account.spaces.body")}</p>
           <div className={cn("mt-3", LIST_GROUP)}>
             {(["owner", "sitter"] as const).map((space) => (
               <SpaceRow
                 key={space}
                 space={space}
-                current={active === space && (space === "owner" || Boolean(state.sitter))}
+                current={active === space}
                 line={
                   space === "owner"
                     ? t("workspace.toOwner")
@@ -186,26 +163,45 @@ export default function Account() {
           </div>
         </section>
 
-        {/* What owners see, from the sitter side — only while they can see it.
-            A link to a profile owners cannot find would open "this profile
-            does not exist" (NAV-02). */}
-        {active === "sitter" && visibility === "listed" && state.sitter && (
-          <section aria-labelledby="account-public" className="mt-8">
-            <h2 id="account-public" className="sr-only">
-              {t("account.publicProfile.title")}
+        {/* « Mon profil pet-sitter » — the 1.6 « Mon profil » tab, now here
+            (§22.2): every section of the professional profile, its preview
+            and its publication status, in one place. */}
+        {active === "sitter" && state.sitter && (
+          <section aria-labelledby="account-sitter" className="mt-8">
+            <h2 id="account-sitter" className="text-title font-semibold text-foreground">
+              {t("account.sitterProfile.title")}
             </h2>
-            <div className={LIST_GROUP}>
+            <div className={cn("mt-3", LIST_GROUP)}>
               <Row
-                to={`/sitters/${state.sitter.profile.id}`}
+                to="/sitter/profile"
+                icon={<HomeHeart className="size-5" />}
+                label={t("account.sitterProfile.sections")}
+                line={t(`account.sitterProfile.status.${visibility}`)}
+              />
+              <Row
+                to="/sitter/preview"
                 icon={<Eye className="size-5" />}
-                label={t("account.publicProfile.title")}
-                line={t("account.publicProfile.line")}
+                label={t("account.sitterProfile.preview")}
+                line={t("account.sitterProfile.previewLine")}
+              />
+              {visibility === "listed" && (
+                <Row
+                  to={`/sitters/${state.sitter.profile.id}`}
+                  icon={<Eye className="size-5" />}
+                  label={t("account.publicProfile.title")}
+                  line={t("account.publicProfile.line")}
+                />
+              )}
+              <Row
+                to="/sitter/profile/availability"
+                icon={<CalendarX className="size-5" />}
+                label={t("account.sitterProfile.availability")}
+                line={t("account.sitterProfile.availabilityLine")}
               />
             </div>
           </section>
         )}
 
-        {/* --------------------------------------------------- help & safety */}
         <section aria-labelledby="account-help" className="mt-8">
           <h2 id="account-help" className="text-title font-semibold text-foreground">
             {t("account.help.title")}

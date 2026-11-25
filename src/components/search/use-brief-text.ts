@@ -1,3 +1,4 @@
+import { getKind } from "@/data/animal-kinds";
 import { useTranslation } from "react-i18next";
 
 import { communeName, getWilaya } from "@/data/algeria";
@@ -20,11 +21,14 @@ export function useBriefText(criteria: SearchCriteria): { title: string | null; 
   const { t } = useTranslation();
   const lng = useAppLocale();
 
+  const kind = criteria.species ? getKind(criteria.kind, criteria.species) : null;
   const title = !criteria.species
     ? null
-    : criteria.species === "dog" && criteria.size
-      ? t(`dogSize.${criteria.size}`)
-      : t(`species.${criteria.species}`);
+    : kind
+      ? kind.name[lng]
+      : criteria.species === "other"
+        ? t("catalogue.other")
+        : t(`species.${criteria.species}`);
 
   const zone = criteria.commune
     ? (communeName(criteria.commune, lng) ?? criteria.commune)

@@ -16,7 +16,8 @@
     "loading": "Loading…",
     "moreInfoAbout": "More information: {{topic}}",
     "languageCurrent": "Language: {{name}}",
-    "optional": "optional"
+    "optional": "optional",
+    "cancel": "Cancel"
   },
   "nav": {
     "home": "Home",
@@ -56,22 +57,70 @@
       "body": "Not sent yet — pick up where you left off.",
       "discard": "Discard the request to {{sitter}}"
     },
-    "browseAll": "Browse all sitters"
+    "browseAll": "Browse all sitters",
+    "hello": "Hello, {{name}}",
+    "views": {
+      "animals": "My animals",
+      "explore": "Explore sitters"
+    },
+    "animals": {
+      "add": "Add an animal",
+      "emptyTitle": "No animal yet",
+      "emptyBody": "Add your animal once: its breed, age, photo and needs are reused for every request.",
+      "find": "Find a sitter",
+      "publish": "Publish a request",
+      "seeInfo": "See and edit its information",
+      "toComplete_one": "{{count}} item to complete",
+      "toComplete_other": "{{count}} items to complete"
+    }
   },
   "species": {
     "dog": "Dog",
     "cat": "Cat",
-    "bird": "Bird"
+    "bird": "Bird",
+    "parrot": "Parrot",
+    "rabbit": "Rabbit",
+    "guineaPig": "Guinea pig",
+    "hamster": "Hamster",
+    "mouse": "Pet mouse",
+    "ferret": "Ferret",
+    "fish": "Fish",
+    "turtle": "Tortoise / turtle",
+    "snake": "Snake",
+    "chameleon": "Chameleon",
+    "other": "Other"
   },
   "speciesPlural": {
     "dog": "Dogs",
     "cat": "Cats",
-    "bird": "Birds"
+    "bird": "Birds",
+    "parrot": "Parrots",
+    "rabbit": "Rabbits",
+    "guineaPig": "Guinea pigs",
+    "hamster": "Hamsters",
+    "mouse": "Pet mice",
+    "ferret": "Ferrets",
+    "fish": "Fish",
+    "turtle": "Tortoises and turtles",
+    "snake": "Snakes",
+    "chameleon": "Chameleons",
+    "other": "Other animals"
   },
   "accepts": {
     "dog": "Accepts dogs",
     "cat": "Accepts cats",
-    "bird": "Accepts birds"
+    "bird": "Accepts birds",
+    "parrot": "Accepts parrots",
+    "rabbit": "Accepts rabbits",
+    "guineaPig": "Accepts guinea pigs",
+    "hamster": "Accepts hamsters",
+    "mouse": "Accepts pet mice",
+    "ferret": "Accepts ferrets",
+    "fish": "Accepts fish",
+    "turtle": "Accepts tortoises and turtles",
+    "snake": "Accepts snakes",
+    "chameleon": "Accepts chameleons",
+    "other": "Animal to be confirmed"
   },
   "care": {
     "boarding": "Boarding at the sitter's home",
@@ -141,16 +190,16 @@
       "addPet": "Add my animal",
       "addAnother": "Add another animal",
       "editPet": "Edit {{name}}",
-      "specifySize": "Give {{name}}'s size",
       "petRequired": "Choose the animal this request is for.",
-      "fitSpecies": {
-        "dog": "{{sitter}} does not take dogs.",
-        "cat": "{{sitter}} does not take cats.",
-        "bird": "{{sitter}} does not take birds."
+      "changeWhen": "Change the service or dates",
+      "fitCategory": "{{sitter}} does not accept this kind of animal ({{animal}}).",
+      "fitKind": "{{sitter}} accepts only certain breeds, and not {{name}}'s.",
+      "fitUnknown": {
+        "otherCategory": "{{name}} is outside Nidz's list: {{sitter}} will confirm whether it is possible.",
+        "kindNotGiven": "{{sitter}} accepts only certain breeds: give {{name}}'s breed, or ask.",
+        "kindFreeText": "{{name}}'s breed is in your own words: {{sitter}} will confirm."
       },
-      "fitSize": "{{sitter}} only takes: {{sizes}}.",
-      "fitSizeUnknown": "{{name}}'s size is not given, and {{sitter}} only takes: {{sizes}}.",
-      "changeWhen": "Change the service or dates"
+      "specifyKind": "Give {{name}}'s breed"
     },
     "sent": {
       "title": "Demonstration request sent",
@@ -242,10 +291,32 @@
       "title": "Animals you accept",
       "label": "Species",
       "required": "State at least one species you can look after.",
-      "sizesLabel": "Dog sizes you accept",
-      "sizesRequired": "State the dog sizes you can take.",
       "maxLabel": "Maximum number of animals at a time",
-      "maxHelp": "Counting the animals entrusted to you, not your own."
+      "maxHelp": "Counting the animals entrusted to you, not your own.",
+      "birdParrot": "“Bird” means small cage birds (canaries, finches, budgerigars…). Parrots are their own category.",
+      "kindsFor": {
+        "breed": "Which breeds of {{animals}}?",
+        "species": "Which species of {{animals}}?"
+      },
+      "all": {
+        "breed": "All breeds",
+        "species": "All species"
+      },
+      "some": {
+        "breed": "Certain breeds only",
+        "species": "Certain species only"
+      },
+      "otherLabel": {
+        "breed": "A breed not in the list",
+        "species": "A species not in the list"
+      },
+      "addOther": "Add",
+      "removeOther": "Remove {{name}}",
+      "otherNote": "Names you type are shown on your profile and never matched automatically.",
+      "chosenCount_one": "{{count}} chosen",
+      "chosenCount_other": "{{count}} chosen",
+      "kindsRequired": "Choose at least one breed or species, or “All”.",
+      "limitsHint": "Physical, behavioural or medical limits (a dog's weight, a reactive animal…) go in “What I cannot accept”."
     },
     "housing": {
       "title": "Your home and how you host",
@@ -312,10 +383,12 @@
       "description": "Choose the animal, the kind of care, the area and the maximum price.",
       "datesHelp": "Sitters who declared themselves unavailable over this period are removed from the results.",
       "clearDates": "Clear the dates",
-      "size": "Your dog's size",
-      "anySize": "Not specified",
       "upToUnit": "{{price}} or less {{unit}}",
-      "perService": "per service"
+      "perService": "per service",
+      "anyKind": {
+        "breed": "All breeds",
+        "species": "All species"
+      }
     },
     "results": {
       "title": "Sitters that match your search",
@@ -328,16 +401,23 @@
       "orderDefaultNear": "{{commune}} first, then in alphabetical order — Nidz does not rank sitters by a score.",
       "orderPrice": "By lowest price, as you chose.",
       "orderPriceNear": "{{commune}} first, then by lowest price, as you chose.",
-      "sizeHint": "Your dog's size is not given, so sitters who only take some sizes are still listed.",
-      "sizeHintAction": "Give the size"
+      "kindHint": "Some sitters accept only certain breeds or species.",
+      "kindHintAction": {
+        "breed": "Say the breed",
+        "species": "Say the species"
+      },
+      "noneNear": "No sitter in this area — see those farther away below.",
+      "orderNearZone": "nearest to the area searched first",
+      "orderNearHome": "nearest to your area first",
+      "orderPriceNearest": "by area, then from the lowest price — your choice"
     },
     "card": {
       "matchLabel": "Matches your search: ",
       "viewProfile": "View profile",
       "demoTag": "Example",
       "from": "from",
-      "sizeLimit": "Dogs: {{sizes}} only",
-      "allSizes": "Dogs of every size"
+      "limitsCount_one": "{{count}} declared limit — read it on the profile",
+      "limitsCount_other": "{{count}} declared limits — read them on the profile"
     },
     "demo": {
       "title": "Demonstration examples",
@@ -356,7 +436,8 @@
       "anyZone": "Anywhere"
     },
     "reason": {
-      "dates": "Has not declared these dates unavailable"
+      "dates": "Has not declared these dates unavailable",
+      "kind": "Accepts: {{kind}}"
     },
     "sort": {
       "label": "Order",
@@ -384,10 +465,7 @@
     "findCare": "Find care",
     "becomeSitter": "Become a pet-sitter",
     "subtitle": "Find someone suited to your companion, near you.",
-    "bothSides": "One account for both sides.",
-    "bothSidesInfo": "Choosing creates no separate account: you can look for care and look after animals with the same account, and switch at any time in Account.",
     "animalsTitle": "Your animal",
-    "animalsHint": "Dogs, cats and birds for now.",
     "sitterTitle": "Look after animals",
     "sitterBody": "Describe how you look after animals and receive requests that fit."
   },
@@ -411,17 +489,10 @@
       "chooseLabel": "Which animal is this about?",
       "another": "Another animal",
       "editElsewhere": "Your saved animals are edited in My pets, not here.",
-      "sizeLabel": "Its size",
-      "sizeHelp": "Sitters state which sizes they can take, so this shows you only the ones who can take your dog.",
       "photoLabel": "A photo (optional)",
       "agePlaceholder": "e.g. 8 months, 3 years",
       "notesPlaceholder": "e.g. on medication, afraid of other dogs…",
-      "notesInfo": "Shown to the sitter with your request, so they can judge before saying yes.",
-      "otherAnimal": {
-        "toggle": "My animal isn't in the list",
-        "title": "Dogs, cats and birds only, for now",
-        "body": "Nidz does not yet let you look for a sitter for another animal — a rabbit, a tortoise, a fish. Sitters only declare dogs, cats and birds, so no result could honestly match."
-      }
+      "notesInfo": "Shown to the sitter with your request, so they can judge before saying yes."
     },
     "location": {
       "title": "Where are you looking?",
@@ -480,7 +551,7 @@
       "dates": "This sitter stated they are unavailable over the requested period.",
       "zone": "This sitter is not in the area you asked for: {{zone}}.",
       "price": "This sitter's rates are above {{price}}.",
-      "size": "This sitter does not take: {{size}}."
+      "kind": "Does not accept: {{kind}}"
     },
     "limitsIntro": "The sitter states these limits so that a stay that would not suit your animal does not happen.",
     "moreLimits_one": "+ {{count}} more limit",
@@ -575,11 +646,9 @@
       "transport": "Can travel: {{modes}}",
       "canReachVet": "Could get an animal to a vet: {{answer}}"
     },
-    "sizeUnknown": "Your dog's size is not given. This sitter takes dogs: {{sizes}} only.",
     "glance": {
       "services": "Services and rates",
-      "dogsAllSizes": "Dogs of every size",
-      "dogsSizes": "Dogs: {{sizes}}"
+      "someKinds": "{{animals}} ({{kinds}} only)"
     },
     "demo": {
       "title": "An example profile",
@@ -589,6 +658,13 @@
       "fitTitle": "Right for your animal?",
       "fitBody": "Describe your animal and your dates: this profile will say what fits and what does not.",
       "fitAction": "Describe my need"
+    },
+    "block": {
+      "action": "Stop seeing this sitter",
+      "blocked": "You blocked this sitter.",
+      "title": "Stop seeing {{name}}?",
+      "body": "This profile will no longer appear in your searches or suggestions on this device. You can undo it in Settings › Security and privacy.",
+      "confirm": "Block"
     }
   },
   "ownerRequests": {
@@ -602,12 +678,18 @@
     "explain": {
       "pending": "No sitter was notified: this request was not sent anywhere. In a real Nidz it would be waiting here for the sitter's answer, and nothing would be agreed until they accepted.",
       "accepted": "In this demonstration the acceptance came from you, on the sitter side. Even in a real Nidz it would not be a booking: Nidz handles no reservation, no payment and no insurance. The details of the stay remain to be agreed directly between the two people.",
-      "declined": "In this demonstration the refusal came from you, on the sitter side. Declining is a normal answer: every sitter's limits are stated on their profile."
+      "declined": "In this demonstration the refusal came from you, on the sitter side. Declining is a normal answer: every sitter's limits are stated on their profile.",
+      "withdrawn": "You withdrew this request before an answer. It is kept in your history.",
+      "cancelled": "This arrangement was cancelled. It is kept in your history; nothing had been booked or paid through Nidz."
     },
     "count_one": "{{count}} request",
     "count_other": "{{count}} requests",
     "demoNote": "These requests exist only in this browser. No sitter was notified.",
-    "alreadySent": "You had already sent this request. Here it is."
+    "alreadySent": "You had already sent this request. Here it is.",
+    "withdraw": "Withdraw the request",
+    "withdrawTitle": "Withdraw this request?",
+    "withdrawBody": "The sitter will no longer be able to answer it. It stays in your history.",
+    "withdrawConfirm": "Withdraw"
   },
   "sitterRequests": {
     "title": "Requests received",
@@ -620,7 +702,9 @@
     "acceptNote": "Accepting means you agree to this stay. It is not a booking: Nidz handles no reservation, no payment and no insurance.",
     "answered": {
       "accepted": "You accepted this request. The owner sees this status on their side. The details remain to be agreed directly between you.",
-      "declined": "You declined this request. The owner sees this status on their side."
+      "declined": "You declined this request. The owner sees this status on their side.",
+      "withdrawn": "The owner withdrew this request.",
+      "cancelled": "This arrangement was cancelled."
     },
     "draftTitle": "Your profile is not visible yet",
     "draftBody": "Owners can only send you a request once your profile is published.",
@@ -713,6 +797,161 @@
       "body": "This demonstration has no other users. To see what a sitter receives — a request, a question, a message — you can address them to your own published profile. They stay in this browser.",
       "selfRequest": "Address a test request to my profile",
       "selfMessage": "Write a test message to my profile"
+    },
+    "versionLine": "Nidz {{version}} — prototype",
+    "sections": {
+      "security": {
+        "title": "Security and privacy",
+        "line": "Phone, sign-in, visibility, blocks, your data"
+      },
+      "notifications": {
+        "title": "Notifications",
+        "line": "What appears in Messages › Notifications"
+      },
+      "preferences": {
+        "title": "Preferences",
+        "line": "Language, reduced motion"
+      },
+      "location": {
+        "title": "Location",
+        "line": "Your area, location permission"
+      },
+      "help": {
+        "title": "Help and support",
+        "line": "Help centre, FAQ, report a problem"
+      },
+      "legal": {
+        "title": "Legal information and about",
+        "line": "Version, terms, privacy, licences"
+      },
+      "account": {
+        "title": "Account management",
+        "line": "Sign out, delete my account"
+      }
+    },
+    "security": {
+      "accountTitle": "Account security",
+      "phone": "Phone number",
+      "unverified": "not verified",
+      "noPhone": "No number",
+      "method": "Sign-in method",
+      "methodValue": {
+        "google": "Google (prototype — not connected)",
+        "apple": "Apple (prototype — not connected)",
+        "phone": "Phone number (prototype — no SMS)"
+      },
+      "methodLocal": "Account kept in this browser",
+      "session": "Session",
+      "sessionLine": "This device only. There are no other sessions: the account is not on a server.",
+      "signOutLine": "In Account management",
+      "notAvailable": "Not available in this prototype, because they need a server: changing an e-mail address (none is collected), two-factor authentication, connected devices, linked Google or Apple accounts.",
+      "privacyTitle": "Privacy",
+      "personalInfo": "Your personal information",
+      "personalInfoLine": "Your surname, phone and exact area are never shown to other members. Public: your first name and initial, and your area at wilaya or commune level.",
+      "profileVisible": "Sitter profile visible",
+      "profileVisibleLine": "Owners can find your profile.",
+      "profileHiddenLine": "Hidden: owners no longer find it. Nothing is deleted.",
+      "profileDraft": "Publish your profile first.",
+      "location": "Location permission",
+      "locationLine": {
+        "granted": "Allowed in this browser. Used only when you press “Use my position”.",
+        "denied": "Refused in this browser. Change it in your browser settings.",
+        "prompt": "Not asked yet. It is asked only when you press “Use my position”.",
+        "unknown": "This browser does not say. It is asked only when you press “Use my position”."
+      },
+      "blockedTitle": "Blocked sitters",
+      "blockedNote": "A blocked sitter no longer appears in your searches on this device.",
+      "blockedNone": "Nobody blocked.",
+      "unblock": "Unblock",
+      "dataTitle": "Your data",
+      "dataNote": "Everything Nidz knows about you is in this browser. You can download it.",
+      "dataCount": {
+        "pets_one": "{{count}} animal",
+        "pets_other": "{{count}} animals",
+        "requests_one": "{{count}} direct request",
+        "requests_other": "{{count}} direct requests",
+        "posts_one": "{{count}} published request",
+        "posts_other": "{{count}} published requests",
+        "conversations_one": "{{count}} conversation",
+        "conversations_other": "{{count}} conversations"
+      },
+      "export": "Download my data (JSON)",
+      "exported": "File prepared. Check your downloads.",
+      "privacyPolicy": "Privacy policy"
+    },
+    "notifications": {
+      "demoTitle": "Nothing is pushed",
+      "demoBody": "There is no push, e-mail or SMS in this prototype. These switches choose what is shown in Messages › Notifications and counted on the tab.",
+      "essentialTitle": "Essential",
+      "essentialNote": "About a request or a proposal you are part of. Always shown.",
+      "optionalTitle": "Optional",
+      "opportunitiesLine": "In your sitter space.",
+      "promotionsLine": "Nidz sends none today. Off by default.",
+      "topics": {
+        "messages": "Messages",
+        "requests": "New requests",
+        "proposals": "New proposals",
+        "updates": "Request updates",
+        "reminders": "Care reminders",
+        "opportunities": "Requests near me (sitters)",
+        "promotions": "News and offers"
+      }
+    },
+    "preferences": {
+      "a11yTitle": "Accessibility",
+      "reduceMotion": "Reduce motion",
+      "reduceMotionLine": "Removes the interface's animations, on top of your device setting.",
+      "appearanceNote": "Nidz has one appearance (light) for now: a dark mode will be offered only once every screen supports it."
+    },
+    "location": {
+      "areaTitle": "Your area",
+      "areaNote": "Orders sitters near you first when you search without giving an area. Never shown as an address.",
+      "noArea": "Not given",
+      "saved": "Area saved.",
+      "permissionTitle": "Location permission",
+      "radiusNote": "No search radius: Nidz has no position for anybody's home, only approximate ones for wilaya chefs-lieux.",
+      "sitterArea": "Area where you offer care",
+      "sitterAreaLine": "In your sitter profile"
+    },
+    "help": {
+      "center": "Help centre",
+      "centerLine": "How Nidz works, what is real and what is not",
+      "faq": "Frequently asked questions",
+      "contactTitle": "Contact Nidz",
+      "contactNote": "No support service is connected to this prototype: nothing written here is sent. Write your message, then copy it to share it with the team.",
+      "kind": {
+        "problem": "Report a problem",
+        "feedback": "Give feedback"
+      },
+      "textLabel": "Your message",
+      "placeholder": "What happened, or what you would like to see…",
+      "copy": "Copy the message",
+      "copied": "Copied. It was not sent: paste it where you want to share it."
+    },
+    "legal": {
+      "version": "Version",
+      "versionLine": "Nidz {{version}} — {{stage}}",
+      "stage": {
+        "prototype": "front-end prototype, without a server"
+      },
+      "terms": "Terms of use",
+      "legalInfo": "Legal information",
+      "licensesTitle": "Open-source licences",
+      "licensesNote": "Nidz is built on these components, under their licences.",
+      "illustrations": "Animal and welcome illustrations supplied for Nidz."
+    },
+    "account": {
+      "sessionTitle": "Sign out",
+      "signOut": "Sign out",
+      "signOutBody": "Your data stays in this browser; signing in again reopens it.",
+      "signOutTitle": "Sign out?",
+      "signOutConfirmBody": "You will go back to the welcome screen. Nothing is erased.",
+      "deleteTitle": "Delete my account",
+      "deleteBody": "Erases the account and everything kept in this browser: animals, requests, published requests, proposals, conversations and sitter profile.",
+      "delete": "Delete my account",
+      "deleteConfirmTitle": "Delete your account?",
+      "deleteConfirmBody": "Everything this browser holds about you is erased, and nothing can undo it. There is no server: no other copy exists to delete.",
+      "deleteConfirm": "Delete permanently"
     }
   },
   "workspace": {
@@ -807,7 +1046,10 @@
       "goodWithChildren": "Comfortable around children?",
       "walksPerDay": "Walks a day",
       "walksPerDayHelp": "How many your dog is used to. Leave empty if it varies.",
-      "leashNotes": "On the lead"
+      "leashNotes": "On the lead",
+      "sizeLegacyLine": "Size given before: {{size}} (no longer asked or used)",
+      "sizeLegacyRemove": "Remove",
+      "sizeLegacy": "Size (earlier answer)"
     },
     "cat": {
       "living": "Indoors or outdoors?",
@@ -847,32 +1089,6 @@
     "notSure": "Not sure",
     "deleteFailedTitle": "Couldn't delete {{name}} — nothing changed.",
     "deleteFailedBody": "This browser couldn't save the deletion (storage full or blocked). The animal is still in your list, so you can try again.",
-    "kind": {
-      "label": {
-        "dog": "Breed",
-        "cat": "Breed",
-        "bird": "Species"
-      },
-      "search": {
-        "dog": "Search for a breed",
-        "cat": "Search for a breed",
-        "bird": "Search for a species"
-      },
-      "notInList": "My animal isn't in the list",
-      "otherLabel": {
-        "dog": "Its breed",
-        "cat": "Its breed",
-        "bird": "Its species"
-      },
-      "otherPlaceholder": {
-        "dog": "e.g. Shar-Pei",
-        "cat": "e.g. Abyssinian",
-        "bird": "e.g. Myna"
-      },
-      "noMatch": "Nothing matches “{{query}}”. Choose “My animal isn't in the list” to write it yourself.",
-      "showAll": "Show the whole list",
-      "info": "It helps a sitter picture your animal. It does not change the results: sitters are found by animal and, for a dog, by size — never by breed."
-    },
     "placeholder": {
       "walks": "e.g. 2",
       "leash": "e.g. pulls, reacts to other dogs, fine off lead",
@@ -880,7 +1096,17 @@
       "outOfCage": "e.g. an hour in the evening, windows shut",
       "social": "e.g. sings in the morning, likes company"
     },
-    "speciesLabel": "Which animal?"
+    "speciesLabel": "Which animal?",
+    "ageLegacy": "Age given before: {{age}}",
+    "habitat": {
+      "label": "Where it lives",
+      "help": "Cage, hutch, terrarium, aquarium, free in the house…",
+      "placeholder": "E.g. 120 cm terrarium with a heat lamp"
+    },
+    "kind": {
+      "showAll": "Show the whole list",
+      "noMatch": "Nothing matches “{{query}}”. Choose “My animal isn't in the list” to write it yourself."
+    }
   },
   "reviews": {
     "title": "Reviews",
@@ -931,7 +1157,7 @@
     },
     "animals": {
       "label": "Animals you accept",
-      "hint": "Species and, for dogs, the sizes you take — and how many at once."
+      "hint": "The animals you accept and, for each, every breed or only some — and how many at once."
     },
     "experience": {
       "label": "What you have done",
@@ -1151,16 +1377,6 @@
       "expired": "Expired"
     }
   },
-  "sizeShort": {
-    "small": "small",
-    "medium": "medium",
-    "large": "large"
-  },
-  "acceptsSize": {
-    "small": "Accepts small dogs",
-    "medium": "Accepts medium dogs",
-    "large": "Accepts large dogs"
-  },
   "clarify": {
     "title": "Questions before deciding",
     "localNote": "Kept in this browser only. Nobody was notified and no message was sent.",
@@ -1273,7 +1489,21 @@
       "accepted": "{{name}} accepted your request for {{pet}}",
       "declined": "{{name}} declined your request for {{pet}}"
     },
-    "incoming": "New request from {{name}} for {{pet}}"
+    "incoming": "New request from {{name}} for {{pet}}",
+    "preferences": "Choose what appears here",
+    "today": "Today",
+    "proposal": "{{name}} proposes to look after {{pet}}",
+    "proposalSimulated": "Simulated proposal from {{name}} for {{pet}}",
+    "proposalDecision": {
+      "accepted": "{{name}} accepted your proposal for {{pet}}",
+      "declined": "{{name}} declined your proposal for {{pet}}",
+      "notRetained": "{{name}} chose another sitter for {{pet}}"
+    },
+    "cancelled": "The arrangement for {{pet}} was cancelled",
+    "withdrawn": "{{name}} withdrew the request for {{pet}}",
+    "reminder": "Care for {{pet}} starts on {{date}}",
+    "opportunities_one": "{{count}} published request matches your profile",
+    "opportunities_other": "{{count}} published requests match your profile"
   },
   "account": {
     "title": "Account",
@@ -1311,6 +1541,479 @@
     "publicProfile": {
       "title": "My public profile",
       "line": "What owners see when they find you"
+    },
+    "personal": {
+      "title": "Personal information",
+      "line": "Name, phone, area, photo"
+    },
+    "sitterProfile": {
+      "title": "My sitter profile",
+      "sections": "Profile sections",
+      "preview": "Preview",
+      "previewLine": "See your profile as owners will",
+      "availability": "Declared unavailability",
+      "availabilityLine": "Periods you cannot take",
+      "status": {
+        "none": "Not started",
+        "draft": "Not visible yet — continue",
+        "listed": "Visible to owners",
+        "hidden": "No longer visible — something is missing"
+      }
+    }
+  },
+  "catalogue": {
+    "other": "Other",
+    "noMatch": "Nothing in the list matches “{{query}}”. Use “Other” to type it.",
+    "label": {
+      "breed": "Breed",
+      "species": "Species"
+    },
+    "search": {
+      "breed": "Search for a breed…",
+      "species": "Search for a species…"
+    }
+  },
+  "status": {
+    "pending": "Waiting",
+    "accepted": "Accepted",
+    "declined": "Declined",
+    "withdrawn": "Withdrawn",
+    "cancelled": "Cancelled",
+    "expired": "Past",
+    "open": "Published",
+    "notRetained": "Not chosen"
+  },
+  "requestKind": {
+    "post": "Published request",
+    "direct": "Direct request",
+    "proposal": "Proposal"
+  },
+  "welcome": {
+    "createAccount": "Open an account",
+    "signIn": "Sign in"
+  },
+  "start": {
+    "title": "Welcome, {{name}}. Where would you like to start?"
+  },
+  "register": {
+    "title": "Open an account",
+    "intro": "One account for both spaces: finding care for your animals and offering it.",
+    "method": {
+      "google": "Continue with Google",
+      "apple": "Continue with Apple",
+      "phone": "Continue with a phone number"
+    },
+    "provider": {
+      "google": "Google",
+      "apple": "Apple",
+      "phone": "SMS"
+    },
+    "demoTitle": "Prototype: no provider is connected",
+    "demoBody": "Google, Apple and SMS are not connected in this version. The screens show the planned journey; nothing is sent to any service, no identity is checked, and your account stays in this browser.",
+    "haveAccount": "Already have an account?",
+    "resume": "Your sign-up ({{method}}) was interrupted.",
+    "resumeAction": "Resume",
+    "progress": "Step {{current}} of {{total}}",
+    "finish": "Finish",
+    "existing": {
+      "title": "An account already exists on this device: {{name}}",
+      "body": "This prototype keeps one account per browser. Sign in to it, or erase this device's data to start again.",
+      "signIn": "Sign in to this account",
+      "erase": "Erase and start again",
+      "eraseTitle": "Erase this device's data?",
+      "eraseBody": "The account, animals, requests, published requests and sitter profile kept in this browser will be erased. Nothing exists on a server, so nothing else is affected. This cannot be undone.",
+      "eraseConfirm": "Erase everything"
+    },
+    "name": {
+      "title": "Your name",
+      "intro": "Your first name and the initial of your last name are what others see.",
+      "providerTitle": "{{provider}} was not contacted",
+      "providerBody": "In the final version, {{provider}} would fill in your name here. In this prototype, type it yourself — you can change it at any time."
+    },
+    "phone": {
+      "title": "Your phone number",
+      "intro": "Needed to open an account. It is never shown to other members.",
+      "label": "Mobile number",
+      "help": "9 digits after +213. Private."
+    },
+    "code": {
+      "title": "Confirmation code",
+      "intro": "Type the 6-digit code.",
+      "label": "Code sent to {{phone}}",
+      "demoTitle": "No SMS was sent",
+      "demoBody": "This prototype is connected to no SMS service, so no code was sent. To continue the demonstration, type any six digits. Your number will be recorded as not verified.",
+      "invalid": "Type the 6 digits.",
+      "changeNumber": "Change the number"
+    },
+    "photo": {
+      "title": "Your profile photo",
+      "intro": "Optional. A photo helps people recognise you; you can add one later.",
+      "label": "Profile photo",
+      "skip": "Skip this step"
+    }
+  },
+  "login": {
+    "title": "Sign in",
+    "continueAs": "Continue as {{name}}",
+    "via": {
+      "google": "Account opened with Google (prototype)",
+      "apple": "Account opened with Apple (prototype)",
+      "phone": "Account opened with a phone number (prototype)"
+    },
+    "viaLocal": "Account kept in this browser",
+    "noneTitle": "No account on this device",
+    "noneBody": "In this prototype an account lives in the browser where it was opened. An account opened on another phone cannot be reached from here.",
+    "demoTitle": "No identity check",
+    "demoBody": "Signing in reopens the account kept in this browser. No password, provider or code is checked: there is no server yet."
+  },
+  "age": {
+    "years": "Years",
+    "months": "Months",
+    "choose": "Choose",
+    "yearsCount_one": "{{count}} year",
+    "yearsCount_other": "{{count}} years",
+    "monthsCount_one": "{{count}} month",
+    "monthsCount_other": "{{count}} months",
+    "estimated": "Approximate age",
+    "unknown": "I don't know its age",
+    "unknownShort": "Age unknown",
+    "about": "about {{value}}",
+    "and": " and "
+  },
+  "photo": {
+    "add": "Add a photo",
+    "replace": "Replace",
+    "remove": "Remove the photo",
+    "none": "No photo",
+    "preparing": "Preparing…",
+    "previewAlt": "Chosen photo",
+    "localNote": "Kept on this device only, reduced in size. Never uploaded.",
+    "errorType": "This file is not an image (JPEG, PNG, WebP or HEIC).",
+    "errorRead": "This image could not be read. Try another one."
+  },
+  "needFlow": {
+    "pet": {
+      "title": "Your animal",
+      "question": "Which animal are you looking for care for?",
+      "addTitle": "Add an animal",
+      "addQuestion": "Which animal do you want to add?",
+      "otherLabel": "What animal is it?",
+      "otherHelp": "No sitter is assumed to accept an animal outside the list: you will confirm with them.",
+      "otherPlaceholder": "E.g. axolotl, hedgehog…",
+      "otherRequired": "Say which animal it is (2 to 40 characters)."
+    },
+    "breed": {
+      "title": {
+        "breed": "Breed",
+        "species": "Species"
+      },
+      "question": {
+        "breed": "What is your animal's breed?",
+        "species": "What is your animal's species?"
+      },
+      "other": "Other",
+      "unknown": "I don't know",
+      "otherLabel": {
+        "breed": "Its breed",
+        "species": "Its species"
+      },
+      "otherPlaceholder": {
+        "breed": "Type the breed",
+        "species": "Type the species"
+      },
+      "otherRequired": "Type at least 2 characters, or choose “I don't know”.",
+      "note": "Optional. Some sitters accept only certain breeds or species: knowing it lets them answer. A breed says nothing about behaviour."
+    },
+    "about": {
+      "title": "Name, age and photo",
+      "nameTitle": "Name",
+      "nameQuestion": "What is your animal called?",
+      "nameRequired": "Type your animal's name.",
+      "ageTitle": "Age",
+      "ageQuestion": "How old is your animal?",
+      "photoTitle": "Photo",
+      "photoLabel": "A photo of your animal"
+    },
+    "needs": {
+      "title": "Important needs and constraints",
+      "question": "Does your animal have special needs or important constraints?",
+      "questionFor": "Does {{name}} have special needs or important constraints?",
+      "info": "This is what a sitter needs to know before saying yes: a daily medication, an allergy, fear of other animals, a special diet. It is shown to the sitters you ask or who see your published request — never on a public page.",
+      "placeholder": "E.g. allergies, daily medication, anxiety, reactivity, special diet, difficulty with other animals, other important instructions…",
+      "privacy": "Seen by the sitters you ask, before they accept. Do not write an address or a phone number.",
+      "nothing": "Nothing to report"
+    },
+    "location": {
+      "intro": "Nidz shows the sitters nearest to the area you are looking in first.",
+      "privacyInfo": "If you choose by hand, Nidz never asks for your position. With “Near me”, your device's position is used once, here, to suggest the nearest wilaya — it is neither stored nor sent.",
+      "methodLabel": "How do you want to give the area?",
+      "manual": "Choose by hand",
+      "manualHint": "Wilaya, and commune if you like.",
+      "nearby": "Near me",
+      "nearbyHint": "Uses your device's location, once, when you ask.",
+      "askHint": "Your browser will ask for permission. You can refuse and choose by hand.",
+      "useMyPosition": "Use my position",
+      "locating": "Locating…",
+      "found": "Nearest wilaya to your position (estimate): {{wilaya}}. Check it below — you can change it.",
+      "retry": "Try again",
+      "chooseManually": "Choose by hand",
+      "error": {
+        "denied": "Location access was refused. You can allow it in your browser settings, or choose by hand.",
+        "unavailable": "Your position could not be determined.",
+        "timeout": "Finding your position took too long.",
+        "unsupported": "This browser cannot give a position here.",
+        "outside": "Your position seems to be outside Algeria. Choose the area by hand."
+      }
+    },
+    "care": {
+      "see": "See the sitters",
+      "publish": "Publish my request",
+      "editTitle": "Change the service and dates",
+      "onlyRelevant": "Only the services suited to {{animal}} are offered."
+    }
+  },
+  "needs": {
+    "label": "Needs",
+    "none": "Not filled in by the owner",
+    "nothing": "Nothing to report, says the owner"
+  },
+  "publish": {
+    "title": "Publish your care request",
+    "points": {
+      "feed": "Your request appears in the feed of nearby sitters.",
+      "propose": "Interested sitters can propose their services.",
+      "choose": "You stay free to choose the sitter who suits you — or nobody.",
+      "noBooking": "Publishing reserves nothing and confirms nothing: no booking, no payment."
+    },
+    "previewTitle": "What sitters will see",
+    "needsShared": "Your needs and constraints are shown.",
+    "needsNothing": "“Nothing to report” is shown.",
+    "needsNone": "No needs filled in.",
+    "privacy": "Shown as {{name}}, with the approximate area only. No phone number, surname or address.",
+    "back": "Back",
+    "duplicateTitle": "You have already published this request",
+    "duplicateBody": "The same animal, service and dates are already open to proposals.",
+    "duplicateOpen": "See the published request",
+    "demoTitle": "Published on this device only",
+    "demoBody": "The request goes to the sitter feed of this browser — the examples and your own sitter space. Nobody else receives it."
+  },
+  "posts": {
+    "example": "Example — no real owner"
+  },
+  "feed": {
+    "title": "Requests near you",
+    "intro": "Requests published by owners, nearest to your area first.",
+    "filterLabel": "Service",
+    "filterAll": "All",
+    "fitsTitle_one": "{{count}} request matches your profile",
+    "fitsTitle_other": "{{count}} requests match your profile",
+    "allTitle_one": "{{count}} published request",
+    "allTitle_other": "{{count}} published requests",
+    "outsideTitle_one": "{{count}} outside your criteria",
+    "outsideTitle_other": "{{count}} outside your criteria",
+    "undeclared": "Say which animals you accept to see which requests match.",
+    "yours": "Your own request, published from your owner space",
+    "outside": {
+      "service": "You do not offer this service.",
+      "unavailable": "You declared yourself unavailable during these dates."
+    },
+    "proposal": {
+      "pending": "Proposal sent — waiting",
+      "accepted": "Your proposal was accepted",
+      "declined": "Your proposal was declined",
+      "withdrawn": "Proposal withdrawn",
+      "notRetained": "Another sitter was chosen",
+      "cancelled": "Arrangement cancelled"
+    },
+    "notListed": {
+      "action": "Complete my profile",
+      "draft": {
+        "title": "Your profile is not visible yet",
+        "body": "You can read the requests; to propose your services, finish what publishing needs."
+      },
+      "hidden": {
+        "title": "Your profile is no longer visible",
+        "body": "Something publishing needs was removed. Fill it in again to propose."
+      }
+    },
+    "demoTitle": "Examples and your own requests",
+    "demoBody": "These requests are examples, plus the ones you published from your owner space on this device. Fitting your profile never means you are available: you decide.",
+    "empty": {
+      "title": "No request to show",
+      "body": "No published request is open right now.",
+      "bodyOutside": "None matches your profile; see those outside your criteria below."
+    }
+  },
+  "postDetail": {
+    "careTitle": "Service and dates",
+    "area": "Area: {{area}}",
+    "by": "Published by {{name}}",
+    "factsTitle": "What the owner says",
+    "fitTitle": "Against your profile",
+    "serviceOk": "You offer this service.",
+    "notDeclaredBusy": "You have not declared these dates unavailable — that is not a confirmation of availability.",
+    "breedNotBehaviour": "A breed says nothing about behaviour: read the needs above.",
+    "propose": "Propose my services",
+    "yourProposal": "Your proposal:",
+    "seeSent": "See my proposals",
+    "withdraw": "Withdraw my proposal",
+    "withdrawTitle": "Withdraw your proposal?",
+    "withdrawBody": "The owner will no longer see it. You can propose again later.",
+    "withdrawConfirm": "Withdraw",
+    "proposedTitle": "Proposal added",
+    "proposedExample": "This is an example request: no owner will read it.",
+    "proposedOwn": "It appears in your owner space, under Requests › Received.",
+    "exampleTitle": "Example request",
+    "exampleBody": "No real owner is behind this request. A proposal is kept but read by nobody.",
+    "ownTitle": "Your own request",
+    "ownBody": "Published from your owner space on this device. In this prototype both spaces are on the same device, so you can answer yourself to try the whole loop.",
+    "cannot": {
+      "notListed": "Your profile must be visible to propose.",
+      "closed": "This request no longer accepts proposals.",
+      "animal": "This animal is outside what you accept.",
+      "service": "You do not offer this service."
+    }
+  },
+  "propose": {
+    "title": "Propose my services",
+    "intro": "{{name}} will see your proposal and decide freely.",
+    "messageLabel": "A message (optional)",
+    "messageHelp": "Your experience with this kind of animal, a question about the needs…",
+    "messagePlaceholder": "E.g. I have looked after a reactive dog before; can we meet first?",
+    "rateTitle": "Your declared rate",
+    "noRate": "No rate declared for this service.",
+    "noPayment": "Proposing commits nobody and asks for no payment.",
+    "submit": "Send my proposal",
+    "exampleBody": "This is an example request: your proposal will be kept, and no owner will read it."
+  },
+  "proposals": {
+    "simulated": "Simulation — example sitter"
+  },
+  "ownerPost": {
+    "title": "Request for {{name}}",
+    "publishedTitle": "Your request is published",
+    "publishedBody": "It is visible in the sitter feed of this device. You will find the proposals here and in Requests › Received.",
+    "edit": "Change the service or dates",
+    "proposalsTitle_one": "{{count}} proposal",
+    "proposalsTitle_other": "{{count}} proposals",
+    "noProposalsYet": "No proposal yet.",
+    "noProposals": "No proposal.",
+    "acceptedWith": "You accepted {{name}}'s proposal",
+    "acceptedMeaning": "You agreed to arrange this care together. It is not a booking and nothing was paid: the details are for the two of you to settle.",
+    "accept": "Accept",
+    "acceptTitle": "Accept {{name}}'s proposal?",
+    "acceptBody": "The request closes to new proposals and the others will be marked “not chosen”. It is an agreement to arrange care, not a booking or a payment.",
+    "acceptConfirm": "Accept this proposal",
+    "decline": "Decline",
+    "viewProfile": "See the profile",
+    "write": "Write",
+    "withdraw": "Withdraw the request",
+    "withdrawTitle": "Withdraw this request?",
+    "withdrawBody_one": "It leaves the sitter feed. {{count}} waiting proposal will be closed.",
+    "withdrawBody_other": "It leaves the sitter feed. {{count}} waiting proposals will be closed.",
+    "withdrawConfirm": "Withdraw",
+    "simTitle": "Test tool — simulation",
+    "simBody": "Nobody else uses this device. To try accepting and declining, add a proposal written on behalf of an example sitter whose profile fits. It is labelled as a simulation everywhere.",
+    "simAction": "Simulate a proposal",
+    "simNone": "No example sitter fits this request (animal, service or dates).",
+    "demoTitle": "Local demonstration",
+    "demoBody": "This request and its proposals exist in this browser only. Accepting confirms no booking and moves no money."
+  },
+  "arrangement": {
+    "cancel": "Cancel the arrangement",
+    "cancelTitle": "Cancel this arrangement?",
+    "cancelBody": "The other person will see that it was cancelled. It stays in your history. Nothing had been paid or booked through Nidz.",
+    "cancelConfirm": "Cancel the arrangement"
+  },
+  "drafts": {
+    "title": "Drafts",
+    "badge": "Draft — not sent",
+    "journeyFor": "Care for {{name}}",
+    "journeyAnimal": "Animal being described: {{animal}}",
+    "step": {
+      "pet": "Stopped while describing the animal",
+      "location": "Next: where",
+      "care": "Next: which care and when"
+    },
+    "discard": "Discard this draft",
+    "discardTitle": "Discard this draft?",
+    "discardBody": "The unfinished request is forgotten. A saved animal stays in My animals.",
+    "discardConfirm": "Discard"
+  },
+  "requestsHub": {
+    "tabs": {
+      "received": "Received",
+      "sent": "Sent",
+      "validated": "Confirmed"
+    },
+    "waitingCount_one": "{{count}} waiting",
+    "waitingCount_other": "{{count}} waiting",
+    "history_one": "History ({{count}})",
+    "history_other": "History ({{count}})",
+    "validatedEmpty": {
+      "title": "Nothing confirmed yet",
+      "body": "An accepted request or proposal appears here. Accepting is an agreement between two people, not a booking."
+    },
+    "owner": {
+      "receivedEmpty": {
+        "title": "No proposal received",
+        "body": "Sitters' proposals on your published requests appear here."
+      },
+      "directTitle": "Direct requests",
+      "directEmpty": "You have not written to a sitter yet.",
+      "postsTitle": "Published requests",
+      "postsEmpty": "You have not published a request yet.",
+      "start": "Find care"
+    },
+    "sitter": {
+      "sentEmpty": {
+        "title": "No proposal sent",
+        "body": "Propose your services on a published request from your feed."
+      },
+      "toFeed": "See the requests near me"
+    }
+  },
+  "explore": {
+    "animal": "Animal",
+    "anyAnimal": "All animals",
+    "care": "Service",
+    "anyCare": "All services",
+    "near": "Near",
+    "anyWilaya": "All Algeria",
+    "count_one": "{{count}} sitter",
+    "count_other": "{{count}} sitters",
+    "orderNear": "nearest first",
+    "orderAlpha": "alphabetical order",
+    "detailed": "Detailed search",
+    "emptyTitle": "No sitter for these criteria",
+    "emptyBody": "Widen the animal or the service.",
+    "fartherTitle": "Farther away",
+    "fartherNote": "From other wilayas, nearest first — an estimate between chefs-lieux, not a distance."
+  },
+  "compat": {
+    "sitter": {
+      "confirmed": "Matches the animals you accept",
+      "unknown": {
+        "otherCategory": "Animal outside the list: to confirm with the owner",
+        "kindNotGiven": "Breed not given, while you accept only some: to confirm",
+        "kindFreeText": "Breed in the owner's own words: to confirm"
+      },
+      "incompatible": {
+        "category": "You do not accept this animal",
+        "kind": "Breed outside those you accept"
+      }
+    },
+    "owner": {
+      "confirmed": "Accepts this kind of animal",
+      "unknown": {
+        "otherCategory": "Your animal is outside the list: to confirm with the sitter",
+        "kindNotGiven": "Accepts only certain breeds: give the breed or ask",
+        "kindFreeText": "Breed to confirm with the sitter"
+      },
+      "incompatible": {
+        "category": "Does not accept this animal",
+        "kind": "Does not accept this breed"
+      }
     }
   }
 }

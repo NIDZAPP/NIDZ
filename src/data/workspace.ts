@@ -89,6 +89,7 @@ export function workspaceForPath(pathname: string): Workspace | null {
     case "search":
     case "sitters":
       return "owner";
+    /* The account steps and the first choice are nobody's side yet. */
     default:
       return null;
   }

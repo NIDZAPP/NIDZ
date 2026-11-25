@@ -3,6 +3,9 @@ import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   BellRing,
+  CalendarClock,
+  HandHeart,
+  Megaphone,
   CircleCheck,
   CircleX,
   Inbox,
@@ -23,7 +26,7 @@ import { conversationsOf, sitterNameFor } from "@/data/repository";
 import { useAppLocale } from "@/hooks/use-locale";
 import { cn } from "@/lib/utils";
 import { useDemo } from "@/state/demo/context";
-import { formatRelativeTime } from "@/utils/dates";
+import { formatDate, formatRelativeTime } from "@/utils/dates";
 
 /**
  * MESSAGES (Nidz 1.4, step 5) — the conversations of the space you are in,
@@ -216,42 +219,40 @@ function ConversationList({ conversations, side }: { conversations: Conversation
   );
 }
 
-const NOTIFICATION_ICON = {
+const NOTIFICATION_ICON: Record<LocalNotification["kind"], typeof Inbox> = {
   message: MessageCircle,
   question: MessageCircleQuestion,
   incoming: Inbox,
-} as const;
+  decision: CircleCheck,
+  proposal: HandHeart,
+  proposalDecision: CircleCheck,
+  cancelled: CircleX,
+  reminder: CalendarClock,
+  opportunities: Megaphone,
+};
 
 function NotificationList({ items }: { items: LocalNotification[] }) {
   const { t } = useTranslation();
   const lng = useAppLocale();
 
-  const text = (n: LocalNotification) => {
-    switch (n.kind) {
-      case "message":
-        return t("notifications.message", { name: n.name, count: n.count });
-      case "question":
-        return t("notifications.question", { pet: n.petName });
-      case "decision":
-        return t(`notifications.decision.${n.status}`, { name: n.name, pet: n.petName });
-      case "incoming":
-        return t("notifications.incoming", { name: n.name, pet: n.petName });
-    }
-  };
-
   return (
     <>
       <p className="mb-3 flex items-start gap-2 px-1 text-sm text-muted-foreground">
         <BellRing className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-        {t("notifications.note")}
+        <span>
+          {t("notifications.note")}{" "}
+          <Link to="/settings/notifications" className="font-semibold text-primary underline underline-offset-4">
+            {t("notifications.preferences")}
+          </Link>
+        </span>
       </p>
       {items.length === 0 ? (
         <EmptyState icon={BellRing} title={t("notifications.empty.title")} body={t("notifications.empty.body")} />
       ) : (
         <ul role="list" className={LIST_GROUP}>
           {items.map((n) => {
-            const Icon =
-              n.kind === "decision" ? (n.status === "accepted" ? CircleCheck : CircleX) : NOTIFICATION_ICON[n.kind];
+            const Icon = n.tone === "positive" ? CircleCheck : n.tone === "ended" ? CircleX : NOTIFICATION_ICON[n.kind];
+            const values = n.kind === "reminder" ? { ...n.text.values, date: formatDate(String(n.text.values.date), lng) } : n.text.values;
             return (
               <li key={n.id}>
                 <Link to={n.to} className={REGISTER_ROW}>
@@ -259,14 +260,16 @@ function NotificationList({ items }: { items: LocalNotification[] }) {
                     aria-hidden="true"
                     className={cn(
                       "flex size-10 shrink-0 items-center justify-center rounded-full",
-                      n.kind === "decision" && n.status === "accepted" ? "bg-success/10 text-success" : "bg-primary-soft text-primary",
+                      n.tone === "positive" ? "bg-success/10 text-success" : n.tone === "ended" ? "bg-secondary text-muted-foreground" : "bg-primary-soft text-primary",
                     )}
                   >
                     <Icon className="size-5" />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block text-[0.9375rem] font-medium text-foreground">{text(n)}</span>
-                    <span className="mt-0.5 block text-xs text-muted-foreground">{formatRelativeTime(n.at, lng)}</span>
+                    <span className="block text-[0.9375rem] font-medium text-foreground">{t(n.text.key, values)}</span>
+                    <span className="mt-0.5 block text-xs text-muted-foreground">
+                      {n.kind === "opportunities" || n.kind === "reminder" ? t("notifications.today") : formatRelativeTime(n.at, lng)}
+                    </span>
                   </span>
                 </Link>
               </li>

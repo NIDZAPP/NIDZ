@@ -22,7 +22,9 @@
    this browser. It is not authentication and no screen may present it as any.
    ------------------------------------------------------------------------ */
 
-export type AuthProviderId = "google" | "microsoft" | "phone";
+/* Nidz 1.7 §3: Google, Apple and a phone number. Microsoft (Audit 1.2) is no
+   longer offered. */
+export type AuthProviderId = "google" | "apple" | "phone";
 
 /**
  * Why a provider cannot be used.
@@ -47,10 +49,37 @@ export type AuthProviderDescriptor = {
 };
 
 export const AUTH_PROVIDERS: readonly AuthProviderDescriptor[] = [
-  { id: "google", labelKey: "auth.provider.google", available: false, reason: "notConfigured" },
-  { id: "microsoft", labelKey: "auth.provider.microsoft", available: false, reason: "notConfigured" },
-  { id: "phone", labelKey: "auth.provider.phone", available: false, reason: "notConfigured" },
+  { id: "google", labelKey: "register.method.google", available: false, reason: "notConfigured" },
+  { id: "apple", labelKey: "register.method.apple", available: false, reason: "notConfigured" },
+  { id: "phone", labelKey: "register.method.phone", available: false, reason: "notConfigured" },
 ];
+
+/**
+ * Nidz 1.7: the three ways of opening an account are shown as the JOURNEYS
+ * they will be — the screens, in order — and each is walked through with a
+ * prototype notice at full weight wherever the real thing would contact a
+ * provider. Nothing here is skipped silently and nothing is claimed:
+ *
+ *   google / apple  the name a provider would return is typed by the person
+ *                   (« Google n'a pas été contacté ») — then the phone and
+ *                   the code, like every account;
+ *   phone           the code step says no SMS was sent and accepts any six
+ *                   digits; the number is recorded as NOT verified.
+ *
+ * `available` stays `false` for all three: that is the fact the screens read.
+ */
+export const REGISTER_STEPS: Record<AuthProviderId, readonly RegisterStep[]> = {
+  google: ["name", "phone", "code", "photo"],
+  apple: ["name", "phone", "code", "photo"],
+  phone: ["phone", "code", "name", "photo"],
+};
+
+export type RegisterStep = "name" | "phone" | "code" | "photo";
+export const REGISTER_STEP_IDS: readonly RegisterStep[] = ["name", "phone", "code", "photo"];
+
+export function isProviderId(value: unknown): value is AuthProviderId {
+  return value === "google" || value === "apple" || value === "phone";
+}
 
 /** True when at least one provider could actually sign someone in. Today this
     is `false`, and the gateway uses it to decide whether the provider list is

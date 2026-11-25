@@ -5,6 +5,7 @@ import { Plus, Search } from "lucide-react";
 import { ChipGroup } from "@/components/shared/Chip";
 import InfoTip from "@/components/shared/InfoTip";
 import { Input } from "@/components/ui/input";
+import { classificationOf } from "@/data/animal-catalogue";
 import { getKind, kindsOf, searchKinds } from "@/data/animal-kinds";
 import type { Species } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
@@ -21,8 +22,10 @@ const UNSET = "";
  * words. Optional, and says so; "Je ne sais pas" is a way back out of a
  * mis-tap.
  *
- * DETAIL, NOT MATCHING. The "!" says it plainly: results are found by animal
- * and, for a dog, by size — never by breed (src/data/animal-kinds.ts).
+ * Used on the animal's own sheet (Nidz 1.7). The guided journey has its own
+ * full-screen step (`NeedBreed`). The "!" says what a breed does since 1.7:
+ * it can decide whether a sitter who takes only some breeds can be asked —
+ * and it predicts nothing about behaviour.
  */
 export default function KindPicker({
   species,
@@ -57,7 +60,8 @@ export default function KindPicker({
   const hidden = !query.trim() && !expanded && total > FIRST_SCREEN;
   const noMatch = query.trim().length > 0 && searchKinds(species, query).length === 0;
 
-  const label = t(`pets.kind.label.${species}`);
+  const classification = classificationOf(species) ?? "breed";
+  const label = t(`catalogue.label.${classification}`);
 
   return (
     <div>
@@ -65,7 +69,7 @@ export default function KindPicker({
         <p id={`${id}-label`} className="text-[0.9375rem] font-medium text-foreground">
           {label} <span className="font-normal text-muted-foreground">· {t("common.optional")}</span>
         </p>
-        <InfoTip topic={label}>{t("pets.kind.info")}</InfoTip>
+        <InfoTip topic={label}>{t("needFlow.breed.note")}</InfoTip>
       </div>
 
       <div className="relative">
@@ -74,8 +78,8 @@ export default function KindPicker({
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder={t(`pets.kind.search.${species}`)}
-          aria-label={t(`pets.kind.search.${species}`)}
+          placeholder={t(`catalogue.search.${classification}`)}
+          aria-label={t(`catalogue.search.${classification}`)}
           className="ps-11"
           autoComplete="off"
           enterKeyHint="search"
@@ -104,8 +108,8 @@ export default function KindPicker({
         }}
         options={[
           ...visible.map((kind) => ({ value: kind.id, label: kind.name[lng] })),
-          { value: OTHER, label: t("pets.kind.notInList"), icon: Plus },
-          { value: UNSET, label: t("pets.notSure") },
+          { value: OTHER, label: t("needFlow.breed.other"), icon: Plus },
+          { value: UNSET, label: t("needFlow.breed.unknown") },
         ]}
       />
 
@@ -127,13 +131,13 @@ export default function KindPicker({
       {otherOpen && (
         <div className="mt-3 animate-fade-in">
           <label htmlFor={`${id}-other`} className="mb-2 block text-[0.9375rem] font-medium text-foreground">
-            {t(`pets.kind.otherLabel.${species}`)}
+            {t(`needFlow.breed.otherLabel.${classification}`)}
           </label>
           <Input
             id={`${id}-other`}
             value={kindOther}
             autoComplete="off"
-            placeholder={t(`pets.kind.otherPlaceholder.${species}`)}
+            placeholder={t(`needFlow.breed.otherPlaceholder.${classification}`)}
             onChange={(e) => onChange({ kindId: null, kindOther: e.target.value })}
           />
         </div>

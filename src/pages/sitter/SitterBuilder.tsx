@@ -5,7 +5,11 @@ import { Navigate } from "react-router-dom";
 import { Cat, Dog, Plus, X } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { AnimalCategoryChecks } from "@/components/shared/AnimalCategories";
+import { AnimalGridMulti } from "@/components/shared/AnimalCategories";
+import { AnimalPortrait } from "@/components/illustrations/animals";
+import KindList from "@/components/shared/KindList";
+import { classificationOf, servicesForAccepted } from "@/data/animal-catalogue";
+import { acceptanceComplete, normalizeAcceptance } from "@/data/compatibility";
 import Chip from "@/components/shared/Chip";
 import FlowScreen from "@/components/shared/FlowScreen";
 import { useReturnToDashboard } from "@/hooks/use-return-to-dashboard";
@@ -19,14 +23,13 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   CARE_TYPES,
   CARE_UNIT_KEY,
-  DOG_SIZES,
   SPECIES,
   asLocalized,
   localized,
   type CareType,
   type DateRange,
-  type DogSize,
   type HousingType,
+  type KindAcceptance,
   type OutdoorSpace,
   type SitterProfile,
   type Species,
@@ -347,7 +350,10 @@ export function StepServices() {
       <fieldset ref={servicesRef} tabIndex={-1} className="focus:outline-none">
         <legend className="mb-3 text-[0.9375rem] font-medium text-foreground">{t("sitterFlow.services.label")}</legend>
         <div className="flex flex-wrap gap-2">
-          {CARE_TYPES.map((c) => (
+          {/* Only the services the accepted animals can have (Nidz 1.7): a
+              walk is a dog's, an aquarium is looked after at home. A service
+              already declared stays visible so it can be removed. */}
+          {CARE_TYPES.filter((c) => servicesForAccepted(profile?.acceptedSpecies ?? []).includes(c) || services.includes(c)).map((c) => (
             <Chip
               key={c}
               icon={CARE_ICON[c]}
@@ -409,18 +415,40 @@ export function StepAnimals() {
   const { t } = useTranslation();
   const profile = useProfile();
   const scope = "sitter-animals";
-  const save = useSave({ scope, watch: watchProfile(["acceptedSpecies", "acceptedDogSizes", "maxAnimals"]) });
+  const save = useSave({ scope, watch: watchProfile(["acceptedSpecies", "acceptedKinds", "maxAnimals"]) });
 
   const [accepted, setAccepted] = useDraftField<Species[]>(scope, "accepted", () => profile?.acceptedSpecies ?? [], {
     validate: listOf(SPECIES),
   });
-  const [sizes, setSizes] = useDraftField<DogSize[]>(scope, "sizes", () => profile?.acceptedDogSizes ?? [], {
-    validate: listOf(DOG_SIZES),
-  });
+  /* Per category: « toutes » or « certaines uniquement », with the chosen
+     kinds and the sitter's own names (Nidz 1.7 §19). */
+  const [kinds, setKinds] = useDraftField<Partial<Record<Species, KindAcceptance>>>(
+    scope,
+    "kinds",
+    () => profile?.acceptedKinds ?? {},
+    {
+      validate: (raw) => {
+        if (typeof raw !== "object" || raw === null) return null;
+        const out: Partial<Record<Species, KindAcceptance>> = {};
+        for (const species of SPECIES) {
+          const entry = normalizeAcceptance(species, (raw as Record<string, unknown>)[species]);
+          if (entry) out[species] = entry;
+        }
+        return out;
+      },
+    },
+  );
   const [max, setMax] = useDraftField(scope, "max", () => String(profile?.maxAnimals ?? 1));
   const [error, setError] = useState<string>();
+  const [kindErrors, setKindErrors] = useState<Species[]>([]);
   const speciesRef = useRef<HTMLDivElement>(null);
-  const sizesRef = useRef<HTMLFieldSetElement>(null);
+
+  const withKinds = accepted.filter((s) => classificationOf(s) !== null);
+  const modeOf = (s: Species): "all" | "some" => (kinds[s]?.mode === "some" ? "some" : "all");
+  const setAcceptance = (s: Species, next: KindAcceptance) => {
+    setKinds((prev) => ({ ...prev, [s]: next }));
+    setKindErrors((prev) => prev.filter((x) => x !== s));
+  };
 
   return (
     <BuilderStep
@@ -433,29 +461,33 @@ export function StepAnimals() {
           speciesRef.current?.focus();
           return false;
         }
-        if (accepted.includes("dog") && sizes.length === 0) {
-          setError(t("sitterFlow.animals.sizesRequired"));
-          sizesRef.current?.focus();
+        const incomplete = withKinds.filter((s) => !acceptanceComplete(kinds[s]));
+        if (incomplete.length > 0) {
+          setKindErrors(incomplete);
+          setError(t("sitterFlow.animals.kindsRequired"));
+          document.getElementById(`accept-${incomplete[0]}`)?.focus();
           return false;
         }
+        const acceptedKinds: Partial<Record<Species, KindAcceptance>> = {};
+        for (const s of withKinds) acceptedKinds[s] = modeOf(s) === "some" ? (kinds[s] as KindAcceptance) : { mode: "all" };
         return save.save(
           patchProfile(() => ({
             acceptedSpecies: accepted,
-            acceptedDogSizes: accepted.includes("dog") ? sizes : [],
+            acceptedKinds,
             maxAnimals: Math.max(1, Number(max) || 1),
           })),
           { force },
         );
       }}
     >
-      {/* The same illustrated cards the owner picks from (1.4, step 3): one
-          classification for both sides, so "chats" means the same thing to
-          the person asking and the person accepting. */}
+      {/* The same illustrated cards the owner picks from: one catalogue for
+          both sides, so « lapins » means the same thing to the person asking
+          and the person accepting. Several can be on. */}
       <div ref={speciesRef} tabIndex={-1} className="focus:outline-none">
         <p id="sitter-animals-label" className="mb-3 text-[0.9375rem] font-medium text-foreground">
           {t("sitterFlow.animals.label")}
         </p>
-        <AnimalCategoryChecks
+        <AnimalGridMulti
           labelledBy="sitter-animals-label"
           values={accepted}
           onToggle={(s) => {
@@ -463,27 +495,71 @@ export function StepAnimals() {
             setError(undefined);
           }}
         />
+        <p className="mt-3 px-1 text-sm text-muted-foreground">{t("sitterFlow.animals.birdParrot")}</p>
       </div>
 
-      {accepted.includes("dog") && (
-        <fieldset ref={sizesRef} tabIndex={-1} className="animate-fade-in focus:outline-none">
-          <legend className="mb-3 text-[0.9375rem] font-medium text-foreground">{t("sitterFlow.animals.sizesLabel")}</legend>
-          <div className="flex flex-wrap gap-2">
-            {DOG_SIZES.map((s) => (
-              <Chip
-                key={s}
-                selected={sizes.includes(s)}
-                onClick={() => {
-                  setSizes(toggle(sizes, s));
-                  setError(undefined);
-                }}
-              >
-                {t(`dogSize.${s}`)}
-              </Chip>
-            ))}
-          </div>
-        </fieldset>
-      )}
+      {withKinds.map((species) => {
+        const classification = classificationOf(species) ?? "breed";
+        const acceptance = kinds[species];
+        const some = modeOf(species) === "some";
+        const ids = acceptance?.mode === "some" ? acceptance.ids : [];
+        const others = acceptance?.mode === "some" ? acceptance.others : [];
+        const invalid = kindErrors.includes(species);
+        return (
+          <fieldset key={species} className="surface p-4 animate-fade-in" aria-invalid={invalid || undefined}>
+            <legend className="sr-only">{t(`sitterFlow.animals.kindsFor.${classification}`, { animals: t(`speciesPlural.${species}`) })}</legend>
+            <div className="flex items-center gap-3">
+              <AnimalPortrait species={species} className="size-12 shrink-0 rounded-lg" sizes="48px" />
+              <p className="text-[0.9375rem] font-semibold text-foreground">
+                {t(`sitterFlow.animals.kindsFor.${classification}`, { animals: t(`speciesPlural.${species}`) })}
+              </p>
+            </div>
+            <OptionGroup
+              className="mt-3"
+              label={t(`sitterFlow.animals.kindsFor.${classification}`, { animals: t(`speciesPlural.${species}`) })}
+              groupRef={undefined}
+              value={some ? "some" : "all"}
+              onChange={(value) =>
+                setAcceptance(species, value === "all" ? { mode: "all" } : { mode: "some", ids, others })
+              }
+              options={[
+                { value: "all", label: t(`sitterFlow.animals.all.${classification}`) },
+                { value: "some", label: t(`sitterFlow.animals.some.${classification}`) },
+              ]}
+            />
+            {some && (
+              <div className="mt-4 animate-fade-in" id={`accept-${species}`} tabIndex={-1}>
+                <KindList
+                  mode="multi"
+                  species={species}
+                  values={ids}
+                  listClassName="max-h-72"
+                  onToggle={(id) =>
+                    setAcceptance(species, {
+                      mode: "some",
+                      ids: ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id],
+                      others,
+                    })
+                  }
+                />
+                <OtherKinds
+                  values={others}
+                  label={t(`sitterFlow.animals.otherLabel.${classification}`)}
+                  onChange={(next) => setAcceptance(species, { mode: "some", ids, others: next })}
+                />
+                <p className="mt-2 text-sm text-muted-foreground" aria-live="polite">
+                  {t("sitterFlow.animals.chosenCount", { count: ids.length + others.length })}
+                </p>
+                {invalid && (
+                  <p role="alert" className="mt-1 text-sm font-medium text-destructive">
+                    {t("sitterFlow.animals.kindsRequired")}
+                  </p>
+                )}
+              </div>
+            )}
+          </fieldset>
+        );
+      })}
 
       <FieldShell label={t("sitterFlow.animals.maxLabel")} info={t("sitterFlow.animals.maxHelp")}>
         {({ id, describedBy }) => (
@@ -501,7 +577,64 @@ export function StepAnimals() {
           />
         )}
       </FieldShell>
+      <p className="text-sm text-muted-foreground">{t("sitterFlow.animals.limitsHint")}</p>
     </BuilderStep>
+  );
+}
+
+/** « Autre » on the sitter side: names the list does not carry, added one by
+    one and removable. Never matched automatically (§19.2). */
+function OtherKinds({ values, label, onChange }: { values: string[]; label: string; onChange: (next: string[]) => void }) {
+  const { t } = useTranslation();
+  const [text, setText] = useState("");
+  const add = () => {
+    const value = text.trim().slice(0, 40);
+    if (value.length < 2 || values.some((v) => v.toLowerCase() === value.toLowerCase()) || values.length >= 10) return;
+    onChange([...values, value]);
+    setText("");
+  };
+  return (
+    <div className="mt-4">
+      <label className="mb-1.5 block text-sm font-medium text-foreground" htmlFor={`other-${label}`}>
+        {label}
+      </label>
+      <div className="flex gap-2">
+        <Input
+          id={`other-${label}`}
+          value={text}
+          maxLength={40}
+          autoComplete="off"
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              add();
+            }
+          }}
+        />
+        <Button type="button" variant="surface" onClick={add}>
+          {t("sitterFlow.animals.addOther")}
+        </Button>
+      </div>
+      {values.length > 0 && (
+        <ul role="list" className="mt-2 flex flex-wrap gap-2">
+          {values.map((value) => (
+            <li key={value}>
+              <button
+                type="button"
+                onClick={() => onChange(values.filter((v) => v !== value))}
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-primary-soft px-3 text-sm font-medium text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <bdi>{value}</bdi>
+                <X className="size-4" aria-hidden="true" />
+                <span className="sr-only">{t("sitterFlow.animals.removeOther", { name: value })}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className="mt-2 text-sm text-muted-foreground">{t("sitterFlow.animals.otherNote")}</p>
+    </div>
   );
 }
 

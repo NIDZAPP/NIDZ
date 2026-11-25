@@ -237,7 +237,10 @@ export function LocationFields({
   help,
   error,
   className,
+  wilayaOnly = false,
 }: {
+  /** Only the wilaya (Explorer's « Près de »): the commune field is not drawn. */
+  wilayaOnly?: boolean;
   wilayaCode: string | null;
   communeCode: string | null;
   onChange: (next: { wilayaCode: string | null; communeCode: string | null }) => void;
@@ -309,6 +312,7 @@ export function LocationFields({
         )}
       </FieldShell>
 
+      {!wilayaOnly && (
       <FieldShell label={communeLabel} help={help}>
         {({ id, describedBy, labelId }) =>
           communeListMissing ? (
@@ -338,6 +342,7 @@ export function LocationFields({
           )
         }
       </FieldShell>
+      )}
     </div>
   );
 }

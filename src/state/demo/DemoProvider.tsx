@@ -56,6 +56,13 @@ export default function DemoProvider({ children }: { children: ReactNode }) {
     };
   }, [store]);
 
+  /* « Réduire les animations » (Paramètres › Préférences): the same overrides
+     as the system setting, applied from the class on <html> (index.css). */
+  const reduceMotion = state.preferences.reduceMotion;
+  useEffect(() => {
+    document.documentElement.classList.toggle("reduce-motion", reduceMotion);
+  }, [reduceMotion]);
+
   const value = useMemo(
     () => ({ state, dispatch: store.dispatch, commit: store.commit }),
     [state, store],

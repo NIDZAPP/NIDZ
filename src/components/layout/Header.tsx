@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useDemo } from "@/state/demo/context";
 import { TOP_BAR, TOP_BAR_ROW } from "@/components/shared/top-bar";
-import { navBadge, workspaceHome } from "@/data/navigation";
+import { navBadge, workspaceHome, hasSession, WELCOME_PATH } from "@/data/navigation";
 import type { Workspace } from "@/data/workspace";
 import BrandMark from "@/components/shared/BrandMark";
 import {
@@ -60,7 +60,8 @@ export default function Header({
      to the same place (§4.2). It stays in the mobile bar, which has no
      wordmark. */
   const navigable = isNavigable(all);
-  const destinations = navigable ? all.filter((d) => d.to !== "/") : [];
+  const destinations = navigable ? all.filter((d) => d.labelKey !== "nav.home") : [];
+  const signedIn = hasSession(state);
 
   return (
     <header className={TOP_BAR}>
@@ -131,7 +132,15 @@ export default function Header({
           {/* Where a space has no navigation (before the introduction, or a
               sitter screen opened with no sitter side), Compte stays one tap
               away. Icon-only, so the name is carried in text. */}
-          {!navigable && (
+          {!signedIn && (
+            <Link
+              to={WELCOME_PATH}
+              className="inline-flex h-11 items-center rounded-full bg-card px-4 text-sm font-semibold text-primary shadow-pill transition-[transform,background-color] duration-150 ease-out hover:bg-secondary active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              {t("welcome.signIn")}
+            </Link>
+          )}
+          {signedIn && !navigable && (
             <NavLink
               to={ACCOUNT_PATH}
               className={({ isActive }) =>

@@ -1,4 +1,5 @@
 import { careAnswered } from "./care-conditions";
+import { acceptanceComplete } from "./compatibility";
 import { wilayaOfPlace } from "./algeria";
 import type { SitterProfile } from "./types";
 
@@ -36,7 +37,8 @@ import type { SitterProfile } from "./types";
          commune — never an address;
        - the presentation sentence;
        - services, each with its price and unit;
-       - the species accepted and, for dogs, the sizes;
+       - the animals accepted and, per category, every breed / species or
+         only some (Nidz 1.7 — dog sizes are no longer asked);
        - the HOME — but only for a sitter who offers boarding. An animal that
          sleeps at the sitter's place is the one case where the housing, the
          outdoor space and the animals already living there are a hard
@@ -113,7 +115,10 @@ export const SITTER_SECTIONS: readonly SitterSection[] = [
     /* Species, and for dogs the sizes: a dog sitter with no declared size
        cannot be matched on size at all (Audit 1.3 LOT 03). */
     isAnswered: (p) =>
-      p.acceptedSpecies.length > 0 && (!p.acceptedSpecies.includes("dog") || p.acceptedDogSizes.length > 0),
+      /* Nidz 1.7: a category, and for each one that has a breed or species
+         list, « toutes » or at least one chosen kind — « certaines
+         uniquement » with nothing ticked would exclude every animal. */
+      p.acceptedSpecies.length > 0 && p.acceptedSpecies.every((s) => acceptanceComplete(p.acceptedKinds?.[s])),
     requiredFor: ALWAYS,
   },
   {

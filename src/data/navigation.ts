@@ -19,7 +19,7 @@ import type { CareRequest } from "./types";
 import type { Workspace } from "./workspace";
 import { awaitingReplyFrom } from "./clarification";
 import { unreadThreads } from "./notifications";
-import { isPubliclyListed, requestsReceived, requestsSent } from "./repository";
+import { isPubliclyListed, proposalsReceived, requestsReceived, requestsSent } from "./repository";
 import { SITTER_DASHBOARD, SITTER_SECTIONS } from "./sitter-sections";
 
 /* ------------------------------------------------------- sitter side */
@@ -75,8 +75,36 @@ export function sitterResumePath(state: DemoState): string {
  */
 export function workspaceHome(state: DemoState, workspace: Workspace): string {
   if (workspace === "owner") return "/";
-  return sitterVisibility(state) === "listed" ? "/sitter/requests" : sitterResumePath(state);
+  return sitterVisibility(state) === "listed" ? SITTER_HOME : sitterResumePath(state);
 }
+
+/** The sitter's Accueil since 1.7: the feed of published requests. */
+export const SITTER_HOME = "/sitter/feed";
+
+/* ------------------------------------------------------------- session */
+
+/**
+ * Whether this device has an account and is « signed in » to it (Nidz 1.7).
+ * A local session — see `DemoState.signedIn` — never an authentication.
+ */
+export function hasSession(state: DemoState): boolean {
+  return Boolean(state.account && state.signedIn);
+}
+
+/**
+ * Where an account goes once it exists: a brand-new account chooses its first
+ * activity (`/start`); a returning one goes back to where it left off — the
+ * home of the last active space (§2.2).
+ */
+export function afterSignInPath(state: DemoState, { isNew = false } = {}): string {
+  if (isNew) return START_PATH;
+  return workspaceHome(state, state.activeWorkspace === "sitter" && state.sitter ? "sitter" : "owner");
+}
+
+export const WELCOME_PATH = "/welcome";
+export const START_PATH = "/start";
+export const REGISTER_PATH = "/register";
+export const LOGIN_PATH = "/login";
 
 /* ------------------------------------------------------------ badges */
 
@@ -95,7 +123,12 @@ export function workspaceHome(state: DemoState, workspace: Workspace): string {
 export function navBadge(state: DemoState, workspace: Workspace, to: string): number {
   switch (to) {
     case "/owner/requests":
-      return requestsSent(state).filter((r) => awaitingReplyFrom(r) === "owner").length;
+      /* A sitter's question waiting on the owner, and proposals on the
+         owner's published requests still waiting for a decision. */
+      return (
+        requestsSent(state).filter((r) => awaitingReplyFrom(r) === "owner").length +
+        proposalsReceived(state).filter((p) => p.status === "pending").length
+      );
     case "/sitter/requests":
       return requestsReceived(state).filter((r) => r.status === "pending" && awaitingReplyFrom(r) !== "owner")
         .length;
@@ -134,4 +167,34 @@ export function messagesPath(tab: MessagesTab): string {
  */
 export function requestSentPath(request: Pick<CareRequest, "id" | "sitterId">): string {
   return `/owner/request/${encodeURIComponent(request.sitterId)}/sent?id=${encodeURIComponent(request.id)}`;
+}
+
+/* ---------------------------------------------------- Demandes (1.7) */
+
+/** The three sections of Demandes, the same words on both sides; what each
+    holds depends on the space (§20). In the address, like Messages. */
+export const REQUEST_TABS = ["received", "sent", "validated"] as const;
+export type RequestsTab = (typeof REQUEST_TABS)[number];
+
+export function requestsTabFrom(params: URLSearchParams, fallback: RequestsTab = "received"): RequestsTab {
+  const value = params.get("tab");
+  return (REQUEST_TABS as readonly string[]).includes(value ?? "") ? (value as RequestsTab) : fallback;
+}
+
+export function requestsPath(workspace: Workspace, tab?: RequestsTab): string {
+  const base = workspace === "owner" ? "/owner/requests" : "/sitter/requests";
+  return tab ? `${base}?tab=${tab}` : base;
+}
+
+/** A published request, from the side looking at it. */
+export function postPath(workspace: Workspace, postId: string): string {
+  return `${workspace === "owner" ? "/owner/posts" : "/sitter/posts"}/${encodeURIComponent(postId)}`;
+}
+
+/** The owner's Accueil views, in the address (`?view=explore`). */
+export const HOME_VIEWS = ["animals", "explore"] as const;
+export type HomeView = (typeof HOME_VIEWS)[number];
+
+export function homeViewFrom(params: URLSearchParams): HomeView {
+  return params.get("view") === "explore" ? "explore" : "animals";
 }

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { MessageCircle } from "lucide-react";
+import { Ban, MessageCircle } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router-dom";
@@ -11,7 +11,11 @@ import BriefCapsule from "@/components/search/BriefCapsule";
 import { useBriefText } from "@/components/search/use-brief-text";
 import SitterProfileView, { QuotedRate } from "@/components/sitter/SitterProfileView";
 import { Button } from "@/components/ui/button";
-import { parseCriteria, petFit, reasonsFor, sizeLimitToState } from "@/data/criteria";
+import { parseCriteria, petFit, reasonsFor } from "@/data/criteria";
+import { hasSession } from "@/data/navigation";
+import ConfirmAction from "@/components/shared/ConfirmAction";
+import { compatibility } from "@/data/compatibility";
+import { getKind } from "@/data/animal-kinds";
 import { isPubliclyListed } from "@/data/repository";
 import { offeredServices, rateFor } from "@/data/offer";
 import { communeName, getWilaya } from "@/data/algeria";
@@ -38,7 +42,7 @@ export default function SitterProfile() {
   const lng = useAppLocale();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
-  const { state } = useDemo();
+  const { state, commit } = useDemo();
   const { sitter, isOwnProfile } = useSitter(id);
 
   const paramKey = searchParams.toString();
@@ -76,7 +80,7 @@ export default function SitterProfile() {
   }
 
   const hasCriteria = Boolean(
-    criteria.species || criteria.size || criteria.care || criteria.commune || criteria.wilaya || criteria.dates,
+    criteria.species || criteria.kind || criteria.care || criteria.commune || criteria.wilaya || criteria.dates,
   );
   /* Recomputed from the sitter's own data rather than trusted from the URL:
      `?species=cat` on a dog-only sitter must not print "Accepte les chats". */
@@ -102,15 +106,15 @@ export default function SitterProfile() {
      a location or a budget that does not match is exactly as useful to know
      as a species that does not. */
   const zoneAsked = criteria.commune ?? criteria.wilaya;
+  /* Compatibility with the animal asked about, three-valued (Nidz 1.7). */
+  const askedFit = criteria.species ? compatibility(sitter, { species: criteria.species, kindId: criteria.kind }) : null;
+  const askedKind = criteria.species && criteria.species !== "other" ? getKind(criteria.kind, criteria.species) : null;
   const mismatches = [
-    ...(criteria.species && !sitter.acceptedSpecies.includes(criteria.species)
+    ...(askedFit?.level === "incompatible" && askedFit.reason === "category" && criteria.species !== "other"
       ? [t("profile.mismatch.species", { species: t(`species.${criteria.species}`) })]
       : []),
-    ...(criteria.species === "dog" &&
-    criteria.size &&
-    sitter.acceptedSpecies.includes("dog") &&
-    !sitter.acceptedDogSizes.includes(criteria.size)
-      ? [t("profile.mismatch.size", { size: t(`dogSize.${criteria.size}`).toLocaleLowerCase(lng) })]
+    ...(askedFit?.level === "incompatible" && askedFit.reason === "kind" && askedKind
+      ? [t("profile.mismatch.kind", { kind: askedKind.name[lng] })]
       : []),
     ...(criteria.care && !offeredServices(sitter).includes(criteria.care)
       ? [t("profile.mismatch.care", { care: t(`care.${criteria.care}`) })]
@@ -142,20 +146,18 @@ export default function SitterProfile() {
   const petName =
     pet &&
     pet.species === criteria.species &&
-    petFit(pet, sitter).fits === true &&
-    /* …and the size being searched for is this animal's size, so the fit
-       heading and the size token below it are about the same dog. */
-    (!criteria.size || (pet.species === "dog" && pet.details.size === criteria.size))
+    petFit(pet, sitter).level === "confirmed" &&
+    /* …and the breed being searched for is this animal's, so the fit heading
+       and the breed token below it are about the same animal. */
+    (!criteria.kind || pet.kindId === criteria.kind)
       ? pet.name
       : null;
 
-  /* A dog search without a size cannot establish a fit on size. The card
-     says so; the profile must too, inside the fit section, rather than
-     leaving "Accepts dogs" to read as "will take your dog". */
-  const sizeLimit = sizeLimitToState(sitter, criteria);
-  const uncertain = sizeLimit
-    ? [t("profile.sizeUnknown", { sizes: formatList(sizeLimit.map((size) => t(`sizeShort.${size}`)), lng) })]
-    : [];
+  /* « À confirmer » is stated inside the fit section, rather than leaving
+     « Accepte les chiens » to read as « will take your dog » (§19.2). */
+  const uncertain = askedFit?.level === "unknown" ? [t(`compat.owner.unknown.${askedFit.reason}`)] : [];
+
+  const canBlock = !isOwnProfile && hasSession(state);
 
   /* Your own profile does not invite you to request care from yourself; it
      offers the thing you would actually want from this page. The demo action
@@ -248,6 +250,13 @@ export default function SitterProfile() {
                 uncertain={uncertain}
                 petName={petName}
               />
+              {/* The same safety control below the rail's breakpoint, where
+                  the rail is not drawn: one of the two is ever displayed. */}
+              {canBlock && (
+                <div className="mt-8 border-t border-border pt-4 xl:hidden">
+                  <BlockControl sitterId={sitter.id} name={sitter.publicName} />
+                </div>
+              )}
             </div>
 
             {/* Desktop: a sticky rail carrying the quoted rate and the action.
@@ -285,6 +294,12 @@ export default function SitterProfile() {
                 )}
                 <p className="mt-4 text-xs leading-relaxed text-muted-foreground">{t("profile.noPayment")}</p>
               </div>
+              {/* Safety (Nidz 1.7 §24): an owner can stop seeing a sitter. */}
+              {canBlock && (
+                <div className="px-2">
+                  <BlockControl sitterId={sitter.id} name={sitter.publicName} />
+                </div>
+              )}
             </aside>
           </div>
         </div>
@@ -332,5 +347,42 @@ export default function SitterProfile() {
         </div>
       </div>
     </div>
+  );
+}
+
+/** « Ne plus voir ce pet-sitter » — local to this device, said so in the
+    dialog, and reversible here or in Paramètres › Sécurité et confidentialité. */
+function BlockControl({ sitterId, name }: { sitterId: string; name: string }) {
+  const { t } = useTranslation();
+  const { state, commit } = useDemo();
+  if (state.blockedSitters.includes(sitterId)) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        {t("profile.block.blocked")}{" "}
+        <button
+          type="button"
+          className="inline-flex min-h-11 items-center font-semibold text-primary underline underline-offset-4"
+          onClick={() => commit({ type: "unblockSitter", id: sitterId })}
+        >
+          {t("settings.security.unblock")}
+        </button>
+      </p>
+    );
+  }
+  return (
+    <ConfirmAction
+      variant="ghost"
+      className="-ms-3 text-muted-foreground"
+      trigger={
+        <>
+          <Ban aria-hidden="true" />
+          {t("profile.block.action")}
+        </>
+      }
+      title={t("profile.block.title", { name })}
+      body={t("profile.block.body")}
+      confirm={t("profile.block.confirm")}
+      onConfirm={() => commit({ type: "blockSitter", id: sitterId })}
+    />
   );
 }

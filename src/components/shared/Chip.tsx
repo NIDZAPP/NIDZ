@@ -60,14 +60,23 @@ export function Chip({
   onClick,
   icon: Icon,
   children,
+  disabled,
 }: {
   selected: boolean;
   onClick: () => void;
   icon?: LucideIcon;
   children: React.ReactNode;
+  disabled?: boolean;
 }) {
   return (
-    <button type="button" role="checkbox" aria-checked={selected} onClick={onClick} className={chipClass(selected)}>
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={selected}
+      disabled={disabled}
+      onClick={onClick}
+      className={cn(chipClass(selected), "disabled:cursor-not-allowed disabled:opacity-50")}
+    >
       <ChipContent selected={selected} icon={Icon}>
         {children}
       </ChipContent>

@@ -29,12 +29,26 @@ const Account = lazy(() => import("@/pages/Account"));
 const Messages = lazy(() => import("@/pages/Messages"));
 const MessageThread = lazy(() => import("@/pages/MessageThread"));
 const Welcome = lazy(() => import("@/pages/onboarding/Welcome"));
+const Start = lazy(() => import("@/pages/onboarding/Start"));
+const registerScreen = (name: "RegisterStart" | "RegisterStepScreen" | "Login") =>
+  lazy(() => import("@/pages/onboarding/Register").then((m) => ({ default: m[name] })));
+const RegisterStart = registerScreen("RegisterStart");
+const RegisterStepScreen = registerScreen("RegisterStepScreen");
+const Login = registerScreen("Login");
 const NeedPet = lazy(() => import("@/pages/owner/need/NeedPet"));
+const NeedBreed = lazy(() => import("@/pages/owner/need/NeedBreed"));
+const NeedAbout = lazy(() => import("@/pages/owner/need/NeedAbout"));
+const NeedNeeds = lazy(() => import("@/pages/owner/need/NeedNeeds"));
 const NeedLocation = lazy(() => import("@/pages/owner/need/NeedLocation"));
 const NeedCare = lazy(() => import("@/pages/owner/need/NeedCare"));
+const NeedPublish = lazy(() => import("@/pages/owner/need/NeedPublish"));
+const OwnerPostDetail = lazy(() => import("@/pages/owner/OwnerPostDetail"));
+const SitterFeed = lazy(() => import("@/pages/sitter/SitterFeed"));
+const SitterPostDetail = lazy(() => import("@/pages/sitter/SitterPostDetail"));
+const SitterPropose = lazy(() => import("@/pages/sitter/SitterPropose"));
+const SettingsSection = lazy(() => import("@/pages/SettingsSection"));
 const Auth = lazy(() => import("@/pages/Auth"));
 const OwnerAccount = lazy(() => import("@/pages/owner/OwnerAccount"));
-const PetsList = lazy(() => import("@/pages/owner/PetsList"));
 const PetEdit = lazy(() => import("@/pages/owner/PetEdit"));
 const RequestReview = lazy(() => import("@/pages/owner/request/RequestReview"));
 const RequestWhen = lazy(() => import("@/pages/owner/request/RequestWhen"));
@@ -84,7 +98,9 @@ function prefetchScreens() {
     void import("@/pages/owner/need/NeedPet");
     void import("@/pages/owner/OwnerRequests");
     void import("@/pages/owner/OwnerRequestDetail");
-    void import("@/pages/owner/PetsList");
+    void import("@/pages/sitter/SitterFeed");
+    void import("@/pages/owner/need/NeedBreed");
+    void import("@/pages/owner/need/NeedAbout");
     void import("@/pages/owner/PetEdit");
     void import("@/pages/sitter/SitterRequests");
     void import("@/pages/sitter/SitterProfileHome");
@@ -158,16 +174,24 @@ const App = () => {
             {/* Flow screens: full viewport, own back control, own action bar,
                 no site chrome. */}
             <Route path="/welcome" element={<Welcome />} />
-            {/* Audit 1.2 merged the introduction and the owner-or-sitter
-                choice into one screen: the first disclosed nothing and stood
-                in front of the real decision. The route stays as a redirect
-                because it is the `useBack` fallback of several steps, and
-                deleting it would give those steps a back control that lands on
-                the catch-all. */}
-            <Route path="/start" element={<Navigate to="/welcome" replace />} />
+            {/* Nidz 1.7 §3–4: opening an account (three journeys), signing
+                in to the account this device holds, and the first choice of
+                activity once the account exists. */}
+            <Route path="/register" element={<RegisterStart />} />
+            <Route path="/register/:step" element={<RegisterStepScreen />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/start" element={<Start />} />
+            {/* The owner journey (§6–§13): the animal, its breed, its name /
+                age / photo, its needs, where, which care and when, and the
+                publication confirmation. */}
             <Route path="/owner/need/pet" element={<NeedPet />} />
+            <Route path="/owner/need/breed" element={<NeedBreed />} />
+            <Route path="/owner/need/about" element={<NeedAbout />} />
+            <Route path="/owner/need/needs" element={<NeedNeeds />} />
             <Route path="/owner/need/location" element={<NeedLocation />} />
             <Route path="/owner/need/care" element={<NeedCare />} />
+            <Route path="/owner/need/publish" element={<NeedPublish />} />
+            <Route path="/sitter/posts/:id/propose" element={<SitterPropose />} />
             {/* The sign-in gateway and the quick owner account. Both are flow
                 screens: they own the viewport and carry their own action bar,
                 and neither should sit under site chrome offering to navigate
@@ -232,13 +256,16 @@ const App = () => {
                   worse than an honest absence. */}
               {/* Audit 1.2 made this real (§17). The old bare `/pets` address
                   redirects rather than 404s. */}
-              <Route path="/owner/pets" element={<PetsList />} />
-              <Route path="/pets" element={<Navigate to="/owner/pets" replace />} />
+              {/* Mes animaux is part of Accueil since 1.7 (§15.1). */}
+              <Route path="/owner/pets" element={<Navigate to="/" replace />} />
+              <Route path="/pets" element={<Navigate to="/" replace />} />
               <Route path="/search" element={<Search />} />
               <Route path="/sitters/:id" element={<SitterProfile />} />
               {/* The legacy registration page promised a verification Nidz
                   cannot perform. The flow that replaced it starts here. */}
               <Route path="/sitter/register" element={<Navigate to="/sitter/start" replace />} />
+              <Route path="/sitter/feed" element={<SitterFeed />} />
+              <Route path="/sitter/posts/:id" element={<SitterPostDetail />} />
               <Route path="/sitter/requests" element={<SitterRequests />} />
               {/* "Mon profil": the sitter's sections dashboard, a tab of the
                   sitter space once published (Audit 1.3 LOT 04). */}
@@ -247,6 +274,7 @@ const App = () => {
               <Route path="/chat/:bookingId" element={<NotAvailable />} />
               <Route path="/owner/requests" element={<OwnerRequests />} />
               <Route path="/owner/requests/:id" element={<OwnerRequestDetail />} />
+              <Route path="/owner/posts/:id" element={<OwnerPostDetail />} />
               <Route path="/owner/bookings" element={<Navigate to="/owner/requests" replace />} />
               <Route path="/sitter/dashboard" element={<Navigate to="/sitter/requests" replace />} />
               <Route path="/admin" element={<NotAvailable />} />
@@ -261,6 +289,7 @@ const App = () => {
                   every flow step still land on the language choice. */}
               <Route path="/account" element={<Account />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/settings/:section" element={<SettingsSection />} />
               {/* Local conversations and the notifications slot (1.4). */}
               <Route path="/messages" element={<Messages />} />
               {/* Profiles moved out of the sitter's own namespace; the old

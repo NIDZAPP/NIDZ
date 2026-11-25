@@ -1,10 +1,16 @@
 import { useTranslation } from "react-i18next";
 import { Lock } from "lucide-react";
 
-import { AnimalCategoryRadio } from "@/components/shared/AnimalCategories";
+import { AnimalPortrait } from "@/components/illustrations/animals";
+import AgeField from "@/components/shared/AgeField";
+import { AnimalGridSingle } from "@/components/shared/AnimalCategories";
+import { Chip } from "@/components/shared/Chip";
 import InfoTip from "@/components/shared/InfoTip";
 import KindPicker from "@/components/shared/KindPicker";
-import { ChipField, FieldShell, PhotoField } from "@/components/shared/fields";
+import PhotoField from "@/components/shared/PhotoField";
+import { Button } from "@/components/ui/button";
+import { ChipField, FieldShell } from "@/components/shared/fields";
+import { OTHER_CATEGORY_MAX, classificationOf } from "@/data/animal-catalogue";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -13,10 +19,11 @@ import {
   type CatDetails,
   type Declared,
   type DogDetails,
+  type HabitatDetails,
   type Pet,
+  type PetAge,
   type PetSex,
 } from "@/data/pets";
-import { DOG_SIZES, type Species } from "@/data/types";
 
 /* Same three chips and the same rule as `DeclaredField`, which the sitter side
    uses: `unknown` is what an untouched question already stores, so it draws no
@@ -25,11 +32,21 @@ import { DOG_SIZES, type Species } from "@/data/types";
 const DECLARED: readonly Declared[] = ["yes", "no", "unknown"];
 const SEXES: readonly PetSex[] = ["female", "male", "unknown"];
 
-/** `ChipGroup` is a Radix RadioGroup and has no deselect, so the four fields
-    modelled as `X | null` need an explicit way back to unanswered — otherwise
-    one mis-tap becomes a permanent declaration about someone else's animal,
-    and the module's own "a skipped question stays skipped" rule has no UI. */
+/** `ChipGroup` is a Radix RadioGroup and has no deselect, so the fields
+    modelled as `X | null` need an explicit way back to unanswered. */
 const UNSET = "";
+
+const ageValue = (age: PetAge | null) =>
+  !age ? { mode: "", years: 0, months: 0 } : age.status === "unknown" ? { mode: "unknown", years: 0, months: 0 } : { mode: age.status, years: age.years, months: age.months };
+
+const ageFrom = (v: { mode: string; years: number; months: number }): PetAge | null =>
+  v.mode === "unknown"
+    ? { status: "unknown" }
+    : v.mode === "known" || v.mode === "estimated"
+      ? v.years === 0 && v.months === 0
+        ? null
+        : { status: v.mode, years: v.years, months: v.months }
+      : null;
 
 type DeclaredRenderer = (
   labelKey: string,
@@ -116,34 +133,51 @@ export default function PetForm({
         {!speciesLocked && (
           <div>
             <p id="pet-species" className="mb-3 text-[0.9375rem] font-medium text-foreground">
-              {t("pets.speciesLabel")}
+              {t("needFlow.pet.question")}
             </p>
             {/* `withSpecies` rebuilds the detail record rather than carrying
                 answers across. "Good with dogs" answered about a dog is not an
                 answer about the bird it was mistakenly filed as. */}
-            <AnimalCategoryRadio
+            <AnimalGridSingle
               labelledBy="pet-species"
               groupRef={speciesRef}
               value={pet.species}
-              onChange={(next) => onChange(withSpecies(pet, next as Species))}
+              onChange={(next) => next && onChange(withSpecies(pet, next))}
             />
           </div>
         )}
 
-        <KindPicker
-          key={pet.species}
-          species={pet.species}
-          kindId={pet.kindId}
-          kindOther={pet.kindOther}
-          onChange={(next) => set(next)}
-        />
+        {pet.species === "other" && (
+          <FieldShell label={t("needFlow.pet.otherLabel")} help={t("needFlow.pet.otherHelp")}>
+            {({ id, describedBy }) => (
+              <Input
+                id={id}
+                value={pet.otherCategory}
+                maxLength={OTHER_CATEGORY_MAX}
+                aria-describedby={describedBy}
+                onChange={(e) => set({ otherCategory: e.target.value })}
+              />
+            )}
+          </FieldShell>
+        )}
 
-        <FieldShell label={t("need.pet.nameLabel")} error={nameError}>
+        {classificationOf(pet.species) && pet.species !== "other" && (
+          <KindPicker
+            key={pet.species}
+            species={pet.species}
+            kindId={pet.kindId}
+            kindOther={pet.kindOther}
+            onChange={(next) => set(next)}
+          />
+        )}
+
+        <FieldShell label={t("needFlow.about.nameQuestion")} error={nameError}>
           {({ id, describedBy, invalid }) => (
             <Input
               id={id}
               ref={nameRef}
               value={pet.name}
+              maxLength={40}
               autoComplete="off"
               aria-describedby={describedBy}
               aria-invalid={invalid || undefined}
@@ -152,17 +186,14 @@ export default function PetForm({
           )}
         </FieldShell>
 
-        <FieldShell label={t("need.pet.ageLabel")}>
-          {({ id, describedBy }) => (
-            <Input
-              id={id}
-              value={pet.age}
-              placeholder={t("need.pet.agePlaceholder")}
-              aria-describedby={describedBy}
-              onChange={(e) => set({ age: e.target.value })}
-            />
-          )}
-        </FieldShell>
+        <AgeField
+          label={t("needFlow.about.ageQuestion")}
+          value={ageValue(pet.ageInfo)}
+          onChange={(next) => set({ ageInfo: ageFrom(next) })}
+        />
+        {!pet.ageInfo && pet.age.trim() && (
+          <p className="-mt-3 text-sm text-muted-foreground">{t("pets.ageLegacy", { age: pet.age })}</p>
+        )}
 
         <ChipField
           label={t("pets.sexLabel")}
@@ -172,10 +203,43 @@ export default function PetForm({
         />
 
         <PhotoField
-          label={t("need.pet.photoLabel")}
-          value={pet.photoUrl}
-          onChange={(photoUrl) => set({ photoUrl })}
+          label={t("needFlow.about.photoLabel")}
+          value={pet.photoUrl ?? null}
+          onChange={(photoUrl) => set({ photoUrl: photoUrl ?? undefined })}
+          placeholder={<AnimalPortrait species={pet.species} className="size-full opacity-70 grayscale-[30%]" />}
         />
+      </section>
+
+      <section aria-labelledby="pet-needs" className={card}>
+        <div className="flex items-center gap-1.5">
+          <h2 id="pet-needs" className="text-title font-semibold text-foreground">
+            {t("needFlow.needs.title")}
+          </h2>
+          <InfoTip topic={t("needFlow.needs.title")}>{t("needFlow.needs.info")}</InfoTip>
+        </div>
+        <Textarea
+          aria-labelledby="pet-needs"
+          aria-describedby="pet-needs-privacy"
+          rows={4}
+          maxLength={1000}
+          value={pet.notes}
+          disabled={pet.needsStatus === "nothing" && !pet.notes}
+          placeholder={t("needFlow.needs.placeholder")}
+          onChange={(e) => set({ notes: e.target.value, needsStatus: null })}
+        />
+        <div className="-mt-3 flex flex-wrap gap-2">
+          <Chip
+            selected={pet.needsStatus === "nothing" && !pet.notes.trim()}
+            onClick={() =>
+              set(pet.needsStatus === "nothing" ? { needsStatus: null } : { needsStatus: "nothing", notes: "" })
+            }
+          >
+            {t("needFlow.needs.nothing")}
+          </Chip>
+        </div>
+        <p id="pet-needs-privacy" className="-mt-3 text-sm text-muted-foreground">
+          {t("needFlow.needs.privacy")}
+        </p>
       </section>
 
       <section aria-labelledby="pet-details" className={card}>
@@ -197,6 +261,9 @@ export default function PetForm({
         )}
         {pet.species === "bird" && (
           <BirdFields details={pet.details} setDetail={setDetail} declaredField={declaredField} />
+        )}
+        {pet.species !== "dog" && pet.species !== "cat" && pet.species !== "bird" && (
+          <HabitatFields details={pet.details as HabitatDetails} setDetail={setDetail} />
         )}
       </section>
 
@@ -267,15 +334,17 @@ function DogFields({
   const { t } = useTranslation();
   return (
     <>
-      <ChipField
-        label={t("pets.dog.size")}
-        value={details.size ?? ""}
-        onChange={(next) => setDetail({ size: next || null })}
-        options={[
-            ...DOG_SIZES.map((value) => ({ value: value as string, label: t(`dogSize.${value}`) })),
-            { value: UNSET, label: t("pets.notSure") },
-          ]}
-      />
+      {/* Nidz 1.7: the size is no longer asked and no longer filters. An
+          answer given before is the owner's and is not deleted behind their
+          back: it is shown, and they can remove it. */}
+      {details.size && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-secondary px-3 py-2 text-sm">
+          <span className="text-foreground">{t("pets.dog.sizeLegacyLine", { size: t(`dogSize.${details.size}`) })}</span>
+          <Button type="button" variant="ghost" className="min-h-11" onClick={() => setDetail({ size: null })}>
+            {t("pets.dog.sizeLegacyRemove")}
+          </Button>
+        </div>
+      )}
 
       {declaredField("pets.dog.neutered", details.neutered, (v) => setDetail({ neutered: v }))}
       {declaredField("pets.dog.goodWithDogs", details.goodWithDogs, (v) => setDetail({ goodWithDogs: v }))}
@@ -438,5 +507,23 @@ function BirdFields({
         )}
       </FieldShell>
     </>
+  );
+}
+
+function HabitatFields({ details, setDetail }: { details: HabitatDetails; setDetail: (patch: Record<string, unknown>) => void }) {
+  const { t } = useTranslation();
+  return (
+    <FieldShell label={t("pets.habitat.label")} help={t("pets.habitat.help")}>
+      {({ id, describedBy }) => (
+        <Textarea
+          id={id}
+          rows={3}
+          value={details.habitat}
+          placeholder={t("pets.habitat.placeholder")}
+          aria-describedby={describedBy}
+          onChange={(e) => setDetail({ habitat: e.target.value })}
+        />
+      )}
+    </FieldShell>
   );
 }

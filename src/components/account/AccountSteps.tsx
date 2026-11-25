@@ -87,6 +87,8 @@ export function NameStep({
              steps that were already completed. */
           accountComplete: base.account?.accountComplete ?? false,
           createdAt: base.account?.createdAt ?? new Date().toISOString(),
+          signInMethod: base.account?.signInMethod ?? null,
+          photoUrl: base.account?.photoUrl,
         },
       }),
       { force },

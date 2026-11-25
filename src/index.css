@@ -286,6 +286,18 @@
   }
 }
 
+/* The same, chosen inside Nidz (Paramètres › Préférences) rather than in
+   the device settings (Nidz 1.7 §23.3). Blur and opacity changes are kept
+   instant, not removed: they carry meaning (the chosen animal), not motion. */
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
 /* Radix renders a hidden "bubble" <input> beside every radio and checkbox that
    sits inside a <form>, so native form events still fire. It is moved out of
    the way with an inline `transform: translateX(-100%)` — off the left edge.

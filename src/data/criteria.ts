@@ -13,18 +13,19 @@
    and what it needs.
    ------------------------------------------------------------------------ */
 
-import { normalizeCommuneId, getWilaya, getWilayaOfCommune, wilayaOfPlace } from "./algeria";
+import { normalizeCommuneId, getWilaya, getWilayaOfCommune, wilayaDistanceKm, wilayaOfPlace } from "./algeria";
+import { serviceFits } from "./animal-catalogue";
+import { getKind } from "./animal-kinds";
+import { compatibility, compatibilityRank, type AnimalRef, type Compatibility } from "./compatibility";
 import { offeredServices, overlapsDeclaredUnavailable, rateFor } from "./offer";
 import {
   CARE_TYPES,
-  DOG_SIZES,
-  SPECIES,
+  isPetCategory,
   type CareType,
   type DateRange,
-  type DogSize,
   type OwnerNeed,
+  type PetCategory,
   type SitterProfile,
-  type Species,
 } from "./types";
 import type { Pet } from "./pets";
 import { isISODate } from "@/utils/dates";
@@ -42,11 +43,12 @@ export const PRICE_STEPS = [600, 900, 1200] as const;
 export type SortOrder = "default" | "price";
 
 export type SearchCriteria = {
-  species: Species | null;
-  /** Only meaningful when `species` is "dog" — `normalizeCriteria` clears it
-      otherwise. A hard constraint: a sitter who declared they take only small
-      dogs is not shown for a large one (Audit 1.3 LOT 03). */
-  size: DogSize | null;
+  /** The animal's category; « other » only for a saved animal of that kind. */
+  species: PetCategory | null;
+  /** A listed breed / species of that category (Nidz 1.7, replacing the dog
+      size). It decides compatibility with a sitter who accepts only some
+      kinds; `normalizeCriteria` drops a kind that is not of the category. */
+  kind: string | null;
   care: CareType | null;
   wilaya: string | null;
   commune: string | null;
@@ -58,7 +60,7 @@ export type SearchCriteria = {
 
 export const EMPTY_CRITERIA: SearchCriteria = {
   species: null,
-  size: null,
+  kind: null,
   care: null,
   wilaya: null,
   commune: null,
@@ -82,15 +84,17 @@ export function normalizeCriteria(c: SearchCriteria): SearchCriteria {
   if (out.care === "walk" && out.dates && out.dates.start !== out.dates.end) {
     out = { ...out, dates: { start: out.dates.start, end: out.dates.start } };
   }
-  /* A size is a fact about a dog. Kept with any other species it would filter
-     cat sitters on a dog size nobody can see in the brief. */
-  if (out.size && out.species !== "dog") out = { ...out, size: null };
+  /* A breed belongs to its category: « Persan » kept on a dog search would
+     filter dog sitters on a cat breed nobody can see in the brief. */
+  if (out.kind && (!out.species || !getKind(out.kind, out.species))) out = { ...out, kind: null };
+  /* A service the animal cannot have — a walk for a cat, boarding for an
+     aquarium — is not a search anyone can mean. */
+  if (out.care && out.species && !serviceFits(out.species, out.care)) out = { ...out, care: null };
   return out;
 }
 
 export function parseCriteria(params: URLSearchParams): SearchCriteria {
   const species = params.get("species");
-  const size = params.get("size");
   const care = params.get("care");
   const max = Number(params.get("max"));
   const from = params.get("from");
@@ -104,8 +108,9 @@ export function parseCriteria(params: URLSearchParams): SearchCriteria {
     : (getWilaya(params.get("wilaya"))?.id ?? null);
 
   return normalizeCriteria({
-    species: (SPECIES as readonly string[]).includes(species ?? "") ? (species as Species) : null,
-    size: (DOG_SIZES as readonly string[]).includes(size ?? "") ? (size as DogSize) : null,
+    species: isPetCategory(species) ? species : null,
+    /* An old `size=` link is simply ignored: dog size no longer filters. */
+    kind: params.get("kind"),
     care: (CARE_TYPES as readonly string[]).includes(care ?? "") ? (care as CareType) : null,
     wilaya,
     commune,
@@ -118,7 +123,7 @@ export function parseCriteria(params: URLSearchParams): SearchCriteria {
 export function criteriaToParams(c: SearchCriteria): Record<string, string> {
   const out: Record<string, string> = {};
   if (c.species) out.species = c.species;
-  if (c.size) out.size = c.size;
+  if (c.kind) out.kind = c.kind;
   if (c.care) out.care = c.care;
   if (c.commune) out.commune = c.commune;
   else if (c.wilaya) out.wilaya = c.wilaya;
@@ -133,9 +138,8 @@ export function criteriaToParams(c: SearchCriteria): Record<string, string> {
 
 export function criteriaFromNeed(need: OwnerNeed): SearchCriteria {
   return normalizeCriteria({
-    species: need.species,
-    /* Storage is untrusted: only a size this build knows reaches a filter. */
-    size: (DOG_SIZES as readonly (string | null)[]).includes(need.dogSize) ? need.dogSize : null,
+    species: isPetCategory(need.species) ? need.species : null,
+    kind: typeof need.kindId === "string" ? need.kindId : null,
     care: need.careType,
     wilaya: need.wilayaCode,
     commune: need.communeCode,
@@ -156,7 +160,7 @@ export function criteriaFromNeed(need: OwnerNeed): SearchCriteria {
 export function needPatchFromCriteria(c: SearchCriteria): Partial<OwnerNeed> {
   return {
     species: c.species,
-    dogSize: c.size,
+    kindId: c.kind,
     careType: c.care,
     wilayaCode: c.wilaya,
     communeCode: c.commune,
@@ -166,7 +170,7 @@ export function needPatchFromCriteria(c: SearchCriteria): Partial<OwnerNeed> {
 }
 
 export function activeCriteriaCount(c: SearchCriteria): number {
-  return [c.species, c.size, c.care, c.commune ?? c.wilaya, c.maxPrice, c.dates].filter(
+  return [c.species, c.kind, c.care, c.commune ?? c.wilaya, c.maxPrice, c.dates].filter(
     (v) => v !== null && v !== undefined,
   ).length;
 }
@@ -180,10 +184,12 @@ export function activeCriteriaCount(c: SearchCriteria): number {
  * that was checked, expressed in the words of the thing that was checked.
  */
 export type MatchReason =
-  | { kind: "species"; species: Species }
-  /** The dog size that was asked for, and that this sitter declared they
-      take. Never emitted for an unknown size: silence is not a match. */
-  | { kind: "size"; size: DogSize }
+  | { kind: "species"; species: PetCategory }
+  /** The listed breed / species asked for, which this sitter accepts —
+      either because they named it, or because they accept every kind of the
+      category. Never emitted when the kind was not given: silence is not a
+      match. */
+  | { kind: "kind"; kindId: string; species: PetCategory }
   | { kind: "care"; care: CareType }
   /** `level` records WHAT was matched. A wilaya-wide search matched the
       wilaya, not the commune — naming the commune there would both repeat the
@@ -214,22 +220,22 @@ export type MatchReason =
 export function reasonsFor(sitter: SitterProfile, c: SearchCriteria): MatchReason[] {
   const reasons: MatchReason[] = [];
 
-  /* "Accepts large dogs" already says "accepts dogs": one reason, not two
-     (Audit 1.3 LOT 06 — one or two concrete reasons, not a token list). */
-  if (c.species === "dog" && c.size && sitter.acceptedSpecies.includes("dog") && sitter.acceptedDogSizes.includes(c.size)) {
-    reasons.push({ kind: "size", size: c.size });
-  } else if (c.species && sitter.acceptedSpecies.includes(c.species)) {
-    reasons.push({ kind: "species", species: c.species });
+  /* « Accepte les Sloughis » already says « accepte les chiens »: one reason,
+     not two (Audit 1.3 LOT 06). Only CONFIRMED compatibility is a reason —
+     « à confirmer » is stated on the card, never as a tick. */
+  if (c.species) {
+    const fit = compatibility(sitter, { species: c.species, kindId: c.kind });
+    if (fit.level === "confirmed" && c.kind) reasons.push({ kind: "kind", kindId: c.kind, species: c.species });
+    else if (fit.level === "confirmed") reasons.push({ kind: "species", species: c.species });
   }
   if (c.care && offeredServices(sitter).includes(c.care)) {
     reasons.push({ kind: "care", care: c.care });
   }
-  /* Zone is reported whenever location narrowed the search, including a
-     wilaya-only search — otherwise the thing that shortened the list is the
-     one thing never explained. */
+  /* Zone is reported for the place that was matched: the commune asked for,
+     or the wilaya — never a commune the owner did not ask about. */
   if (c.commune && sitter.communeCode === c.commune) {
     reasons.push({ kind: "zone", zone: sitter.communeCode, level: "commune" });
-  } else if (!c.commune && c.wilaya && wilayaOfPlace(sitter) === c.wilaya) {
+  } else if (c.wilaya && wilayaOfPlace(sitter) === c.wilaya) {
     reasons.push({ kind: "zone", zone: c.wilaya, level: "wilaya" });
   }
   if (c.dates && !overlapsDeclaredUnavailable(sitter, c.dates)) {
@@ -238,10 +244,49 @@ export function reasonsFor(sitter: SitterProfile, c: SearchCriteria): MatchReaso
   return reasons;
 }
 
+/* ---------------------------------------------------------------- proximity */
+
+/** Where results are ordered from: the zone searched, else the owner's own
+    area when they gave one. */
+export type Origin = { wilayaCode: string | null; communeCode: string | null };
+
+/**
+ * How near a place is to the origin, as an ORDERING key (Nidz 1.7 §11, §13).
+ *
+ *   tier 0  the same commune;
+ *   tier 1  the same wilaya;
+ *   tier 2  another wilaya — `km` is the approximate distance between the two
+ *           chefs-lieux (`algeria/positions.ts`), used only to order;
+ *   tier 3  no origin, or a place Nidz cannot locate.
+ *
+ * Never rendered as a distance: Nidz has no position for any home, so « à
+ * 2,1 km » would be a precision claim with nothing behind it. The screens say
+ * « dans votre commune », « dans votre wilaya », « plus loin ».
+ */
+export type Proximity = { tier: 0 | 1 | 2 | 3; km: number };
+
+export function proximity(origin: Origin | null, place: { wilayaCode?: string | null; communeCode?: string | null }): Proximity {
+  const originWilaya = origin ? (origin.wilayaCode ?? getWilayaOfCommune(origin.communeCode)?.id ?? null) : null;
+  if (!origin || !originWilaya) return { tier: 3, km: Number.POSITIVE_INFINITY };
+  const placeWilaya = wilayaOfPlace(place);
+  if (!placeWilaya) return { tier: 3, km: Number.POSITIVE_INFINITY };
+  if (origin.communeCode && place.communeCode === origin.communeCode) return { tier: 0, km: 0 };
+  if (placeWilaya === originWilaya) return { tier: 1, km: 0 };
+  return { tier: 2, km: wilayaDistanceKm(originWilaya, placeWilaya) };
+}
+
+export function compareProximity(a: Proximity, b: Proximity): number {
+  if (a.tier !== b.tier) return a.tier - b.tier;
+  return a.km === b.km ? 0 : a.km < b.km ? -1 : 1;
+}
+
 export type SearchResult = {
   sitter: SitterProfile;
   rate: NonNullable<ReturnType<typeof rateFor>>;
   reasons: MatchReason[];
+  /** Confirmed or « à confirmer » — an incompatible sitter is never a result. */
+  compat: Compatibility;
+  proximity: Proximity;
 };
 
 /**
@@ -250,17 +295,20 @@ export type SearchResult = {
  *
  * WHAT ORDERS THE RESULTS, AND WHAT DELIBERATELY DOES NOT.
  *
- * Filtering is hard compatibility only: species, dog size, service, area,
- * budget, and a period the sitter has declared unavailable. A fact the owner
- * has not given (a dog's size) excludes nobody — it is not a mismatch — but it
- * is not reported as a match either; the card states the sitter's own limit
- * instead (Audit 1.3 LOT 03).
+ * Filtering is hard compatibility only (Nidz 1.7): an animal the sitter does
+ * not accept (`compatibility.ts`), a service they do not offer, a budget, and
+ * a period the sitter has declared unavailable. A fact the owner has not
+ * given — the breed, for a sitter who takes only some — excludes nobody, but
+ * it is not reported as a match either: the card says « à confirmer ».
  *
- * Then the DEFAULT order is
+ * The zone is no longer a filter: « Nidz affiche d'abord les pet-sitters
+ * proches ». The DEFAULT order is
  *
- *   1. sitters in the owner's OWN commune, when Nidz knows it and the search
- *      was not already narrowed to one commune;
- *   2. alphabetical by public name.
+ *   1. nearness to the zone searched (or to the owner's own area): same
+ *      commune, same wilaya, then other wilayas nearest first by the
+ *      approximate distance between their chefs-lieux;
+ *   2. confirmed compatibility before « à confirmer »;
+ *   3. alphabetical by public name.
  *
  * Alphabetical is deliberate. It is neutral and anyone can check it; it makes
  * no claim that the first row is the "best match", which Nidz has no basis to
@@ -269,10 +317,10 @@ export type SearchResult = {
  * Price ordering is still available — as an option the owner picks
  * (`sort: "price"`), and the screen says it was their choice.
  *
- * Proximity is expressed as a shared administrative area, never as a distance.
- * Nidz has no coordinates for anything (see docs/NIDZ-1.2-MAP-AND-LOCATION.md),
- * so "2.1 km away" would be a precision claim with nothing behind it, while
- * "in your commune" is a fact.
+ * Proximity is SHOWN as a shared administrative area, never as a distance.
+ * The only coordinates Nidz holds are approximate chef-lieu positions, used to
+ * order other wilayas; "2.1 km away" would be a precision claim with nothing
+ * behind it, while "in your commune" is a fact.
  *
  * Nothing else ranks, and each omission is a decision:
  *
@@ -283,8 +331,8 @@ export type SearchResult = {
  *   - EXPERIENCE YEARS: a soft preference the owner did not express. Sorting on
  *     it silently answers a question nobody asked.
  *   - WEIGHTED SCORES: §116 rules out inventing weights for sophistication's
- *     sake. Two tiers, both statable in one sentence, is the whole ranking, and
- *     the results screen states it.
+ *     sake. Three tiers, each statable in one sentence, is the whole ranking,
+ *     and the results screen states it.
  */
 /**
  * Identity of a reason, for deduplication.
@@ -298,8 +346,8 @@ export function reasonKey(reason: MatchReason): string {
   switch (reason.kind) {
     case "species":
       return `species:${reason.species}`;
-    case "size":
-      return `size:${reason.size}`;
+    case "kind":
+      return `kind:${reason.kindId}`;
     case "care":
       return `care:${reason.care}`;
     case "zone":
@@ -382,16 +430,15 @@ export function partitionReasons(results: SearchResult[]): {
 export function matchSitters(
   sitters: SitterProfile[],
   c: SearchCriteria,
-  /** The owner's own commune, when they have told Nidz. Used only to break
-      ties — never to filter, because someone looking for care in a commune
-      they are travelling to is a normal case. */
-  homeCommune: string | null = null,
+  /** The owner's own area, when they have told Nidz. Orders results when the
+      search names no zone; never filters, because someone looking for care
+      somewhere they are travelling to is a normal case. */
+  home: Origin | null = null,
   /** The interface language, so "alphabetical" means the same thing the
       sentence above the list says, whatever the browser's own locale. */
   locale = "en",
 ): SearchResult[] {
-  /* A no-op when the search already names a commune: every result is in it. */
-  const nearBy = c.commune ? null : homeCommune;
+  const origin: Origin | null = c.commune || c.wilaya ? { wilayaCode: c.wilaya, communeCode: c.commune } : home;
   const collator = new Intl.Collator(locale, { sensitivity: "base" });
 
   return sitters
@@ -399,28 +446,27 @@ export function matchSitters(
       const rate = rateFor(sitter, c.care ? [c.care] : []);
       if (!rate) return [];
 
-      if (c.species && !sitter.acceptedSpecies.includes(c.species)) return [];
-      if (c.species === "dog" && c.size && !sitter.acceptedDogSizes.includes(c.size)) return [];
+      const compat: Compatibility = c.species
+        ? compatibility(sitter, { species: c.species, kindId: c.kind })
+        : { level: "confirmed", scope: "category" };
+      if (compat.level === "incompatible") return [];
       if (c.care && !offeredServices(sitter).includes(c.care)) return [];
-      /* A commune search keeps only sitters who named that commune; a sitter
-         who gave only their wilaya is found by a search of that wilaya, never
-         presented as being in a commune they did not state. */
-      if (c.commune && sitter.communeCode !== c.commune) return [];
-      if (!c.commune && c.wilaya && wilayaOfPlace(sitter) !== c.wilaya) return [];
       if (c.maxPrice !== null && rate.amount > c.maxPrice) return [];
       /* A period the sitter has DECLARED unavailable is a statement by them,
          and excluding it is honest. The reverse is not: not-declared-busy is
          never "confirmed available", and the results screen must say so. */
       if (c.dates && overlapsDeclaredUnavailable(sitter, c.dates)) return [];
 
-      return [{ sitter, rate, reasons: reasonsFor(sitter, c) }];
+      return [{ sitter, rate, reasons: reasonsFor(sitter, c), compat, proximity: proximity(origin, sitter) }];
     })
     .sort((a, b) => {
-      if (nearBy) {
-        const aNear = a.sitter.communeCode === nearBy ? 0 : 1;
-        const bNear = b.sitter.communeCode === nearBy ? 0 : 1;
-        if (aNear !== bNear) return aNear - bNear;
-      }
+      /* 1. Nearest first: commune, wilaya, then other wilayas by the
+         approximate distance between chefs-lieux (Nidz 1.7). */
+      const near = compareProximity(a.proximity, b.proximity);
+      if (near !== 0) return near;
+      /* 2. What is confirmed before what is to be confirmed. */
+      const fit = compatibilityRank(a.compat) - compatibilityRank(b.compat);
+      if (fit !== 0) return fit;
       /* Prices are only comparable in ONE unit. With no service chosen each
          sitter is quoted on their cheapest service — a walk against a night —
          so a price order would rank units, not prices. A stale `sort=price`
@@ -428,74 +474,37 @@ export function matchSitters(
       if (c.sort === "price" && c.care && a.rate.amount !== b.rate.amount) {
         return a.rate.amount - b.rate.amount;
       }
+      /* 3. Alphabetical: neutral, checkable, and no claim that the first row
+         is « the best ». */
       return collator.compare(a.sitter.publicName, b.sitter.publicName);
     });
 }
 
-/**
- * The dog sizes a sitter restricts to, when the owner searched for a dog
- * WITHOUT giving its size. Null when the size was given (the filter already
- * guarantees it), when the sitter takes every size, or when the search is not
- * about a dog. The card states this limit so an unknown size is never read as
- * "this sitter will take my dog".
- */
-export function sizeLimitToState(
-  sitter: SitterProfile,
-  c: Pick<SearchCriteria, "species" | "size">,
-): DogSize[] | null {
-  if (c.species !== "dog" || c.size) return null;
-  if (!sitter.acceptedSpecies.includes("dog") || acceptsEveryDogSize(sitter)) return null;
-  const sizes = DOG_SIZES.filter((size) => sitter.acceptedDogSizes.includes(size));
-  /* A dog sitter with NO declared size (only possible through hand-edited
-     storage) has nothing statable: "Dogs:  only" is not a sentence. */
-  return sizes.length > 0 ? sizes : null;
-}
-
-/** Whether the home-commune tie-break actually changed anything, so the
-    results screen can state the order truthfully instead of claiming a rule
-    that did not apply. */
-export function usedHomeCommune(
-  results: SearchResult[],
-  c: SearchCriteria,
-  homeCommune: string | null,
-): boolean {
-  if (!homeCommune || c.commune) return false;
-  return results.some((r) => r.sitter.communeCode === homeCommune);
+/** Whether ordering was by a place at all, and whether anything sits outside
+    the origin wilaya — so the results can say « plus loin » truthfully. */
+export function splitByDistance(results: SearchResult[]): { near: SearchResult[]; farther: SearchResult[]; unplaced: boolean } {
+  const unplaced = results.length > 0 && results.every((r) => r.proximity.tier === 3);
+  if (unplaced) return { near: results, farther: [], unplaced };
+  return {
+    near: results.filter((r) => r.proximity.tier <= 1),
+    farther: results.filter((r) => r.proximity.tier >= 2),
+    unplaced,
+  };
 }
 
 /* ------------------------------------------------------------- pet ↔ sitter */
 
-/**
- * Whether ONE particular animal can be put in front of ONE particular sitter.
- *
- * The request flow's hard constraint, and deliberately three-valued. Species
- * and declared dog size are facts on both sides, so a mismatch is certain and
- * the animal cannot be sent. But a dog whose size the owner never gave is not
- * proven compatible with a sitter who only takes small dogs — an absent answer
- * is not a match (Audit 1.3, LOT 03) — and it is not proven incompatible
- * either. That case is `unknown`, and the request screen asks for the missing
- * fact instead of guessing it.
- *
- * A sitter who accepts every size needs no answer, so `unknown` only arises
- * when the sitter actually restricts sizes.
- */
-export type PetFit =
-  | { fits: true }
-  | { fits: false; reason: "species" }
-  | { fits: false; reason: "size"; accepted: DogSize[] }
-  | { fits: "unknown"; reason: "sizeUnknown"; accepted: DogSize[] };
-
-/** Every declared size, in the canonical order, for a sitter who restricts. */
-export function acceptsEveryDogSize(sitter: SitterProfile): boolean {
-  return DOG_SIZES.every((size) => sitter.acceptedDogSizes.includes(size));
+/** A saved animal as matching sees it. */
+export function petRef(pet: Pick<Pet, "species" | "kindId" | "kindOther">): AnimalRef {
+  return { species: pet.species, kindId: pet.kindId, kindOther: pet.kindOther };
 }
 
-export function petFit(pet: Pet, sitter: SitterProfile): PetFit {
-  if (!sitter.acceptedSpecies.includes(pet.species)) return { fits: false, reason: "species" };
-  if (pet.species !== "dog" || acceptsEveryDogSize(sitter)) return { fits: true };
-
-  const accepted = DOG_SIZES.filter((size) => sitter.acceptedDogSizes.includes(size));
-  const size = pet.details.size;
-  if (size === null) return { fits: "unknown", reason: "sizeUnknown", accepted };
-  return accepted.includes(size) ? { fits: true } : { fits: false, reason: "size", accepted };
+/**
+ * Whether ONE particular animal can be put in front of ONE particular sitter —
+ * the request flow's hard constraint, three-valued (see `compatibility.ts`).
+ * An incompatible animal cannot be sent; an « à confirmer » one can, and the
+ * request says what is to be confirmed instead of guessing it.
+ */
+export function petFit(pet: Pick<Pet, "species" | "kindId" | "kindOther">, sitter: SitterProfile): Compatibility {
+  return compatibility(sitter, petRef(pet));
 }

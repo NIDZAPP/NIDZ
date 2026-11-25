@@ -80,7 +80,7 @@ describe("conversations", () => {
     const c = conv({ messages: [newConversationMessage("owner", "Bonjour", T1)] });
     const state: DemoState = {
       ...INITIAL_STATE,
-      sitter: { profile: { id: "sitter-local", publicName: "Lina K." }, published: true, idDocument: null } as unknown as DemoState["sitter"],
+      sitter: { profile: { id: "sitter-local", publicName: "Lina K.", acceptedSpecies: [] }, published: true, hidden: false, idDocument: null } as unknown as DemoState["sitter"],
       conversations: [c],
     };
     assert.equal(unreadThreads(state, "sitter"), 1);
@@ -88,6 +88,11 @@ describe("conversations", () => {
     const items = notificationsFor(state, "sitter");
     assert.equal(items.length, 1);
     assert.equal(items[0].kind, "message");
+    assert.equal(items[0].text.key, "notifications.message");
     assert.equal(notificationsFor(state, "owner").length, 0);
+    /* Switching « Messages » off in Paramètres hides it and the badge. */
+    const quiet: DemoState = { ...state, preferences: { ...state.preferences, notifications: { ...state.preferences.notifications, messages: false } } };
+    assert.equal(notificationsFor(quiet, "sitter").length, 0);
+    assert.equal(unreadThreads(quiet, "sitter"), 0);
   });
 });

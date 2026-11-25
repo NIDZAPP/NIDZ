@@ -1,49 +1,72 @@
-import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
 import { Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import type { ReactNode } from "react";
+import { useRef, type KeyboardEvent, type ReactNode, type Ref } from "react";
 
-import { AnimalPortrait, SPECIES_TILE } from "@/components/illustrations/animals";
-import { SPECIES, type Species } from "@/data/types";
+import { AnimalPortrait } from "@/components/illustrations/animals";
+import { PET_CATEGORIES, SPECIES, type PetCategory, type Species } from "@/data/types";
 import { cn } from "@/lib/utils";
 
 /* ---------------------------------------------------------------------------
-   THE ANIMAL CATEGORIES, AS ILLUSTRATED CARDS (Nidz 1.4, step 3).
+   THE ANIMAL CATALOGUE AS A GRID (Nidz 1.7).
 
    One component for the one classification owners and sitters share
-   (`SPECIES` in src/data/types.ts): the owner picks the animal that needs
-   care, the sitter ticks the animals they accept, the home offers them as a
-   way in. Same three cards, same order, same words — so "chien" means the
-   same thing on both sides of the marketplace.
+   (`animal-catalogue.ts`): three cards to a row, the supplied illustration
+   and the name, in catalogue order — dog, cat, bird first. The same cards on
+   both sides, so « chien » means the same thing everywhere.
 
-   The cards are the CATEGORY. Breeds and kinds (src/data/animal-kinds.ts) are
-   detail about one animal and never widen or narrow matching.
+   Two modes, two honest roles:
 
-   Three modes, three honest roles:
-     - `pick`    buttons — choosing IS the action (the home's quick start);
-     - `single`  a Radix radio group — arrow keys, one tab stop;
-     - `multi`   checkboxes — several can be on.
+     single  the owner's « Pour quel animal ? ». Toggle buttons (`aria-pressed`)
+             in a group: one at a time, a second tap on the chosen card
+             deselects it — a radio group cannot be emptied, and correcting a
+             mis-tap must be easy (§6.2). « Autre » closes the grid.
+     multi   the sitter's accepted animals: checkboxes, several on. No
+             « Autre »: nobody is assumed to accept an animal Nidz cannot
+             name.
+
+   THE FOCUS EFFECT (single). Once an animal is chosen, the other cards step
+   back — a 2px blur, lower opacity, a hair smaller — while the chosen one
+   stays sharp with the teal ring and check. Two reasons it is safe: the
+   names stay in the accessibility tree untouched (the effect is pure CSS on
+   the visual layer), and every blurred card is still a live button, so
+   choosing another animal is one tap, not two. Under reduced motion the
+   change is instant and the scale is dropped.
+
    Selected = a 2.5px teal ring + a check badge, never colour alone (§12.2).
    ------------------------------------------------------------------------ */
 
 const CARD = cn(
-  "group relative flex min-h-11 flex-col overflow-hidden rounded-xl text-start",
-  "transition-[transform,box-shadow] duration-150 ease-out active:scale-[0.97]",
+  "group relative flex min-h-11 flex-col overflow-hidden rounded-xl bg-card text-start",
+  "transition-[transform,box-shadow,filter,opacity] duration-200 ease-out active:scale-[0.97]",
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+  "motion-reduce:transition-none motion-reduce:active:scale-100",
 );
 
-function CardBody({ species, label, selected, sub }: { species: Species; label: string; selected?: boolean; sub?: string }) {
+const ring = (selected: boolean) =>
+  selected
+    ? "shadow-[inset_0_0_0_2.5px_hsl(var(--primary)),0_10px_24px_-10px_hsl(var(--shadow)/0.35)]"
+    : "shadow-card [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-raised";
+
+/** The receded state of the cards around a chosen one. */
+const RECEDED = "opacity-[0.55] blur-[2px] saturate-[0.7] scale-[0.97] motion-reduce:scale-100";
+
+function CardBody({
+  category,
+  label,
+  selected,
+  eager,
+}: {
+  category: PetCategory;
+  label: string;
+  selected?: boolean;
+  eager?: boolean;
+}) {
   return (
     <>
-      <AnimalPortrait
-        species={species}
-        tile={false}
-        className="mx-auto aspect-square w-full max-w-[9rem] transition-transform duration-200 ease-out [@media(hover:hover)_and_(pointer:fine)]:group-hover:-translate-y-0.5"
-      />
-      <span className="flex items-center justify-between gap-1 px-3 pb-3">
-        <span className="min-w-0">
-          <span className="block truncate text-[0.9375rem] font-semibold text-foreground">{label}</span>
-          {sub && <span className="block truncate text-xs text-muted-foreground">{sub}</span>}
+      <AnimalPortrait species={category} eager={eager} className="aspect-square w-full" />
+      <span className="flex min-h-[2.75rem] items-center px-2.5 py-2">
+        <span className="line-clamp-2 text-[0.875rem] font-semibold leading-tight text-foreground sm:text-[0.9375rem]">
+          {label}
         </span>
       </span>
       {selected !== undefined && (
@@ -51,7 +74,7 @@ function CardBody({ species, label, selected, sub }: { species: Species; label: 
           aria-hidden="true"
           className={cn(
             "absolute end-2 top-2 flex size-6 items-center justify-center rounded-full transition-colors duration-150",
-            selected ? "bg-primary text-primary-foreground" : "bg-card/80 shadow-[inset_0_0_0_1.5px_hsl(var(--input))]",
+            selected ? "bg-primary text-primary-foreground" : "bg-card/85 shadow-[inset_0_0_0_1.5px_hsl(var(--input))]",
           )}
         >
           {selected && <Check className="size-3.5 animate-pop" strokeWidth={3} />}
@@ -61,121 +84,141 @@ function CardBody({ species, label, selected, sub }: { species: Species; label: 
   );
 }
 
-const ring = (selected: boolean) =>
-  selected
-    ? "shadow-[inset_0_0_0_2.5px_hsl(var(--primary)),0_8px_20px_-8px_hsl(var(--shadow)/0.25)]"
-    : "shadow-card [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-raised";
+/** Arrow keys move through the grid three to a row; Home / End jump. Reading
+    order follows the page direction, so ArrowRight moves backwards in RTL. */
+function useGridKeys(columns = 3) {
+  const root = useRef<HTMLDivElement>(null);
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const items = Array.from(root.current?.querySelectorAll<HTMLButtonElement>("button[data-cell]") ?? []);
+    const index = items.indexOf(document.activeElement as HTMLButtonElement);
+    if (index < 0) return;
+    const rtl = getComputedStyle(event.currentTarget).direction === "rtl";
+    const step: Record<string, number> = {
+      ArrowRight: rtl ? -1 : 1,
+      ArrowLeft: rtl ? 1 : -1,
+      ArrowDown: columns,
+      ArrowUp: -columns,
+    };
+    let next = index;
+    if (event.key in step) next = index + step[event.key];
+    else if (event.key === "Home") next = 0;
+    else if (event.key === "End") next = items.length - 1;
+    else return;
+    event.preventDefault();
+    items[Math.max(0, Math.min(items.length - 1, next))]?.focus();
+  };
+  return { root, onKeyDown };
+}
 
 type Common = {
-  /** Label per species; defaults to `species.<s>` (singular). */
-  labelFor?: (species: Species) => string;
-  subFor?: (species: Species) => string | undefined;
   className?: string;
-  /** A card after the three, e.g. « Mon animal n'est pas dans la liste ». */
-  extra?: ReactNode;
+  labelledBy?: string;
+  describedBy?: string;
+  /** Rows above the fold load eagerly; the rest lazily. */
+  eagerCount?: number;
 };
 
-export function AnimalCategoryPicker({
-  onPick,
+export function AnimalGridSingle({
+  value,
+  onChange,
+  includeOther = true,
+  invalid,
+  groupRef,
+  className,
   labelledBy,
-  ...common
-}: Common & { onPick: (species: Species) => void; labelledBy?: string }) {
+  describedBy,
+  eagerCount = 9,
+  extra,
+}: Common & {
+  value: PetCategory | null;
+  /** `null` when the chosen card is tapped again. */
+  onChange: (category: PetCategory | null) => void;
+  includeOther?: boolean;
+  invalid?: boolean;
+  groupRef?: Ref<HTMLDivElement>;
+  extra?: ReactNode;
+}) {
   const { t } = useTranslation();
-  const label = common.labelFor ?? ((s: Species) => t(`species.${s}`));
+  const keys = useGridKeys();
+  const categories = includeOther ? PET_CATEGORIES : SPECIES;
   return (
-    <div role="group" aria-labelledby={labelledBy} className={cn("grid grid-cols-3 gap-2.5 sm:gap-3", common.className)}>
-      {SPECIES.map((species) => (
-        <button
-          key={species}
-          type="button"
-          onClick={() => onPick(species)}
-          className={cn(CARD, SPECIES_TILE[species], ring(false))}
-        >
-          <CardBody species={species} label={label(species)} sub={common.subFor?.(species)} />
-        </button>
-      ))}
-      {common.extra}
+    <div
+      ref={(node) => {
+        (keys.root as React.MutableRefObject<HTMLDivElement | null>).current = node;
+        if (typeof groupRef === "function") groupRef(node);
+        else if (groupRef) (groupRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+      }}
+      role="group"
+      tabIndex={-1}
+      aria-labelledby={labelledBy}
+      aria-describedby={describedBy}
+      aria-invalid={invalid || undefined}
+      onKeyDown={keys.onKeyDown}
+      className={cn("grid grid-cols-3 gap-2.5 focus:outline-none sm:gap-3", className)}
+    >
+      {categories.map((category, index) => {
+        const selected = value === category;
+        return (
+          <button
+            key={category}
+            type="button"
+            data-cell
+            aria-pressed={selected}
+            onClick={() => onChange(selected ? null : category)}
+            className={cn(CARD, ring(selected), value !== null && !selected && RECEDED)}
+          >
+            <CardBody
+              category={category}
+              label={category === "other" ? t("catalogue.other") : t(`species.${category}`)}
+              selected={selected}
+              eager={index < eagerCount}
+            />
+          </button>
+        );
+      })}
+      {extra}
     </div>
   );
 }
 
-export function AnimalCategoryRadio({
-  value,
-  onChange,
-  labelledBy,
-  describedBy,
-  invalid,
-  groupRef,
-  ...common
-}: Common & {
-  value: Species | null;
-  onChange: (species: Species) => void;
-  labelledBy?: string;
-  describedBy?: string;
-  invalid?: boolean;
-  groupRef?: React.Ref<HTMLDivElement>;
-}) {
-  const { t } = useTranslation();
-  const label = common.labelFor ?? ((s: Species) => t(`species.${s}`));
-  return (
-    <RadioGroupPrimitive.Root
-      ref={groupRef}
-      aria-labelledby={labelledBy}
-      aria-describedby={describedBy}
-      aria-invalid={invalid || undefined}
-      value={value ?? ""}
-      onValueChange={(v) => onChange(v as Species)}
-      className={cn("grid grid-cols-3 gap-2.5 sm:gap-3", common.className)}
-    >
-      {SPECIES.map((species) => {
-        const selected = value === species;
-        return (
-          <RadioGroupPrimitive.Item
-            key={species}
-            value={species}
-            className={cn(CARD, SPECIES_TILE[species], ring(selected))}
-          >
-            <CardBody species={species} label={label(species)} selected={selected} sub={common.subFor?.(species)} />
-          </RadioGroupPrimitive.Item>
-        );
-      })}
-      {common.extra}
-    </RadioGroupPrimitive.Root>
-  );
-}
-
-export function AnimalCategoryChecks({
+export function AnimalGridMulti({
   values,
   onToggle,
+  className,
   labelledBy,
   describedBy,
-  ...common
+  eagerCount = 9,
 }: Common & {
   values: readonly Species[];
   onToggle: (species: Species) => void;
-  labelledBy?: string;
-  describedBy?: string;
 }) {
   const { t } = useTranslation();
-  const label = common.labelFor ?? ((s: Species) => t(`speciesPlural.${s}`));
+  const keys = useGridKeys();
   return (
-    <div role="group" aria-labelledby={labelledBy} aria-describedby={describedBy} className={cn("grid grid-cols-3 gap-2.5 sm:gap-3", common.className)}>
-      {SPECIES.map((species) => {
+    <div
+      ref={keys.root}
+      role="group"
+      aria-labelledby={labelledBy}
+      aria-describedby={describedBy}
+      onKeyDown={keys.onKeyDown}
+      className={cn("grid grid-cols-3 gap-2.5 sm:gap-3", className)}
+    >
+      {SPECIES.map((species, index) => {
         const selected = values.includes(species);
         return (
           <button
             key={species}
             type="button"
+            data-cell
             role="checkbox"
             aria-checked={selected}
             onClick={() => onToggle(species)}
-            className={cn(CARD, SPECIES_TILE[species], ring(selected))}
+            className={cn(CARD, ring(selected))}
           >
-            <CardBody species={species} label={label(species)} selected={selected} sub={common.subFor?.(species)} />
+            <CardBody category={species} label={t(`speciesPlural.${species}`)} selected={selected} eager={index < eagerCount} />
           </button>
         );
       })}
-      {common.extra}
     </div>
   );
 }

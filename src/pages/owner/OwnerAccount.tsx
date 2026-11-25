@@ -164,6 +164,8 @@ export default function OwnerAccount() {
           phoneNumber: digits,
           accountComplete: true,
           createdAt: base.account?.createdAt ?? new Date().toISOString(),
+          signInMethod: base.account?.signInMethod ?? null,
+          photoUrl: base.account?.photoUrl,
         },
       }),
       { force },

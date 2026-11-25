@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sheet";
 import { ChipGroup } from "@/components/shared/Chip";
 import BackButton from "@/components/shared/BackButton";
+import NativeSelect from "@/components/shared/NativeSelect";
 import BriefCapsule from "@/components/search/BriefCapsule";
 import SitterCard from "@/components/sitter/SitterCard";
 import { useReasonLabel } from "@/components/sitter/use-reason-label";
@@ -27,26 +28,26 @@ import {
   activeCriteriaCount,
   criteriaToParams,
   matchSitters,
-  usedHomeCommune,
   needPatchFromCriteria,
   normalizeCriteria,
   parseCriteria,
   partitionReasons,
-  sizeLimitToState,
+  splitByDistance,
   type SearchCriteria,
   type SortOrder,
 } from "@/data/criteria";
 import { publicSitters } from "@/data/repository";
 import { communeName, getWilaya } from "@/data/algeria";
 import {
+  CARE_TYPES,
   CARE_UNIT_KEY,
-  DOG_SIZES,
   SPECIES,
   localized,
   type CareType,
-  type DogSize,
-  type Species,
+  type PetCategory,
 } from "@/data/types";
+import { classificationOf, servicesFor } from "@/data/animal-catalogue";
+import { getKind, kindsOf } from "@/data/animal-kinds";
 import { useAppLocale } from "@/hooks/use-locale";
 import { cn } from "@/lib/utils";
 import { useDemo } from "@/state/demo/context";
@@ -135,11 +136,13 @@ export default function Search() {
   /* The owner's own commune breaks ties, so a wilaya-wide search puts the
      people nearest them first. It never filters: someone arranging care in a
      commune they are travelling to is a normal case. */
+  const homeWilaya = state.account?.wilayaId ?? null;
   const homeCommune = state.account?.communeId ?? null;
   const results = useMemo(
-    () => matchSitters(pool, criteria, homeCommune, lng),
-    [pool, criteria, homeCommune, lng],
+    () => matchSitters(pool, criteria, homeWilaya || homeCommune ? { wilayaCode: homeWilaya, communeCode: homeCommune } : null, lng),
+    [pool, criteria, homeWilaya, homeCommune, lng],
   );
+  const groups = useMemo(() => splitByDistance(results), [results]);
   /* The order is an option the owner picks, applied straight away: it filters
      nothing, so there is nothing to stage in the sheet. */
   const setSort = (sort: SortOrder) => apply({ ...criteria, sort }, { replace: true });
@@ -147,16 +150,12 @@ export default function Search() {
      once a service is chosen (see `matchSitters`). */
   const canSortByPrice = criteria.care !== null;
   const priceOrder = criteria.sort === "price" && canSortByPrice;
-  /* The size hint is only true when at least one listed sitter actually
-     restricts sizes. */
-  const someSizeLimit = results.some((r) => sizeLimitToState(r.sitter, criteria) !== null);
-  /* Narrowed to a value rather than asserted at the call site: the invariant
-     that makes `homeCommune!` safe lives in another module. Null when the
-     tie-break did not actually change anything. */
-  const near = useMemo(
-    () => (usedHomeCommune(results, criteria, homeCommune) ? homeCommune : null),
-    [results, criteria, homeCommune],
-  );
+  /* Some results are « à confirmer » because the breed was not given and
+     the sitter takes only some breeds (Nidz 1.7): said once, with the way
+     to say the breed. */
+  const someUnknown = results.some((r) => r.compat.level === "unknown" && r.compat.reason === "kindNotGiven");
+  /* What the order was measured from, so the sentence above the list is true. */
+  const orderFrom = criteria.commune || criteria.wilaya ? "zone" : homeWilaya || homeCommune ? "home" : null;
   /* Every criteria-derived reason is true of every survivor by construction,
      so repeating it on each row is three lines of noise per entry that
      discriminates nothing. Shared reasons are stated once, above. */
@@ -165,12 +164,13 @@ export default function Search() {
   const activeFilters = activeCriteriaCount(criteria);
   const hasCriteria = activeFilters > 0;
 
-  /* "Grands chiens" says both facts at once; "Chien" alone when the size was
+  /* « Sloughi » says both facts at once; « Chien » alone when the breed was
      not given. */
-  function speciesValue(species: Species | null, size: DogSize | null): string {
+  function speciesValue(species: PetCategory | null, kindId: string | null): string {
     if (!species) return t("search.brief.anySpecies");
-    if (species === "dog" && size) return t(`dogSize.${size}`);
-    return t(`species.${species}`);
+    if (species === "other") return t("catalogue.other");
+    const kind = getKind(kindId, species);
+    return kind ? kind.name[lng] : t(`species.${species}`);
   }
 
   const zoneText = criteria.commune
@@ -187,17 +187,18 @@ export default function Search() {
     ...(criteria.maxPrice !== null ? [budgetLabel(criteria.maxPrice, criteria.care)] : []),
   ];
 
-  const speciesText = criteria.species ? speciesValue(criteria.species, criteria.size) : null;
+  const speciesText = criteria.species ? speciesValue(criteria.species, criteria.kind) : null;
 
   /* The order, said as what it is. Never "best match": Nidz has no basis for
      that claim. */
-  const orderText =
-    priceOrder
-      ? near
-        ? t("search.results.orderPriceNear", { commune: zoneLabel(near) })
-        : t("search.results.orderPrice")
-      : near
-        ? t("search.results.orderDefaultNear", { commune: zoneLabel(near) })
+  const orderText = priceOrder
+    ? orderFrom
+      ? t("search.results.orderPriceNearest")
+      : t("search.results.orderPrice")
+    : orderFrom === "zone"
+      ? t("search.results.orderNearZone")
+      : orderFrom === "home"
+        ? t("search.results.orderNearHome")
         : t("search.results.orderDefault");
 
   const clearAll = () => {
@@ -289,15 +290,15 @@ export default function Search() {
               absent answer is not a match. Said once, here; each card states
               the sitter's own limit. The action is underlined: it sits inside
               a sentence, where teal alone is under 3:1 against the text. */}
-          {criteria.species === "dog" && !criteria.size && someSizeLimit && (
+          {criteria.species && !criteria.kind && someUnknown && (
             <p className="mt-4 max-w-[70ch] text-sm text-foreground">
-              {t("search.results.sizeHint")}{" "}
+              {t("search.results.kindHint")}{" "}
               <button
                 type="button"
                 onClick={() => openSheet(true)}
                 className="-my-3 inline-flex min-h-11 items-center font-semibold text-primary underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                {t("search.results.sizeHintAction")}
+                {t(`search.results.kindHintAction.${classificationOf(criteria.species) ?? "breed"}`)}
               </button>
             </p>
           )}
@@ -349,23 +350,54 @@ export default function Search() {
               />
             ) : (
               /* One card per sitter, two across from md. */
-              <ul role="list" className="grid gap-3 md:gap-4">
-                {results.map(({ sitter, rate }) => (
-                  <SitterCard
-                    key={sitter.id}
-                    sitter={sitter}
-                    rate={rate}
-                    reasons={perResult.get(sitter.id) ?? []}
-                    askedSpecies={criteria.species}
-                    askedSize={criteria.size}
-                    askedCare={criteria.care}
-                    search={paramKey}
-                    /* Redundant once the species is a criterion: it is then
-                       true of every result and the capsule says so. */
-                    showSpeciesEyebrow={criteria.species === null}
-                  />
-                ))}
-              </ul>
+              <>
+                <ul role="list" className="grid gap-3 md:gap-4">
+                  {groups.near.map(({ sitter, rate, compat }) => (
+                    <SitterCard
+                      key={sitter.id}
+                      sitter={sitter}
+                      rate={rate}
+                      reasons={perResult.get(sitter.id) ?? []}
+                      askedSpecies={criteria.species}
+                      compat={compat}
+                      askedCare={criteria.care}
+                      search={paramKey}
+                      /* Redundant once the species is a criterion: it is then
+                         true of every result and the capsule says so. */
+                      showSpeciesEyebrow={criteria.species === null}
+                    />
+                  ))}
+                </ul>
+                {groups.near.length === 0 && (
+                  <p className="text-sm text-muted-foreground">{t("search.results.noneNear")}</p>
+                )}
+                {/* Nidz 1.7 §11: the zone ORDERS, it does not hide. Other
+                    wilayas follow, nearest first — an estimate between
+                    chefs-lieux, never a distance. */}
+                {groups.farther.length > 0 && (
+                  <section aria-labelledby="search-farther" className="mt-8">
+                    <h2 id="search-farther" className="text-title font-semibold text-foreground">
+                      {t("explore.fartherTitle")}
+                    </h2>
+                    <p className="mt-1 text-sm text-muted-foreground">{t("explore.fartherNote")}</p>
+                    <ul role="list" className="mt-3 grid gap-3 md:gap-4">
+                      {groups.farther.map(({ sitter, rate, compat }) => (
+                        <SitterCard
+                          key={sitter.id}
+                          sitter={sitter}
+                          rate={rate}
+                          reasons={perResult.get(sitter.id) ?? []}
+                          askedSpecies={criteria.species}
+                          compat={compat}
+                          askedCare={criteria.care}
+                          search={paramKey}
+                          showSpeciesEyebrow={criteria.species === null}
+                        />
+                      ))}
+                    </ul>
+                  </section>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -405,11 +437,13 @@ export default function Search() {
                   labelledBy="f-species"
                   value={draft.species ?? ANY}
                   onChange={(v) =>
-                    setDraft({
-                      ...draft,
-                      species: v === ANY ? null : (v as Species),
-                      size: v === "dog" ? draft.size : null,
-                    })
+                    setDraft(
+                      normalizeCriteria({
+                        ...draft,
+                        species: v === ANY ? null : (v as PetCategory),
+                        kind: null,
+                      }),
+                    )
                   }
                   options={[
                     { value: ANY, label: t("search.brief.anySpecies") },
@@ -418,21 +452,24 @@ export default function Search() {
                 />
               </fieldset>
 
-              {draft.species === "dog" && (
-                <fieldset>
-                  <legend id="f-size" className="mb-3 text-[0.9375rem] font-medium text-foreground">
-                    {t("search.filters.size")}
-                  </legend>
-                  <ChipGroup
-                    labelledBy="f-size"
-                    value={draft.size ?? ANY}
-                    onChange={(v) => setDraft({ ...draft, size: v === ANY ? null : (v as DogSize) })}
-                    options={[
-                      { value: ANY, label: t("search.filters.anySize") },
-                      ...DOG_SIZES.map((size) => ({ value: size, label: t(`dogSize.${size}`) })),
-                    ]}
-                  />
-                </fieldset>
+              {draft.species && draft.species !== "other" && classificationOf(draft.species) && (
+                <div>
+                  <label htmlFor="f-kind" className="mb-3 block text-[0.9375rem] font-medium text-foreground">
+                    {t(`catalogue.label.${classificationOf(draft.species)}`)}
+                  </label>
+                  <NativeSelect
+                    id="f-kind"
+                    value={draft.kind ?? ""}
+                    onChange={(e) => setDraft({ ...draft, kind: e.target.value || null })}
+                  >
+                    <option value="">{t(`search.filters.anyKind.${classificationOf(draft.species)}`)}</option>
+                    {kindsOf(draft.species).map((k) => (
+                      <option key={k.id} value={k.id}>
+                        {k.name[lng]}
+                      </option>
+                    ))}
+                  </NativeSelect>
+                </div>
               )}
 
               <fieldset>
@@ -445,9 +482,7 @@ export default function Search() {
                   onChange={(v) => setDraft({ ...draft, care: v === ANY ? null : (v as CareType) })}
                   options={[
                     { value: ANY, label: t("search.brief.anyCare") },
-                    { value: "boarding", label: t("care.boarding") },
-                    { value: "atOwner", label: t("care.atOwner") },
-                    { value: "walk", label: t("care.walk") },
+                    ...CARE_TYPES.filter((c) => servicesFor(draft.species).includes(c)).map((c) => ({ value: c, label: t(`care.${c}`) })),
                   ]}
                 />
               </fieldset>

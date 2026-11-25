@@ -16,7 +16,8 @@
     "loading": "Chargement…",
     "moreInfoAbout": "Plus d'informations : {{topic}}",
     "languageCurrent": "Langue : {{name}}",
-    "optional": "facultatif"
+    "optional": "facultatif",
+    "cancel": "Annuler"
   },
   "nav": {
     "home": "Accueil",
@@ -58,22 +59,71 @@
       "body": "Pas encore envoyée — reprenez là où vous en étiez.",
       "discard": "Abandonner la demande à {{sitter}}"
     },
-    "browseAll": "Voir tous les pet-sitters"
+    "browseAll": "Voir tous les pet-sitters",
+    "hello": "Bonjour, {{name}}",
+    "views": {
+      "animals": "Mes animaux",
+      "explore": "Explorer les pet-sitters"
+    },
+    "animals": {
+      "add": "Ajouter un animal",
+      "emptyTitle": "Aucun animal pour le moment",
+      "emptyBody": "Ajoutez votre animal une fois : sa race, son âge, sa photo et ses besoins resservent à chaque demande.",
+      "find": "Trouver un pet-sitter",
+      "publish": "Publier une demande",
+      "seeInfo": "Voir et modifier ses informations",
+      "toComplete_one": "{{count}} élément à compléter",
+      "toComplete_many": "{{count}} éléments à compléter",
+      "toComplete_other": "{{count}} éléments à compléter"
+    }
   },
   "species": {
     "dog": "Chien",
     "cat": "Chat",
-    "bird": "Oiseau"
+    "bird": "Oiseau",
+    "parrot": "Perroquet",
+    "rabbit": "Lapin",
+    "guineaPig": "Cochon d'Inde",
+    "hamster": "Hamster",
+    "mouse": "Souris domestique",
+    "ferret": "Furet",
+    "fish": "Poisson",
+    "turtle": "Tortue",
+    "snake": "Serpent",
+    "chameleon": "Caméléon",
+    "other": "Autre"
   },
   "speciesPlural": {
     "dog": "Chiens",
     "cat": "Chats",
-    "bird": "Oiseaux"
+    "bird": "Oiseaux",
+    "parrot": "Perroquets",
+    "rabbit": "Lapins",
+    "guineaPig": "Cochons d'Inde",
+    "hamster": "Hamsters",
+    "mouse": "Souris domestiques",
+    "ferret": "Furets",
+    "fish": "Poissons",
+    "turtle": "Tortues",
+    "snake": "Serpents",
+    "chameleon": "Caméléons",
+    "other": "Autres animaux"
   },
   "accepts": {
     "dog": "Accepte les chiens",
     "cat": "Accepte les chats",
-    "bird": "Accepte les oiseaux"
+    "bird": "Accepte les oiseaux",
+    "parrot": "Accepte les perroquets",
+    "rabbit": "Accepte les lapins",
+    "guineaPig": "Accepte les cochons d'Inde",
+    "hamster": "Accepte les hamsters",
+    "mouse": "Accepte les souris",
+    "ferret": "Accepte les furets",
+    "fish": "Accepte les poissons",
+    "turtle": "Accepte les tortues",
+    "snake": "Accepte les serpents",
+    "chameleon": "Accepte les caméléons",
+    "other": "Animal à confirmer"
   },
   "care": {
     "boarding": "Garde chez le pet-sitter",
@@ -143,16 +193,16 @@
       "addPet": "Ajouter mon animal",
       "addAnother": "Ajouter un autre animal",
       "editPet": "Modifier {{name}}",
-      "specifySize": "Préciser la taille de {{name}}",
       "petRequired": "Choisissez l'animal concerné par cette demande.",
-      "fitSpecies": {
-        "dog": "{{sitter}} ne garde pas de chiens.",
-        "cat": "{{sitter}} ne garde pas de chats.",
-        "bird": "{{sitter}} ne garde pas d'oiseaux."
+      "changeWhen": "Modifier le service ou les dates",
+      "fitCategory": "{{sitter}} n'accepte pas ce type d'animal ({{animal}}).",
+      "fitKind": "{{sitter}} n'accepte que certaines races, pas celle de {{name}}.",
+      "fitUnknown": {
+        "otherCategory": "{{name}} est hors de la liste de Nidz : {{sitter}} confirmera si c'est possible.",
+        "kindNotGiven": "{{sitter}} n'accepte que certaines races : indiquez celle de {{name}}, ou posez la question.",
+        "kindFreeText": "La race de {{name}} est écrite avec vos mots : {{sitter}} confirmera."
       },
-      "fitSize": "{{sitter}} accepte uniquement : {{sizes}}.",
-      "fitSizeUnknown": "La taille de {{name}} n'est pas précisée, et {{sitter}} accepte uniquement : {{sizes}}.",
-      "changeWhen": "Modifier le service ou les dates"
+      "specifyKind": "Indiquer la race de {{name}}"
     },
     "sent": {
       "title": "Demande de démonstration envoyée",
@@ -244,10 +294,33 @@
       "title": "Animaux acceptés",
       "label": "Espèces",
       "required": "Indiquez au moins une espèce que vous pouvez garder.",
-      "sizesLabel": "Tailles de chiens acceptées",
-      "sizesRequired": "Indiquez les tailles de chiens que vous pouvez accueillir.",
       "maxLabel": "Nombre maximum d'animaux à la fois",
-      "maxHelp": "En comptant les animaux confiés, pas les vôtres."
+      "maxHelp": "En comptant les animaux confiés, pas les vôtres.",
+      "birdParrot": "« Oiseau » désigne les petits oiseaux de cage (canaris, chardonnerets, perruches ondulées…). Les perroquets ont leur propre catégorie.",
+      "kindsFor": {
+        "breed": "Quelles races de {{animals}} ?",
+        "species": "Quelles espèces de {{animals}} ?"
+      },
+      "all": {
+        "breed": "Toutes les races",
+        "species": "Toutes les espèces"
+      },
+      "some": {
+        "breed": "Certaines races uniquement",
+        "species": "Certaines espèces uniquement"
+      },
+      "otherLabel": {
+        "breed": "Une race absente de la liste",
+        "species": "Une espèce absente de la liste"
+      },
+      "addOther": "Ajouter",
+      "removeOther": "Retirer {{name}}",
+      "otherNote": "Les noms écrits par vous sont montrés sur votre profil et ne sont jamais comparés automatiquement.",
+      "chosenCount_one": "{{count}} choisie",
+      "chosenCount_many": "{{count}} choisies",
+      "chosenCount_other": "{{count}} choisies",
+      "kindsRequired": "Choisissez au moins une race ou espèce, ou « Toutes ».",
+      "limitsHint": "Les limites physiques, de comportement ou médicales (poids d'un chien, animal réactif…) se déclarent dans « Ce que je ne peux pas accepter »."
     },
     "housing": {
       "title": "Votre logement et l'accueil",
@@ -315,10 +388,12 @@
       "description": "Choisissez l'animal, le type de garde, la commune et le prix maximum.",
       "datesHelp": "Les pet-sitters qui se sont déclarés indisponibles sur cette période sont retirés des résultats.",
       "clearDates": "Retirer les dates",
-      "size": "Taille de votre chien",
-      "anySize": "Non précisée",
       "upToUnit": "{{price}} ou moins {{unit}}",
-      "perService": "par prestation"
+      "perService": "par prestation",
+      "anyKind": {
+        "breed": "Toutes les races",
+        "species": "Toutes les espèces"
+      }
     },
     "results": {
       "title": "Pet-sitters correspondant à votre recherche",
@@ -331,16 +406,24 @@
       "orderDefaultNear": "{{commune}} d'abord, puis par ordre alphabétique — Nidz ne classe pas les pet-sitters selon une note.",
       "orderPrice": "Du prix le plus bas au plus élevé, selon votre choix.",
       "orderPriceNear": "{{commune}} d'abord, puis du prix le plus bas au plus élevé, selon votre choix.",
-      "sizeHint": "La taille de votre chien n'est pas précisée : les pet-sitters qui n'acceptent que certaines tailles restent affichés.",
-      "sizeHintAction": "Préciser la taille"
+      "kindHint": "Certains pet-sitters n'acceptent que certaines races ou espèces.",
+      "kindHintAction": {
+        "breed": "Indiquer la race",
+        "species": "Indiquer l'espèce"
+      },
+      "noneNear": "Aucun pet-sitter dans cette zone — voyez ceux plus loin ci-dessous.",
+      "orderNearZone": "les plus proches de la zone recherchée d'abord",
+      "orderNearHome": "les plus proches de votre zone d'abord",
+      "orderPriceNearest": "par zone, puis du prix le plus bas — votre choix"
     },
     "card": {
       "matchLabel": "Correspond à votre recherche : ",
       "viewProfile": "Voir le profil",
       "demoTag": "Exemple",
       "from": "à partir de",
-      "sizeLimit": "Chiens : {{sizes}} uniquement",
-      "allSizes": "Chiens de toutes tailles"
+      "limitsCount_one": "{{count}} limite déclarée — lisez-la sur le profil",
+      "limitsCount_many": "{{count}} limites déclarées — lisez-les sur le profil",
+      "limitsCount_other": "{{count}} limites déclarées — lisez-les sur le profil"
     },
     "demo": {
       "title": "Exemples de démonstration",
@@ -359,7 +442,8 @@
       "anyZone": "Toutes les zones"
     },
     "reason": {
-      "dates": "Ne s'est pas déclaré indisponible sur cette période"
+      "dates": "Ne s'est pas déclaré indisponible sur cette période",
+      "kind": "Accepte : {{kind}}"
     },
     "sort": {
       "label": "Ordre",
@@ -387,10 +471,7 @@
     "findCare": "Trouver une garde",
     "becomeSitter": "Devenir pet-sitter",
     "subtitle": "Trouvez une personne adaptée à votre compagnon, près de chez vous.",
-    "bothSides": "Un seul compte pour les deux.",
-    "bothSidesInfo": "Ce choix ne crée pas deux comptes : vous pouvez chercher une garde et garder des animaux avec le même compte, et passer de l'un à l'autre dans Compte.",
     "animalsTitle": "Votre animal",
-    "animalsHint": "Chiens, chats et oiseaux pour l'instant.",
     "sitterTitle": "Garder des animaux",
     "sitterBody": "Décrivez comment vous gardez les animaux et recevez des demandes adaptées."
   },
@@ -414,17 +495,10 @@
       "chooseLabel": "De quel animal s’agit-il ?",
       "another": "Un autre animal",
       "editElsewhere": "Vos animaux enregistrés se modifient dans Mes animaux, pas ici.",
-      "sizeLabel": "Sa taille",
-      "sizeHelp": "Les pet-sitters indiquent les tailles qu'ils acceptent : cela vous montre seulement ceux qui peuvent prendre votre chien.",
       "photoLabel": "Une photo (facultatif)",
       "agePlaceholder": "Ex. 8 mois, 3 ans",
       "notesPlaceholder": "Ex. traitement en cours, peur des autres chiens…",
-      "notesInfo": "Montré au pet-sitter avec votre demande, pour qu'il puisse juger avant d'accepter.",
-      "otherAnimal": {
-        "toggle": "Mon animal n'est pas dans la liste",
-        "title": "Chiens, chats et oiseaux seulement, pour l'instant",
-        "body": "Nidz ne permet pas encore de chercher un pet-sitter pour un autre animal — lapin, tortue, poisson. Les pet-sitters ne déclarent que les chiens, les chats et les oiseaux : aucun résultat ne pourrait honnêtement correspondre."
-      }
+      "notesInfo": "Montré au pet-sitter avec votre demande, pour qu'il puisse juger avant d'accepter."
     },
     "location": {
       "title": "Où cherchez-vous ?",
@@ -483,7 +557,7 @@
       "dates": "Ce pet-sitter s'est déclaré indisponible sur la période demandée.",
       "zone": "Ce pet-sitter n'est pas dans la zone demandée : {{zone}}.",
       "price": "Les tarifs de ce pet-sitter dépassent {{price}}.",
-      "size": "Ce pet-sitter n'accepte pas : {{size}}."
+      "kind": "N'accepte pas : {{kind}}"
     },
     "limitsIntro": "Ces limites sont indiquées par le pet-sitter pour éviter une garde qui ne conviendrait pas à votre animal.",
     "moreLimits_one": "+ {{count}} autre limite",
@@ -591,11 +665,9 @@
       "transport": "Peut se déplacer : {{modes}}",
       "canReachVet": "Pourrait emmener un animal chez le vétérinaire : {{answer}}"
     },
-    "sizeUnknown": "La taille de votre chien n'est pas précisée. Ce pet-sitter accepte les chiens : {{sizes}} uniquement.",
     "glance": {
       "services": "Services et tarifs",
-      "dogsAllSizes": "Chiens de toutes tailles",
-      "dogsSizes": "Chiens : {{sizes}}"
+      "someKinds": "{{animals}} ({{kinds}} uniquement)"
     },
     "demo": {
       "title": "Un profil d'exemple",
@@ -605,6 +677,13 @@
       "fitTitle": "Adapté à votre animal ?",
       "fitBody": "Décrivez votre animal et vos dates : ce profil dira ce qui correspond, et ce qui ne correspond pas.",
       "fitAction": "Décrire mon besoin"
+    },
+    "block": {
+      "action": "Ne plus voir ce pet-sitter",
+      "blocked": "Vous avez bloqué ce pet-sitter.",
+      "title": "Ne plus voir {{name}} ?",
+      "body": "Ce profil n'apparaîtra plus dans vos recherches ni vos suggestions sur cet appareil. Vous pourrez l'annuler dans Paramètres › Sécurité et confidentialité.",
+      "confirm": "Bloquer"
     }
   },
   "ownerRequests": {
@@ -618,13 +697,19 @@
     "explain": {
       "pending": "Aucun pet-sitter n'a été prévenu : cette demande n'a été envoyée nulle part. Dans un vrai Nidz, elle attendrait ici une réponse du pet-sitter, et rien ne serait convenu tant qu'il n'aurait pas accepté.",
       "accepted": "Dans cette démonstration, l'acceptation vient de vous, depuis le côté pet-sitter. Même dans un vrai Nidz, ce ne serait pas une réservation : Nidz ne gère ni réservation, ni paiement, ni assurance. Les détails de la garde restent à convenir directement entre les deux personnes.",
-      "declined": "Dans cette démonstration, le refus vient de vous, depuis le côté pet-sitter. Un refus est une réponse normale : les limites de chaque pet-sitter sont indiquées sur son profil."
+      "declined": "Dans cette démonstration, le refus vient de vous, depuis le côté pet-sitter. Un refus est une réponse normale : les limites de chaque pet-sitter sont indiquées sur son profil.",
+      "withdrawn": "Vous avez retiré cette demande avant une réponse. Elle est gardée dans votre historique.",
+      "cancelled": "Cette garde a été annulée. Elle est gardée dans votre historique ; rien n'avait été réservé ni payé par Nidz."
     },
     "count_one": "{{count}} demande",
     "count_other": "{{count}} demandes",
     "demoNote": "Ces demandes existent uniquement dans ce navigateur. Aucun pet-sitter n'a été prévenu.",
     "alreadySent": "Vous aviez déjà envoyé cette demande. La voici.",
-    "count_many": "{{count}} demandes"
+    "count_many": "{{count}} demandes",
+    "withdraw": "Retirer la demande",
+    "withdrawTitle": "Retirer cette demande ?",
+    "withdrawBody": "Le pet-sitter ne pourra plus y répondre. Elle reste dans votre historique.",
+    "withdrawConfirm": "Retirer"
   },
   "sitterRequests": {
     "title": "Demandes reçues",
@@ -637,7 +722,9 @@
     "acceptNote": "Accepter signifie que vous êtes d'accord pour cette garde. Ce n'est pas une réservation : Nidz ne gère ni réservation, ni paiement, ni assurance.",
     "answered": {
       "accepted": "Vous avez accepté cette demande. Le propriétaire voit ce statut de son côté. Les détails restent à convenir directement entre vous.",
-      "declined": "Vous avez refusé cette demande. Le propriétaire voit ce statut de son côté."
+      "declined": "Vous avez refusé cette demande. Le propriétaire voit ce statut de son côté.",
+      "withdrawn": "Le propriétaire a retiré cette demande.",
+      "cancelled": "Cette garde a été annulée."
     },
     "draftTitle": "Votre profil n'est pas encore visible",
     "draftBody": "Les propriétaires ne peuvent vous adresser une demande qu'une fois votre profil publié.",
@@ -730,6 +817,165 @@
       "body": "Cette démonstration n'a pas d'autres utilisateurs. Pour voir ce que reçoit un pet-sitter — une demande, une question, un message —, vous pouvez les adresser à votre propre profil publié. Ils restent dans ce navigateur.",
       "selfRequest": "M'adresser une demande d'essai",
       "selfMessage": "M'écrire un message d'essai"
+    },
+    "versionLine": "Nidz {{version}} — prototype",
+    "sections": {
+      "security": {
+        "title": "Sécurité et confidentialité",
+        "line": "Téléphone, connexion, visibilité, blocages, vos données"
+      },
+      "notifications": {
+        "title": "Notifications",
+        "line": "Ce qui apparaît dans Messages › Notifications"
+      },
+      "preferences": {
+        "title": "Préférences",
+        "line": "Langue, animations réduites"
+      },
+      "location": {
+        "title": "Localisation",
+        "line": "Votre zone, l'autorisation de position"
+      },
+      "help": {
+        "title": "Aide et assistance",
+        "line": "Centre d'aide, questions fréquentes, signaler un problème"
+      },
+      "legal": {
+        "title": "Informations légales et À propos",
+        "line": "Version, conditions, confidentialité, licences"
+      },
+      "account": {
+        "title": "Gestion du compte",
+        "line": "Se déconnecter, supprimer mon compte"
+      }
+    },
+    "security": {
+      "accountTitle": "Sécurité du compte",
+      "phone": "Numéro de téléphone",
+      "unverified": "non vérifié",
+      "noPhone": "Aucun numéro",
+      "method": "Méthode de connexion",
+      "methodValue": {
+        "google": "Google (prototype — non connecté)",
+        "apple": "Apple (prototype — non connecté)",
+        "phone": "Numéro de téléphone (prototype — sans SMS)"
+      },
+      "methodLocal": "Compte gardé dans ce navigateur",
+      "session": "Session",
+      "sessionLine": "Cet appareil uniquement. Il n'y a pas d'autre session : le compte n'est pas sur un serveur.",
+      "signOutLine": "Dans Gestion du compte",
+      "notAvailable": "Indisponibles dans ce prototype, car ils demandent un serveur : modifier une adresse e-mail (aucune n'est collectée), la double authentification, les appareils connectés, les comptes Google ou Apple associés.",
+      "privacyTitle": "Confidentialité",
+      "personalInfo": "Vos informations personnelles",
+      "personalInfoLine": "Votre nom de famille, votre téléphone et votre zone exacte ne sont jamais montrés aux autres membres. Public : votre prénom et votre initiale, et votre zone à l'échelle de la wilaya ou de la commune.",
+      "profileVisible": "Profil pet-sitter visible",
+      "profileVisibleLine": "Les propriétaires peuvent trouver votre profil.",
+      "profileHiddenLine": "Masqué : les propriétaires ne le trouvent plus. Rien n'est supprimé.",
+      "profileDraft": "Publiez d'abord votre profil.",
+      "location": "Autorisation de position",
+      "locationLine": {
+        "granted": "Autorisée dans ce navigateur. Utilisée seulement quand vous appuyez sur « Utiliser ma position ».",
+        "denied": "Refusée dans ce navigateur. Modifiez-la dans les réglages du navigateur.",
+        "prompt": "Pas encore demandée. Elle n'est demandée que lorsque vous appuyez sur « Utiliser ma position ».",
+        "unknown": "Ce navigateur ne l'indique pas. Elle n'est demandée que lorsque vous appuyez sur « Utiliser ma position »."
+      },
+      "blockedTitle": "Pet-sitters bloqués",
+      "blockedNote": "Un pet-sitter bloqué n'apparaît plus dans vos recherches sur cet appareil.",
+      "blockedNone": "Personne n'est bloqué.",
+      "unblock": "Débloquer",
+      "dataTitle": "Vos données",
+      "dataNote": "Tout ce que Nidz sait de vous est dans ce navigateur. Vous pouvez le télécharger.",
+      "dataCount": {
+        "pets_one": "{{count}} animal",
+        "pets_many": "{{count}} animaux",
+        "pets_other": "{{count}} animaux",
+        "requests_one": "{{count}} demande directe",
+        "requests_many": "{{count}} demandes directes",
+        "requests_other": "{{count}} demandes directes",
+        "posts_one": "{{count}} demande publiée",
+        "posts_many": "{{count}} demandes publiées",
+        "posts_other": "{{count}} demandes publiées",
+        "conversations_one": "{{count}} conversation",
+        "conversations_many": "{{count}} conversations",
+        "conversations_other": "{{count}} conversations"
+      },
+      "export": "Télécharger mes données (JSON)",
+      "exported": "Fichier préparé. Vérifiez vos téléchargements.",
+      "privacyPolicy": "Politique de confidentialité"
+    },
+    "notifications": {
+      "demoTitle": "Rien n'est envoyé",
+      "demoBody": "Il n'y a ni notification push, ni e-mail, ni SMS dans ce prototype. Ces réglages choisissent ce qui est affiché dans Messages › Notifications et compté sur l'onglet.",
+      "essentialTitle": "Essentielles",
+      "essentialNote": "Sur une demande ou une proposition qui vous concerne. Toujours affichées.",
+      "optionalTitle": "Facultatives",
+      "opportunitiesLine": "Dans votre espace pet-sitter.",
+      "promotionsLine": "Nidz n'en envoie aucune aujourd'hui. Désactivé par défaut.",
+      "topics": {
+        "messages": "Messages",
+        "requests": "Nouvelles demandes",
+        "proposals": "Nouvelles propositions",
+        "updates": "Suivi des demandes",
+        "reminders": "Rappels de garde",
+        "opportunities": "Demandes près de chez moi (pet-sitters)",
+        "promotions": "Actualités et offres"
+      }
+    },
+    "preferences": {
+      "a11yTitle": "Accessibilité",
+      "reduceMotion": "Réduire les animations",
+      "reduceMotionLine": "Supprime les animations de l'interface, en plus du réglage de votre appareil.",
+      "appearanceNote": "Nidz n'a qu'une apparence (claire) pour l'instant : un mode sombre ne sera proposé que lorsque tous les écrans le prendront en charge."
+    },
+    "location": {
+      "areaTitle": "Votre zone",
+      "areaNote": "Classe d'abord les pet-sitters proches de vous quand vous cherchez sans indiquer de zone. Jamais affichée comme une adresse.",
+      "noArea": "Non renseignée",
+      "saved": "Zone enregistrée.",
+      "permissionTitle": "Autorisation de position",
+      "radiusNote": "Pas de rayon de recherche : Nidz n'a la position du domicile de personne, seulement celles, approximatives, des chefs-lieux de wilaya.",
+      "sitterArea": "Zone où vous gardez",
+      "sitterAreaLine": "Dans votre profil pet-sitter"
+    },
+    "help": {
+      "center": "Centre d'aide",
+      "centerLine": "Comment fonctionne Nidz, ce qui est réel et ce qui ne l'est pas",
+      "faq": "Questions fréquentes",
+      "contactTitle": "Contacter Nidz",
+      "contactNote": "Aucun service d'assistance n'est relié à ce prototype : rien de ce qui est écrit ici n'est envoyé. Rédigez votre message, puis copiez-le pour le transmettre à l'équipe.",
+      "kind": {
+        "problem": "Signaler un problème",
+        "feedback": "Donner votre avis"
+      },
+      "textLabel": "Votre message",
+      "placeholder": "Ce qui s'est passé, ou ce que vous aimeriez voir…",
+      "copy": "Copier le message",
+      "copied": "Copié. Il n'a pas été envoyé : collez-le là où vous voulez le partager."
+    },
+    "legal": {
+      "version": "Version",
+      "versionLine": "Nidz {{version}} — {{stage}}",
+      "stage": {
+        "prototype": "prototype d'interface, sans serveur"
+      },
+      "terms": "Conditions d'utilisation",
+      "legalInfo": "Informations légales",
+      "licensesTitle": "Licences open source",
+      "licensesNote": "Nidz est construit avec ces composants, sous leurs licences.",
+      "illustrations": "Illustrations des animaux et de l'accueil fournies pour Nidz."
+    },
+    "account": {
+      "sessionTitle": "Se déconnecter",
+      "signOut": "Se déconnecter",
+      "signOutBody": "Vos données restent dans ce navigateur ; vous reconnecter les rouvre.",
+      "signOutTitle": "Se déconnecter ?",
+      "signOutConfirmBody": "Vous reviendrez à l'écran d'accueil. Rien n'est effacé.",
+      "deleteTitle": "Supprimer mon compte",
+      "deleteBody": "Efface le compte et tout ce qui est gardé dans ce navigateur : animaux, demandes, demandes publiées, propositions, conversations et profil pet-sitter.",
+      "delete": "Supprimer mon compte",
+      "deleteConfirmTitle": "Supprimer votre compte ?",
+      "deleteConfirmBody": "Tout ce que ce navigateur garde de vous est effacé, et rien ne pourra l'annuler. Il n'y a pas de serveur : aucune autre copie n'existe à supprimer.",
+      "deleteConfirm": "Supprimer définitivement"
     }
   },
   "workspace": {
@@ -824,7 +1070,10 @@
       "goodWithChildren": "À l’aise avec les enfants ?",
       "walksPerDay": "Promenades par jour",
       "walksPerDayHelp": "Ce à quoi votre chien est habitué. Laissez vide si cela varie.",
-      "leashNotes": "En laisse"
+      "leashNotes": "En laisse",
+      "sizeLegacyLine": "Taille indiquée auparavant : {{size}} (n'est plus demandée ni utilisée)",
+      "sizeLegacyRemove": "Retirer",
+      "sizeLegacy": "Taille (réponse antérieure)"
     },
     "cat": {
       "living": "À l’intérieur ou dehors ?",
@@ -864,32 +1113,6 @@
     "notSure": "Je ne sais pas",
     "deleteFailedTitle": "Impossible de supprimer {{name}} : rien n'a changé.",
     "deleteFailedBody": "Ce navigateur n'a pas pu enregistrer la suppression (stockage plein ou bloqué). L'animal est toujours dans votre liste : vous pouvez réessayer.",
-    "kind": {
-      "label": {
-        "dog": "Race",
-        "cat": "Race",
-        "bird": "Espèce"
-      },
-      "search": {
-        "dog": "Rechercher une race",
-        "cat": "Rechercher une race",
-        "bird": "Rechercher une espèce"
-      },
-      "notInList": "Mon animal n'est pas dans la liste",
-      "otherLabel": {
-        "dog": "Sa race",
-        "cat": "Sa race",
-        "bird": "Son espèce"
-      },
-      "otherPlaceholder": {
-        "dog": "Ex. Shar-pei",
-        "cat": "Ex. Abyssin",
-        "bird": "Ex. Mainate"
-      },
-      "noMatch": "Rien ne correspond à « {{query}} ». Choisissez « Mon animal n'est pas dans la liste » pour l'écrire vous-même.",
-      "showAll": "Voir toute la liste",
-      "info": "Cela aide le pet-sitter à se représenter votre animal. Les résultats n'en dépendent pas : on cherche par animal et, pour un chien, par taille — jamais par race."
-    },
     "placeholder": {
       "walks": "Ex. 2",
       "leash": "Ex. tire, réagit aux autres chiens, très bien sans laisse",
@@ -897,7 +1120,17 @@
       "outOfCage": "Ex. une heure le soir, fenêtres fermées",
       "social": "Ex. chante le matin, aime la compagnie"
     },
-    "speciesLabel": "Quel animal ?"
+    "speciesLabel": "Quel animal ?",
+    "ageLegacy": "Âge indiqué auparavant : {{age}}",
+    "habitat": {
+      "label": "Où il vit",
+      "help": "Cage, clapier, terrarium, aquarium, en liberté dans la maison…",
+      "placeholder": "Ex. terrarium de 120 cm avec lampe chauffante"
+    },
+    "kind": {
+      "showAll": "Voir toute la liste",
+      "noMatch": "Rien ne correspond à « {{query}} ». Choisissez « Mon animal n'est pas dans la liste » pour l'écrire vous-même."
+    }
   },
   "reviews": {
     "title": "Avis",
@@ -951,7 +1184,7 @@
     },
     "animals": {
       "label": "Animaux que vous acceptez",
-      "hint": "Espèces et, pour les chiens, les tailles acceptées — et combien à la fois."
+      "hint": "Les animaux acceptés et, pour chacun, toutes les races ou seulement certaines — et combien à la fois."
     },
     "experience": {
       "label": "Ce que vous avez déjà fait",
@@ -1174,16 +1407,6 @@
       "expired": "Expiré"
     }
   },
-  "sizeShort": {
-    "small": "petits",
-    "medium": "moyens",
-    "large": "grands"
-  },
-  "acceptsSize": {
-    "small": "Accepte les petits chiens",
-    "medium": "Accepte les chiens moyens",
-    "large": "Accepte les grands chiens"
-  },
   "clarify": {
     "title": "Questions avant de décider",
     "localNote": "Conservées dans ce navigateur uniquement. Personne n'a été prévenu et aucun message n'a été envoyé.",
@@ -1296,7 +1519,22 @@
       "accepted": "{{name}} a accepté votre demande pour {{pet}}",
       "declined": "{{name}} a refusé votre demande pour {{pet}}"
     },
-    "incoming": "Nouvelle demande de {{name}} pour {{pet}}"
+    "incoming": "Nouvelle demande de {{name}} pour {{pet}}",
+    "preferences": "Choisir ce qui apparaît ici",
+    "today": "Aujourd'hui",
+    "proposal": "{{name}} propose de garder {{pet}}",
+    "proposalSimulated": "Proposition simulée de {{name}} pour {{pet}}",
+    "proposalDecision": {
+      "accepted": "{{name}} a accepté votre proposition pour {{pet}}",
+      "declined": "{{name}} a refusé votre proposition pour {{pet}}",
+      "notRetained": "{{name}} a choisi un autre pet-sitter pour {{pet}}"
+    },
+    "cancelled": "La garde de {{pet}} a été annulée",
+    "withdrawn": "{{name}} a retiré la demande pour {{pet}}",
+    "reminder": "La garde de {{pet}} commence le {{date}}",
+    "opportunities_one": "{{count}} demande publiée correspond à votre profil",
+    "opportunities_many": "{{count}} demandes publiées correspondent à votre profil",
+    "opportunities_other": "{{count}} demandes publiées correspondent à votre profil"
   },
   "account": {
     "title": "Compte",
@@ -1335,6 +1573,489 @@
     "publicProfile": {
       "title": "Mon profil public",
       "line": "Ce que voient les propriétaires qui vous trouvent"
+    },
+    "personal": {
+      "title": "Informations personnelles",
+      "line": "Nom, téléphone, zone, photo"
+    },
+    "sitterProfile": {
+      "title": "Mon profil pet-sitter",
+      "sections": "Rubriques du profil",
+      "preview": "Aperçu",
+      "previewLine": "Voir votre profil comme les propriétaires",
+      "availability": "Indisponibilités déclarées",
+      "availabilityLine": "Les périodes où vous ne pouvez pas garder",
+      "status": {
+        "none": "Pas commencé",
+        "draft": "Pas encore visible — continuer",
+        "listed": "Visible par les propriétaires",
+        "hidden": "N'est plus visible — un élément manque"
+      }
+    }
+  },
+  "catalogue": {
+    "other": "Autre",
+    "noMatch": "Rien dans la liste ne correspond à « {{query}} ». Utilisez « Autre » pour l'écrire.",
+    "label": {
+      "breed": "Race",
+      "species": "Espèce"
+    },
+    "search": {
+      "breed": "Rechercher une race...",
+      "species": "Rechercher une espèce..."
+    }
+  },
+  "status": {
+    "pending": "En attente",
+    "accepted": "Acceptée",
+    "declined": "Refusée",
+    "withdrawn": "Retirée",
+    "cancelled": "Annulée",
+    "expired": "Passée",
+    "open": "Publiée",
+    "notRetained": "Non retenue"
+  },
+  "requestKind": {
+    "post": "Demande publiée",
+    "direct": "Demande directe",
+    "proposal": "Proposition"
+  },
+  "welcome": {
+    "createAccount": "Ouvrir un compte",
+    "signIn": "Se connecter"
+  },
+  "start": {
+    "title": "Bienvenue, {{name}}. Par quoi commencer ?"
+  },
+  "register": {
+    "title": "Ouvrir un compte",
+    "intro": "Un compte pour les deux espaces : trouver une garde pour vos animaux, et en proposer.",
+    "method": {
+      "google": "Continuer avec Google",
+      "apple": "Continuer avec Apple",
+      "phone": "Continuer avec un numéro de téléphone"
+    },
+    "provider": {
+      "google": "Google",
+      "apple": "Apple",
+      "phone": "SMS"
+    },
+    "demoTitle": "Prototype : aucun service n'est connecté",
+    "demoBody": "Google, Apple et l'envoi de SMS ne sont pas reliés à cette version. Les écrans montrent le parcours prévu ; rien n'est envoyé à aucun service, aucune identité n'est vérifiée, et votre compte reste dans ce navigateur.",
+    "haveAccount": "Vous avez déjà un compte ?",
+    "resume": "Votre inscription ({{method}}) a été interrompue.",
+    "resumeAction": "Reprendre",
+    "progress": "Étape {{current}} sur {{total}}",
+    "finish": "Terminer",
+    "existing": {
+      "title": "Un compte existe déjà sur cet appareil : {{name}}",
+      "body": "Ce prototype garde un compte par navigateur. Connectez-vous à ce compte, ou effacez les données de cet appareil pour recommencer.",
+      "signIn": "Se connecter à ce compte",
+      "erase": "Effacer et recommencer",
+      "eraseTitle": "Effacer les données de cet appareil ?",
+      "eraseBody": "Le compte, les animaux, les demandes, les demandes publiées et le profil pet-sitter gardés dans ce navigateur seront effacés. Rien n'existe sur un serveur, donc rien d'autre n'est touché. C'est définitif.",
+      "eraseConfirm": "Tout effacer"
+    },
+    "name": {
+      "title": "Votre nom",
+      "intro": "Votre prénom et l'initiale de votre nom sont ce que les autres voient.",
+      "providerTitle": "{{provider}} n'a pas été contacté",
+      "providerBody": "Dans la version finale, {{provider}} remplirait votre nom ici. Dans ce prototype, saisissez-le vous-même — vous pourrez le modifier à tout moment."
+    },
+    "phone": {
+      "title": "Votre numéro de téléphone",
+      "intro": "Nécessaire pour ouvrir un compte. Il n'est jamais montré aux autres membres.",
+      "label": "Numéro de mobile",
+      "help": "9 chiffres après +213. Privé."
+    },
+    "code": {
+      "title": "Code de confirmation",
+      "intro": "Saisissez le code à 6 chiffres.",
+      "label": "Code envoyé au {{phone}}",
+      "demoTitle": "Aucun SMS n'a été envoyé",
+      "demoBody": "Ce prototype n'est relié à aucun service d'envoi de SMS : aucun code n'a été envoyé. Pour poursuivre la démonstration, saisissez six chiffres de votre choix. Votre numéro sera enregistré comme non vérifié.",
+      "invalid": "Saisissez les 6 chiffres.",
+      "changeNumber": "Modifier le numéro"
+    },
+    "photo": {
+      "title": "Votre photo de profil",
+      "intro": "Facultative. Une photo aide à vous reconnaître ; vous pourrez en ajouter une plus tard.",
+      "label": "Photo de profil",
+      "skip": "Passer cette étape"
+    }
+  },
+  "login": {
+    "title": "Se connecter",
+    "continueAs": "Continuer en tant que {{name}}",
+    "via": {
+      "google": "Compte ouvert avec Google (prototype)",
+      "apple": "Compte ouvert avec Apple (prototype)",
+      "phone": "Compte ouvert avec un numéro de téléphone (prototype)"
+    },
+    "viaLocal": "Compte gardé dans ce navigateur",
+    "noneTitle": "Aucun compte sur cet appareil",
+    "noneBody": "Dans ce prototype, un compte vit dans le navigateur où il a été ouvert. Un compte ouvert sur un autre téléphone n'est pas accessible d'ici.",
+    "demoTitle": "Aucune vérification d'identité",
+    "demoBody": "Se connecter rouvre le compte gardé dans ce navigateur. Aucun mot de passe, service ou code n'est vérifié : il n'y a pas encore de serveur."
+  },
+  "age": {
+    "years": "Ans",
+    "months": "Mois",
+    "choose": "Choisir",
+    "yearsCount_one": "{{count}} an",
+    "yearsCount_many": "{{count}} ans",
+    "yearsCount_other": "{{count}} ans",
+    "monthsCount_one": "{{count}} mois",
+    "monthsCount_many": "{{count}} mois",
+    "monthsCount_other": "{{count}} mois",
+    "estimated": "Âge approximatif",
+    "unknown": "Je ne connais pas son âge",
+    "unknownShort": "Âge inconnu",
+    "about": "environ {{value}}",
+    "and": " et "
+  },
+  "photo": {
+    "add": "Ajouter une photo",
+    "replace": "Remplacer",
+    "remove": "Retirer la photo",
+    "none": "Aucune photo",
+    "preparing": "Préparation…",
+    "previewAlt": "Photo choisie",
+    "localNote": "Gardée sur cet appareil uniquement, réduite. Jamais envoyée.",
+    "errorType": "Ce fichier n'est pas une image (JPEG, PNG, WebP ou HEIC).",
+    "errorRead": "Cette image n'a pas pu être lue. Essayez-en une autre."
+  },
+  "needFlow": {
+    "pet": {
+      "title": "Votre animal",
+      "question": "Pour quel animal cherchez-vous une garde ?",
+      "addTitle": "Ajouter un animal",
+      "addQuestion": "Quel animal voulez-vous ajouter ?",
+      "otherLabel": "De quel animal s'agit-il ?",
+      "otherHelp": "Aucun pet-sitter n'est présumé accepter un animal hors de la liste : vous le confirmerez avec lui.",
+      "otherPlaceholder": "Ex. axolotl, hérisson…",
+      "otherRequired": "Indiquez de quel animal il s'agit (2 à 40 caractères)."
+    },
+    "breed": {
+      "title": {
+        "breed": "Race",
+        "species": "Espèce"
+      },
+      "question": {
+        "breed": "Quelle est la race de votre animal ?",
+        "species": "Quelle est l'espèce de votre animal ?"
+      },
+      "other": "Autre",
+      "unknown": "Je ne sais pas",
+      "otherLabel": {
+        "breed": "Sa race",
+        "species": "Son espèce"
+      },
+      "otherPlaceholder": {
+        "breed": "Écrivez la race",
+        "species": "Écrivez l'espèce"
+      },
+      "otherRequired": "Écrivez au moins 2 caractères, ou choisissez « Je ne sais pas ».",
+      "note": "Facultatif. Certains pet-sitters n'acceptent que certaines races ou espèces : la connaître leur permet de répondre. Une race ne dit rien du comportement."
+    },
+    "about": {
+      "title": "Nom, âge et photo",
+      "nameTitle": "Nom",
+      "nameQuestion": "Comment s'appelle votre animal ?",
+      "nameRequired": "Indiquez le nom de votre animal.",
+      "ageTitle": "Âge",
+      "ageQuestion": "Quel âge a votre animal ?",
+      "photoTitle": "Photo",
+      "photoLabel": "Une photo de votre animal"
+    },
+    "needs": {
+      "title": "Besoins et contraintes importantes",
+      "question": "Votre animal a-t-il des besoins particuliers ou des contraintes importantes ?",
+      "questionFor": "{{name}} a-t-il des besoins particuliers ou des contraintes importantes ?",
+      "info": "C'est ce qu'un pet-sitter doit savoir avant de dire oui : un traitement quotidien, une allergie, la peur des autres animaux, un régime particulier. C'est montré aux pet-sitters que vous sollicitez ou qui voient votre demande publiée — jamais sur une page publique.",
+      "placeholder": "Ex. allergies, traitement quotidien, anxiété, réactivité, régime alimentaire particulier, difficulté avec les autres animaux, autres consignes importantes…",
+      "privacy": "Vu par les pet-sitters que vous sollicitez, avant qu'ils acceptent. N'indiquez ni adresse ni numéro de téléphone.",
+      "nothing": "Rien à signaler"
+    },
+    "location": {
+      "intro": "Nidz affiche d'abord les pet-sitters proches de la zone recherchée.",
+      "privacyInfo": "Si vous choisissez manuellement, Nidz ne demande jamais votre position. Avec « À proximité de moi », la position de votre appareil sert une seule fois, ici, à proposer la wilaya la plus proche — elle n'est ni enregistrée ni envoyée.",
+      "methodLabel": "Comment indiquer la zone ?",
+      "manual": "Sélectionner manuellement",
+      "manualHint": "La wilaya, et la commune si vous le souhaitez.",
+      "nearby": "À proximité de moi",
+      "nearbyHint": "Utilise la position de votre appareil, une fois, à votre demande.",
+      "askHint": "Votre navigateur va demander l'autorisation. Vous pouvez refuser et choisir manuellement.",
+      "useMyPosition": "Utiliser ma position",
+      "locating": "Localisation en cours…",
+      "found": "Wilaya la plus proche de votre position (estimation) : {{wilaya}}. Vérifiez-la ci-dessous — vous pouvez la modifier.",
+      "retry": "Réessayer",
+      "chooseManually": "Choisir manuellement",
+      "error": {
+        "denied": "L'accès à la position a été refusé. Vous pouvez l'autoriser dans les réglages du navigateur, ou choisir manuellement.",
+        "unavailable": "Votre position n'a pas pu être déterminée.",
+        "timeout": "La recherche de votre position a pris trop de temps.",
+        "unsupported": "Ce navigateur ne peut pas donner de position ici.",
+        "outside": "Votre position semble hors d'Algérie. Choisissez la zone manuellement."
+      }
+    },
+    "care": {
+      "see": "Voir les pet-sitters",
+      "publish": "Publier ma demande",
+      "editTitle": "Modifier la garde et les dates",
+      "onlyRelevant": "Seules les gardes adaptées aux {{animal}} sont proposées."
+    }
+  },
+  "needs": {
+    "label": "Besoins",
+    "none": "Non renseigné par le propriétaire",
+    "nothing": "Rien à signaler, selon le propriétaire"
+  },
+  "publish": {
+    "title": "Publier votre demande de garde",
+    "points": {
+      "feed": "Votre demande apparaît dans le fil des pet-sitters proches.",
+      "propose": "Les pet-sitters intéressés peuvent proposer leurs services.",
+      "choose": "Vous restez libre de choisir le pet-sitter qui vous convient — ou personne.",
+      "noBooking": "Publier ne réserve rien et ne confirme rien : ni réservation, ni paiement."
+    },
+    "previewTitle": "Ce que les pet-sitters verront",
+    "needsShared": "Vos besoins et contraintes sont montrés.",
+    "needsNothing": "« Rien à signaler » est indiqué.",
+    "needsNone": "Aucun besoin renseigné.",
+    "privacy": "Affiché comme {{name}}, avec la zone approximative seulement. Ni numéro, ni nom de famille, ni adresse.",
+    "back": "Retour",
+    "duplicateTitle": "Vous avez déjà publié cette demande",
+    "duplicateBody": "Le même animal, la même garde et les mêmes dates sont déjà ouverts aux propositions.",
+    "duplicateOpen": "Voir la demande publiée",
+    "demoTitle": "Publiée sur cet appareil uniquement",
+    "demoBody": "La demande rejoint le fil pet-sitter de ce navigateur — les exemples et votre propre espace pet-sitter. Personne d'autre ne la reçoit."
+  },
+  "posts": {
+    "example": "Exemple — aucun vrai propriétaire"
+  },
+  "feed": {
+    "title": "Demandes près de chez vous",
+    "intro": "Les demandes publiées par des propriétaires, les plus proches de votre zone d'abord.",
+    "filterLabel": "Garde",
+    "filterAll": "Toutes",
+    "fitsTitle_one": "{{count}} demande correspond à votre profil",
+    "fitsTitle_many": "{{count}} demandes correspondent à votre profil",
+    "fitsTitle_other": "{{count}} demandes correspondent à votre profil",
+    "allTitle_one": "{{count}} demande publiée",
+    "allTitle_many": "{{count}} demandes publiées",
+    "allTitle_other": "{{count}} demandes publiées",
+    "outsideTitle_one": "{{count}} hors de vos critères",
+    "outsideTitle_many": "{{count}} hors de vos critères",
+    "outsideTitle_other": "{{count}} hors de vos critères",
+    "undeclared": "Indiquez les animaux que vous acceptez pour voir les demandes qui vous correspondent.",
+    "yours": "Votre propre demande, publiée depuis votre espace propriétaire",
+    "outside": {
+      "service": "Vous ne proposez pas ce type de garde.",
+      "unavailable": "Vous vous êtes déclaré indisponible pendant ces dates."
+    },
+    "proposal": {
+      "pending": "Proposition envoyée — en attente",
+      "accepted": "Votre proposition a été acceptée",
+      "declined": "Votre proposition a été refusée",
+      "withdrawn": "Proposition retirée",
+      "notRetained": "Un autre pet-sitter a été choisi",
+      "cancelled": "Garde annulée"
+    },
+    "notListed": {
+      "action": "Compléter mon profil",
+      "draft": {
+        "title": "Votre profil n'est pas encore visible",
+        "body": "Vous pouvez lire les demandes ; pour proposer vos services, terminez ce que la publication demande."
+      },
+      "hidden": {
+        "title": "Votre profil n'est plus visible",
+        "body": "Un élément nécessaire à la publication a été retiré. Complétez-le pour proposer."
+      }
+    },
+    "demoTitle": "Exemples et vos propres demandes",
+    "demoBody": "Ces demandes sont des exemples, plus celles que vous avez publiées depuis votre espace propriétaire sur cet appareil. Correspondre à votre profil ne veut jamais dire que vous êtes disponible : c'est vous qui décidez.",
+    "empty": {
+      "title": "Aucune demande à afficher",
+      "body": "Aucune demande publiée n'est ouverte pour le moment.",
+      "bodyOutside": "Aucune ne correspond à votre profil ; voyez celles hors de vos critères ci-dessous."
+    }
+  },
+  "postDetail": {
+    "careTitle": "Garde et dates",
+    "area": "Zone : {{area}}",
+    "by": "Publiée par {{name}}",
+    "factsTitle": "Ce que dit le propriétaire",
+    "fitTitle": "Par rapport à votre profil",
+    "serviceOk": "Vous proposez ce type de garde.",
+    "notDeclaredBusy": "Vous n'avez pas déclaré ces dates indisponibles — ce n'est pas une confirmation de disponibilité.",
+    "breedNotBehaviour": "Une race ne dit rien du comportement : lisez les besoins ci-dessus.",
+    "propose": "Proposer mes services",
+    "yourProposal": "Votre proposition :",
+    "seeSent": "Voir mes propositions",
+    "withdraw": "Retirer ma proposition",
+    "withdrawTitle": "Retirer votre proposition ?",
+    "withdrawBody": "Le propriétaire ne la verra plus. Vous pourrez proposer de nouveau plus tard.",
+    "withdrawConfirm": "Retirer",
+    "proposedTitle": "Proposition ajoutée",
+    "proposedExample": "C'est une demande d'exemple : aucun propriétaire ne la lira.",
+    "proposedOwn": "Elle apparaît dans votre espace propriétaire, dans Demandes › Reçues.",
+    "exampleTitle": "Demande d'exemple",
+    "exampleBody": "Aucun vrai propriétaire n'est derrière cette demande. Une proposition est gardée mais lue par personne.",
+    "ownTitle": "Votre propre demande",
+    "ownBody": "Publiée depuis votre espace propriétaire sur cet appareil. Dans ce prototype, les deux espaces sont sur le même appareil : vous pouvez vous répondre pour essayer toute la boucle.",
+    "cannot": {
+      "notListed": "Votre profil doit être visible pour proposer.",
+      "closed": "Cette demande n'accepte plus de propositions.",
+      "animal": "Cet animal est hors de ce que vous acceptez.",
+      "service": "Vous ne proposez pas ce type de garde."
+    }
+  },
+  "propose": {
+    "title": "Proposer mes services",
+    "intro": "{{name}} verra votre proposition et décidera librement.",
+    "messageLabel": "Un message (facultatif)",
+    "messageHelp": "Votre expérience avec ce type d'animal, une question sur les besoins…",
+    "messagePlaceholder": "Ex. J'ai déjà gardé un chien réactif ; pouvons-nous nous rencontrer avant ?",
+    "rateTitle": "Votre tarif déclaré",
+    "noRate": "Aucun tarif déclaré pour cette garde.",
+    "noPayment": "Proposer n'engage personne et ne demande aucun paiement.",
+    "submit": "Envoyer ma proposition",
+    "exampleBody": "C'est une demande d'exemple : votre proposition sera gardée, et aucun propriétaire ne la lira."
+  },
+  "proposals": {
+    "simulated": "Simulation — pet-sitter d'exemple"
+  },
+  "ownerPost": {
+    "title": "Demande pour {{name}}",
+    "publishedTitle": "Votre demande est publiée",
+    "publishedBody": "Elle est visible dans le fil pet-sitter de cet appareil. Vous retrouverez les propositions ici et dans Demandes › Reçues.",
+    "edit": "Modifier la garde ou les dates",
+    "proposalsTitle_one": "{{count}} proposition",
+    "proposalsTitle_many": "{{count}} propositions",
+    "proposalsTitle_other": "{{count}} propositions",
+    "noProposalsYet": "Aucune proposition pour le moment.",
+    "noProposals": "Aucune proposition.",
+    "acceptedWith": "Vous avez accepté la proposition de {{name}}",
+    "acceptedMeaning": "Vous êtes convenus d'organiser cette garde ensemble. Ce n'est pas une réservation et rien n'a été payé : les détails restent à régler entre vous.",
+    "accept": "Accepter",
+    "acceptTitle": "Accepter la proposition de {{name}} ?",
+    "acceptBody": "La demande se ferme aux nouvelles propositions et les autres seront marquées « non retenue ». C'est un accord pour organiser une garde, pas une réservation ni un paiement.",
+    "acceptConfirm": "Accepter cette proposition",
+    "decline": "Refuser",
+    "viewProfile": "Voir le profil",
+    "write": "Écrire",
+    "withdraw": "Retirer la demande",
+    "withdrawTitle": "Retirer cette demande ?",
+    "withdrawBody_one": "Elle quitte le fil des pet-sitters. {{count}} proposition en attente sera close.",
+    "withdrawBody_many": "Elle quitte le fil des pet-sitters. {{count}} propositions en attente seront closes.",
+    "withdrawBody_other": "Elle quitte le fil des pet-sitters. {{count}} propositions en attente seront closes.",
+    "withdrawConfirm": "Retirer",
+    "simTitle": "Outil de test — simulation",
+    "simBody": "Personne d'autre n'utilise cet appareil. Pour essayer d'accepter et de refuser, ajoutez une proposition écrite au nom d'un pet-sitter d'exemple dont le profil correspond. Elle est marquée comme simulation partout.",
+    "simAction": "Simuler une proposition",
+    "simNone": "Aucun pet-sitter d'exemple ne correspond à cette demande (animal, garde ou dates).",
+    "demoTitle": "Démonstration locale",
+    "demoBody": "Cette demande et ses propositions n'existent que dans ce navigateur. Accepter ne confirme aucune réservation et ne déplace aucun argent."
+  },
+  "arrangement": {
+    "cancel": "Annuler la garde",
+    "cancelTitle": "Annuler cette garde ?",
+    "cancelBody": "L'autre personne verra qu'elle a été annulée. Elle reste dans votre historique. Rien n'avait été payé ni réservé par Nidz.",
+    "cancelConfirm": "Annuler la garde"
+  },
+  "drafts": {
+    "title": "Brouillons",
+    "badge": "Brouillon — non envoyé",
+    "journeyFor": "Garde pour {{name}}",
+    "journeyAnimal": "Animal en cours de description : {{animal}}",
+    "step": {
+      "pet": "Arrêté pendant la description de l'animal",
+      "location": "Prochaine étape : où",
+      "care": "Prochaine étape : quelle garde et quand"
+    },
+    "discard": "Supprimer ce brouillon",
+    "discardTitle": "Supprimer ce brouillon ?",
+    "discardBody": "La demande inachevée est oubliée. Un animal enregistré reste dans Mes animaux.",
+    "discardConfirm": "Supprimer"
+  },
+  "requestsHub": {
+    "tabs": {
+      "received": "Reçues",
+      "sent": "Envoyées",
+      "validated": "Validées"
+    },
+    "waitingCount_one": "{{count}} en attente",
+    "waitingCount_many": "{{count}} en attente",
+    "waitingCount_other": "{{count}} en attente",
+    "history_one": "Historique ({{count}})",
+    "history_many": "Historique ({{count}})",
+    "history_other": "Historique ({{count}})",
+    "validatedEmpty": {
+      "title": "Rien de validé pour le moment",
+      "body": "Une demande ou une proposition acceptée apparaît ici. Accepter est un accord entre deux personnes, pas une réservation."
+    },
+    "owner": {
+      "receivedEmpty": {
+        "title": "Aucune proposition reçue",
+        "body": "Les propositions des pet-sitters sur vos demandes publiées apparaissent ici."
+      },
+      "directTitle": "Demandes directes",
+      "directEmpty": "Vous n'avez encore écrit à aucun pet-sitter.",
+      "postsTitle": "Demandes publiées",
+      "postsEmpty": "Vous n'avez encore publié aucune demande.",
+      "start": "Trouver une garde"
+    },
+    "sitter": {
+      "sentEmpty": {
+        "title": "Aucune proposition envoyée",
+        "body": "Proposez vos services sur une demande publiée depuis votre fil."
+      },
+      "toFeed": "Voir les demandes près de chez moi"
+    }
+  },
+  "explore": {
+    "animal": "Animal",
+    "anyAnimal": "Tous les animaux",
+    "care": "Garde",
+    "anyCare": "Toutes les gardes",
+    "near": "Près de",
+    "anyWilaya": "Toute l'Algérie",
+    "count_one": "{{count}} pet-sitter",
+    "count_many": "{{count}} pet-sitters",
+    "count_other": "{{count}} pet-sitters",
+    "orderNear": "les plus proches d'abord",
+    "orderAlpha": "ordre alphabétique",
+    "detailed": "Recherche détaillée",
+    "emptyTitle": "Aucun pet-sitter pour ces critères",
+    "emptyBody": "Élargissez l'animal ou le type de garde.",
+    "fartherTitle": "Plus loin",
+    "fartherNote": "D'autres wilayas, les plus proches d'abord — une estimation entre chefs-lieux, pas une distance."
+  },
+  "compat": {
+    "sitter": {
+      "confirmed": "Correspond aux animaux que vous acceptez",
+      "unknown": {
+        "otherCategory": "Animal hors de la liste : à confirmer avec le propriétaire",
+        "kindNotGiven": "Race non précisée, alors que vous n'en acceptez que certaines : à confirmer",
+        "kindFreeText": "Race écrite par le propriétaire : à confirmer"
+      },
+      "incompatible": {
+        "category": "Vous n'acceptez pas cet animal",
+        "kind": "Race hors de celles que vous acceptez"
+      }
+    },
+    "owner": {
+      "confirmed": "Accepte ce type d'animal",
+      "unknown": {
+        "otherCategory": "Votre animal est hors de la liste : à confirmer avec le pet-sitter",
+        "kindNotGiven": "N'accepte que certaines races : indiquez la race ou posez la question",
+        "kindFreeText": "Race à confirmer avec le pet-sitter"
+      },
+      "incompatible": {
+        "category": "N'accepte pas cet animal",
+        "kind": "N'accepte pas cette race"
+      }
     }
   }
 }

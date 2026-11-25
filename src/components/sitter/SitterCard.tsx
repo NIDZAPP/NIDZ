@@ -6,20 +6,20 @@ import { AnimalPortrait } from "@/components/illustrations/animals";
 import { MatchReasonList } from "@/components/sitter/match";
 import { ProvenanceLabel } from "@/components/shared/trust";
 import { Button } from "@/components/ui/button";
-import { acceptsEveryDogSize, sizeLimitToState, type MatchReason } from "@/data/criteria";
+import type { MatchReason } from "@/data/criteria";
+import type { Compatibility } from "@/data/compatibility";
 import { offeredServices, type rateFor } from "@/data/offer";
 import { communeName, wilayaName, wilayaOfPlace } from "@/data/algeria";
 import {
   CARE_UNIT_KEY,
   localized,
   type CareType,
-  type DogSize,
-  type Species,
+  type PetCategory,
   type SitterProfile,
 } from "@/data/types";
 import { useAppLocale } from "@/hooks/use-locale";
 import { cn } from "@/lib/utils";
-import { formatDZD, formatList } from "@/utils/format";
+import { formatDZD } from "@/utils/format";
 
 /**
  * One entry in the results register.
@@ -43,7 +43,7 @@ export default function SitterCard({
   rate,
   reasons,
   askedSpecies,
-  askedSize = null,
+  compat = null,
   askedCare,
   /** Carried onto the profile link so the profile can explain the same match
       and offer a real "back to results" link. */
@@ -55,9 +55,10 @@ export default function SitterCard({
   sitter: SitterProfile;
   rate: NonNullable<ReturnType<typeof rateFor>>;
   reasons: MatchReason[];
-  askedSpecies: Species | null;
-  /** The dog's size, when the search gave one. */
-  askedSize?: DogSize | null;
+  askedSpecies: PetCategory | null;
+  /** Compatibility with the animal asked about (Nidz 1.7). Only « à
+      confirmer » is stated on the card: a confirmed one is a reason token. */
+  compat?: Compatibility | null;
   askedCare: CareType | null;
   search: string;
   showSpeciesEyebrow?: boolean;
@@ -83,14 +84,11 @@ export default function SitterCard({
     .filter((c) => c !== askedCare)
     .map((c) => t(`care.${c}`));
 
-  /* A dog search without a size cannot rule anyone out on size, so the row
-     states the sitter's own limit instead of letting silence read as "yes". */
-  const limit = sizeLimitToState(sitter, { species: askedSpecies, size: askedSize });
-  const sizeNote = limit
-    ? t("search.card.sizeLimit", { sizes: formatList(limit.map((size) => t(`sizeShort.${size}`)), lng) })
-    : askedSpecies === "dog" && !askedSize && sitter.acceptedSpecies.includes("dog") && acceptsEveryDogSize(sitter)
-      ? t("search.card.allSizes")
-      : null;
+  /* « À confirmer » is said in words on the card: a breed the owner did not
+     give is never read as « this sitter takes my animal » (Nidz 1.7 §19.2). */
+  const sizeNote = compat?.level === "unknown" ? t(`compat.owner.unknown.${compat.reason}`) : null;
+  const shownSpecies = sitter.acceptedSpecies.slice(0, 4);
+  const moreSpecies = sitter.acceptedSpecies.length - shownSpecies.length;
 
   return (
     <li>
@@ -148,14 +146,24 @@ export default function SitterCard({
                 <span className="sr-only">
                   {sitter.acceptedSpecies.map((sp) => t(`speciesPlural.${sp}`)).join(" · ")}
                 </span>
-                {sitter.acceptedSpecies.map((sp) => (
-                  <AnimalPortrait key={sp} species={sp} className="size-8 rounded-full ring-2 ring-card" />
+                {shownSpecies.map((sp) => (
+                  <AnimalPortrait key={sp} species={sp} className="size-8 rounded-full ring-2 ring-card" sizes="32px" />
                 ))}
+                {moreSpecies > 0 && (
+                  <span aria-hidden="true" className="flex size-8 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-foreground ring-2 ring-card">
+                    +{moreSpecies}
+                  </span>
+                )}
               </p>
             )}
           </div>
 
           {sizeNote && <p className={cn("text-sm font-semibold text-foreground", row && "lg:col-start-2")}>{sizeNote}</p>}
+          {sitter.limits.length > 0 && askedSpecies && (
+            <p className={cn("text-sm text-muted-foreground", row && "lg:col-start-2")}>
+              {t("search.card.limitsCount", { count: sitter.limits.length })}
+            </p>
+          )}
 
           <p className={cn("line-clamp-3 max-w-[56ch] text-[0.9375rem] leading-relaxed text-foreground", row && "lg:col-start-2")}>
             {localized(sitter.headline, lng)}

@@ -25,9 +25,12 @@ describe("publication minimum", () => {
   test("a service without a price is not enough", () => {
     assert.equal(canPublish({ ...base(), rates: {} }), false);
   });
-  test("a dog sitter must state sizes", () => {
-    const p = { ...base(), acceptedSpecies: ["dog" as const], acceptedDogSizes: [] };
+  test("« certaines races uniquement » with nothing chosen is not an answer", () => {
+    const p = { ...base(), acceptedSpecies: ["dog" as const], acceptedKinds: { dog: { mode: "some" as const, ids: [], others: [] } } };
     assert.deepEqual(missingRequired(p).map((s) => s.id), ["animals"]);
+    const chosen = { ...p, acceptedKinds: { dog: { mode: "some" as const, ids: ["dog.sloughi"], others: [] } } };
+    assert.equal(canPublish(chosen), true);
+    assert.equal(canPublish({ ...base(), acceptedSpecies: ["dog" as const], acceptedKinds: {} }), true);
   });
   test("boarding makes the home an essential", () => {
     const boarding = { ...base(), services: ["boarding" as const], rates: { boarding: 900 } };

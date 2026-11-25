@@ -1,7 +1,30 @@
 import type { TFunction } from "i18next";
 
-import { kindLabel, type SharedPet } from "@/data/pets";
+import { classificationOf } from "@/data/animal-catalogue";
+import { kindLabel, type PetAge, type SharedPet } from "@/data/pets";
 import type { AppLocale } from "@/i18n";
+
+/** « 2 ans et 3 mois », « environ 12 ans », « âge inconnu » — or the pre-1.7
+    free text, or null when the owner said nothing. */
+export function ageText(pet: Pick<SharedPet, "age" | "ageInfo">, t: TFunction): string | null {
+  const info: PetAge | null = pet.ageInfo ?? null;
+  if (info?.status === "unknown") return t("age.unknownShort");
+  if (info) {
+    const parts = [
+      info.years > 0 ? t("age.yearsCount", { count: info.years }) : null,
+      info.months > 0 ? t("age.monthsCount", { count: info.months }) : null,
+    ].filter(Boolean) as string[];
+    const value = parts.join(t("age.and"));
+    return info.status === "estimated" ? t("age.about", { value }) : value;
+  }
+  return pet.age.trim() || null;
+}
+
+/** The animal's category in words: the catalogue name, or the owner's own
+    words for « Autre ». */
+export function categoryText(pet: Pick<SharedPet, "species" | "otherCategory">, t: TFunction): string {
+  return pet.species === "other" ? pet.otherCategory.trim() || t("catalogue.other") : t(`species.${pet.species}`);
+}
 
 /**
  * The species-specific facts an owner actually answered, as label/value pairs.
@@ -39,13 +62,15 @@ export function petFacts(pet: SharedPet, t: TFunction, locale: AppLocale): { key
   };
 
   /* Breed or species first: it is what a sitter pictures before anything. */
-  add("kind", `pets.kind.label.${pet.species}`, kindLabel(pet, locale));
+  add("kind", `catalogue.label.${classificationOf(pet.species) ?? "breed"}`, kindLabel(pet, locale));
+  add("age", "needFlow.about.ageTitle", ageText(pet, t));
   if (pet.sex !== "unknown") add("sex", "pets.sexLabel", t(`pets.sex.${pet.sex}`));
 
   switch (pet.species) {
     case "dog": {
       const d = pet.details;
-      add("size", "pets.dog.size", d.size ? t(`dogSize.${d.size}`) : null);
+      /* Retired question; an earlier answer is still what the owner said. */
+      add("size", "pets.dog.sizeLegacy", d.size ? t(`dogSize.${d.size}`) : null);
       declared("neutered", "pets.dog.neutered", d.neutered);
       declared("withDogs", "pets.dog.goodWithDogs", d.goodWithDogs);
       declared("withCats", "pets.dog.goodWithCats", d.goodWithCats);
@@ -77,6 +102,8 @@ export function petFacts(pet: SharedPet, t: TFunction, locale: AppLocale): { key
       add("social", "pets.bird.socialNotes", d.socialNotes.trim() || null);
       break;
     }
+    default:
+      add("habitat", "pets.habitat.label", pet.details.habitat.trim() || null);
   }
 
   return facts;

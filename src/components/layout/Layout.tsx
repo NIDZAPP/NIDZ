@@ -1,11 +1,11 @@
 import { Suspense, useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigationType } from "react-router-dom";
 
+import { hasSession } from "@/data/navigation";
 import { resolveWorkspace, type Workspace } from "@/data/workspace";
 import { cn } from "@/lib/utils";
 import { useDemo } from "@/state/demo/context";
 
-import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import { BackSlotContext } from "@/components/shared/top-bar";
 import RouteLoading from "@/components/shared/RouteLoading";
 import Header from "./Header";
@@ -82,7 +82,10 @@ export default function Layout() {
   const workspace: Workspace = resolveWorkspace(pathname, state.activeWorkspace);
 
   const navContext: NavContext = {
-    entered: state.entered,
+    /* Nidz 1.7: navigation is for someone inside their account. A shared
+       profile link opened without one shows the page, not a bar of tabs
+       that would all lead back to the welcome screen. */
+    entered: hasSession(state),
     sitterSpace: Boolean(state.sitter),
   };
   const hasBar = isNavigable(workspaceDestinations(workspace, navContext));
@@ -95,16 +98,13 @@ export default function Layout() {
        phantom padding under screens with nothing pinned to them, and 11rem
        where a pinned action bar stacked with it. */
     <div className={cn("flex min-h-dvh flex-col", hasBar && "has-bottom-nav")}>
-      {/* The home is an "Accueil" like the entry screen, so it carries the
-          same language icon (design system amendment 0.1). Elsewhere the
-          choice lives in Paramètres, under Compte. Messages is a tab since
-          1.6, not a header icon: one way to it, in the same place on both
-          sides. */}
+      {/* The language lives in Paramètres (and on the welcome screen); Messages
+          is a tab, not a header icon: one way to each, in the same place on
+          both sides (Nidz 1.7 §15.1). */}
       <Header
         workspace={workspace}
         navContext={navContext}
         backSlot={setBackSlot}
-        actions={pathname === "/" ? <LanguageSwitcher /> : undefined}
       />
       {/* `pb-28` below md keeps the last content clear of the floating tab
           bar, which overlays the page rather than taking a row of its own. */}
