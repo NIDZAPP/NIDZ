@@ -108,7 +108,7 @@ Le stockage reste traité comme une entrée non fiable : chaque publication, pro
 
 **Couleur (4 constats, traités) :** libellés des cartes en recul à 3,87:1 → seule l'image recule, libellé en encre atténuée (6,3:1) ; anneau de focus filtré sur ces cartes → le bouton n'est plus filtré ; anneau de sélection caché sous l'image → dessiné en surimpression ; pilule blanche sur carte blanche → contour. `DESIGN.md` est mis à jour (fond des images, contraste de l'anneau 3,1–3,9:1, statuts, recul).
 
-**Trouvés en plus pendant les contrôles :** l'écran d'accueil et le premier choix débordaient à 320×568 (hauteur en pourcentage non résolue dans une colonne `min-h-dvh`) ; « Ne plus voir ce pet-sitter » n'existait que sur ordinateur ; « Mon profil pet-sitter » n'avait pas de Retour ; une race « à confirmer » était titrée « Ne correspond pas » ; `/owner/account` permettait encore d'ouvrir un compte sans passer par l'inscription ; le logo et l'onglet Accueil menaient à deux endroits différents.
+**Trouvés en plus pendant les contrôles :** l'écran d'accueil et le premier choix débordaient à 320×568 (hauteur en pourcentage non résolue dans une colonne `min-h-dvh`) ; « Ne plus voir ce pet-sitter » n'existait que sur ordinateur ; « Mon profil pet-sitter » n'avait pas de Retour ; une race « à confirmer » était titrée « Ne correspond pas » ; `/owner/account` permettait encore d'ouvrir un compte sans passer par l'inscription ; le logo et l'onglet Accueil menaient à deux endroits différents. Le balayage de mise en page a trouvé le dernier : sur ordinateur (colonne de 13rem), la rangée des animaux acceptés écrasait le nom d'un pet-sitter qui en accepte beaucoup jusqu'à une lettre par ligne — elle passe désormais sous le nom.
 
 ## 11. Défauts de navigation 1.5 (NAV-01…05)
 
@@ -137,7 +137,7 @@ Environnement : Chromium (Playwright, sans tête), serveur de dev Vite `127.0.0.
 | `npm run check:locales` | OK | OK (fr/en/ar, pluriels complets) |
 | `npm run test:unit` | 98/98 | **139/139** (dont `publications.test.ts` et `review-17.test.ts`) |
 | `npm run test:e2e` | 406/406 sur 14 fichiers | **523/523 sur 15 fichiers** (nouveau `lot16-nidz-17.mjs` : 78) |
-| `node e2e/audit-layout.mjs` (tous les écrans × fr/en/ar × 320→1440 px) | 1 113 rendus, 0 problème | balayage complet en cours au moment de ce commit — résultat ajouté au commit suivant |
+| `node e2e/audit-layout.mjs` (tous les écrans × fr/en/ar × 320→1440 px) | 1 113 rendus, 0 problème | **1 617 rendus** (85 écrans, dont 30 nouveaux), 6 débordements trouvés — tous un même défaut de la carte de pet-sitter, corrigé, puis écrans concernés rebalayés : **0 problème** ; 42 troncatures volontaires (aperçus sur 2 lignes) ; 7 redirections attendues, désormais signalées |
 | Détecteur Impeccable (57 fichiers d'interface modifiés) | — | 0 constat bloquant ; 8 avis « taille hors de l'échelle typographique » (chiffres de badges à 11 px, deux libellés à 13 px) |
 | Build de production | OK, chunk principal 241,0 kB gzip | OK, **268,3 kB gzip** (+27 kB : surtout le texte des trois langues, ≈ +29 kB gzip à elles trois ; puis le catalogue des races et les exemples). Les vignettes 192 px sont intégrées au chunk des illustrations ; les 384 px et l'illustration d'accueil sont des fichiers à part |
 

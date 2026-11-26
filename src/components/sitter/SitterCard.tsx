@@ -107,7 +107,11 @@ export default function SitterCard({
             left, what they say and the facts that tell them apart in the
             middle — so a wide row is dense instead of half empty. */}
         <div className={cn("flex min-w-0 flex-1 flex-col gap-3", row && "lg:grid lg:grid-cols-[13rem_minmax(0,1fr)] lg:content-start lg:gap-x-6 lg:gap-y-2.5")}>
-          <div className={cn("flex items-start gap-3.5", row && "lg:row-span-4")}>
+          {/* Wraps: with several accepted animals their row no longer fits
+              beside the name in the 13rem column of a wide row, and squeezed
+              the name to one letter per line (layout sweep 1.7). The name
+              keeps a minimum width; the animals go underneath instead. */}
+          <div className={cn("flex flex-wrap items-start gap-x-3.5 gap-y-2", row && "lg:row-span-4")}>
             {/* A monogram, not a stock portrait: §21 and §40 forbid presenting
                 stock photography as a real person. Terracotta belongs on the
                 PERSON, the one place without a photograph to carry them. */}
@@ -121,7 +125,7 @@ export default function SitterCard({
                 {sitter.publicName.charAt(0)}
               </span>
             )}
-            <div className="min-w-0 flex-1">
+            <div className="min-w-[7rem] flex-1">
               {/* <bdi> isolates these Latin strings: without it "Youcef H."
                   renders as ".Youcef H" in Arabic. */}
               <h2 className="text-name font-semibold text-foreground">
